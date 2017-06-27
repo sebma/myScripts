@@ -12,8 +12,6 @@ then
 
 	cat <<-EOF >> README.md
 
-[Parent directory](..)
-
 ## License
 
 [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)  
