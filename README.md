@@ -1,8 +1,6 @@
 # myScripts
 (Almost) All my linux shell, python, perl scripts through time
 
-[Parent directory](..)
-
 ## License
 
 [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)  
