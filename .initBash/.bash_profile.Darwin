@@ -1,0 +1,11 @@
+#!sh
+export system="$(sw_vers -productName) $(sw_vers -productVersion)"
+cd && ls -ld -G .cache | awk '{print$(NF-2)" "$(NF-1)" "$NF}'
+mkdir -p ~/log
+
+#test "$SSH_CONNECTION" || pgrep -qfu $USER XQuartz.app || ( echo "=> Starting XQuartz.app ..." | tee -a ~/log/XQuartz.log ;nohup /Applications/Utilities/XQuartz.app/Contents/MacOS/X11.bin >>~/log/XQuartz.log 2>&1 & )
+test "$SSH_CONNECTION" || pgrep -qfu $USER XQuartz.app || ( echo "=> Starting XQuartz ..." && $(which open) -a XQuartz )
+
+#echo $DISPLAY | grep -q ^/private/tmp && export DISPLAY=:0
+which matlab >/dev/null 2>&1 && test -d "$HOME/Library/Application Support/MathWorks/MATLAB" && export MATLAB=$(\ls -d "$HOME/Library/Application Support/MathWorks/MATLAB/"* | head -1)
+set +x
