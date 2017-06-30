@@ -88,7 +88,7 @@ then
 	#my git configuration
 	which git >/dev/null && {
 		test "$http_proxy" && git config --global http.proxy $http_proxy
-#		git config --global alias.ci '!f() { git commit $1 -m "Updated $1"; }; f'
+		git config alias.ci '!f() { git commit $1 -m "Updated $1"; }; f'
 		git config --global alias.co checkout
 		git config --global alias.st status
 		git config --global alias.br branch
