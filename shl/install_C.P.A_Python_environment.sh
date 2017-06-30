@@ -78,5 +78,5 @@ function runScriptWithArgs {
 runScriptWithArgs $@
 installMiniconda $minicondaVersion
 
-CPARequiredPythonPackageList="scipy pandas"
+CPARequiredPythonPackageList="scipy pandas spyder=3.1.3 jedi=0.9.0 ipython=5"
 installCondaPythonPackages $minicondaVersion "$CPARequiredPythonPackageList"
