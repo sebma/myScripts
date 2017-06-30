@@ -60,6 +60,7 @@ def initDates() :
 	yearMonthDay = today.strftime('%Y%m%d')
 
 def initScript() :
+	initArgs()
 	initDates()
 	global previousDir
 	previousDir = getcwd()
@@ -71,7 +72,6 @@ def initScript() :
 
 	logDir = toolsDir + os.sep + "log" + os.sep + datetime.now().strftime( "%Y" + os.sep + "%Y%m" + os.sep + "%Y%m%d" )
 	if not exists( logDir ) : makedirs( logDir )
-	initArgs()
 	global logFile
 	logFile = logDir + os.sep + splitext( scriptBaseName )[0] + datetime.now().strftime("_%Y%m%d") + ".txt"
 	print >> stderr, "=> The log file will be : < " + logFile + " >.\n"

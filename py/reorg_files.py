@@ -81,7 +81,6 @@ def initLog() :
 
 	logDir = logBaseDir + os.sep + "log" + os.sep + datetime.now().strftime( "%Y" + os.sep + "%Y%m" + os.sep + "%Y%m%d" )
 	if not exists( logDir ) : makedirs( logDir )
-	initArgs()
 	global logFile, logHandle
 	logFile = logDir + os.sep + splitext( scriptBaseName )[0] + datetime.now().strftime("_%Y%m%d") + ".txt"
 	print >> stderr, "=> The log file will be : < " + logFile + " >.\n"
@@ -91,6 +90,7 @@ def initLog() :
 			printNLogString( "="*80 + "\n" + yearMonthDay + " - Initiating the log of the script <" + scriptBaseName + "> for the " + theDate + ".\n" + "="*80 + "\n" )
 
 def main() :
+	initArgs()
 	initScript()
 
 	global logHandle
