@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+#coding: latin1
+
 import SocketServer
 from argparse import ArgumentParser
 import inspect

@@ -1,5 +1,9 @@
+#!/usr/bin/env python
+#coding: latin1
+
 import urllib2
 import argparse
+from sys import stderr, exit
 
 def initArgs() :
 	parser = argparse.ArgumentParser()
