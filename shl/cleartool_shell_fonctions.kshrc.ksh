@@ -6,9 +6,11 @@ pVobName=$(cleartool lsvob -short | awk '/pvob/')
 vobName=$(cleartool lsvob -short | awk '!/pvob/')
 alias lsstream="cleartool lsstream -invob $pVobName"
 alias ctman="cleartool man"
-alias siv="cleartool setview -login ${USER}_ELA_Integration "
-alias srv="cleartool setview -login ${USER}_ELA_Livraison"
-alias shv="cleartool setview -login ${USER}_ELA_HOMO_Liv"
+APP=APPLI
+app=appli
+alias siv="cleartool setview -login ${USER}_${APP}_Integration "
+alias srv="cleartool setview -login ${USER}_${APP}_Livraison"
+alias shv="cleartool setview -login ${USER}_${APP}_HOMO_Liv"
 
 setview() {
   test "$1" && cleartool setview -login "$1" || cleartool lsview -s
@@ -26,7 +28,7 @@ alias lscomp="cleartool lscomp -s -invob $pVobName"
 alias lsbl="cleartool lsbl -comp $(cleartool lscomp -s -invob $pVobName)@$pVobName"
 
 getbaseline() {
-  local pvobPath=/vobs/pvob_ela
+  local pvobPath=/vobs/pvob_$app
   test $# = 0 && {
     cleartool lsstream -invob $pvobPath -s
     return 1

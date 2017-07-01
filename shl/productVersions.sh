@@ -33,7 +33,6 @@ echo
 printf "=> Version de Apache: "
 local apacheHome=$(ls -1d -t /produits/composants/apache/apache*/ | head -1)
 $apacheHome/bin/apachectl -v
-#sudo su - $userApplicatif -c '$ELA_DIR/app/apache/domaineELA/bin/apachectl -v '
 echo
 printf "=> Version de WebLogic: "
 
