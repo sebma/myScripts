@@ -7,10 +7,13 @@ then
 	cat README.template > README.md
 	if [ $# = 1 ] && [ -x "$1" ]
 	then
+		echo "* Usage of \"$1\" :" >> README.md
 		./"$1" --mdh | sed "1s/^.*<pre>/<pre>/" >> README.md
 	fi
 
 	cat <<-EOF >> README.md
+
+[Parent directory](..)
 
 ## License
 
