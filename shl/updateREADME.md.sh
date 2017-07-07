@@ -2,12 +2,12 @@
 
 set -o nounset
 
-if [ README.template -nt README.md ]
+if [ README.template -nt README.md ] || [ $0 -nt README.md ]
 then
 	cat README.template > README.md
 	if [ $# = 1 ] && [ -x "$1" ]
 	then
-		echo "* Usage of \"$1\" :" >> README.md
+		echo "* Usage of \"\`$1\`\" :" >> README.md
 		./"$1" --mdh | sed "1s/^.*<pre>/<pre>/" >> README.md
 	fi
 
