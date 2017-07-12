@@ -57,9 +57,8 @@ function installCondaPythonPackages {
 	local CPARequiredPythonPackageList="$2"
 #	echo "=> $conda install $CPARequiredPythonPackageList ..."
 	$conda install $CPARequiredPythonPackageList
-#	$conda install spyder 
-#	$conda config --show-sources | grep -q conda-forge || $conda config --add channels conda-forge 
-#	$conda install -c conda-forge ipdb
+	$conda install -c conda-forge ipdb
+#	$conda install -c auto ansicolors
 }
 
 function runScriptWithArgs {
@@ -78,5 +77,5 @@ function runScriptWithArgs {
 runScriptWithArgs $@
 installMiniconda $minicondaVersion
 
-CPARequiredPythonPackageList="scipy pandas spyder=3.1.3 jedi=0.9.0 ipython=5"
+CPARequiredPythonPackageList="scipy pandas spyder=3.1.3 jedi=0.9.0 ipython=5 termcolor"
 installCondaPythonPackages $minicondaVersion "$CPARequiredPythonPackageList"
