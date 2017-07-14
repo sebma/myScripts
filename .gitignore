@@ -1,2 +1,3 @@
 #Pour ignorer tous les fichiers qui n'ont pas ete explicitement ajoute car ce depot se trouve dans $HOME
 *
+watch_later/*
