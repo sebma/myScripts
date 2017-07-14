@@ -135,16 +135,16 @@ function conda2Rename {
 	oldName=$1
 	newName=$2
 	test $# = 2 && {
-		conda2 create --name $newName --clone $oldName
-		conda2 remove --name $oldName --all
+		conda2 create --name $newName --offline --clone $oldName
+		conda2 remove --name $oldName --offline --all
 	}
 }
 function conda3Rename {
 	oldName=$1
 	newName=$2
 	test $# = 2 && {
-		conda3 create --name $newName --clone $oldName
-		conda3 remove --name $oldName --all
+		conda3 create --name $newName --offline --clone $oldName
+		conda3 remove --name $oldName --offline --all
 	}
 }
 function configure {
