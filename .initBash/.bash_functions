@@ -147,7 +147,7 @@ function conda3Rename {
 		conda3 remove --name $oldName --offline --all
 	}
 }
-function gitClone@NonEmptyDir {
+function gitClone@nonEmptyDir {
 	local url="$1"
 	local dir="$2"
 	test $dir || dir=.
@@ -159,7 +159,7 @@ function gitClone@NonEmptyDir {
 	}
 }
 function gitClone@home {
-	gitClone@NonEmptyDir $HOME
+	gitClone@nonEmptyDir $HOME
 }
 function configure {
 	test $CC || export CC=$(echo $HOSTTYPE-$OSTYPE-gcc | sed "s/armv[^-]*-/arm-/")
