@@ -87,11 +87,13 @@ then
 
 	#my git configuration
 	which git >/dev/null && {
+		git config --global user.email sebma@users.noreply.github.com
+		git config --global user.name sebma
 		test "$http_proxy" && git config --global http.proxy $http_proxy
-		git config alias.ci '!f() { git commit $1 -m "Updated $1"; }; f'
 		git config --global alias.co checkout
 		git config --global alias.st status
 		git config --global alias.br branch
+		git config alias.ci '!f() { git commit $1 -m "Updated $1"; }; f'
 	}
 fi
 

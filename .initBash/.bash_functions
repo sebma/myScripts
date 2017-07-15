@@ -154,6 +154,7 @@ function gitClone@nonEmptyDir {
 	test $url && {
 		git init "$dir"
 		git remote add origin "$url"
+		git fetch
 		#git pull origin master
 		#git branch --set-upstream-to=origin/master master
 	}
