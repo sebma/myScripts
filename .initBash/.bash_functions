@@ -147,7 +147,7 @@ function conda3Rename {
 		conda3 remove --name $oldName --offline --all
 	}
 }
-function gitClone@nonEmptyDir {
+function gitCloneNonEmptyDir {
 	local url="$1"
 	local dir="$2"
 	test $dir || dir=.
@@ -159,8 +159,8 @@ function gitClone@nonEmptyDir {
 		#git branch --set-upstream-to=origin/master master
 	}
 }
-function gitClone@home {
-	gitClone@nonEmptyDir $HOME
+function gitCloneHome {
+	gitCloneNonEmptyDir $HOME
 }
 function configure {
 	test $CC || export CC=$(echo $HOSTTYPE-$OSTYPE-gcc | sed "s/armv[^-]*-/arm-/")
