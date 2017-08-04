@@ -37,7 +37,7 @@ groups 2>/dev/null | egrep -wq "sudo|admin" || {
 	export HOMEBREW_PREFIX=$HOME/usr/local
 }
 
-export domain=$(awk -F"[ .]" '/domain/{print$(NF-1)}' /etc/resolv.conf)
+export domain=$(awk -F"[ .]" '/domain/{print$(NF-1);exit}' /etc/resolv.conf /private/etc/resolv.conf 2>/dev/null)
 test "$domain" || export domain=localhost
 case $domain in
 jussieu|enst)
