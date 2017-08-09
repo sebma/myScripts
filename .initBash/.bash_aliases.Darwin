@@ -1,9 +1,15 @@
-
 #!sh
 #alias lpr="\lpr -P ppti-14-503-imp -o PageSize=A4 -o PageRegion=A4 -o Resolution=default -o InputSlot=Tray2 -o Duplex=DuplexNoTumble -o PreFilter=No"
 #alias lpr="\lpr -o PageSize=A4 -o PageRegion=A4 -o Resolution=default -o InputSlot=Tray2 -o Duplex=DuplexNoTumble -o PreFilter=No"
 #alias topflines='$(which find) . $prunePathsFindExpression -xdev -type f -size +10M -exec ls -lT {} \; 2>/dev/null | sort -nrk5 | column -t | head -n $(($LINES-4)) | awk '\''{total+=$5;print}END{print"=> total = "total" MiB"}'\'''
 #which pidof >/dev/null 2>&1 || alias pgrep="\ps -o 'pid=' -C"
+function initVars {
+	local duExcludedPathList="./proc ./sys ./dev"
+	excludePathsDuExpression=$(printf " --exclude %s" $duExcludedPathList)
+	local findExcludedPathList="./proc ./sys ./dev"
+	prunePathsFindExpression=$(printf " -path %s -prune -o" $findExcludedPathList)
+}
+initVars
 alias cpuInfo="\sysctl machdep.cpu | egrep 'brand_string|count|size|VMX|SVM'"
 alias df="\df -Ph"
 alias hideFiles='defaults write com.apple.finder AppleShowAllFiles NO; killall Finder /System/Library/CoreServices/Finder.app'
@@ -11,6 +17,7 @@ alias l="\ls -G"
 alias ldd="\otool -L"
 alias ll="ls -blF -T"
 alias ls="ls -GF"
+alias rename="\rename -v"
 alias rsync="time \rsync -uth -P -z --exclude '*.swp'"
 alias scp="time \rsync -h --progress -u -zt --exclude '*.swp'"
 alias showFiles='defaults write com.apple.finder AppleShowAllFiles YES; killall Finder /System/Library/CoreServices/Finder.app'
@@ -19,15 +26,18 @@ alias sshStart="sudo launchctl load /System/Library/LaunchDaemons/ssh.plist"
 alias sshStop="sudo launchctl unload /System/Library/LaunchDaemons/ssh.plist"
 alias start="launchctl start"
 alias stat="\stat -x"
+alias stop="launchctl stop"
 alias tcpPorts="\netstat -np tcp"
 alias topf10='$(which find) . $prunePathsFindExpression -xdev -type f -size +10M -exec ls -lT {} \; 2>/dev/null | sort -nrk5 | column -t | head -10 | awk '\''{total+=$5;print}END{print"=> total = "total" MiB"}'\'''
 alias topf50='$(which find) . $prunePathsFindExpression -xdev -type f -size +10M -exec ls -lT {} \; 2>/dev/null | sort -nrk5 | column -t | head -50 | awk '\''{total+=$5;print}END{print"=> total = "total" MiB"}'\'''
 alias topf5='$(which find) . $prunePathsFindExpression -xdev -type f -size +10M -exec ls -lT {} \; 2>/dev/null | sort -nrk5 |  column -t | head -5 | awk '\''{total+=$5;print}END{print"=> total = "total" MiB"}'\'''
 alias topf='$(which find) . $prunePathsFindExpression -xdev -type f -size +10M -exec ls -lT {} \; 2>/dev/null | sort -nrk5 | column -t | head -n | awk '\''{total+=$5;print}END{print"=> total = "total" MiB"}'\'''
 alias umount="\diskutil unmount"
-duExcludedPathList="./proc ./sys ./dev"
-excludePathsDuExpression=$(printf " --exclude %s" $duExcludedPathList)
-findExcludedPathList="./proc ./sys ./dev"
+alias updatedb="time sudo gupdatedb"
+groups | egrep -wq "admin|sudo" && alias pipInstall="sudo -H easy_install pip" || alias pipInstall="easy_install --user pip"
+which gcp >/dev/null 2>&1 && alias cp='\gcp -puv' || alias cp='\cp -pv'
+which pgrep >/dev/null 2>&1 || alias pgrep="\ps -fC"
+############################################################################################################
 function locate {
 	groups | \egrep -wq "sudo|admin" || locateOptions="--database $HOME/.local/lib/mlocate/mlocate.db"
 	echo "$@" | grep -q "\-[a-z]*r" && $(which glocate) $locateOptions "$@" || $(which glocate) $locateOptions -ir "${@}"
@@ -58,11 +68,9 @@ function netstat {
 		$(which netstat) $args
 	fi
 }
-alias rename="\rename -v"
 function restart {
 	test $1 && { launchctl stop $1; launchctl start $1; }
 }
-alias stop="launchctl stop"
 function route {
 	if echo $@ | \egrep -wq "add|flush|delete|change|get|monitor" ;then
 		$(which route) $@
@@ -76,10 +84,6 @@ function status {
 }
 
 function topflines {
+	initVars
 	$(which find) "$@" $prunePathsFindExpression -xdev -type f -size +10M -exec ls -lT {} \; 2>/dev/null | sort -nrk5 | column -t | head -n $(($LINES-4)) | awk '{total+=$5;print}END{if(total) print"=> total = "total" MiB"}'
 }
-alias updatedb="time sudo gupdatedb"
-groups | egrep -wq "admin|sudo" && alias pipInstall="sudo -H easy_install pip" || alias pipInstall="easy_install --user pip"
-prunePathsFindExpression=$(printf " -path %s -prune -o" $findExcludedPathList)
-which gcp >/dev/null 2>&1 && alias cp='\gcp -puv' || alias cp='\cp -pv'
-which pgrep >/dev/null 2>&1 || alias pgrep="\ps -fC"
