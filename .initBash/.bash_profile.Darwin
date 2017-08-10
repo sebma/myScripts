@@ -9,4 +9,5 @@ test "$SSH_CONNECTION" || pgrep -qfu $USER XQuartz.app || ( echo "=> Starting XQ
 #echo $DISPLAY | grep -q ^/private/tmp && export DISPLAY=:0
 which matlab >/dev/null 2>&1 && test -d "$HOME/Library/Application Support/MathWorks/MATLAB" && export MATLAB=$(\ls -d "$HOME/Library/Application Support/MathWorks/MATLAB/"* | head -1)
 git config --global credential.helper osxkeychain
+test -d /Applications/PicoScope6.app/Contents/Resources/lib && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/Applications/PicoScope6.app/Contents/Resources/lib
 set +x
