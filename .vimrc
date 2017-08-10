@@ -20,5 +20,7 @@ au BufNewFile,BufRead *.octave set filetype=matlab
 " Specify a directory for plugins
 " - Avoid using standard Vim directory names like 'plugin'
 call plug#begin('~/.vim/plugged')
+Plug 'vim-scripts/AdvancedSorters'
+Plug 'vim-scripts/ingo-library'
 " Initialize plugin system
 call plug#end()
