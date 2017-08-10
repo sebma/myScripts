@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 ########################################################################
-####  Script Name: inxi
-####  Version: 2.3.23
-####  Date: 2017-06-29
-####  Patch Number: 00
+SELF_NAME='inxi' 
+# don't quote the following, parsers grab these too
+SELF_VERSION=2.3.34
+SELF_DATE=2017-08-04
+SELF_PATCH=00
 ########################################################################
 ####  SPECIAL THANKS
 ########################################################################
@@ -413,6 +414,7 @@ B_SUDO_TESTED='false'
 # echo $BITS
 
 ### CONSTANTS/INITIALIZE - SOME MAY BE RESET LATER ###
+BASH=${BASH_VERSION%%[^0-9]*} # some bash 4 things can be used but only if tested
 DCOPOBJ="default"
 DEBUG=0 # Set debug levels from 1-10 (8-10 trigger logging levels)
 # Debug Buffer Index, index into a debug buffer storing debug messages until inxi is 'all up'
@@ -476,46 +478,52 @@ SUDO_PATH=''
 
 ALTERNATE_FTP='' # for data uploads
 ALTERNATE_WEATHER_LOCATION='' # weather alternate location
-SCRIPT_CONFIG_DIR=''
-SCRIPT_DATA_DIR=''
+SELF_CONFIG_DIR=''
+SELF_DATA_DIR=''
 LOG_FILE='inxi.log'
 LOG_FILE_1='inxi.1.log'
 LOG_FILE_2='inxi.2.log'
 MAN_FILE_DOWNLOAD='https://github.com/smxi/inxi/raw/master/inxi.1.gz'
-SCRIPT_NAME='inxi'
-SCRIPT_PATCH_NUMBER=''
-SCRIPT_PATH='' # filled-in in Main
-SCRIPT_VERSION_NUMBER='' # filled-in in Main
-SCRIPT_DOWNLOAD='https://github.com/smxi/inxi/raw/master/'
-SCRIPT_DOWNLOAD_BRANCH_1='https://github.com/smxi/inxi/raw/one/'
-SCRIPT_DOWNLOAD_BRANCH_2='https://github.com/smxi/inxi/raw/two/'
-SCRIPT_DOWNLOAD_BRANCH_3='https://github.com/smxi/inxi/raw/three/'
-SCRIPT_DOWNLOAD_BRANCH_4='https://github.com/smxi/inxi/raw/four/'
-SCRIPT_DOWNLOAD_BRANCH_BSD='https://github.com/smxi/inxi/raw/bsd/'
-SCRIPT_DOWNLOAD_BRANCH_GNUBSD='https://github.com/smxi/inxi/raw/gnubsd/'
-SCRIPT_DOWNLOAD_DEV='http://smxi.org/test/'
+SELF_PATH='' # filled-in in Main
+SELF_DOWNLOAD='https://github.com/smxi/inxi/raw/master/'
+SELF_DOWNLOAD_BRANCH_1='https://github.com/smxi/inxi/raw/one/'
+SELF_DOWNLOAD_BRANCH_2='https://github.com/smxi/inxi/raw/two/'
+SELF_DOWNLOAD_BRANCH_3='https://github.com/smxi/inxi/raw/three/'
+SELF_DOWNLOAD_BRANCH_4='https://github.com/smxi/inxi/raw/four/'
+SELF_DOWNLOAD_BRANCH_BSD='https://github.com/smxi/inxi/raw/bsd/'
+SELF_DOWNLOAD_BRANCH_GNUBSD='https://github.com/smxi/inxi/raw/gnubsd/'
+SELF_DOWNLOAD_DEV='http://smxi.org/test/'
 # note, you can use any ip url here as long as it's the only line on the output page.
 # Also the ip address must be the last thing on that line. If you abuse this ip tool 
 # you will be banned from further access. Most > 24x daily automated queries to it are abuse.
 WAN_IP_URL='http://smxi.org/opt/ip.php'
-KONVI_CFG="konversation/scripts/$SCRIPT_NAME.conf" # relative path to $(kde-config --path data)
+KONVI_CFG="konversation/scripts/$SELF_NAME.conf" # relative path to $(kde-config --path data)
 
 ### INITIALIZE VARIABLES NULL ###
+ARCH='' # cpu microarchitecture
 BSD_TYPE=''
 BSD_VERSION=
 CMDL_MAX=''
-
+CPU_COUNT_ALPHA=''
+CURRENT_KERNEL=''
 DEV_DISK_ID=''
 DEV_DISK_LABEL=''
 DEV_DISK_MAPPER=''
 DEV_DISK_UUID=''
 DMIDECODE_DATA=''
+DMESG_BOOT_DATA=''
 DNSTOOL=''
 DOWNLOADER='wget'
 IRC_CLIENT=''
 IRC_CLIENT_VERSION=''
+LINE_LENGTH=0
+LSPCI_V_DATA=''
+LSPCI_N_DATA=''
+MEMORY=''
 PS_THROTTLED=''
 REPO_DATA=''
+SYSCTL_A_DATA=''
+UP_TIME=''
 
 ### LAYOUT ###
 # These two determine separators in single line output, to force irc clients not to break off sections
@@ -687,20 +695,20 @@ main()
 	eval $LOGFS
 	
 	local color_scheme='' kde_config_app=''
-	# this will be used by all functions following
-	local Ps_aux_Data="$( ps aux )"
+	# this will be used by all functions following, lower case for bash parameter expansion
+	local Ps_aux_Data="$( ps aux | tr '[:upper:]' '[:lower:]' )"
 
 	# This function just initializes variables
 	initialize_data
 	
 	# Source global config overrides, needs to be here because some things
 	# can be reset that were set in initialize, but check_required_apps needs
-	if [[ -s /etc/$SCRIPT_NAME.conf ]];then
-		source /etc/$SCRIPT_NAME.conf
+	if [[ -s /etc/$SELF_NAME.conf ]];then
+		source /etc/$SELF_NAME.conf
 	fi
 	# Source user config variables override /etc/inxi.conf variables
-	if [[ -s $SCRIPT_CONFIG_DIR/$SCRIPT_NAME.conf ]];then
-		source $SCRIPT_CONFIG_DIR/$SCRIPT_NAME.conf
+	if [[ -s $SELF_CONFIG_DIR/$SELF_NAME.conf ]];then
+		source $SELF_CONFIG_DIR/$SELF_NAME.conf
 	fi
 	
 	set_display_width 'live' # can be reset with -y
@@ -716,10 +724,6 @@ main()
 		check_required_apps
 		check_recommended_apps
 	fi
-
-	SCRIPT_VERSION_NUMBER=$( parse_version_data 'main' )
-	SCRIPT_PATCH_NUMBER=$( parse_version_data 'patch' )
-	
 	# previous source location, check for bugs
 
 	## this needs to run before the KONVI stuff is set below
@@ -823,7 +827,7 @@ main()
 	
 	# all the pre-start stuff is in place now
 	B_SCRIPT_UP='true'
-	script_debugger "Debugger: $SCRIPT_NAME is up and running..."
+	script_debugger "Debugger: $SELF_NAME is up and running..."
 	
 	# then create the output
 	print_it_out
@@ -839,42 +843,42 @@ set_user_paths()
 	local b_conf='false' b_data='false'
 	
 	if [[ -n $XDG_CONFIG_HOME ]];then
-		SCRIPT_CONFIG_DIR=$XDG_CONFIG_HOME
+		SELF_CONFIG_DIR=$XDG_CONFIG_HOME
 		b_conf=true
 	elif [[ -d $HOME/.config ]];then
-		SCRIPT_CONFIG_DIR=$HOME/.config
+		SELF_CONFIG_DIR=$HOME/.config
 		b_conf=true
 	else 
-		SCRIPT_CONFIG_DIR="$HOME/.$SCRIPT_NAME"
+		SELF_CONFIG_DIR="$HOME/.$SELF_NAME"
 	fi
 	if [[ -n $XDG_DATA_HOME ]];then
-		SCRIPT_DATA_DIR=$XDG_DATA_HOME/$SCRIPT_NAME
+		SELF_DATA_DIR=$XDG_DATA_HOME/$SELF_NAME
 		b_data=true
 	elif [[ -d $HOME/.local/share ]];then
-		SCRIPT_DATA_DIR=$HOME/.local/share/$SCRIPT_NAME
+		SELF_DATA_DIR=$HOME/.local/share/$SELF_NAME
 		b_data=true
 	else 
-		SCRIPT_DATA_DIR="$HOME/.$SCRIPT_NAME"
+		SELF_DATA_DIR="$HOME/.$SELF_NAME"
 	fi
 	# note, this used to be created/checked in specific instance, but we'll just do it
 	# universally so it's done at script start.
-	if [[ ! -d $SCRIPT_DATA_DIR ]];then
-		mkdir $SCRIPT_DATA_DIR
+	if [[ ! -d $SELF_DATA_DIR ]];then
+		mkdir $SELF_DATA_DIR
 	fi
 	
-	if [[ $b_conf == 'true' && -f $HOME/.$SCRIPT_NAME/$SCRIPT_NAME.conf ]];then
-		mv -f $HOME/.$SCRIPT_NAME/$SCRIPT_NAME.conf $SCRIPT_CONFIG_DIR
-		echo "Moved $SCRIPT_NAME.conf from $HOME/.$SCRIPT_NAME to $SCRIPT_CONFIG_DIR"
+	if [[ $b_conf == 'true' && -f $HOME/.$SELF_NAME/$SELF_NAME.conf ]];then
+		mv -f $HOME/.$SELF_NAME/$SELF_NAME.conf $SELF_CONFIG_DIR
+		echo "Moved $SELF_NAME.conf from $HOME/.$SELF_NAME to $SELF_CONFIG_DIR"
 	fi
-	if [[ $b_data == 'true' && -d $HOME/.$SCRIPT_NAME ]];then
-		mv -f $HOME/.$SCRIPT_NAME/* $SCRIPT_DATA_DIR
-		rm -Rf $HOME/.$SCRIPT_NAME
-		echo "Moved data dir $HOME/.$SCRIPT_NAME to $SCRIPT_DATA_DIR"
+	if [[ $b_data == 'true' && -d $HOME/.$SELF_NAME ]];then
+		mv -f $HOME/.$SELF_NAME/* $SELF_DATA_DIR
+		rm -Rf $HOME/.$SELF_NAME
+		echo "Moved data dir $HOME/.$SELF_NAME to $SELF_DATA_DIR"
 	fi
 	
-	LOG_FILE=$SCRIPT_DATA_DIR/$LOG_FILE
-	LOG_FILE_1=$SCRIPT_DATA_DIR/$LOG_FILE_1
-	LOG_FILE_2=$SCRIPT_DATA_DIR/$LOG_FILE_2
+	LOG_FILE=$SELF_DATA_DIR/$LOG_FILE
+	LOG_FILE_1=$SELF_DATA_DIR/$LOG_FILE_1
+	LOG_FILE_2=$SELF_DATA_DIR/$LOG_FILE_2
 }
 
 #### -------------------------------------------------------------------
@@ -931,7 +935,7 @@ initialize_data()
 		elif type -p curl &>/dev/null;then
 			DOWNLOADER='curl'
 			NO_SSL=' --insecure'
-		elif [[ $BSD_VERSION == 'openbsd' && -n $( type -p ftp ) ]];then
+		elif [[ $BSD_VERSION == 'openbsd' ]] && type -p ftp &>/dev/null;then
 			DOWNLOADER='ftp'
 		else
 			DOWNLOADER='no-downloader'
@@ -1060,30 +1064,30 @@ set_display_width()
 # arg: $1 - version number: main/patch/date
 parse_version_data()
 {
-	local version_data=''
-
-	# note, using ####[[:space:]]+ to avoid having this function also trip the version datas
+	# note, this is only now used for self updater function
 	case $1 in
 		date)
-			version_data=$( gawk -F ': ' '
-			/####[[:space:]]+Date:/ {
+			SELF_DATE=$( gawk -F '=' '
+			/^SELF_DATE/ {
 				print $NF
-			}' "$SCRIPT_PATH/$SCRIPT_NAME" )
+				exit
+			}' "$SELF_PATH/$SELF_NAME" )
 			;;
 		main)
-			version_data=$( gawk '
-			/####[[:space:]]+Version:/ {
-				print $3
-			}' "$SCRIPT_PATH/$SCRIPT_NAME" )
+			SELF_VERSION=$( gawk -F '=' '
+			/^SELF_VERSION/ {
+				print $NF
+				exit
+			}' "$SELF_PATH/$SELF_NAME" )
 			;;
 		patch)
-			version_data=$( gawk '
-			/####[[:space:]]+Patch Number:/ {
-				print $4
-			}' "$SCRIPT_PATH/$SCRIPT_NAME" )
+			SELF_PATCH=$( gawk -F '=' '
+			/^SELF_PATCH/ {
+				print $NF
+				exit
+			}' "$SELF_PATH/$SELF_NAME" )
 			;;
 	esac
-	echo $version_data
 }
 
 initialize_paths()
@@ -1093,8 +1097,7 @@ initialize_paths()
 	local extra_paths="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/opt/local/bin"
 	
 	# this needs to be set here because various options call the parent initialize function directly.
-	SCRIPT_PATH=$( dirname "$0" )
-
+	SELF_PATH=$( dirname "$0" )
 	# Fallback paths put into $extra_paths; This might, among others, help on gentoo.
 	# Now, create a difference of $PATH and $extra_paths and add that to $PATH:
 	IFS=":"
@@ -1117,6 +1120,7 @@ initialize_paths()
 	# echo "PATH='$PATH'"
 	##/bin/sh -c 'echo "PATH in subshell=\"$PATH\""'
 }
+
 # No args taken.
 check_recommended_apps()
 {
@@ -1181,7 +1185,7 @@ check_required_apps()
 		for app_name in $x_apps
 		do
 			if ! type -p $app_name &>/dev/null;then
-				script_debugger "Resuming in non X mode: $app_name not found. For package install advice run: $SCRIPT_NAME --recommends"
+				script_debugger "Resuming in non X mode: $app_name not found. For package install advice run: $SELF_NAME --recommends"
 				B_SHOW_DISPLAY_DATA='false'
 				break
 			fi
@@ -1264,7 +1268,7 @@ select_default_color_scheme()
 {
 	eval $LOGFS
 	local spacer='  ' options='' user_selection='' config_variable=''
-	local config_file="$SCRIPT_CONFIG_DIR/$SCRIPT_NAME.conf"
+	local config_file="$SELF_CONFIG_DIR/$SELF_NAME.conf"
 	local irc_clear="[0m" 
 	local irc_gui='Unset' irc_console='Unset' irc_x_term='Unset'
 	local console='Unset' virt_term='Unset' global='Unset' 
@@ -1296,8 +1300,8 @@ select_default_color_scheme()
 	set_color_scheme "0"
 	# print_lines_basic "0" "" ""
 	if [[ $B_IRC == 'false' ]];then
-		print_lines_basic "0" "" "Welcome to $SCRIPT_NAME! Please select the default $COLOR_SELECTION color scheme."
-		# print_screen_output "You will see this message only one time per user account, unless you set preferences in: /etc/$SCRIPT_NAME.conf"
+		print_lines_basic "0" "" "Welcome to $SELF_NAME! Please select the default $COLOR_SELECTION color scheme."
+		# print_screen_output "You will see this message only one time per user account, unless you set preferences in: /etc/$SELF_NAME.conf"
 		print_screen_output " "
 	fi
 	print_lines_basic "0" "" "Because there is no way to know your $COLOR_SELECTION foreground/background colors, you can set your color preferences from color scheme option list below. 0 is no colors, 1 neutral. After these, there are 4 sets: 1-dark or light backgrounds; 2-light backgrounds; 3-dark backgrounds; 4-miscellaneous."
@@ -1326,11 +1330,11 @@ select_default_color_scheme()
 	if [[ $B_IRC == 'false' ]];then
 		echo -n "[0m"
 		
-		print_screen_output "$irc_clear $i)${spacer}Remove all color settings. Restore $SCRIPT_NAME default."
+		print_screen_output "$irc_clear $i)${spacer}Remove all color settings. Restore $SELF_NAME default."
 		print_screen_output "$irc_clear $(($i+1)))${spacer}Continue, no changes or config file setting."
 		print_screen_output "$irc_clear $(($i+2)))${spacer}Exit, use another terminal, or set manually."
 		print_screen_output "$LINE1"
-		print_lines_basic "0" "" "Simply type the number for the color scheme that looks best to your eyes for your $COLOR_SELECTION settings and hit ENTER. NOTE: You can bring this option list up by starting $SCRIPT_NAME with option: -c plus one of these numbers:"
+		print_lines_basic "0" "" "Simply type the number for the color scheme that looks best to your eyes for your $COLOR_SELECTION settings and hit ENTER. NOTE: You can bring this option list up by starting $SELF_NAME with option: -c plus one of these numbers:"
 		print_lines_basic "0" "" "94^(console,^no X^-^$console); 95^(terminal,^X^-^$virt_term); 96^(irc,^gui,^X^-^$irc_gui); 97^(irc,^X,^in^terminal^-^$irc_x_term); 98^(irc,^no^X^-^$irc_console); 99^(global^-^$global)"
 		print_lines_basic "0" "" ""
 		print_screen_output "Your selection(s) will be stored here: $config_file"
@@ -1386,7 +1390,7 @@ select_default_color_scheme()
 			-e '/IRC_COLOR_SCHEME=/d' -e '/IRC_CONS_COLOR_SCHEME=/d' -e '/IRC_X_TERM_COLOR_SCHEME=/d' $config_file
 			set_color_scheme $DEFAULT_COLOR_SCHEME
 		elif [[ $user_selection == $(( $i+1 )) ]];then
-			print_lines_basic "0" "" "Ok, continuing $SCRIPT_NAME unchanged. You can set the colors anytime by starting with: -c 95 to 99"
+			print_lines_basic "0" "" "Ok, continuing $SELF_NAME unchanged. You can set the colors anytime by starting with: -c 95 to 99"
 			if [[ -n $CONSOLE_COLOR_SCHEME && -z $DISPLAY ]];then
 				set_color_scheme $CONSOLE_COLOR_SCHEME
 			elif [[ -n $VIRT_TERM_COLOR_SCHEME ]];then
@@ -1396,7 +1400,7 @@ select_default_color_scheme()
 			fi
 		elif [[ $user_selection == $(( $i+2 )) ]];then
 			set_color_scheme $DEFAULT_COLOR_SCHEME
-			print_screen_output "Ok, exiting $SCRIPT_NAME now. You can set the colors later."
+			print_screen_output "Ok, exiting $SELF_NAME now. You can set the colors later."
 			exit 0
 		else
 			print_screen_output "Error - Invalid Selection. You entered this: $user_selection"
@@ -1437,18 +1441,18 @@ error_handler()
 			;;
 		4)	error_message="unsupported verbosity level: $2"
 			;;
-		5)	error_message="dependency not met: $2 not found in path.\nFor distribution installation package names and missing apps information, run: $SCRIPT_NAME --recommends"
+		5)	error_message="dependency not met: $2 not found in path.\nFor distribution installation package names and missing apps information, run: $SELF_NAME --recommends"
 			;;
 		6)	error_message="/proc not found! Quitting..."
 			;;
-		7)	error_message="One of the options you entered in your script parameters: $2\nis not supported.The option may require extra arguments to work.\nFor supported options (and their arguments), check the help menu: $SCRIPT_NAME -h"
+		7)	error_message="One of the options you entered in your script parameters: $2\nis not supported.The option may require extra arguments to work.\nFor supported options (and their arguments), check the help menu: $SELF_NAME -h"
 			;;
-		8)	error_message="the self-updater failed, $DOWNLOADER exited with error: $2.\nYou probably need to be root.\nHint, to make for easy updates without being root, do: chown <user name> $SCRIPT_PATH/$SCRIPT_NAME"
+		8)	error_message="the self-updater failed, $DOWNLOADER exited with error: $2.\nYou probably need to be root.\nHint, to make for easy updates without being root, do: chown <user name> $SELF_PATH/$SELF_NAME"
 			;;
 		9)	error_message="unsupported debugging level: $2"
 			;;
 		10)
-			error_message="the alt download url you provided: $2\nappears to be wrong, download aborted. Please note, the url\nneeds to end in /, without $SCRIPT_NAME, like: http://yoursite.com/downloads/"
+			error_message="the alt download url you provided: $2\nappears to be wrong, download aborted. Please note, the url\nneeds to end in /, without $SELF_NAME, like: http://yoursite.com/downloads/"
 			;;
 		11)
 			error_message="unsupported testing option argument: -! $2"
@@ -1460,16 +1464,16 @@ error_handler()
 			error_message="The -t option requires the following extra arguments (no spaces between letters/numbers):\nc m cm [required], for example: -t cm8 OR -t cm OR -t c9\n(numbers: 1-20, > 5 throttled to 5 in irc clients) You entered: $2"
 			;;
 		14)
-			error_message="failed to write correctly downloaded $SCRIPT_NAME to location $SCRIPT_PATH.\nThis usually means you don't have permission to write to that location, maybe you need to be root?\nThe operation failed with error: $2"
+			error_message="failed to write correctly downloaded $SELF_NAME to location $SELF_PATH.\nThis usually means you don't have permission to write to that location, maybe you need to be root?\nThe operation failed with error: $2"
 			;;
 		15)
-			error_message="failed set execute permissions on $SCRIPT_NAME at location $SCRIPT_PATH.\nThis usually means you don't have permission to set permissions on files there, maybe you need to be root?\nThe operation failed with error: $2"
+			error_message="failed set execute permissions on $SELF_NAME at location $SELF_PATH.\nThis usually means you don't have permission to set permissions on files there, maybe you need to be root?\nThe operation failed with error: $2"
 			;;
 		16)
-			error_message="$SCRIPT_NAME downloaded but the file data is corrupted. Purged data and using current version."
+			error_message="$SELF_NAME downloaded but the file data is corrupted. Purged data and using current version."
 			;;
 		17)
-			error_message="All $SCRIPT_NAME self updater features have been disabled by the distribution\npackage maintainer. This includes the option you used: $2"
+			error_message="All $SELF_NAME self updater features have been disabled by the distribution\npackage maintainer. This includes the option you used: $2"
 			;;
 		18)
 			error_message="The argument you provided for $2 does not have supported syntax.\nPlease use the following formatting:\n$3"
@@ -1597,7 +1601,7 @@ create_rotate_logfiles()
 	touch $LOG_FILE
 	# and echo the start data
 	echo "=========================================================" >> $LOG_FILE
-	echo "START $SCRIPT_NAME LOGGING:"                               >> $LOG_FILE
+	echo "START $SELF_NAME LOGGING:"                               >> $LOG_FILE
 	echo "Script started: $( date +%Y-%m-%d-%H:%M:%S )"              >> $LOG_FILE
 	echo "=========================================================" >> $LOG_FILE
 }
@@ -1613,26 +1617,27 @@ script_self_updater()
 	local man_file_path="$man_file_location/inxi.1.gz" 
 	
 	if [[ $B_IRC == 'true' ]];then
-		print_screen_output "Sorry, you can't run the $SCRIPT_NAME self updater option (-$3) in an IRC client."
+		print_screen_output "Sorry, you can't run the $SELF_NAME self updater option (-$3) in an IRC client."
 		exit 1
 	fi
 
-	print_screen_output "Starting $SCRIPT_NAME self updater."
-	print_screen_output "Currently running $SCRIPT_NAME version number: $SCRIPT_VERSION_NUMBER"
-	print_screen_output "Current version patch number: $SCRIPT_PATCH_NUMBER"
-	print_screen_output "Updating $SCRIPT_NAME in $SCRIPT_PATH using $2 as download source..."
+	print_screen_output "Starting $SELF_NAME self updater."
+	print_screen_output "Currently running $SELF_NAME version number: $SELF_VERSION"
+	print_screen_output "Current version patch number: $SELF_PATCH"
+	print_screen_output "Current version release date: $SELF_DATE"
+	print_screen_output "Updating $SELF_NAME in $SELF_PATH using $2 as download source..."
 	case $DOWNLOADER in
 		curl)
-			file_contents="$( curl $NO_SSL_OPT -s $1$SCRIPT_NAME )" || downloader_error=$?
+			file_contents="$( curl $NO_SSL_OPT -s $1$SELF_NAME )" || downloader_error=$?
 			;;
 		fetch)
-			file_contents="$( fetch $NO_SSL_OPT -q -o - $1$SCRIPT_NAME )" || downloader_error=$?
+			file_contents="$( fetch $NO_SSL_OPT -q -o - $1$SELF_NAME )" || downloader_error=$?
 			;;
 		ftp)
-			file_contents="$( ftp $NO_SSL_OPT -o - $1$SCRIPT_NAME 2>/dev/null )" || downloader_error=$?
+			file_contents="$( ftp $NO_SSL_OPT -o - $1$SELF_NAME 2>/dev/null )" || downloader_error=$?
 			;;
 		wget)
-			file_contents="$( wget $NO_SSL_OPT -q -O - $1$SCRIPT_NAME )" || downloader_error=$?
+			file_contents="$( wget $NO_SSL_OPT -q -O - $1$SELF_NAME )" || downloader_error=$?
 			;;
 		no-downloader)
 			downloader_error=1
@@ -1643,13 +1648,15 @@ script_self_updater()
 	if [[  $downloader_error -eq 0 ]];then
 		# make sure the whole file got downloaded and is in the variable
 		if [[ -n $( grep '###\*\*EOF\*\*###' <<< "$file_contents" ) ]];then
-			echo "$file_contents" > $SCRIPT_PATH/$SCRIPT_NAME || error_handler 14 "$?"
-			chmod +x $SCRIPT_PATH/$SCRIPT_NAME || error_handler 15 "$?"
-			SCRIPT_VERSION_NUMBER=$( parse_version_data 'main' )
-			SCRIPT_PATCH_NUMBER=$( parse_version_data 'patch' )
-			print_screen_output "Successfully updated to $2 version: $SCRIPT_VERSION_NUMBER"
-			print_screen_output "New $2 version patch number: $SCRIPT_PATCH_NUMBER"
-			print_screen_output "To run the new version, just start $SCRIPT_NAME again."
+			echo "$file_contents" > $SELF_PATH/$SELF_NAME || error_handler 14 "$?"
+			chmod +x $SELF_PATH/$SELF_NAME || error_handler 15 "$?"
+			parse_version_data 'main'
+			parse_version_data 'patch'
+			parse_version_data 'date'
+			print_screen_output "Successfully updated to $2 version: $SELF_VERSION"
+			print_screen_output "New $2 version patch number: $SELF_PATCH"
+			print_screen_output "New $2 version release date: $SELF_DATE"
+			print_screen_output "To run the new version, just start $SELF_NAME again."
 			print_screen_output "----------------------------------------"
 			print_screen_output "Starting download of man page file now."
 			if [[ ! -d $man_file_location ]];then
@@ -1700,7 +1707,7 @@ script_self_updater()
 					fi
 				else
 					print_screen_output "Updating / Installing the Man page requires root user, writing to: $man_file_location"
-					print_screen_output "If you want the man page, you'll have to run $SCRIPT_NAME -$3 as root."
+					print_screen_output "If you want the man page, you'll have to run $SELF_NAME -$3 as root."
 				fi
 			fi
 			exit 0
@@ -1763,8 +1770,14 @@ debug_data_collector()
 	local xiin_url="https://github.com/smxi/inxi/raw/xiin/$xiin_file"
 	local Line='-------------------------' root_string=''
 	local start_directory=$( pwd )
-	local host=$( tr '[A-Z]' '[a-z]' <<< "$HOSTNAME" )
+	local host=''
 	local downloader_error=0 debug_i=''
+	
+	if (( "$BASH" >= 4 ));then
+		host="${HOSTNAME,,}"
+	else 
+		host=$( tr '[A-Z]' '[a-z]' <<< "$HOSTNAME" )
+	fi
 	
 	if [[ $B_DEBUG_I == 'true' ]];then
 		debug_i='i'
@@ -1789,20 +1802,20 @@ debug_data_collector()
 			ftp_upload=$ALTERNATE_FTP
 		fi
 		echo "Starting debugging data collection type: $1"
-		cd $SCRIPT_DATA_DIR
-		if [[ -d $SCRIPT_DATA_DIR/$debug_data_dir ]];then
+		cd $SELF_DATA_DIR
+		if [[ -d $SELF_DATA_DIR/$debug_data_dir ]];then
 			echo 'Deleting previous xiin data directory...'
-			rm -rf $SCRIPT_DATA_DIR/$debug_data_dir
+			rm -rf $SELF_DATA_DIR/$debug_data_dir
 		fi
-		mkdir $SCRIPT_DATA_DIR/$debug_data_dir
-		if [[ -f $SCRIPT_DATA_DIR/$debug_data_dir.tar.gz ]];then
+		mkdir $SELF_DATA_DIR/$debug_data_dir
+		if [[ -f $SELF_DATA_DIR/$debug_data_dir.tar.gz ]];then
 			echo 'Deleting previous tar.gz file...'
-			rm -f $SCRIPT_DATA_DIR/$debug_data_dir.tar.gz
+			rm -f $SELF_DATA_DIR/$debug_data_dir.tar.gz
 		fi
 		
 		echo 'Collecting system info: sensors, lsusb, lspci, lspci -v data, plus /proc data'
 		echo 'also checking for dmidecode data: note, you must be root to have dmidecode work.'
-		echo "Data going into: $SCRIPT_DATA_DIR/$debug_data_dir"
+		echo "Data going into: $SELF_DATA_DIR/$debug_data_dir"
 		# bsd tools http://cb.vu/unixtoolbox.xhtml
 		# freebsd
 		if type -p pciconf &>/dev/null;then
@@ -1845,7 +1858,7 @@ debug_data_collector()
 		# fdisk <disk>
 		dmidecode &> $debug_data_dir/dmidecode.txt
 		
-		get_repo_data "$SCRIPT_DATA_DIR/$debug_data_dir"
+		get_repo_data "$SELF_DATA_DIR/$debug_data_dir"
 		
 		if type -p shopt &>/dev/null;then
 			shopt -s nullglob
@@ -1973,7 +1986,7 @@ debug_data_collector()
 		check_recommends_user_output &> $debug_data_dir/check-recommends-user-output.txt
 		# first download and verify xiin
 		if [[ $B_UPLOAD_DEBUG_DATA == 'true' || $1 == 'disk' || $1 == 'sys' || $1 == 'all' ]];then
-			touch $SCRIPT_DATA_DIR/$debug_data_dir/xiin-error.txt
+			touch $SELF_DATA_DIR/$debug_data_dir/xiin-error.txt
 			echo "Downloading required tree traverse tool $xiin_file..."
 			if [[ -f xiin && ! -f $xiin_file ]];then
 				mv -f xiin $xiin_file
@@ -2016,10 +2029,12 @@ debug_data_collector()
 		fi
 		# note, only bash 4> supports ;;& for case, so using if/then here
 		if [[ $1 == 'disk' || $1 == 'sys' || $1 == 'all' ]];then
-			xiin_data_file=$SCRIPT_DATA_DIR/$debug_data_dir/xiin-sys.txt
+			xiin_data_file=$SELF_DATA_DIR/$debug_data_dir/xiin-sys.txt
 			echo 'Collecting networking data...'
 			ifconfig &> $debug_data_dir/ifconfig.txt
 			ip addr &> $debug_data_dir/ip-addr.txt
+			# f="$( find /sys -mindepth 1  -type f  -exec gawk 'END { print  FILENAME ":[" $0 "]"}' 2>/dev/null {} \; )" 2>/dev/null;echo "$f"
+			# https://stackoverflow.com/questions/5119946/find-exec-with-multiple-commands
 			if [[ $b_run_xiin == 'true' && -z $BSD_TYPE ]];then
 				echo $Line
 				echo "Running $xiin_file tool now on /sys..."
@@ -2213,15 +2228,15 @@ debug_data_collector()
 			cat /etc/mtab &> $debug_data_dir/etc-mtab.txt
 		fi
 		echo 'Creating inxi output file now. This can take a few seconds...'
-		echo "Starting $SCRIPT_NAME from: $start_directory"
+		echo "Starting $SELF_NAME from: $start_directory"
 		cd $start_directory
-		$SCRIPT_PATH/$SCRIPT_NAME -F${debug_i}Rfrploudmxxx -c 0 -@ 8 -y 120 > $SCRIPT_DATA_DIR/$debug_data_dir/inxi-F${debug_i}Rfrploudmxxxy120.txt
-		cp $LOG_FILE $SCRIPT_DATA_DIR/$debug_data_dir
-		if [[ -f $SCRIPT_DATA_DIR/$debug_data_dir.tar.gz ]];then
+		$SELF_PATH/$SELF_NAME -F${debug_i}Rfrploudmxxx -c 0 -@ 8 -y 120 > $SELF_DATA_DIR/$debug_data_dir/inxi-F${debug_i}Rfrploudmxxxy120.txt
+		cp $LOG_FILE $SELF_DATA_DIR/$debug_data_dir
+		if [[ -f $SELF_DATA_DIR/$debug_data_dir.tar.gz ]];then
 			echo "Found and removing previous tar.gz data file: $debug_data_dir.tar.gz"
-			rm -f $SCRIPT_DATA_DIR/$debug_data_dir.tar.gz
+			rm -f $SELF_DATA_DIR/$debug_data_dir.tar.gz
 		fi
-		cd $SCRIPT_DATA_DIR
+		cd $SELF_DATA_DIR
 		echo 'Creating tar.gz compressed file of this material now. Contents:'
 		echo $Line
 		tar -cvzf $debug_data_dir.tar.gz $debug_data_dir
@@ -2236,7 +2251,7 @@ debug_data_collector()
 			echo "Data in gz is corrupted, removed gzip file" >> $debug_data_dir/gzip-error.txt
 		else
 			echo 'All done, you can find your data gzipped directory here:'
-			completed_gz_file=$SCRIPT_DATA_DIR/$debug_data_dir.tar.gz
+			completed_gz_file=$SELF_DATA_DIR/$debug_data_dir.tar.gz
 			echo $completed_gz_file
 			if [[ $B_UPLOAD_DEBUG_DATA == 'true' ]];then
 				echo $Line
@@ -2280,7 +2295,7 @@ check_recommends_user_output()
 		ftp:ftp-OpenBSD-only~ftp-OpenBSD-only~ftp-OpenBSD-only~:-i_wan_ip;-w/-W;-U/-!_[11-15]_(OpenBSD_only)'
 	fi
 	initialize_paths
-	print_lines_basic "0" "" "$SCRIPT_NAME will now begin checking for the programs it needs to operate. First a check of the main languages and tools $SCRIPT_NAME uses. Python is only for debugging data collection."
+	print_lines_basic "0" "" "$SELF_NAME will now begin checking for the programs it needs to operate. First a check of the main languages and tools $SELF_NAME uses. Python is only for debugging data collection."
 	echo $Line
 	echo "Bash version: $( bash --version 2>&1 | awk 'BEGIN {IGNORECASE=1} /^GNU bash/ {print $4}' )"
 	if type -p gawk &>/dev/null;then
@@ -2306,22 +2321,22 @@ check_recommends_user_output()
 	echo $Line
 	
 	echo "Test One: Required System Directories (Linux Only)."
-	print_lines_basic "0" "" "If one of these system directories is missing, $SCRIPT_NAME cannot operate:"
+	print_lines_basic "0" "" "If one of these system directories is missing, $SELF_NAME cannot operate:"
 	echo 
 	check_recommends_items 'required-dirs'
 	
 	echo "Test Two: Required Core Applications."
-	print_lines_basic "0" "" "If one of these applications is missing, $SCRIPT_NAME cannot operate:"
+	print_lines_basic "0" "" "If one of these applications is missing, $SELF_NAME cannot operate:"
 	echo 
 	check_recommends_items 'required-apps'
 	
 	print_lines_basic "0" "" "Test Three: Script Recommends for Graphics Features."
-	print_lines_basic "0" "" "NOTE: If you do not use X these do not matter (like a headless server). Otherwise, if one of these applications is missing, $SCRIPT_NAME will have incomplete output:"
+	print_lines_basic "0" "" "NOTE: If you do not use X these do not matter (like a headless server). Otherwise, if one of these applications is missing, $SELF_NAME will have incomplete output:"
 	echo 
 	check_recommends_items 'recommended-x-apps'
 	
 	echo 'Test Four: Script Recommends for Remaining Features.' 
-	print_lines_basic "0" "" "If one of these applications is missing, $SCRIPT_NAME will have incomplete output:"
+	print_lines_basic "0" "" "If one of these applications is missing, $SELF_NAME will have incomplete output:"
 	echo 
 	check_recommends_items 'recommended-apps'
 	
@@ -2332,13 +2347,13 @@ check_recommends_user_output()
 	
 	echo 'Test Six: System Directories for Various Information.'
 	echo '(Unless otherwise noted, these are for GNU/Linux systems)' 
-	print_lines_basic "0" "" "If one of these directories is missing, $SCRIPT_NAME may have incomplete output:"
+	print_lines_basic "0" "" "If one of these directories is missing, $SELF_NAME may have incomplete output:"
 	echo 
 	check_recommends_items 'system-dirs'
 	
 	echo 'Test Seven: System Files for Various Information.'
 	echo '(Unless otherwise noted, these are for GNU/Linux systems)' 
-	print_lines_basic "0" "" "If one of these files is missing, $SCRIPT_NAME may have incomplete output:"
+	print_lines_basic "0" "" "If one of these files is missing, $SELF_NAME may have incomplete output:"
 	echo 
 	check_recommends_items 'system-files'
 	
@@ -2878,7 +2893,7 @@ get_parameters()
 				fi
 				;;
 			U)	if [[ $B_ALLOW_UPDATE == 'true' ]];then
-					script_self_updater "$SCRIPT_DOWNLOAD" 'source server' "$opt"
+					script_self_updater "$SELF_DOWNLOAD" 'source server' "$opt"
 				else
 					error_handler 17 "-$opt"
 				fi
@@ -2985,25 +3000,25 @@ get_parameters()
 						if [[ $B_ALLOW_UPDATE == 'true' ]];then
 							case $OPTARG in
 								10)
-									script_self_updater "$SCRIPT_DOWNLOAD_DEV" 'dev server' "$opt $OPTARG"
+									script_self_updater "$SELF_DOWNLOAD_DEV" 'dev server' "$opt $OPTARG"
 									;;
 								11)
-									script_self_updater "$SCRIPT_DOWNLOAD_BRANCH_1" 'branch one server' "$opt $OPTARG"
+									script_self_updater "$SELF_DOWNLOAD_BRANCH_1" 'branch one server' "$opt $OPTARG"
 									;;
 								12)
-									script_self_updater "$SCRIPT_DOWNLOAD_BRANCH_2" 'branch two server' "$opt $OPTARG"
+									script_self_updater "$SELF_DOWNLOAD_BRANCH_2" 'branch two server' "$opt $OPTARG"
 									;;
 								13)
-									script_self_updater "$SCRIPT_DOWNLOAD_BRANCH_3" 'branch three server' "$opt $OPTARG"
+									script_self_updater "$SELF_DOWNLOAD_BRANCH_3" 'branch three server' "$opt $OPTARG"
 									;;
 								14)
-									script_self_updater "$SCRIPT_DOWNLOAD_BRANCH_4" 'branch four server' "$opt $OPTARG"
+									script_self_updater "$SELF_DOWNLOAD_BRANCH_4" 'branch four server' "$opt $OPTARG"
 									;;
 								15)
-									script_self_updater "$SCRIPT_DOWNLOAD_BRANCH_BSD" 'branch bsd server' "$opt $OPTARG"
+									script_self_updater "$SELF_DOWNLOAD_BRANCH_BSD" 'branch bsd server' "$opt $OPTARG"
 									;;
 								16)
-									script_self_updater "$SCRIPT_DOWNLOAD_BRANCH_GNUBSD" 'branch gnubsd server' "$opt $OPTARG"
+									script_self_updater "$SELF_DOWNLOAD_BRANCH_GNUBSD" 'branch gnubsd server' "$opt $OPTARG"
 									;;
 								http*)
 									script_self_updater "$OPTARG" 'alt server' "$opt <http...>"
@@ -3095,18 +3110,18 @@ show_options()
 	# print_lines_basic "1" "" ""
 	# print_lines_basic "2" "" ""
 	# print_screen_output " "
-	print_lines_basic "0" "" "$SCRIPT_NAME supports the following options. You can combine them, or list them one by one. Examples: $SCRIPT_NAME^-v4^-c6 OR $SCRIPT_NAME^-bDc^6. If you start $SCRIPT_NAME with no arguments, it will show the short form."
+	print_lines_basic "0" "" "$SELF_NAME supports the following options. You can combine them, or list them one by one. Examples: $SELF_NAME^-v4^-c6 OR $SELF_NAME^-bDc^6. If you start $SELF_NAME with no arguments, it will show the short form."
 	print_screen_output " "
 	print_lines_basic "0" "" "The following options if used without -F, -b, or -v will show just option line(s): A, B, C, D, G, I, M, N, P, R, S, f, i, m, n, o, p, l, u, r, s, t - you can use these alone or together to show just the line(s) you want to see. If you use them with -v^[level], -b or -F, it will show the full output for that line along with the output for the chosen verbosity level."
 	print_screen_output "- - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 	print_screen_output "Output Control Options:"
 	print_lines_basic "1" "-A" "Audio/sound card information."
-	print_lines_basic "1" "-b" "Basic output, short form. Like $SCRIPT_NAME^-v^2, only minus hard disk names ."
+	print_lines_basic "1" "-b" "Basic output, short form. Like $SELF_NAME^-v^2, only minus hard disk names ."
 	print_lines_basic "1" "-B" "Battery info, shows charge, condition, plus extra information (if battery present)."
-	print_lines_basic "1" "-c" "Color schemes. Scheme number is required. Color selectors run a color selector option prior to $SCRIPT_NAME starting which lets you set the config file value for the selection."
-	print_lines_basic "1" "" "Supported color schemes: 0-$color_scheme_count Example:^$SCRIPT_NAME^-c^11"
+	print_lines_basic "1" "-c" "Color schemes. Scheme number is required. Color selectors run a color selector option prior to $SELF_NAME starting which lets you set the config file value for the selection."
+	print_lines_basic "1" "" "Supported color schemes: 0-$color_scheme_count Example:^$SELF_NAME^-c^11"
 	print_lines_basic "1" "" "Color selectors for each type display (NOTE: irc and global only show safe color set):"
-# 	print_screen_output "    Supported color schemes: 0-$color_scheme_count Example: $SCRIPT_NAME -c 11"
+# 	print_screen_output "    Supported color schemes: 0-$color_scheme_count Example: $SELF_NAME -c 11"
 # 	print_screen_output "    Color selectors for each type display (NOTE: irc and global only show safe color set):"
 	print_lines_basic "2" "94" "Console, out of X"
 	print_lines_basic "2" "95" "Terminal, running in X - like xTerm"
@@ -3118,11 +3133,11 @@ show_options()
 	print_lines_basic "1" "-d" "Optical drive data (and floppy disks, if present). Same as -Dd. See also -x and -xx."
 	print_lines_basic "1" "-D" "Full hard Disk info, not only model, ie: /dev/sda ST380817AS 80.0GB. See also -x and -xx. Disk total used percentage includes swap partition size(s)."
 	print_lines_basic "1" "-f" "All cpu flags, triggers -C. Not shown with -F to avoid spamming. ARM cpus show 'features'."
-	print_lines_basic "1" "-F" "Full output for $SCRIPT_NAME. Includes all Upper Case line letters, plus -s and -n. Does not show extra verbose options like -d -f -l -m -o -p -r -t -u -x"
+	print_lines_basic "1" "-F" "Full output for $SELF_NAME. Includes all Upper Case line letters, plus -s and -n. Does not show extra verbose options like -d -f -l -m -o -p -r -t -u -x"
 	print_lines_basic "1" "-G" "Graphic card information (card, display server type/version, resolution, renderer, OpenGL version)."
 	print_lines_basic "1" "-i" "Wan IP address, and shows local interfaces (requires ifconfig 
 	network tool). Same as -Nni. Not shown with -F for user security reasons, you shouldn't paste your local/wan IP."
-	print_lines_basic "1" "-I" "Information: processes, uptime, memory, irc client (or shell type), $SCRIPT_NAME version."
+	print_lines_basic "1" "-I" "Information: processes, uptime, memory, irc client (or shell type), $SELF_NAME version."
 	print_lines_basic "1" "-l" "$partition_string_u labels. Default: short $partition_string -P. For full -p output, use: -pl (or -plu)."
 	print_lines_basic "1" "-m" "Memory (RAM) data. Physical system memory array(s), capacity, how many devices (slots) supported, and individual memory devices (sticks of memory etc). For devices, shows device locator, size, speed, type (like: DDR3). If neither -I nor -tm are selected, also shows ram used/total. Also see -x, -xx, -xxx"
 	print_lines_basic "1" "-M" "Machine data. Device type (desktop, server, laptop, VM etc.), Motherboard, Bios, and if present, System Builder (Like Lenovo). Shows UEFI/BIOS/UEFI [Legacy}. Older systems/kernels without the required /sys data can use dmidecode instead, run as root. Dmidecode can be forced with -! 33"
@@ -3139,10 +3154,10 @@ show_options()
 	print_lines_basic "1" "" "Make sure to have no space between letters and numbers (-t^cm10 - right, -t^cm^10 - wrong)."
 	print_lines_basic "1" "-u" "$partition_string_u UUIDs. Default: short $partition_string -P. For full -p output, use: -pu (or -plu)."
 	print_lines_basic "1" "-v" "Script verbosity levels. Verbosity level number is required. Should not be used with -b or -F"
-	print_lines_basic "1" "" "Supported levels: 0-$VERBOSITY_LEVELS Example: $SCRIPT_NAME^-v^4"
-	print_lines_basic "2" "0" "Short output, same as: $SCRIPT_NAME"
+	print_lines_basic "1" "" "Supported levels: 0-$VERBOSITY_LEVELS Example: $SELF_NAME^-v^4"
+	print_lines_basic "2" "0" "Short output, same as: $SELF_NAME"
 	print_lines_basic "2" "1" "Basic verbose, -S + basic CPU + -G + basic Disk + -I."
-	print_lines_basic "2" "2" "Networking card (-N), Machine (-M) data, if present, Battery (-B), basic hard disk data (names only), and, if present, basic raid (devices only, and if inactive, notes that). similar to: $SCRIPT_NAME^-b"
+	print_lines_basic "2" "2" "Networking card (-N), Machine (-M) data, if present, Battery (-B), basic hard disk data (names only), and, if present, basic raid (devices only, and if inactive, notes that). similar to: $SELF_NAME^-b"
 	print_lines_basic "2" "3" "Advanced CPU (-C), battery, network (-n) data, and switches on -x advanced data option."
 	print_lines_basic "2" "4" "$partition_string_u size/filled data (-P) for (if present): /, /home, /var/, /boot. Shows full disk data (-D)."
 	print_lines_basic "2" "5" "Audio card (-A); sensors^(-s), memory/ram^(-m), $partition_string label^(-l) and UUID^(-u), short form of optical drives, standard raid data (-R)."
@@ -3152,11 +3167,11 @@ show_options()
 	# if distro maintainers don't want the weather feature disable it
 	if [[ $B_ALLOW_WEATHER == 'true' ]];then
 		print_lines_basic "1" "-w" "Local weather data/time. To check an alternate location, see: -W^<location>. For extra weather data options see -x, -xx, and -xxx."
-		print_lines_basic "1" "-W" "<location> Supported options for <location>: postal code; city, state/country; latitude, longitude. Only use if you want the weather somewhere other than the machine running $SCRIPT_NAME. Use only ascii characters, replace spaces in city/state/country names with '+'. Example:^$SCRIPT_NAME^-W^new+york,ny"
+		print_lines_basic "1" "-W" "<location> Supported options for <location>: postal code; city, state/country; latitude, longitude. Only use if you want the weather somewhere other than the machine running $SELF_NAME. Use only ascii characters, replace spaces in city/state/country names with '+'. Example:^$SELF_NAME^-W^new+york,ny"
 	fi
 	print_lines_basic "1" "-x" "Adds the following extra data (only works with verbose or line output, not short form):"
 	print_lines_basic "2" "-B" "Vendor/model, status (if available)"
-	print_lines_basic "2" "-C" "CPU Flags, Bogomips on Cpu;"
+	print_lines_basic "2" "-C" "CPU Flags, Bogomips on Cpu;CPU microarchitecture / revision if found, like: (Sandy Bridge rev.2)"
 	print_lines_basic "2" "-d" "Extra optical drive data; adds rev version to optical drive."
 	print_lines_basic "2" "-D" "Hdd temp with disk data if you have hddtemp installed, if you are root OR if you have added to /etc/sudoers (sudo v. 1.7 or newer) Example:^<username>^ALL^=^NOPASSWD:^/usr/sbin/hddtemp"
 	print_lines_basic "2" "-G" "Direct rendering status for Graphics (in X)."
@@ -3187,7 +3202,7 @@ show_options()
 	if [[ $B_ALLOW_WEATHER == 'true' ]];then
 		print_lines_basic "2" "-w -W" "Humidity, barometric pressure."
 	fi
-	print_lines_basic "2" "-@ 11-14" "Automatically uploads debugger data tar.gz file to ftp.techpatterns.com. EG: $SCRIPT_NAME^-xx@14"
+	print_lines_basic "2" "-@ 11-14" "Automatically uploads debugger data tar.gz file to ftp.techpatterns.com. EG: $SELF_NAME^-xx@14"
 	print_lines_basic "1" "-xxx" "Show extra, extra, extra data (only works with verbose or line output, not short form):"
 	print_lines_basic "2" "-B" "chemistry, cycles, location (if available)."
 	print_lines_basic "2" "-m" "Width of memory bus, data and total (if present and greater than data); Detail, if present, for Type; module voltage, if available."
@@ -3202,15 +3217,15 @@ show_options()
 	print_screen_output "Additional Options:"
 	print_lines_basic "4" "-h --help" "This help menu."
 	print_lines_basic "4" "-H" "This help menu, plus developer options. Do not use dev options in normal operation!"
-	print_lines_basic "4" "--recommends" "Checks $SCRIPT_NAME application dependencies + recommends, and directories, then shows what package(s) you need to install to add support for that feature. "
+	print_lines_basic "4" "--recommends" "Checks $SELF_NAME application dependencies + recommends, and directories, then shows what package(s) you need to install to add support for that feature. "
 	if [[ $B_ALLOW_UPDATE == 'true' ]];then
 		print_lines_basic "4" "-U" "Auto-update script. Will also install/update man page. Note: if you installed as root, you must be root to update, otherwise user is fine. Man page installs require root user mode."
 	fi
-	print_lines_basic "4" "-V --version" "$SCRIPT_NAME version information. Prints information then exits."
+	print_lines_basic "4" "-V --version" "$SELF_NAME version information. Prints information then exits."
 	print_screen_output " "
 	print_screen_output "Debugging Options:"
 	print_lines_basic "1" "-%" "Overrides defective or corrupted data."
-	print_lines_basic "1" "-@" "Triggers debugger output. Requires debugging level 1-14 (8-10 - logging of data). Less than 8 just triggers $SCRIPT_NAME debugger output on screen."
+	print_lines_basic "1" "-@" "Triggers debugger output. Requires debugging level 1-14 (8-10 - logging of data). Less than 8 just triggers $SELF_NAME debugger output on screen."
 	print_lines_basic "2" "1-7" "On screen debugger output"
 	print_lines_basic "2" "8" "Basic logging"
 	print_lines_basic "2" "9" "Full file/sys info logging"
@@ -3377,7 +3392,7 @@ print_lines_basic()
 print_version_info()
 {
 	# if not in PATH could be either . or directory name, no slash starting
-	local script_path=$SCRIPT_PATH script_symbolic_start=''
+	local script_path=$SELF_PATH script_symbolic_start=''
 	if [[ $script_path == '.' ]];then
 		script_path=$( pwd )
 	elif [[ -z $( grep '^/' <<< "$script_path" ) ]];then
@@ -3385,15 +3400,12 @@ print_version_info()
 	fi
 	# handle if it's a symbolic link, rare, but can happen with script directories in irc clients
 	# which would only matter if user starts inxi with -! 30 override in irc client
-	if [[ -L $script_path/$SCRIPT_NAME ]];then
-		script_symbolic_start=$script_path/$SCRIPT_NAME
-		script_path=$( readlink $script_path/$SCRIPT_NAME )
+	if [[ -L $script_path/$SELF_NAME ]];then
+		script_symbolic_start=$script_path/$SELF_NAME
+		script_path=$( readlink $script_path/$SELF_NAME )
 		script_path=$( dirname $script_path )
 	fi
-	local last_modified=$( parse_version_data 'date' ) 
-	local year_modified=$( gawk '{print $NF}' <<< "$last_modified" )
-	
-	print_screen_output "$SCRIPT_NAME $SCRIPT_VERSION_NUMBER-$SCRIPT_PATCH_NUMBER ($last_modified)"
+	print_screen_output "$SELF_NAME $SELF_VERSION-$SELF_PATCH ($SELF_DATE)"
 	if [[ $B_IRC == 'false' ]];then
 		print_screen_output "Program Location: $script_path"
 		if [[ -n $script_symbolic_start ]];then
@@ -3403,7 +3415,7 @@ print_version_info()
 		print_lines_basic "0" "" "IRC:^irc.oftc.net channel:^#smxi"
 		print_lines_basic "0" "" "Forums:^http://techpatterns.com/forums/forum-33.html"
 		print_screen_output " "
-		print_lines_basic "0" "" "$SCRIPT_NAME - the universal, portable, system information tool for console and irc."
+		print_lines_basic "0" "" "$SELF_NAME - the universal, portable, system information tool for console and irc."
 		print_screen_output " "
 		print_lines_basic "0" "" "This program started life as a fork of Infobash 3.02: Copyright^(C)^2005-2007^Michiel^de^Boer^a.k.a.^locsmif."
 		print_lines_basic "0" "" "Subsequent changes and modifications (after Infobash 3.02): Copyright^(C)^2008-${year_modified%%-*}^Harald^Hope,^Scott^Rogers,^aka^h2^&trash80."
@@ -3439,7 +3451,12 @@ get_start_client()
 		Irc_Client_Path=$( readlink /proc/$PPID/exe )
 		# Irc_Client_Path=$( ps -p $PPID | gawk '!/[[:space:]]*PID/ {print $5}'  )
 		# echo $( ps -p $PPID )
-		irc_client_path_lower=$( tr '[A-Z]' '[a-z]' <<< $Irc_Client_Path )
+		if (( "$BASH" >= 4 ));then
+			irc_client_path_lower=${Irc_Client_Path,,}
+		else 
+			irc_client_path_lower=$( tr '[A-Z]' '[a-z]' <<< "$Irc_Client_Path" )
+		fi
+		
 		App_Working_Name=${irc_client_path_lower##*/}
 		# handles the xchat/sh/bash/dash cases, and the konversation/perl cases, where clients
 		# report themselves as perl or unknown shell. IE:  when konversation starts inxi
@@ -3456,7 +3473,11 @@ get_start_client()
 				fi
 				if [[ -n $pppid && -f /proc/$pppid/exe ]];then
 					Irc_Client_Path="$( readlink /proc/$pppid/exe )"
-					irc_client_path_lower=$( tr '[A-Z]' '[a-z]' <<< $Irc_Client_Path )
+					if (( "$BASH" >= 4 ));then
+						irc_client_path_lower=${Irc_Client_Path,,}
+					else 
+						irc_client_path_lower=$( tr '[A-Z]' '[a-z]' <<< "$Irc_Client_Path" )
+					fi
 					App_Working_Name=${irc_client_path_lower##*/}
 					B_Non_Native_App='true'
 				fi
@@ -3498,7 +3519,11 @@ get_start_client()
 			
 			if [[ -n $App_Working_Name ]];then
 				Irc_Client_Path=$App_Working_Name
-				irc_client_path_lower=$( tr '[A-Z]' '[a-z]' <<< $Irc_Client_Path )
+				if (( "$BASH" >= 4 ));then
+					irc_client_path_lower=${Irc_Client_Path,,}
+				else 
+					irc_client_path_lower=$( tr '[A-Z]' '[a-z]' <<< "$Irc_Client_Path" )
+				fi
 				App_Working_Name=${irc_client_path_lower##*/}
 				B_Non_Native_App='false'
 				get_irc_client_version
@@ -3910,7 +3935,7 @@ get_audio_data()
 
 	IFS=$'\n'
 	# this first step handles the drivers for cases where the second step fails to find one
-	device_count=$( echo "$Lspci_v_Data" | grep -iEc '(multimedia audio controller|audio device)' )
+	device_count=$( echo "$LSPCI_V_DATA" | grep -iEc '(multimedia audio controller|audio device)' )
 	if [[ $device_count -eq 1 ]] && [[ $B_ASOUND_DEVICE_FILE == 'true' ]];then
 		audio_driver=$( gawk -F ']: ' '
 		BEGIN {
@@ -3933,7 +3958,7 @@ get_audio_data()
 	audio_driver=$( echo $audio_driver )
 	# now we'll build the main audio data, card name, driver, and port. If no driver is found,
 	# and if the first method above is not null, and one card is found, it will use that instead.
-	A_AUDIO_DATA=( $( echo "$Lspci_v_Data" | gawk -F ': ' -v audioDriver="$audio_driver" '
+	A_AUDIO_DATA=( $( echo "$LSPCI_V_DATA" | gawk -F ': ' -v audioDriver="$audio_driver" '
 	BEGIN {
 		IGNORECASE=1
 	}
@@ -3942,6 +3967,10 @@ get_audio_data()
 		# The doublequotes are necessary because of the pipes in the variable.
 		gsub(/'"$BAN_LIST_NORMAL"'/, "", audioCard)
 		gsub(/'"$BAN_LIST_ARRAY"'/, " ", audioCard)
+		if ( '$COLS_INNER' < 100 ){
+			sub(/Series Family/,"Series", audioCard)
+			sub(/High Definition/,"High Def.", audioCard)
+		}
 		gsub(/^ +| +$/, "", audioCard)
 		gsub(/ [ \t]+/, " ", audioCard)
 		aPciBusId[audioCard] = gensub(/(^[0-9a-f:\.]+) [^:]+: .+$/,"\\1","g",$0)
@@ -4155,9 +4184,14 @@ get_battery_data()
 					voltage_min_design=""
 					voltage_now=""
 					power_now=""
+					# charge: mAh
 					charge_full_design=""
 					charge_full=""
 					charge_now=""
+					# energy: Wh
+					energy_full_design=""
+					energy_full=""
+					energy_now=""
 					capacity=""
 					capacity_level=""
 					model=""
@@ -4165,6 +4199,7 @@ get_battery_data()
 					serial=""
 					of_orig=""
 					location=""
+					b_ma="false" # trips ma x voltage
 				}
 				{
 					gsub(/'"$BAN_LIST_NORMAL"'|,|battery|unknown/, "", $2)
@@ -4197,23 +4232,30 @@ get_battery_data()
 					power_now=$NF
 				}
 				$1 ~ /^POWER_SUPPLY_ENERGY_FULL_DESIGN$/ {
-					charge_full_design = $NF / 1000000
+					energy_full_design = $NF / 1000000
 				}
 				$1 ~ /^POWER_SUPPLY_ENERGY_FULL$/ {
-					charge_full = $NF / 1000000
+					energy_full = $NF / 1000000
 				}
 				$1 ~ /^POWER_SUPPLY_ENERGY_NOW$/ {
-					charge_now = $NF / 1000000
-					charge_now = sprintf( "%.1f", charge_now )
+					energy_now = $NF / 1000000
+					energy_now = sprintf( "%.1f", energy_now )
 				}
+				# note: the following 3 were off, 100000 instead of 1000000
+				# why this is, I do not know. I did not document any reason for that
+				# so going on assumption it is a mistake. CHARGE is mAh, which are converted
+				# to Wh by: mAh x voltage. Note: voltage fluctuates so will make results vary slightly.
 				$1 ~ /^POWER_SUPPLY_CHARGE_FULL_DESIGN$/ {
-					charge_full_design = $NF / 100000
+					charge_full_design = $NF / 1000000
+					b_ma="true"
 				}
 				$1 ~ /^POWER_SUPPLY_CHARGE_FULL$/ {
-					charge_full = $NF / 100000
+					charge_full = $NF / 1000000
+					b_ma="true"
 				}
 				$1 ~ /^POWER_SUPPLY_CHARGE_NOW$/ {
-					charge_now = $NF / 100000
+					charge_now = $NF / 1000000
+					b_ma="true"
 				}
 				$1 ~ /^POWER_SUPPLY_CAPACITY$/ {
 					if ( $NF != "" ){
@@ -4233,25 +4275,40 @@ get_battery_data()
 					serial=$NF
 				}
 				END {
-					if (charge_now != "" && charge_full != "" ){
-						capacity = 100*charge_now/charge_full
+					# note:voltage_now fluctuates, which will make capacity numbers change a bit
+					# if any of these values failed, the math will be wrong, but no way to fix that
+					# tests show more systems give right capacity/charge with voltage_min_design 
+					# than with voltage_now
+					if (b_ma == "true" && voltage_min_design != ""){
+						if (charge_now != ""){
+							energy_now=charge_now*voltage_min_design
+						}
+						if (charge_full != ""){
+							energy_full=charge_full*voltage_min_design
+						}
+						if (charge_full_design != ""){
+							energy_full_design=charge_full_design*voltage_min_design
+						}
+					}
+					if (energy_now != "" && energy_full != "" ){
+						capacity = 100*energy_now/energy_full
 						capacity = sprintf( "%.1f%", capacity )
 					}
-					if (charge_full_design != "" && charge_full != "" ){
-						of_orig=100*charge_full/charge_full_design
+					if (energy_full_design != "" && energy_full != "" ){
+						of_orig=100*energy_full/energy_full_design
 						of_orig = sprintf( "%.0f%", of_orig )
 					}
-					if (charge_now != "" ){
-						charge_now = sprintf( "%.1f", charge_now )
+					if (energy_now != "" ){
+						energy_now = sprintf( "%.1f", energy_now )
 					}
-					if (charge_full_design != "" ){
-						charge_full_design = sprintf( "%.1f", charge_full_design )
+					if (energy_full_design != "" ){
+						energy_full_design = sprintf( "%.1f", energy_full_design )
 					}
-					if ( charge_full != "" ){
-						charge_full = sprintf( "%.1f", charge_full )
+					if ( energy_full != "" ){
+						energy_full = sprintf( "%.1f", energy_full )
 					}
 					entry = name "," status "," present "," chemistry "," cycles "," voltage_min_design "," voltage_now "," 
-					entry = entry power_now "," charge_full_design "," charge_full "," charge_now "," capacity "," 
+					entry = entry power_now "," energy_full_design "," energy_full "," energy_now "," capacity "," 
 					entry = entry capacity_level "," of_orig "," model "," company "," serial "," location
 					print entry
 				}' < $battery_file )
@@ -4354,12 +4411,186 @@ get_battery_data()
 	eval $LOGFE
 }
 
+## args: $1 type [intel|amd|centaur|arm]; $2 family [hex]; $3 model id [hex]; 
+get_cpu_architecture()
+{
+	eval $LOGFS
+	case $1 in
+		amd)
+			case $2 in
+				4)
+					case $3 in
+						3|7|8|9|A)ARCH='Am486';;
+						E|F)ARCH='Am5x86';;
+					esac
+					;;
+				5)
+					case $3 in
+						0|1|2|3)ARCH='K5';;
+						6|7)ARCH='K6';;
+						8)ARCH='K6-2';;
+						9|D)ARCH='K6-3';;
+						A)ARCH='Geode';;
+					esac
+					;;
+				6)
+					case $3 in
+						1|2)ARCH='K7';;
+						3|4)ARCH='K7 Thunderbird';;
+						6|7|8|A)ARCH='K7 Palomino+';;
+						*)ARCH='K7';;
+					esac
+					;;
+				F)
+					case $3 in
+						4|5|7|8|B|C|E|F|14|15|17|18|1B|1C|1F)ARCH='K8';;
+						21|23|24|25|27|28|2C|2F)ARCH='K8 rev.E';;
+						41|43|48|4B|4C|4F|5D|5F|68|6B|6C|6F|7C|7F|C1)ARCH='K8 rev.F+';;
+						*)ARCH='K8';;
+					esac
+					;;
+				10)
+					case $3 in
+						2|4|5|6|8|9|A)ARCH='K10';;
+						*)ARCH='K10';;
+					esac
+					;;
+				11)
+					case $3 in
+						3)ARCH='K8 rev.E+';;
+					esac
+					;;
+				12)
+					case $3 in
+						1)ARCH='K10';;
+						*)ARCH='K10';;
+					esac
+					;;
+				14)
+					case $3 in
+						1|2)ARCH='Bobcat';;
+						*)ARCH='Bobcat';;
+					esac
+					;;
+				15)
+					case $3 in
+						0|1)ARCH='Bulldozer';;
+						2|10|13)ARCH='Piledriver';;
+						30|38)ARCH='Steamroller';;
+						60|65|70)ARCH='Excavator';;
+						*)ARCH='Bulldozer';;
+					esac
+					;;
+				16)
+					case $3 in
+						0)ARCH='Jaguar';;
+						30)ARCH='Puma';;
+						*)ARCH='Jaguar';;
+					esac
+					;;
+				17)
+					case $3 in
+						1)ARCH='Zen';;
+						*)ARCH='Zen';;
+					esac
+					;;
+			esac
+			;;
+		arm)
+			if [[ "$2" != '' ]];then
+				ARCH="ARMv$2"
+			else
+				ARCH='ARM'
+			fi
+			;;
+		centaur) # aka VIA
+			case $2 in
+				5)
+					case $3 in
+						4)ARCH='WinChip C6';;
+						8)ARCH='WinChip 2';;
+						9)ARCH='WinChip 3';;
+					esac
+					;;
+				6)
+					case $3 in
+						6)ARCH='WinChip-based';;
+						7|8)ARCH='C3';;
+						9)ARCH='C3-2';;
+						A|D)ARCH='C7';;
+						F)ARCH='Isaiah';;
+					esac
+					;;
+			esac
+			;;
+		intel)
+			case $2 in
+				4)
+					case $3 in
+						0|1|2|3|4|5|6|7|8|9)ARCH='486';;
+					esac
+					;;
+				5)
+					case $3 in
+						1|2|3|7)ARCH='P5';;
+						4|8)ARCH='P5';; # MMX
+						9)ARCH='Quark';;
+					esac
+					;;
+				6)
+					case $3 in
+						1)ARCH='P6 Pro';;
+						3|5|6)ARCH='P6 II';;
+						7|8|A|B)ARCH='P6 III';;
+						9)ARCH='Banias';; # pentium M
+						15)ARCH='Dothan Tolapai';; # pentium M system on chip
+						D)ARCH='Dothan';; # Pentium M
+						E)ARCH='Yonah';;
+						F|16)ARCH='Conroe';;
+						17|1D)ARCH='Penryn';;
+						1A|1E|1F|2E|25|2C|2F)ARCH='Nehalem';;
+						1C|26)ARCH='Bonnell';;
+						27|35|36)ARCH='Saltwell';;
+						25|2C|2F)ARCH='Westmere';;
+						26|27)ARCH='Bonnell';;
+						2A|2D)ARCH='Sandy Bridge';;
+						37|4A|4D|5A)ARCH='Silvermont';;
+						3A|3E)ARCH='Ivy Bridge';;
+						3C|3F|45|46)ARCH='Haswell';;
+						3D|47|4F|56)ARCH='Broadwell';;
+						4E|55|9E)ARCH='Skylake';;
+						4C|5D)ARCH='Airmont';;
+						8E|9E)ARCH='Kaby Lake';;
+						57)ARCH='Knights Landing';;
+						85)ARCH='Knights Mill';;
+					esac
+					;;
+				B)
+					case $3 in
+						1)ARCH='Knights Corner';;
+					esac
+					;;
+				F)
+					case $3 in
+						0|1|2)ARCH='Netburst Willamette';;
+						3|4|6)ARCH='Netburst Prescott';; # Nocona
+						*)ARCH='Netburst';;
+					esac
+					;;
+			esac
+			;;
+		
+	esac
+	log_function_data "ARCH: $ARCH"
+	eval $LOGFE
+}
+
 ## create A_CPU_CORE_DATA, currently with two values: integer core count; core string text
 ## return value cpu core count string, this helps resolve the multi redundant lines of old style output
 get_cpu_core_count()
 {
 	eval $LOGFS
-	local cpu_physical_count='' cpu_core_count='' cpu_type='' cpu_alpha_count='' cores_per_cpu=''
+	local cpu_physical_count='' cpu_core_count='' cpu_type='' cores_per_cpu=''
 	local array_data=''
 	
 	if [[ $B_CPUINFO_FILE == 'true' ]]; then
@@ -4372,11 +4603,11 @@ get_cpu_core_count()
 		cpu_type=${A_CPU_TYPE_PCNT_CCNT[0]}
 
 		# match the numberic value to an alpha value
-		cpu_alpha_count=$( get_cpu_core_count_alpha "$cpu_core_count" )
+		get_cpu_core_count_alpha "$cpu_core_count"
 		
 		# create array, core count integer; core count string
-		# A_CPU_CORE_DATA=( "$cpu_core_count" "$cpu_alpha_count Core$cpu_type" )
-		array_data="$cpu_physical_count,$cpu_alpha_count,$cpu_type,$cpu_core_count"
+		# A_CPU_CORE_DATA=( "$cpu_core_count" "$CPU_COUNT_ALPHA Core$cpu_type" )
+		array_data="$cpu_physical_count,$CPU_COUNT_ALPHA,$cpu_type,$cpu_core_count"
 		IFS=','
 		A_CPU_CORE_DATA=( $array_data )
 		IFS="$ORIGINAL_IFS"
@@ -4399,14 +4630,14 @@ get_cpu_core_count()
 		}
 		END {
 			print coreCount
-		}' <<< "$Sysctl_a_Data" )
+		}' <<< "$SYSCTL_A_DATA" )
 		cores_per_cpu=$( gawk -F "$gawk_fs" '
 		/^machdep.cpu.cores_per_package/ {
 			print $NF
-		}' <<< "$Sysctl_a_Data" )
+		}' <<< "$SYSCTL_A_DATA" )
 		
 		if [[ -n $( grep -E '^[0-9]+$' <<< "$cpu_core_count" ) ]];then
-			cpu_alpha_count=$( get_cpu_core_count_alpha "$cpu_core_count" )
+			get_cpu_core_count_alpha "$cpu_core_count"
 			if [[ $cpu_core_count -gt 1 ]];then
 				cpu_type='-SMP-'
 			else
@@ -4423,7 +4654,7 @@ get_cpu_core_count()
 		else
 			cpu_physical_count=1
 		fi
-		array_data="$cpu_physical_count,$cpu_alpha_count,$cpu_type,$cpu_core_count"
+		array_data="$cpu_physical_count,$CPU_COUNT_ALPHA,$cpu_type,$cpu_core_count"
 		IFS=','
 		A_CPU_CORE_DATA=( $array_data )
 		IFS="$ORIGINAL_IFS"
@@ -4438,23 +4669,21 @@ get_cpu_core_count()
 get_cpu_core_count_alpha()
 {
 	eval $LOGFS
-	local cpu_alpha_count=''
-	
+
 	case $1 in
-		1) cpu_alpha_count='Single';;
-		2) cpu_alpha_count='Dual';;
-		3) cpu_alpha_count='Triple';;
-		4) cpu_alpha_count='Quad';;
-		5) cpu_alpha_count='Penta';;
-		6) cpu_alpha_count='Hexa';;
-		7) cpu_alpha_count='Hepta';;
-		8) cpu_alpha_count='Octa';;
-		9) cpu_alpha_count='Ennea';;
-		10) cpu_alpha_count='Deca';;
-		*) cpu_alpha_count='Multi';;
+		1) CPU_COUNT_ALPHA='Single';;
+		2) CPU_COUNT_ALPHA='Dual';;
+		3) CPU_COUNT_ALPHA='Triple';;
+		4) CPU_COUNT_ALPHA='Quad';;
+		5) CPU_COUNT_ALPHA='Penta';;
+		6) CPU_COUNT_ALPHA='Hexa';;
+		7) CPU_COUNT_ALPHA='Hepta';;
+		8) CPU_COUNT_ALPHA='Octa';;
+		9) CPU_COUNT_ALPHA='Ennea';;
+		10) CPU_COUNT_ALPHA='Deca';;
+		*) CPU_COUNT_ALPHA='Multi';;
 	esac
-	
-	echo $cpu_alpha_count
+	log_function_data "CPU_COUNT_ALPHA: $CPU_COUNT_ALPHA"
 	
 	eval $LOGFE
 }
@@ -4491,6 +4720,10 @@ get_cpu_data()
 			speed = 0
 			max = 0
 			min = 0
+			type=""
+			family=""
+			model_nu=""
+			rev=""
 		}
 		# TAKE STRONGER NOTE: \t+ does NOT always work, MUST be [ \t]+
 		# TAKE NOTE: \t+ will work for $FILE_CPUINFO, but SOME ARBITRARY FILE used for TESTING might contain SPACES!
@@ -4513,6 +4746,9 @@ get_cpu_data()
 				# but no model name type
 				if ( $NF ~ "(ARM|AArch)" ) {
 					bArm = "true"
+					if ( type=""){
+						type="arm"
+					}
 				}
 				gsub(/'"$BAN_LIST_NORMAL"'/, "", $NF )
 				gsub(/'"$BAN_LIST_CPU"'/, "", $NF )
@@ -4520,6 +4756,23 @@ get_cpu_data()
 				gsub(/ [ \t]+/, " ", $NF)
 				cpu[nr, "model"] = $NF
 			}
+		}
+		# arm 
+		/^cpu architecture/ && (family = "") {
+			gsub(/^ +| +$/, "", $NF)
+			family=$NF
+		}
+		/^cpu family/ && ( family == ""){
+			gsub(/^ +| +$/, "", $NF)
+			family=toupper( sprintf("%x", $NF) )
+		}
+		/^(stepping|cpu revission)/ && ( rev == "" ){
+			gsub(/^ +| +$/, "", $NF)
+			rev=$NF
+		}
+		/^model[ \t]*:/ && ( model_nu == ""){
+			gsub(/^ +| +$/, "", $NF)
+			model_nu=toupper( sprintf("%x", $NF) )
 		}
 		/^model name|^cpu\t+:/ {
 			gsub(/'"$BAN_LIST_NORMAL"'/, "", $NF )
@@ -4565,6 +4818,18 @@ get_cpu_data()
 		/vendor_id/ {
 			gsub(/genuine|authentic/,"",$NF)
 			cpu[nr, "vendor"] = tolower( $NF )
+			if ( type == ""){
+				if ( $NF ~ /.*intel.*/ ) {
+					type="intel"
+				}
+				else if ($NF ~ /.*amd.*/){
+					type="amd"
+				}
+				# via
+				else if ($NF ~ /.*centaur.*/){
+					type="centaur"
+				}
+			}
 		}
 		END {
 			#if (!nr) { print ",,,"; exit } # <- should this be necessary or should bash handle that
@@ -4593,11 +4858,15 @@ get_cpu_data()
 			sub(/\.[0-9]+$/,"",max)
 			sub(/\.[0-9]+$/,"",speed)
 			sub(/\.[0-9]+$/,"",min)
+			if ( bArm == "true" ){
+				type = "arm"
+			}
 			if (speed == 0) {
-				print "N/A," min "," max
+				print "N/A," min "," max "," type "," family "," model_nu
 			}
 			else {
-				print speed "," min "," max 
+				# print speed "," min "," max  "," type "," family "," model_nu "," rev > "/dev/tty"
+				print speed "," min "," max  "," type "," family "," model_nu "," rev
 			}
 		} 
 		' $FILE_CPUINFO ) )
@@ -4637,11 +4906,11 @@ get_cpu_data_bsd()
 	fi
 	# avoid setting this for systems where you have no read/execute permissions
 	# might be cases where the dmesg boot file was readable but sysctl perms failed
-	if [[ -n $Sysctl_a_Data || -n $bsd_cpu_flags ]];then
-		if [[ -n $Dmesg_Boot_Data ]];then
+	if [[ -n $SYSCTL_A_DATA || -n $bsd_cpu_flags ]];then
+		if [[ -n $DMESG_BOOT_DATA ]];then
 			cpu_max=$( gawk -F ':' '
 			BEGIN {
-			IGNORECASE=1
+				IGNORECASE=1
 			}
 			# NOTE: freebsd may say: 2300-MHz, so check for dash as well
 			$1 ~ /^(CPU|cpu0)$/ {
@@ -4657,7 +4926,7 @@ get_cpu_data_bsd()
 					print max
 					exit
 				}
-			}' <<< "$Dmesg_Boot_Data" )
+			}' <<< "$DMESG_BOOT_DATA" )
 		fi
 		IFS=$'\n'
 		A_CPU_DATA=( $( 
@@ -4672,6 +4941,11 @@ get_cpu_data_bsd()
 			bSwitchFs="false"
 			min=0
 			max=0
+			# these can be found in dmesg.boot just like in cpuinfo except all in one row
+			type="" 
+			family=""
+			model_nu=""
+			rev=""
 		}
 		/^hw.model/ && ( bsdVersion != "darwin" ) {
 			gsub(/'"$BAN_LIST_NORMAL"'/, "", $NF )
@@ -4751,9 +5025,9 @@ get_cpu_data_bsd()
 			sub(/\.[0-9]+/,"",min)
 			sub(/\.[0-9]+/,"",max)
 			print cpuModel "," cpuClock "," cpuCache "," cpuFlags "," cpuBogomips ","  cpuVendor
-			# triggers print case
-			print cpuClock "," min "," max
-		}' <<< "$Sysctl_a_Data" ) )
+			# triggers print case, for architecture, check source for syntax
+			print cpuClock "," min "," max ",,,," 
+		}' <<< "$SYSCTL_A_DATA" ) )
 		IFS="$ORIGINAL_IFS"
 	fi
 	
@@ -4767,7 +5041,7 @@ get_cpu_flags_bsd()
 	local cpu_flags=''
 	local gawk_fs=':'
 	
-	if [[ -n $Dmesg_Boot_Data ]];then
+	if [[ -n $DMESG_BOOT_DATA ]];then
 		cpu_flags=$( gawk -v bsdVersion="$BSD_VERSION" -F ":" '
 		BEGIN {
 			IGNORECASE=1
@@ -4787,8 +5061,8 @@ get_cpu_flags_bsd()
 			cpuFlags=tolower(cpuFlags)
 			print cpuFlags
 			exit
-		}' <<< "$Dmesg_Boot_Data" )
-	elif [[ -n $Sysctl_a_Data ]];then
+		}' <<< "$DMESG_BOOT_DATA" )
+	elif [[ -n $SYSCTL_A_DATA ]];then
 		if [[ $BSD_VERSION == 'openbsd' ]];then
 			gawk_fs=':'
 		fi
@@ -4800,7 +5074,7 @@ get_cpu_flags_bsd()
 			cpuFlags=tolower($NF)
 			print cpuFlags
 			exit
-		}' <<< "$Sysctl_a_Data" )
+		}' <<< "$SYSCTL_A_DATA" )
 	fi
 	echo $cpu_flags
 	log_function_data "$cpu_flags"
@@ -5107,13 +5381,13 @@ get_desktop_environment()
 	# did we find it? If not, start the xprop tests
 	if [[ -z $desktop_environment ]];then
 		if type -p xprop &>/dev/null;then
-			xprop_root="$( xprop -root $DISPLAY_OPT 2>/dev/null )"
+			xprop_root="$( xprop -root $DISPLAY_OPT 2>/dev/null | tr '[:upper:]' '[:lower:]' )"
 		fi
 		# note that cinnamon split from gnome, and and can now be id'ed via xprop,
 		# but it will still trigger the next gnome true case, so this needs to go before gnome test
 		# eventually this needs to be better organized so all the xprop tests are in the same
 		# section, but this is good enough for now.
-		if [[ -n $xprop_root && -n $( grep -is '^_MUFFIN' <<< "$xprop_root" ) ]];then
+		if [[ -n $xprop_root && -z ${xprop_root/*_muffin*/} ]];then
 			version=$( get_program_version 'cinnamon' '^cinnamon' '2' )
 			# not certain cinn will always have version, so keep output right if not
 			if [[ -n $version ]];then
@@ -5126,7 +5400,7 @@ get_desktop_environment()
 				fi
 			fi
 			desktop_environment="Cinnamon"
-		elif [[ $XDG_CURRENT_DESKTOP == 'MATE' ]] || [[ -n $xprop_root && -n $( grep -is '^_MARCO' <<< "$xprop_root" ) ]];then
+		elif [[ $XDG_CURRENT_DESKTOP == 'MATE' ]] || [[ -n $xprop_root && -z ${xprop_root/*_marco*/} ]];then
 			version=$( get_program_version 'mate-about' '^MATE[[:space:]]DESKTOP' 'NF' )
 			# not certain cinn/mate will always have version, so keep output right if not
 			if [[ -n $version ]];then
@@ -5161,7 +5435,7 @@ get_desktop_environment()
 			if [[ -n $xprop_root ]];then
 				# String: "This is xfdesktop version 4.2.12"
 				# alternate: xfce4-about --version > xfce4-about 4.10.0 (Xfce 4.10)
-				if [[ -n $( grep -Eis '\"xfce4\"' <<< "$xprop_root" ) ]];then
+				if [[ -z ${xprop_root/*\"xfce4\"*/} ]];then
 					version=$( get_program_version 'xfdesktop' 'xfdesktop[[:space:]]version' '5' )
 					# arch linux reports null, so use alternate if null
 					if [[ -z $version ]];then
@@ -5178,7 +5452,7 @@ get_desktop_environment()
 					fi
 					desktop_environment="Xfce"
 				# when 5 is released, the string may need updating
-				elif [[ -n $( grep -is '\"xfce5\"' <<< "$xprop_root" ) ]];then
+				elif [[ -z ${xprop_root/*\"xfce5\"*/} ]];then
 					version=$( get_program_version 'xfdesktop' 'xfdesktop[[:space:]]version' '5' )
 					# arch linux reports null, so use alternate if null
 					if [[ -z $version ]];then
@@ -5195,7 +5469,7 @@ get_desktop_environment()
 					fi
 					desktop_environment="Xfce"
 				# case where no xfce number exists, just xfce
-				elif [[ -n $( grep -is 'xfce' <<< "$xprop_root" ) ]];then
+				elif [[ -z ${xprop_root/*xfce*/} ]];then
 					version=$( get_program_version 'xfdesktop' 'xfdesktop[[:space:]]version' '5' )
 					# arch linux reports null, so use alternate if null
 					if [[ -z $version ]];then
@@ -5215,27 +5489,26 @@ get_desktop_environment()
 						fi
 					fi
 					desktop_environment="Xfce"
-				elif [[ -n $( grep -is 'BLACKBOX_PID' <<< "$xprop_root" ) ]];then
-					if [[ -n $( grep -is 'fluxbox' <<< "$Ps_aux_Data" ) ]];then
+				elif [[ -z ${xprop_root/*blackbox_pid*/} ]];then
+					if [[ -z "${Ps_aux_Data/*fluxbox*/}" ]];then
 						version=$( get_program_version 'fluxbox' '^fluxbox' '2' )
 						desktop_environment='Fluxbox'
 					else
 						desktop_environment='Blackbox'
 					fi
-				elif [[ -n $( grep -is 'OPENBOX_PID' <<< "$xprop_root" ) ]];then
+				elif [[ -z ${xprop_root/*openbox_pid*/}  ]];then
 					# note: openbox-lxde --version may be present, but returns openbox data
 					version=$( get_program_version 'openbox' '^openbox' '2' )
-					if [[ $XDG_CURRENT_DESKTOP == 'LXDE' || \
-							-n $( grep -is '/lxsession' <<< "$Ps_aux_Data" ) ]];then
+					if [[ $XDG_CURRENT_DESKTOP == 'LXDE' || -z "${Ps_aux_Data/*\/lxsession*/}" ]];then
 						if [[ -n $version ]];then
 							version="(Openbox $version)"
 						fi
 						desktop_environment='LXDE'
 					elif [[  $XDG_CURRENT_DESKTOP == 'Razor' || $XDG_CURRENT_DESKTOP == 'LXQt' ]] || \
-						[[ -n $( grep -Eis '(razor-desktop|lxqt-session)' <<< "$Ps_aux_Data" ) ]];then
-						if [[ -n $( grep -is 'lxqt-session' <<< "$Ps_aux_Data" ) ]];then
+						[[ -n $( grep -Es '(razor-desktop|lxqt-session)' <<< "$Ps_aux_Data" ) ]];then
+						if [[ -z "${Ps_aux_Data/*lxqt-session*/}" ]];then
 							desktop_environment='LXQt'
-						elif [[ -n $( grep -is 'razor-desktop' <<< "$Ps_aux_Data" ) ]];then
+						elif [[ -z "${Ps_aux_Data/*razor-desktop*/}" ]];then
 							desktop_environment='Razor-Qt'
 						else
 							desktop_environment='LX-Qt-Variant'
@@ -5246,24 +5519,26 @@ get_desktop_environment()
 					else
 						desktop_environment='Openbox' 
 					fi
-				elif [[ -n $( grep -is 'ICEWM' <<< "$xprop_root" ) ]];then
+				elif [[ -z ${xprop_root/*icewm*/} ]];then
 					version=$( get_program_version 'icewm' '^icewm' '2' )
 					desktop_environment='IceWM'
-				elif [[ -n $( grep -is 'ENLIGHTENMENT' <<< "$xprop_root" ) ]];then
+				elif [[ -z ${xprop_root/*enlightenment*/} ]];then
 					# no -v or --version but version is in xprop -root
 					# ENLIGHTENMENT_VERSION(STRING) = "Enlightenment 0.16.999.49898"
 					version=$( grep -is 'ENLIGHTENMENT_VERSION' <<< "$xprop_root" | cut -d '"' -f 2 | gawk '{print $2}' )
 					desktop_environment='Enlightenment'
-				elif [[ -n $( grep -is '^I3_' <<< "$xprop_root" ) ]];then
+				# need to check starts line because it's so short
+				elif [[ -n $( grep -s '^i3_' <<< "$xprop_root" ) ]];then
 					version=$( get_program_version 'i3' '^i3' '3' )
 					desktop_environment='i3'
-				elif [[ -n $( grep -is 'WINDOWMAKER' <<< "$xprop_root" ) ]];then
+				elif [[ -z ${xprop_root/*windowmaker*/} ]];then
 					version=$( get_program_version 'wmaker' '^Window[[:space:]]*Maker' 'NF' )
 					if [[ -n $version ]];then
 						version="$version "
 					fi
 					desktop_environment="WindowMaker"
-				elif [[ -n $( grep -is '^_WM2' <<< "$xprop_root" ) ]];then
+				# need to check starts line because it's so short
+				elif [[ -n $( grep -s '^_wm2' <<< "$xprop_root" ) ]];then
 					# note; there isn't actually a wm2 version available but error handling should cover it and return null
 					# maybe one day they will add it?
 					version=$( get_program_version 'wm2' '^wm2' 'NF' )
@@ -5272,7 +5547,7 @@ get_desktop_environment()
 						version="$version "
 					fi
 					desktop_environment="WM2"
-				elif [[ -n $( grep -is 'herbstluftwm' <<< "$xprop_root" ) ]];then
+				elif [[ -z "${xprop_root/*herbstluftwm*/}" ]];then
 					version=$( get_program_version 'herbstluftwm' '^herbstluftwm' 'NF' )
 					if [[ -n $version ]];then
 						version="$version "
@@ -5284,43 +5559,43 @@ get_desktop_environment()
 			# note that gawk is going to exit after first occurrence of search string, so no need for extra
 			# http://www.xwinman.org/ for more possible wm
 			if [[ -z $desktop_environment ]];then
-				if [[ -n $( grep -is 'fvwm-crystal'  <<< "$Ps_aux_Data" ) ]];then
+				if [[ -z "${Ps_aux_Data/*fvwm-crystal*/}" ]];then
 					version=$( get_program_version 'fvwm' '^fvwm' '2' )
 					desktop_environment='FVWM-Crystal'
-				elif [[ -n $( grep -is 'fvwm'  <<< "$Ps_aux_Data" ) ]];then
+				elif [[ -z "${Ps_aux_Data/*fvwm*/}" ]];then
 					version=$( get_program_version 'fvwm' '^fvwm' '2' )
 					desktop_environment='FVWM'
-				elif [[ -n $( grep -is 'pekwm'  <<< "$Ps_aux_Data" ) ]];then
+				elif [[ -z "${Ps_aux_Data/*pekwm*/}" ]];then
 					version=$( get_program_version 'pekwm' '^pekwm' '3' )
 					desktop_environment='pekwm'
-				elif [[ -n $( grep -is 'awesome' <<< "$Ps_aux_Data" ) ]];then
+				elif [[ -z "${Ps_aux_Data/*awesome*/}" ]];then
 					version=$( get_program_version 'awesome' '^awesome' '2' )
 					desktop_environment='Awesome'
-				elif [[ -n $( grep -is 'scrotwm' <<< "$Ps_aux_Data" ) ]];then
+				elif [[ -z "${Ps_aux_Data/*scrotwm*/}" ]];then
 					version=$( get_program_version 'scrotwm' '^welcome.*scrotwm' '4' )
 					desktop_environment='Scrotwm' # no --version for this one
-				elif [[ -n $( grep -is 'spectrwm' <<< "$Ps_aux_Data" ) ]];then
+				elif [[ -z "${Ps_aux_Data/*spectrwm*/}" ]];then
 					version=$( get_program_version 'spectrwm' '^spectrwm.*welcome.*spectrwm' '5' )
 					desktop_environment='Spectrwm' # no --version for this one
-				elif [[ -n $( grep -Eis '([[:space:]]|/)twm' <<< "$Ps_aux_Data" ) ]];then
+				elif [[ -n $( grep -Es '([[:space:]]|/)twm' <<< "$Ps_aux_Data" ) ]];then
 					desktop_environment='Twm' # no --version for this one
-				elif [[ -n $( grep -Eis '([[:space:]]|/)dwm' <<< "$Ps_aux_Data" ) ]];then
+				elif [[ -n $( grep -Es '([[:space:]]|/)dwm' <<< "$Ps_aux_Data" ) ]];then
 					version=$( get_program_version 'dwm' '^dwm' '1' )
 					desktop_environment='dwm'
-				elif [[ -n $( grep -is 'wmii2' <<< "$Ps_aux_Data" ) ]];then
+				elif [[ -z "${Ps_aux_Data/*wmii2*/}" ]];then
 					version=$( get_program_version 'wmii2' '^wmii2' '1' )
 					desktop_environment='wmii2'
 				# note: in debian at least, wmii is actuall wmii3
-				elif [[ -n $( grep -is 'wmii' <<< "$Ps_aux_Data" ) ]];then
+				elif [[ -z "${Ps_aux_Data/*wmii*/}" ]];then
 					version=$( get_program_version 'wmii' '^wmii' '1' )
 					desktop_environment='wmii'
-				elif [[ -n $( grep -Eis '([[:space:]]|/)jwm' <<< "$Ps_aux_Data" ) ]];then
+				elif [[ -n $( grep -Es '([[:space:]]|/)jwm' <<< "$Ps_aux_Data" ) ]];then
 					version=$( get_program_version 'jwm' '^jwm' '2' )
 					desktop_environment='JWM'
-				elif [[ -n $( grep -is 'sawfish' <<< "$Ps_aux_Data" ) ]];then
+				elif [[ -z "${Ps_aux_Data/*sawfish*/}" ]];then
 					version=$( get_program_version 'sawfish' '^sawfish' '3' )
 					desktop_environment='Sawfish'
-				elif [[ -n $( grep -is 'afterstep' <<< "$Ps_aux_Data" ) ]];then
+				elif [[ -z "${Ps_aux_Data/*afterstep*/}" ]];then
 					version=$( get_program_version 'afterstep' '^afterstep' '3' )
 					desktop_environment='AfterStep'
 				fi
@@ -5605,7 +5880,8 @@ get_device_vm()
 	local vm='other-vm?' vm_data='' vm_test=''
 	
 	# https://www.freedesktop.org/software/systemd/man/systemd-detect-virt.html
-	# note: unknown is how reliable this tool is
+	# note: returns bosh for qemu-kvm so if that's the result, let the other tests 
+	# run
 	if type -p systemd-detect-virt &>/dev/null;then
 		vm_test=$(systemd-detect-virt 2>/dev/null | sed 's/none//' )
 		if [[ -n $vm_test && $vm_test != 'none' ]];then
@@ -5613,20 +5889,30 @@ get_device_vm()
 		fi
 	fi
 	# some simple to detect linux vm id's
-	if [[ $vm == 'other-vm?' ]];then
+	if [[ $vm == 'other-vm?' || $vm == 'bochs' ]];then
 		if [[ -e /proc/vz ]];then
 			vm='openvz'
 		elif [[ -e /proc/xen ]];then
 			vm='xen'
 		elif [[ -e /dev/vzfs ]];then
 			vm='virtuozzo'
+		elif type -p lsmod &>/dev/null;then
+			vm_data="$( lsmod 2>/dev/null )"
+			if [[  -n $( grep -i 'kqemu' <<< "$vm_data" ) ]];then
+				vm='kqemu'
+			elif [[ -n $( grep -i 'kvm' <<< "$vm_data" ) ]];then
+				vm='kvm'
+			elif [[ -n $( grep -i 'qemu' <<< "$vm_data" ) ]];then
+				vm='qemu'
+			fi
+			vm_data=''
 		fi
 	fi
 	# this will catch many Linux systems and some BSDs
-	if [[ $vm == 'other-vm?' ]];then
-		vm_data=$vm_data$Lspci_v_Data
-		vm_data=$vm_data$Sysctl_a_Data
-		vm_data=$vm_data$Dmesg_Boot_Data
+	if [[ $vm == 'other-vm?' || $vm == 'bochs' ]];then
+		vm_data=$vm_data$LSPCI_V_DATA
+		vm_data=$vm_data$SYSCTL_A_DATA
+		vm_data=$vm_data$DMESG_BOOT_DATA
 		if [[ -e /dev/disk/by-id ]];then
 			vm_data=$vm_data$(ls -l /dev/disk/by-id 2>/dev/null )
 		fi
@@ -5697,7 +5983,7 @@ get_display_manager()
 	# might add this in, but the rate of new dm's makes it more likely it's an unknown dm, so
 	# we'll keep output to N/A
 	if [[ -n $x_is_running && -z $dm ]];then
-		if [[ -n $( grep 'startx$' <<< "$Ps_aux_Data" ) ]];then
+		if [[ -z "${Ps_aux_Data/*startx*/}" ]];then
 			dm='(startx)'
 		fi
 	fi
@@ -6160,8 +6446,8 @@ get_dmesg_boot_data()
 			print $0
 		}' )"
 	fi
-	echo "$dmsg_boot_data"
-	# log_function_data "$dmsg_boot_data"
+	DMESG_BOOT_DATA="$dmsg_boot_data"
+	log_function_data "$dmsg_boot_data"
 	eval $LOGFE
 }
 
@@ -6323,6 +6609,8 @@ get_graphics_card_data()
 		IGNORECASE=1
 		busId=""
 		trueCard=""
+		card=""
+		driver=""
 	}
 	# not using 3D controller yet, needs research: |3D controller |display controller
 	# note: this is strange, but all of these can be either a separate or the same
@@ -6330,16 +6618,27 @@ get_graphics_card_data()
 	# cards are  either the same or different. We want only the .0 version as a valid
 	# card. .1 would be for example: Display Adapter with bus id x:xx.1, not the right one
 	/vga compatible controller|3D controller|Display controller/ {
+		driver=""
 		gsub(/'"$BAN_LIST_NORMAL"'/, "", $NF)
 		gsub(/'"$BAN_LIST_ARRAY"'/, " ", $NF)
+		if ( '$COLS_INNER' < 100 ){
+			sub(/Core Processor Family/,"Core", $NF)
+		}
 		gsub(/^ +| +$/, "", $NF)
 		gsub(/ [ \t]+/, " ", $NF)
+		card=$NF
 		busId=gensub(/^([0-9a-f:\.]+) (.+)$/,"\\1",1,$1)
 		trueCard=gensub(/(.*)\.([0-9]+)$/,"\\2",1,busId)
-		if ( trueCard == 0 ) {
-			print $NF "," busId
+		while ( getline && !/^$/) {
+			if ( $1 ~ /Kernel driver in use/ ){
+				driver=$2
+			}
 		}
-	}' <<< "$Lspci_v_Data" ) )
+		if ( trueCard == 0 ) {
+			print card "," busId "," driver
+			# print card "," busId "," driver > "/dev/tty"
+		}
+	}' <<< "$LSPCI_V_DATA" ) )
 	IFS="$ORIGINAL_IFS"
 # 	for (( i=0; i < ${#A_GRAPHICS_CARD_DATA[@]}; i++ ))
 # 	do
@@ -6347,7 +6646,7 @@ get_graphics_card_data()
 # 	done
 
 	# GFXMEM is UNUSED at the moment, because it shows AGP aperture size, which is not necessarily equal to GFX memory..
-	# GFXMEM="size=[$(echo "$Lspci_v_Data" | gawk '/VGA/{while (!/^$/) {getline;if (/size=[0-9][0-9]*M/) {size2=gensub(/.*\[size=([0-9]+)M\].*/,"\\1","g",$0);if (size<size2){size=size2}}}}END{print size2}')M]"
+	# GFXMEM="size=[$(echo "$LSPCI_V_DATA" | gawk '/VGA/{while (!/^$/) {getline;if (/size=[0-9][0-9]*M/) {size2=gensub(/.*\[size=([0-9]+)M\].*/,"\\1","g",$0);if (size<size2){size=size2}}}}END{print size2}')M]"
 	a_temp=${A_GRAPHICS_CARD_DATA[@]}
 	log_function_data "A_GRAPHICS_CARD_DATA: $a_temp"
 	eval $LOGFE
@@ -6606,14 +6905,14 @@ get_graphics_display_server_data()
 	eval $LOGFS
 	local vendor='' vendor_version='' a_temp='' xdpy_info='' a_display_vendor_working='' 
 	# note: this may not always be set, it won't be out of X, for example
-	local server=$XDG_SESSION_TYPE compositor='' compositor_version=''
+	local server="$XDG_SESSION_TYPE" compositor='' compositor_version=''
 	
 	if [[ $B_EXTRA_EXTRA_DATA == 'true' ]];then
-		compositor=$(get_graphics_display_compositor) compositor_version=''
+		compositor="$(get_graphics_display_compositor)" compositor_version=''
 	fi
 	
 	if [[ $server == '' ]];then
-		if [[ -n $WAYLAND_DISPLAY ]];then
+		if [[ -n "$WAYLAND_DISPLAY" ]];then
 			server='wayland'
 		fi
 	fi
@@ -6695,39 +6994,38 @@ get_graphics_display_compositor()
 {
 	eval $LOGFS
 	local compositor=''
-	local ps_aux="$( ps aux)"
 	
-	if [[ -n $( grep 'mutter' <<< "$ps_aux" ) ]];then
+	if [[ -z "${Ps_aux_Data/*mutter*/}" ]];then
 		compositor='mutter'
-	elif [[ -n $( grep 'gnome-shell' <<< "$ps_aux" ) ]];then
+	elif [[ -z "${Ps_aux_Data/*gnome-shell*/}" ]];then
 		compositor='gnome-shell'
-	elif [[ -n $( grep 'kwin' <<< "$ps_aux" ) ]];then
+	elif [[ -z "${Ps_aux_Data/*kwin*/}" ]];then
 		compositor='kwin'
-	elif [[ -n $( grep 'moblin' <<< "$ps_aux" ) ]];then
+	elif [[ -z "${Ps_aux_Data/*moblin*/}" ]];then
 		compositor='moblin'
-	elif [[ -n $( grep 'kmscon' <<< "$ps_aux" ) ]];then
+	elif [[ -z "${Ps_aux_Data/*kmscon*/}" ]];then
 		compositor='kmscon'
-	elif [[ -n $( grep 'sway' <<< "$ps_aux" ) ]];then
+	elif [[ -z "${Ps_aux_Data/*sway*/}" ]];then
 		compositor='sway'
-	elif [[ -n $( grep 'grefson' <<< "$ps_aux" ) ]];then
+	elif [[ -z "${Ps_aux_Data/*grefson*/}" ]];then
 		compositor='grefson'
-	elif [[ -n $( grep 'westford' <<< "$ps_aux" ) ]];then
+	elif [[ -z "${Ps_aux_Data/*westford*/}" ]];then
 		compositor='westford'
-	elif [[ -n $( grep 'rustland' <<< "$ps_aux" ) ]];then
+	elif [[ -z "${Ps_aux_Data/*rustland*/}" ]];then
 		compositor='rustland'
-	elif [[ -n $( grep 'fireplace' <<< "$ps_aux" ) ]];then
+	elif [[ -z "${Ps_aux_Data/*fireplace*/}" ]];then
 		compositor='fireplace'
-	elif [[ -n $( grep 'wayhouse' <<< "$ps_aux" ) ]];then
+	elif [[ -z "${Ps_aux_Data/*wayhouse*/}" ]];then
 		compositor='wayhouse'
-	elif [[ -n $( grep 'weston' <<< "$ps_aux" ) ]];then
+	elif [[ -z "${Ps_aux_Data/*weston*/}" ]];then
 		compositor='weston'
-	elif [[ -n $( grep 'compton' <<< "$ps_aux" ) ]];then
+	elif [[ -z "${Ps_aux_Data/*compton*/}" ]];then
 		compositor='compton'
-	elif [[ -n $( grep 'compiz' <<< "$ps_aux" ) ]];then
+	elif [[ -z "${Ps_aux_Data/*compiz*/}" ]];then
 		compositor='compiz'
-	elif [[ -n $( grep 'swc' <<< "$ps_aux" ) ]];then
+	elif [[ -z "${Ps_aux_Data/*swc*/}" ]];then
 		compositor='swc'
-	elif [[ -n $( grep 'dwc' <<< "$ps_aux" ) ]];then
+	elif [[ -z "${Ps_aux_Data/*dwc*/}" ]];then
 		compositor='dwc'
 	fi
 	
@@ -7150,7 +7448,7 @@ get_hard_drive_data_bsd()
 	
 	local a_temp=''
 	
-	if [[ -n $Dmesg_Boot_Data ]];then
+	if [[ -n $DMESG_BOOT_DATA ]];then
 		IFS=$'\n'
 		A_HDD_DATA=( $( gawk -v hddUsed="$1" -F ':' '
 		BEGIN {
@@ -7236,7 +7534,7 @@ get_hard_drive_data_bsd()
 			else {
 				print "NA,-,,.." # print an empty array, this will be further handled in the print out function
 			}
-		}' <<< "$Dmesg_Boot_Data" ) )
+		}' <<< "$DMESG_BOOT_DATA" ) )
 		IFS="$ORIGINAL_IFS"
 	fi
 	
@@ -7479,7 +7777,7 @@ get_kernel_version()
 	fi
 	log_function_data "kernel_version: $kernel_version - ksplice_kernel_version: $ksplice_kernel_version"
 	
-	echo $kernel_version
+	CURRENT_KERNEL=$kernel_version
 	
 	eval $LOGFE
 }
@@ -7497,9 +7795,12 @@ get_lspci_data()
 			print
 		}' )"
 	fi
-	
-	echo "$lspci_data"
 	log_function_data 'raw' "lspci_data $1:\n$lspci_data"
+	if [[ $1 == 'v' ]];then
+		LSPCI_V_DATA="$lspci_data"
+	elif [[ $1 == 'n' ]];then
+		LSPCI_N_DATA="$lspci_data"
+	fi
 	eval $LOGFE
 }
 
@@ -7515,7 +7816,7 @@ get_lspci_chip_id()
 		if ( $3 != "" ) {
 			print $3
 		}
-	}' <<< "$Lspci_n_Data" )
+	}' <<< "$LSPCI_N_DATA" )
 	
 	echo $chip_id
 	
@@ -7720,7 +8021,7 @@ get_memory_data()
 			printf("%.1f/%.1fMB\n", used/1024, tot/1024)
 		}' $FILE_MEMINFO )
 		log_function_data 'cat' "$FILE_MEMINFO"
-	elif [[ $B_SYSCTL == 'true' && -n $Sysctl_a_Data ]];then
+	elif [[ $B_SYSCTL == 'true' && -n $SYSCTL_A_DATA ]];then
 		local gawk_fs=': '
 		# darwin sysctl is broken and uses both : and = and repeats these items
 		if [[ $BSD_VERSION == 'openbsd' ]];then
@@ -7771,7 +8072,7 @@ get_memory_data()
 			}' )
 		fi
 		# for dragonfly, we will use free mem, not used because free is 0
-		memory=$( grep -i 'mem' <<< "$Sysctl_a_Data" | gawk -v usedMemory="$used_memory" -F "$gawk_fs"  '
+		memory=$( grep -i 'mem' <<< "$SYSCTL_A_DATA" | gawk -v usedMemory="$used_memory" -F "$gawk_fs"  '
 		BEGIN {
 			realMemory=""
 			freeMemory=""
@@ -7819,8 +8120,8 @@ get_memory_data()
 			}
 		}' )
 	fi
-	echo "$memory"
 	log_function_data "memory: $memory"
+	MEMORY="$memory"
 	eval $LOGFE
 }
 
@@ -7864,7 +8165,7 @@ get_networking_data()
 	
 	IFS=$'\n'
 	A_NETWORK_DATA=( $( 
-	echo "$Lspci_v_Data" | gawk '
+	echo "$LSPCI_V_DATA" | gawk '
 	# NOTE: see version 2.1.28 or earlier for old logic if for some reason it is needed again
 	# that used a modified string made from nic name for index, why, I have no idea, makes no sense and leads
 	# to wrong ordered output as well. get_audio_data uses the old logic for now too.
@@ -7879,6 +8180,9 @@ get_networking_data()
 		# The doublequotes are necessary because of the pipes in the variable.
 		gsub(/'"$BAN_LIST_NORMAL"'/, "", aNic[counter])
 		gsub(/'"$BAN_LIST_ARRAY"'/, " ", aNic[counter])
+		if ( '$COLS_INNER' < 100 ){
+			sub(/PCI Express/,"PCIE", aNic[counter])
+		}
 		gsub(/^ +| +$/, "", aNic[counter])
 		gsub(/ [ \t]+/, " ", aNic[counter])
 		aPciBusId[counter] = gensub(/(^[0-9a-f:\.]+) [^:]+: .+$/,"\\1","g",$0)
@@ -8271,7 +8575,7 @@ get_networking_local_ip_data()
 		fi
 	fi
 	if [[ -z $ip_tool_command ]];then
-		A_INTERFACES_DATA=( "Interfaces program 'ip' missing. Please check: $SCRIPT_NAME --recommends" )
+		A_INTERFACES_DATA=( "Interfaces program 'ip' missing. Please check: $SELF_NAME --recommends" )
 	elif [[ -n "$ip_tool_data" ]];then
 		IFS=$'\n' # $ip_tool_command
 		A_INTERFACES_DATA=( $( 
@@ -8299,8 +8603,8 @@ get_networking_local_ip_data()
 			gsub(/^ +| +$/, "", $0)
 			gsub(/ [ \t]+/, " ", $0)
 			interface = $1
-			# prep this this for ip addr: eth0: 
-			sub(/:/, "", interface)
+			# prep this this for ip addr: eth0: but NOT eth0:1
+			sub(/:$/, "", interface)
 			ifIpV4=""
 			ifIpV6=""
 			ifMask=""
@@ -8621,7 +8925,7 @@ get_optical_drive_data_bsd()
 	
 	local a_temp=''
 	
-	if [[ -n $Dmesg_Boot_Data ]];then
+	if [[ -n $DMESG_BOOT_DATA ]];then
 		IFS=$'\n'
 		A_OPTICAL_DRIVE_DATA=( $( gawk -F ':' '
 		BEGIN {
@@ -8669,7 +8973,7 @@ get_optical_drive_data_bsd()
 			for ( key in aIds ) {
 				print aDisks[aIds[key], "id"] ",,," aDisks[aIds[key], "model"] "," aDisks[aIds[key], "rev"] "," aDisks[aIds[key], "speed"] ",,,,,,,," 
 			}
-		}' <<< "$Dmesg_Boot_Data" ) )
+		}' <<< "$DMESG_BOOT_DATA" ) )
 		IFS="$ORIGINAL_IFS"
 	fi
 	
@@ -8684,7 +8988,7 @@ get_partition_data()
 {
 	eval $LOGFS
 	
-	local a_partition_working='' dev_item='' a_temp='' dev_working_item='' 
+	local a_part_working='' dev_item='' a_temp='' dev_working_item='' 
 	local swap_data='' df_string='' main_partition_data='' fs_type=''
 	local mount_data='' dev_bsd_item=''
 	#local excluded_file_types='--exclude-type=aufs --exclude-type=tmpfs --exclude-type=iso9660'
@@ -8705,6 +9009,7 @@ get_partition_data()
 			df_string='df -h'
 		fi
 	fi
+	
 	main_partition_data="$( eval $df_string )"
 	# set dev disk label/mapper/uuid data globals
 	get_partition_dev_data 'label'
@@ -8864,11 +9169,11 @@ get_partition_data()
 	for (( i=0; i < ${#A_PARTITION_DATA[@]}; i++ ))
 	do
 		IFS=","
-		a_partition_working=( ${A_PARTITION_DATA[i]} )
+		a_part_working=( ${A_PARTITION_DATA[i]} )
 		IFS="$ORIGINAL_IFS"
 		
-		dev_item=${a_partition_working[6]} # reset each loop
-		fs_type=${a_partition_working[5]}
+		dev_item=${a_part_working[6]} # reset each loop
+		fs_type=${a_part_working[5]}
 		# older bsds have df minus -T so can't get fs type easily, try using mount instead
 		if [[ $BSD_TYPE == 'bsd' ]] && [[ -z $fs_type && -n $dev_item ]];then
 			dev_bsd_item=$( sed -e 's/non-dev-//' -e 's|/|\\/|g' <<< "$dev_item" )
@@ -8920,7 +9225,7 @@ get_partition_data()
 		if [[ -n $dev_item ]];then
 			# assemble everything we could get for dev/h/dx, label, and uuid
 			IFS=","
-			A_PARTITION_DATA[i]=${a_partition_working[0]}","${a_partition_working[1]}","${a_partition_working[2]}","${a_partition_working[3]}","${a_partition_working[4]}","$fs_type","$dev_item
+			A_PARTITION_DATA[i]=${a_part_working[0]}","${a_part_working[1]}","${a_part_working[2]}","${a_part_working[3]}","${a_part_working[4]}","$fs_type","$dev_item
 			IFS="$ORIGINAL_IFS"
 		fi
 	done
@@ -8937,7 +9242,7 @@ get_partition_data()
 get_partition_data_advanced()
 {
 	eval $LOGFS
-	local a_partition_working='' dev_partition_data=''
+	local a_part_working='' dev_partition_data=''
 	local dev_item='' dev_label='' dev_uuid='' a_temp=''
 	local mount_point=''
 	# set dev disk label/mapper/uuid data globals
@@ -8949,13 +9254,13 @@ get_partition_data_advanced()
 		for (( i=0; i < ${#A_PARTITION_DATA[@]}; i++ ))
 		do
 			IFS=","
-			a_partition_working=( ${A_PARTITION_DATA[i]} )
+			a_part_working=( ${A_PARTITION_DATA[i]} )
 			IFS="$ORIGINAL_IFS"
 			
 			# note: for swap this will already be set
-			if [[ -z ${a_partition_working[6]} ]];then
+			if [[ -z ${a_part_working[6]} ]];then
 				
-				mount_point=$( sed 's|/|\\/|g'  <<< ${a_partition_working[0]} )
+				mount_point=$( sed 's|/|\\/|g'  <<< ${a_part_working[0]} )
 				#echo mount_point $mount_point
 				dev_partition_data=$( gawk '
 				BEGIN {
@@ -9011,21 +9316,21 @@ get_partition_data_advanced()
 
 				# assemble everything we could get for dev/h/dx, label, and uuid
 				IFS=","
-				A_PARTITION_DATA[i]=${a_partition_working[0]}","${a_partition_working[1]}","${a_partition_working[2]}","${a_partition_working[3]}","${a_partition_working[4]}","${a_partition_working[5]}","$dev_partition_data
+				A_PARTITION_DATA[i]=${a_part_working[0]}","${a_part_working[1]}","${a_part_working[2]}","${a_part_working[3]}","${a_part_working[4]}","${a_part_working[5]}","$dev_partition_data
 				IFS="$ORIGINAL_IFS"
 			fi
 			## now we're ready to proceed filling in the data
 			IFS=","
-			a_partition_working=( ${A_PARTITION_DATA[i]} )
+			a_part_working=( ${A_PARTITION_DATA[i]} )
 			IFS="$ORIGINAL_IFS"
 			# get the mapper actual dev item first, in case it's mapped
-			dev_item=$( get_dev_processed_item "${a_partition_working[6]}" )
+			dev_item=$( get_dev_processed_item "${a_part_working[6]}" )
 			# make sure not to slice off rest if it's a network mounted file system
 			if [[ -n $dev_item && -z $( grep -E '(^//|:/)' <<< $dev_item ) ]];then
 				dev_item=${dev_item##*/} ## needed to avoid error in case name still has / in it
 			fi
-			dev_label=${a_partition_working[7]}
-			dev_uuid=${a_partition_working[8]}
+			dev_label=${a_part_working[7]}
+			dev_uuid=${a_part_working[8]}
 			# then if dev data/uuid is incomplete, try to get missing piece
 			# it's more likely we'll get a uuid than a label. But this should get the
 			# dev item set no matter what, so then we can get the rest of any missing data
@@ -9071,7 +9376,7 @@ get_partition_data_advanced()
 
 			# assemble everything we could get for dev/h/dx, label, and uuid
 			IFS=","
-			A_PARTITION_DATA[i]=${a_partition_working[0]}","${a_partition_working[1]}","${a_partition_working[2]}","${a_partition_working[3]}","${a_partition_working[4]}","${a_partition_working[5]}","$dev_item","$dev_label","$dev_uuid
+			A_PARTITION_DATA[i]=${a_part_working[0]}","${a_part_working[1]}","${a_part_working[2]}","${a_part_working[3]}","${a_part_working[4]}","${a_part_working[5]}","$dev_item","$dev_label","$dev_uuid
 			IFS="$ORIGINAL_IFS"
 		done
 		log_function_data 'cat' "$FILE_MOUNTS"
@@ -9090,16 +9395,16 @@ get_partition_data_advanced_bsd()
 {
 	eval $LOGFS
 	local gpart_data="$( gpart list 2>/dev/null )"
-	local a_partition_working='' label_uuid='' dev_item=''
+	local a_part_working='' label_uuid='' dev_item=''
 	
 	if [[ -n $gpart_data ]];then
 		for (( i=0; i < ${#A_PARTITION_DATA[@]}; i++ ))
 		do
 			IFS=","
-			a_partition_working=( ${A_PARTITION_DATA[i]} )
+			a_part_working=( ${A_PARTITION_DATA[i]} )
 			IFS="$ORIGINAL_IFS"
 			# no need to use the rest of the name if it's not a straight /dev/item
-			dev_item=${a_partition_working[6]##*/}
+			dev_item=${a_part_working[6]##*/}
 			
 			label_uuid=$( gawk -F ':' '
 			BEGIN {
@@ -9124,7 +9429,7 @@ get_partition_data_advanced_bsd()
 
 			# assemble everything we could get for dev/h/dx, label, and uuid
 			IFS=","
-			A_PARTITION_DATA[i]=${a_partition_working[0]}","${a_partition_working[1]}","${a_partition_working[2]}","${a_partition_working[3]}","${a_partition_working[4]}","${a_partition_working[5]}","${a_partition_working[6]}","$label_uuid
+			A_PARTITION_DATA[i]=${a_part_working[0]}","${a_part_working[1]}","${a_part_working[2]}","${a_part_working[3]}","${a_part_working[4]}","${a_part_working[5]}","${a_part_working[6]}","$label_uuid
 			IFS="$ORIGINAL_IFS"
 		done
 	fi
@@ -9212,16 +9517,13 @@ get_dev_processed_item()
 
 get_patch_version_string()
 {
-	local patch_version_number=$( sed 's/^[0]*//' <<< $SCRIPT_PATCH_NUMBER )
+	SELF_PATCH=${SELF_PATCH##*[0]} # strip leading zero(s)
 	
-	if [[ -n $patch_version_number ]];then
-		patch_version_number="-$patch_version_number"
+	if [[ -n $SELF_PATCH ]];then
+		SELF_PATCH="-$SELF_PATCH"
 		# for cases where it was for example: 00-bsd cleaned to --bsd trim out one -
-		if [[ -n $( grep '\--' <<< $patch_version_number ) ]];then
-			patch_version_number=$( sed 's/--/-/' <<< $patch_version_number )
-		fi
+		SELF_PATCH="${SELF_PATCH/--/-}"
 	fi
-	echo $patch_version_number
 }
 
 get_pciconf_data()
@@ -9437,7 +9739,7 @@ get_ps_tcm_data()
 
 	IFS=$'\n'
 	# note that inxi can use a lot of cpu, and can actually show up here as the script runs
-	A_PS_DATA=( $( echo "$ps_data" | grep -Ev "($SCRIPT_NAME|%CPU|[[:space:]]ps[[:space:]])" | $head_tail -n $PS_COUNT | gawk '
+	A_PS_DATA=( $( echo "$ps_data" | grep -Ev "($SELF_NAME|%CPU|[[:space:]]ps[[:space:]])" | $head_tail -n $PS_COUNT | gawk '
 	BEGIN {
 		IGNORECASE=1
 		appName=""
@@ -9520,7 +9822,6 @@ get_raid_data()
 			IGNORECASE=1
 			RS="\n"
 		}
-		
 		/^personalities/ {
 			KernelRaidSupport = gensub(/personalities[[:space:]]*:[[:space:]]*(.*)/, "\\1", 1, $0)
 			# clean off the brackets
@@ -11386,8 +11687,10 @@ get_sysctl_data()
 			sysctl_data="$( sysctl -$1 )"
 		fi
 	fi
-	# log_function_data "sysctl_data: $sysctl_data"
-	echo "$sysctl_data"
+	if [[ $1 == 'a' ]];then
+		SYSCTL_A_DATA="$sysctl_data"
+	fi
+	log_function_data "sysctl_data: $sysctl_data"
 	
 	eval $LOGFE
 }
@@ -11448,7 +11751,8 @@ get_unmounted_partition_data()
 			a_unmounted_working=( ${A_PARTITION_DATA[i]} )
 			IFS="$ORIGINAL_IFS"
 			if [[ -n ${a_unmounted_working[6]} ]];then
-				mounted_partitions="$mounted_partitions$separator${a_unmounted_working[6]}"
+				# escape '/' for remote mounts, the path would be: [domain|ip]:/path/in/remote
+				mounted_partitions="$mounted_partitions$separator${a_unmounted_working[6]//\//\\/}"
 			fi
 		done
 		# now we need to exclude the mdraid partitions from the unmounted partition output as well
@@ -11471,7 +11775,7 @@ get_unmounted_partition_data()
 		# note that size 1 means it is a logical extended partition container
 		# lvm might have dm-1 type syntax
 		# need to exclude loop type file systems, squashfs for example
-		/[a-z][0-9]+$|dm-[0-9]+$/ && $3 != 1 && $NF !~ /loop/ && $NF !~ /('$mounted_partitions')/ {
+		/[a-z][0-9]+$|dm-[0-9]+$/ && $3 != 1 && $NF !~ /loop/ && $NF !~ /'$mounted_partitions'/ {
 			size = sprintf( "%.2f", $3*1024/1000**3 )
 			print $4 "," size "G"
 		}' $FILE_PARTITIONS ) )
@@ -11549,8 +11853,8 @@ get_uptime()
 			print a
 		}' )"
 	fi
-	echo "$uptime_value"
 	log_function_data "uptime_value: $uptime_value"
+	UP_TIME="$uptime_value"
 	eval $LOGFE
 }
 
@@ -11889,8 +12193,9 @@ calculate_line_length()
 	# ansi: [1;34m irc: \x0312
 	# note: using special trick for bsd sed, tr - NOTE irc sed must use " double quote
 	string=$( sed -e 's/'$ESC'\[[0-9]\{1,2\}\(;[0-9]\{1,2\}\)\{0,2\}m//g' -e "s/\\\x0[0-9]\{1,3\}//g" <<< $string )
-	count=${#string}
-	echo $count
+	#echo $string
+	LINE_LENGTH=${#string}
+	# echo ${#string}
 }
 
 ## multiply the core count by the data to be calculated, bmips, cache
@@ -11992,21 +12297,18 @@ print_it_out()
 {
 	eval $LOGFS
 	# note that print_it_out passes local variable values on to its children,
-	# and in some cases, their children, with Lspci_v_Data
-	local Lspci_v_Data='' Lspci_n_Data='' # only for verbose
-	local Sysctl_a_Data='' Dmesg_Boot_Data=''
+	# and in some cases, their children, if variable syntax: Xxxx_Yyyy
 	
 	if [[ -n $BSD_TYPE ]];then
-		Sysctl_a_Data="$( get_sysctl_data 'a' )"
-		Dmesg_Boot_Data="$( get_dmesg_boot_data )"
+		get_sysctl_data 'a' # set: SYSCTL_A_DATA
+		get_dmesg_boot_data # set: DMESG_BOOT_DATA
 	fi
-
 	if [[ $B_SHOW_SHORT_OUTPUT == 'true' ]];then
 		print_short_data
 	else
-		Lspci_v_Data="$( get_lspci_data 'v' )"
+		get_lspci_data 'v' # set: LSPCI_V_DATA
 		if [[ $B_EXTRA_EXTRA_DATA == 'true' ]];then
-			Lspci_n_Data="$( get_lspci_data 'n' )"
+			get_lspci_data 'n' # set: LSPCI_N_DATA
 		fi
 		if [[ $B_SHOW_SYSTEM == 'true' ]];then
 			print_system_data
@@ -12074,15 +12376,19 @@ print_it_out()
 print_short_data()
 {
 	eval $LOGFS
-	local current_kernel=$( get_kernel_version ) 
 	local processes=$(( $( wc -l <<< "$Ps_aux_Data" ) - 1 ))
 	local short_data='' i='' b_background_black='false'
-	local memory=$( get_memory_data )
-	local up_time="$( get_uptime )"
-	if [[ -z $up_time ]];then
-		up_time='N/A - missing uptime?'
+	if [[ -z $UP_TIME ]];then
+		UP_TIME='N/A - missing uptime?'
 	fi
-
+	get_uptime
+	get_kernel_version
+	get_memory_data
+	get_patch_version_string
+	# load A_CPU_DATA
+	get_cpu_data
+	# load A_HDD_DATA
+	get_hdd_data_basic
 	# set A_CPU_CORE_DATA
 	get_cpu_core_count
 	local cpc_plural='' cpu_count_print='' model_plural='' current_max_clock=''
@@ -12096,13 +12402,11 @@ print_short_data()
 	if [[ -z $BSD_TYPE || -n $cpu_type ]];then
 		cpu_type=" ($cpu_type)"
 	fi
-	
 	if [[ $BSD_TYPE == 'bsd' ]];then
 		kernel_os="${C1}OS${C2}$SEP1$( uname -rsp )" 
 	else
-		kernel_os="${C1}Kernel${C2}$SEP1$current_kernel"
+		kernel_os="${C1}Kernel${C2}$SEP1$CURRENT_KERNEL"
 	fi
-
 	if [[ $cpu_physical_count -gt 1 ]];then
 		cpc_plural='(s)'
 		model_plural='s'
@@ -12116,9 +12420,7 @@ print_short_data()
 		cpu_data_string="$cpu_count_print$cpu_core_count core"
 	fi
 # 	local cpu_core_count=${A_CPU_CORE_DATA[0]}
-
-	# load A_HDD_DATA
-	get_hdd_data_basic
+	
 	## note: if hdd_model is declared prior to use, whatever string you want inserted will
 	## be inserted first. In this case, it's desirable to print out (x) before each disk found.
 	local a_hdd_data_count=$(( ${#A_HDD_DATA[@]} - 1 ))
@@ -12127,15 +12429,12 @@ print_short_data()
 	IFS="$ORIGINAL_IFS"
 	local hdd_capacity=${a_hdd_basic_working[0]}
 	local hdd_used=${a_hdd_basic_working[1]}
-
-	# load A_CPU_DATA
-	get_cpu_data
-
+	
 	IFS=","
 	local a_cpu_working=(${A_CPU_DATA[0]})
 	# this gets that weird min/max final array item, which almost never contains any data of use
 	local current_max_clock_nu=$(( ${#A_CPU_DATA[@]} - 1 ))
-	local a_cpu_speeds=(${A_CPU_DATA[$current_max_clock_nu]})
+	local a_cpu_info=(${A_CPU_DATA[$current_max_clock_nu]})
 	IFS="$ORIGINAL_IFS"
 	local cpu_model="${a_cpu_working[0]}"
 	## assemble data for output
@@ -12151,19 +12450,19 @@ print_short_data()
 	# model from
 	# index: 0 speed ; 1 min ; 2 max
 	# this handles bsd types which always should show N/A unless we get a way to get min / max data
-	if [[ "${a_cpu_speeds[0]}" == 'N/A' && ${a_cpu_working[1]} != '' ]];then
+	if [[ "${a_cpu_info[0]}" == 'N/A' && ${a_cpu_working[1]} != '' ]];then
 		current_max_clock="${a_cpu_working[1]} MHz"
 	else
-		if [[ ${a_cpu_speeds[2]} != 0 ]];then
-			if [[ ${a_cpu_speeds[0]} == ${a_cpu_speeds[2]} ]];then
-				current_max_clock="${a_cpu_speeds[0]} MHz (max)"
+		if [[ ${a_cpu_info[2]} != 0 ]];then
+			if [[ ${a_cpu_info[0]} == ${a_cpu_info[2]} ]];then
+				current_max_clock="${a_cpu_info[0]} MHz (max)"
 			else
-				current_max_clock="${a_cpu_speeds[0]}/${a_cpu_speeds[2]} MHz"
+				current_max_clock="${a_cpu_info[0]}/${a_cpu_info[2]} MHz"
 				speed_starter='speed/max'
 			fi
 		fi
 	fi
-	local patch_version_number=$( get_patch_version_string )
+	
 
 	#set_color_scheme 12
 	if [[ $B_IRC == 'true' ]];then
@@ -12188,12 +12487,12 @@ print_short_data()
 			#C1="${C1},1"; C2="${C2},1"; CN="${CN},1"
 		fi
 	fi
-	short_data="${C1}CPU$cpc_plural${C2}$SEP1$cpu_data_string $cpu_model$model_plural$cpu_type ${C1}$speed_starter${C2}$SEP1$current_max_clock$SEP2$kernel_os$SEP2${C1}Up${C2}$SEP1$up_time$SEP2${C1}Mem${C2}$SEP1$memory$SEP2${C1}HDD${C2}$SEP1$hdd_capacity($hdd_used)$SEP2${C1}Procs${C2}$SEP1$processes$SEP2"
+	short_data="${C1}CPU$cpc_plural${C2}$SEP1$cpu_data_string $cpu_model$model_plural$cpu_type ${C1}$speed_starter${C2}$SEP1$current_max_clock$SEP2$kernel_os$SEP2${C1}Up${C2}$SEP1$UP_TIME$SEP2${C1}Mem${C2}$SEP1$MEMORY$SEP2${C1}HDD${C2}$SEP1$hdd_capacity($hdd_used)$SEP2${C1}Procs${C2}$SEP1$processes$SEP2"
 
 	if [[ $SHOW_IRC -gt 0 ]];then
 		short_data="$short_data${C1}Client${C2}$SEP1$IRC_CLIENT$IRC_CLIENT_VERSION$SEP2"
 	fi
-	short_data="$short_data${C1}$SCRIPT_NAME${C2}$SEP1$SCRIPT_VERSION_NUMBER$patch_version_number$SEP2${CN}"
+	short_data="$short_data${C1}$SELF_NAME${C2}$SEP1$SELF_VERSION$SELF_PATCH$SEP2${CN}"
 	if [[ $SCHEME -gt 0 ]];then
 		short_data="$short_data $NORMAL"
 	fi
@@ -12316,19 +12615,21 @@ print_audio_data()
 			fi
 			# only print alsa on last line if short enough, otherwise print on its own line
 			if [[ $i -eq 0 ]];then
-				if [[ -n $alsa_data && $( calculate_line_length "$card_string$audio_data$alsa_data" ) -lt $COLS_INNER ]];then
+				calculate_line_length "$card_string$audio_data$alsa_data"
+				if [[ -n $alsa_data && $LINE_LENGTH -lt $COLS_INNER ]];then
 					audio_data="$audio_data$alsa_data"
 					alsa_data=''
 				fi
 			fi
 			if [[ -n $audio_data ]];then
-				if [[ $( calculate_line_length "$card_string$audio_data" ) -lt $COLS_INNER ]];then
+				calculate_line_length "$card_string$audio_data"
+				if [[ $LINE_LENGTH -lt $COLS_INNER ]];then
 					print_data=$( create_print_line "$line_starter" "$card_string$audio_data" )
 					print_screen_output "$print_data"
 				# print the line
 				else
 					# keep the driver on the same line no matter what, looks weird alone on its own line
-					if [[ $( calculate_line_length "$card_string$audio_data" ) -gt $COLS_INNER ]];then
+					if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
 						print_data=$( create_print_line "$line_starter" "$card_string" )
 						print_screen_output "$print_data"
 						line_starter=' '
@@ -12344,7 +12645,8 @@ print_audio_data()
 		done
 	fi
 	if [[ -n $alsa_data ]];then
-		if [[ $( calculate_line_length "${alsa_data/ALSA/Advanced Linux Sound Architecture}" ) -lt $COLS_INNER ]];then
+		calculate_line_length "${alsa_data/ALSA/Advanced Linux Sound Architecture}"
+		if [[ $LINE_LENGTH -lt $COLS_INNER ]];then
 			# alsa_data=$( sed 's/ALSA/Advanced Linux Sound Architecture/' <<< $alsa_data )
 			alsa_data=${alsa_data/ALSA/Advanced Linux Sound Architecture}
 		fi
@@ -12362,9 +12664,8 @@ print_battery_data()
 	if [[ -n ${A_BATTERY_DATA[@]} ]];then
 		local battery_data='' battery_string=''
 		local present='' chemistry='' cycles='' voltage_min_design='' voltage_now=''
-		local power_now='' charge_full_design='' charge_full='' charge_now='' capacity=''
-		local capacity_level='' model='' company='' serial='' of_orig='' model='' condition=''
-		local power=''
+		local power_now='' capacity='' capacity_level='' model='' company='' serial='' 
+		local of_orig='' model='' condition='' power=''
 		
 		# echo ${A_BATTERY_DATA[@]}
 		for (( i=0; i< ${#A_BATTERY_DATA[@]}; i++ ))
@@ -12376,7 +12677,6 @@ print_battery_data()
 			model=''
 			condition=''
 			voltage=''
-			
 			name=''
 			status=''
 			present=''
@@ -12385,9 +12685,6 @@ print_battery_data()
 			voltage_min_design=''
 			voltage_now=''
 			power_now=''
-			charge_full_design=''
-			charge_full=''
-			charge_now=''
 			capacity=''
 			capacity_level=''
 			of_orig=''
@@ -12492,15 +12789,17 @@ print_battery_data()
 			fi
 			
 			if [[ -n $battery_string ]];then
-				if [[ $( calculate_line_length "$battery_string$voltage$battery_data" ) -lt $COLS_INNER ]];then
+				calculate_line_length "$battery_string$voltage$battery_data"
+				if [[ $LINE_LENGTH -lt $COLS_INNER ]];then
 					#echo one
 					print_data=$( create_print_line "$line_starter" "$battery_string$voltage$battery_data" )
 					print_screen_output "$print_data"
 				# print the line
 				else
 					# keep the driver on the same line no matter what, looks weird alone on its own line
-					if [[ $( calculate_line_length "$battery_string$voltage$battery_data" ) -gt $COLS_INNER ]];then
-						if [[ $( calculate_line_length "$battery_string$voltage" ) -gt $COLS_INNER ]];then
+					if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
+						calculate_line_length "$battery_string$voltage"
+						if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
 							print_data=$( create_print_line "$line_starter" "$battery_string" )
 							print_screen_output "$print_data"
 							line_starter=' '
@@ -12539,14 +12838,15 @@ print_battery_data()
 print_cpu_data()
 {
 	eval $LOGFS
-	local cpu_data='' i='' cpu_clock_speed='' cpu_multi_clock_data='' a_cpu_speeds=''
+	local cpu_data='' i='' cpu_clock_speed='' cpu_multi_clock_data='' a_cpu_info=''
 	local bmip_data='' cpu_cache='' cpu_vendor='' cpu_flags='' flag_feature='flags'
 	local a_cpu_working='' cpu_model='' cpu_clock='' cpu_null_error='' max_speed=''
 	local cpc_plural='' cpu_count_print='' model_plural='' cpu_data_string=''
 	local cpu_physical_count='' cpu_core_count='' cpu_core_alpha='' cpu_type=''
 	local cpu_2_data='' working_cpu='' temp1='' per_cpu_cores='' current_max_clock_nu=''
 	local line_starter="CPU:" multi_cpu_starter="${C1}clock speeds$SEP3${C2} "
-	local speed_starter='speed'
+	local speed_starter='speed' arch_data='' arm=' (ARM)' rev='' arch_cache='' cache_data=''
+	local flags_bmip=''
 
 	##print_screen_output "A_CPU_DATA[0]=\"${A_CPU_DATA[0]}\""
 	# Array A_CPU_DATA always has one extra element: max clockfreq found.
@@ -12557,9 +12857,26 @@ print_cpu_data()
 	IFS=","
 	a_cpu_working=(${A_CPU_DATA[0]})
 	current_max_clock_nu=$(( ${#A_CPU_DATA[@]} - 1 ))
-	a_cpu_speeds=(${A_CPU_DATA[$current_max_clock_nu]})
+	a_cpu_info=(${A_CPU_DATA[$current_max_clock_nu]})
 	IFS="$ORIGINAL_IFS"
-
+	
+	if [[ $B_EXTRA_DATA == 'true' ]];then
+		if [[ ${a_cpu_info[3]} != '' ]];then
+			get_cpu_architecture "${a_cpu_info[3]}" "${a_cpu_info[4]}" "${a_cpu_info[5]}"
+			# note: arm model names usually say what revision it is
+			if [[ ${a_cpu_info[3]} != 'arm' && "${a_cpu_info[6]}" != '' ]];then
+				if [[ -n "${ARCH/*rev*/}" ]];then
+					rev=" rev.${a_cpu_info[6]}"
+				fi
+			fi
+		fi
+		if [[ $ARCH == '' ]];then
+			ARCH='N/A'
+		else
+			arm='' # note: to avoid redundant output, only show this without -x option
+		fi
+		arch_data="${C1}arch$SEP3${C2} $ARCH$rev "
+	fi
 	# Strange (and also some expected) behavior encountered. If print_screen_output() uses $1
 	# as the parameter to output to the screen, then passing "<text1> ${ARR[@]} <text2>"
 	# will output only <text1> and first element of ARR. That "@" splits in elements and "*" _doesn't_,
@@ -12569,7 +12886,7 @@ print_cpu_data()
 	## print_screen_output "a_cpu_working=\"***${a_cpu_working[@]} $hostName+++++++\"----------"
 	# unless all these are null, process whatever you have
 	if [[ -n ${a_cpu_working[0]} || -n ${a_cpu_working[1]} || -n ${a_cpu_working[2]} || -n ${a_cpu_working[3]} ]];then
-		cpu_model="${a_cpu_working[0]}"
+		cpu_model="${a_cpu_working[0]}";
 		## assemble data for output
 		cpu_clock="${a_cpu_working[1]}"
 		cpu_vendor=${a_cpu_working[5]}
@@ -12588,7 +12905,7 @@ print_cpu_data()
 		line_starter="CPU$cpc_plural:"
 		if [[ -z $BSD_TYPE ]];then
 			cpu_data_string="$cpu_count_print$cpu_core_alpha core"
-			cpu_data="${C1}$cpu_data_string${C2} ${a_cpu_working[0]}$model_plural ($cpu_type)"
+			cpu_data="${C1}$cpu_data_string${C2} $cpu_model$model_plural ($cpu_type) "
 		else
 			if [[ $cpu_physical_count -gt 1 ]];then
 				per_cpu_cores=$(($cpu_core_count/$cpu_physical_count))
@@ -12599,7 +12916,7 @@ print_cpu_data()
 			if [[ -n $cpu_type ]];then
 				cpu_type=" ($cpu_type)"
 			fi
-			cpu_data="$cpu_data_string${C1}model$SEP3${C2} ${a_cpu_working[0]}$cpu_type"
+			cpu_data="$cpu_data_string${C1}model$SEP3${C2} $cpu_model$cpu_type "
 		fi
 		if [[ $B_SHOW_CPU == 'true' ]];then
 			# update for multicore, bogomips x core count.
@@ -12623,6 +12940,7 @@ print_cpu_data()
 				else
 					bmip_data="${C1}bmips$SEP3${C2} $bmip_data "
 				fi
+				
 			fi
 			## note: this handles how intel reports L2, total instead of per core like AMD does
 			# note that we need to multiply by number of actual cpus here to get true cache size
@@ -12653,10 +12971,11 @@ print_cpu_data()
 			fi
 			# arm cpus do not have flags or cache
 			if [[ ${a_cpu_working[6]} != 'true' ]];then
-				cpu_data="$cpu_data${C2} ${C1}cache$SEP3${C2} $cpu_cache"
-				cpu_2_data="$cpu_flags$bmip_data"
+				cpu_data="$cpu_data${C2}"
+				cache_data="${C1}cache$SEP3${C2} $cpu_cache "
+				flags_bmip="$cpu_flags$bmip_data"
 			else
-				cpu_data="$cpu_data${C2} (ARM) $bmip_data"
+				cpu_data="$cpu_data${C2}$arm $bmip_data"
 			fi
 		fi
 		# we don't this printing out extra line unless > 1 cpu core
@@ -12665,30 +12984,36 @@ print_cpu_data()
 		else
 			if [[ -z ${a_cpu_working[1]} ]];then
 				if [[ -z ${cpu_data/*ARM*/} ]];then
-					temp1=' (ARM)'
+					temp1="$arm"
 				fi
 				a_cpu_working[1]="N/A$temp1"
 			else
 				a_cpu_working[1]="${a_cpu_working[1]%.*} MHz"
 			fi
 			# this handles bsd case unless we get a way to get max/min cpu speeds
-			if [[ ${a_cpu_speeds[0]} != 'N/A' && ${a_cpu_speeds[2]} != 0 ]];then
+			if [[ ${a_cpu_info[0]} != 'N/A' && ${a_cpu_info[2]} != 0 ]];then
 				if [[ $B_EXTRA_EXTRA_DATA == 'true' && ${#A_CPU_DATA[@]} -eq 2 && 
-				      $B_SHOW_CPU == 'true' && ${a_cpu_speeds[1]} != 0 ]];then
-					a_cpu_working[1]="${a_cpu_speeds[0]}/${a_cpu_speeds[1]}/${a_cpu_speeds[2]} MHz"
+				      $B_SHOW_CPU == 'true' && ${a_cpu_info[1]} != 0 ]];then
+					a_cpu_working[1]="${a_cpu_info[0]}/${a_cpu_info[1]}/${a_cpu_info[2]} MHz"
 					speed_starter='speed/min/max'
 				else
-					if [[ ${a_cpu_speeds[0]} == ${a_cpu_speeds[2]} ]];then
-						a_cpu_working[1]="${a_cpu_speeds[0]} MHz (max)"
+					if [[ ${a_cpu_info[0]} == ${a_cpu_info[2]} ]];then
+						a_cpu_working[1]="${a_cpu_info[0]} MHz (max)"
 					else
-						a_cpu_working[1]="${a_cpu_speeds[0]}/${a_cpu_speeds[2]} MHz"
+						a_cpu_working[1]="${a_cpu_info[0]}/${a_cpu_info[2]} MHz"
 						speed_starter='speed/max'
 					fi
 				fi
 			fi
 			cpu_clock_speed="${C1}$speed_starter$SEP3${C2} ${a_cpu_working[1]}"
 		fi
-		cpu_2_data="$cpu_2_data$cpu_clock_speed"
+		if [[ $B_CPU_FLAGS_FULL == 'true' ]];then
+			cpu_2_data=""
+			arch_cache="$arch_data$cache_data$bmip_data"
+		else
+			cpu_2_data="$flags_bmip$cpu_clock_speed"
+			arch_cache="$arch_data$cache_data"
+		fi
 	else
 		if [[ $BSD_TYPE == 'bsd' && $B_ROOT != 'true' ]];then
 			cpu_null_error=' No permissions for sysctl use?'
@@ -12701,24 +13026,47 @@ print_cpu_data()
 # 	echo icols: $COLS_INNER
 # 	echo tc: $TERM_COLUMNS
 	# echo :${cpu_2_data}:
-	if [[ -n $cpu_2_data && $( calculate_line_length "$cpu_data $cpu_2_data" ) -gt $COLS_INNER ]];then
+	calculate_line_length "$cpu_data $arch_cache"
+	if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
+		#echo one
 		cpu_data=$( create_print_line "$line_starter" "$cpu_data" )
-		line_starter=' '
 		print_screen_output "$cpu_data"
-		cpu_data=$( create_print_line " " "$cpu_2_data" )
+		cpu_data=$( create_print_line " " "$arch_cache" )
+		print_screen_output "$cpu_data"
+		line_starter=' '
+		cpu_data=''
+		arch_cache=''
+	fi
+	calculate_line_length "$cpu_data$arch_cache$cpu_2_data"
+	if [[ -n $cpu_2_data && $LINE_LENGTH -gt $COLS_INNER ]];then
+		#echo two
+		calculate_line_length "$cpu_data$arch_cache"
+		if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
+			cpu_data=$( create_print_line "$line_starter" "$cpu_data" )
+			print_screen_output "$cpu_data"
+		else
+			cpu_data=$( create_print_line "$line_starter" "$cpu_data$arch_cache" )
+			print_screen_output "$cpu_data"
+			arch_cache=''
+		fi
+		line_starter=' '
+		cpu_data=$( create_print_line " " "$arch_cache$cpu_2_data" )
 		print_screen_output "$cpu_data"
 	else
-		cpu_data=$( create_print_line "$line_starter" "$cpu_data" )
-		print_screen_output "$cpu_data $cpu_2_data"
+		#echo three
+		if [[ -n "$cpu_data$arch_cache$cpu_2_data" ]];then
+			cpu_data=$( create_print_line "$line_starter" "$cpu_data$arch_cache$cpu_2_data" )
+			print_screen_output "$cpu_data"
+		fi
 	fi
 	# we don't do this printing out extra line unless > 1 cpu core
 	# note the numbering, the last array item is the min/max/not found for cpu speeds
 	if [[ ${#A_CPU_DATA[@]} -gt 2 && $B_SHOW_CPU == 'true' ]];then
-		if [[ ${a_cpu_speeds[2]} != 0 ]];then
-			if [[ $B_EXTRA_EXTRA_DATA == 'true' && ${a_cpu_speeds[1]} != 0 ]];then
-				max_speed="${C1}min/max$SEP3${C2} ${a_cpu_speeds[1]}/${a_cpu_speeds[2]} MHz "
+		if [[ ${a_cpu_info[2]} != 0 ]];then
+			if [[ $B_EXTRA_EXTRA_DATA == 'true' && ${a_cpu_info[1]} != 0 ]];then
+				max_speed="${C1}min/max$SEP3${C2} ${a_cpu_info[1]}/${a_cpu_info[2]} MHz "
 			else
-				max_speed="${C1}max$SEP3${C2} ${a_cpu_speeds[2]} MHz "
+				max_speed="${C1}max$SEP3${C2} ${a_cpu_info[2]} MHz "
 			fi
 		fi
 		for (( i=0; i < ${#A_CPU_DATA[@]}-1; i++ ))
@@ -12735,8 +13083,8 @@ print_cpu_data()
 			# echo $(calculate_line_length "$multi_cpu_starter$SEP3 $cpu_multi_clock_data" )
 			working_cpu="$max_speed${C1}$(( i + 1 ))$SEP3${C2} ${a_cpu_working[1]%.*} MHz "
 			max_speed=''
-			if [[ -n $cpu_multi_clock_data && \
-			$( calculate_line_length "$multi_cpu_starter$cpu_multi_clock_data$working_cpu" ) -gt $COLS_INNER ]];then
+			calculate_line_length "$multi_cpu_starter$cpu_multi_clock_data$working_cpu"
+			if [[ -n $cpu_multi_clock_data && $LINE_LENGTH -gt $COLS_INNER ]];then
 				cpu_multi_clock_data=$( create_print_line " " "$multi_cpu_starter$cpu_multi_clock_data" )
 				print_screen_output "$cpu_multi_clock_data"
 				multi_cpu_starter=''
@@ -12830,13 +13178,13 @@ print_dmidecode_error()
 		fi
 	fi
 	if [[ $2 == 'dmidecode-error-requires-root' ]];then
-		error_message="${sysDmiError}dmidecode: you must be root to run dmidecode"
+		error_message="${sysDmiError}dmidecode: root required for dmidecode"
 	elif [[ $2 == 'dmidecode-error-not-installed' ]];then
 		error_message="${sysDmiError}dmidecode: dmidecode is not installed."
 	elif [[ $2 == 'dmidecode-error-no-smbios-dmi-data' ]];then
-		error_message="${sysDmiError}dmidecode: no smbios data available. Old system?"
+		error_message="${sysDmiError}dmidecode: no smbios data. Old system?"
 	elif [[ $2 == 'dmidecode-error-no-battery-data' ]];then
-		error_message="${sysDmiError}dmidecode: no battery data available."
+		error_message="${sysDmiError}dmidecode: no battery data."
 	elif [[ $2 == 'dmidecode-error-unknown-error' ]];then
 		error_message="${sysDmiError}dmidecode: unknown error occurred"
 	fi
@@ -12848,10 +13196,10 @@ print_graphics_data()
 {
 	eval $LOGFS
 	local graphics_data='' card_id='' i='' root_alert='' root_x_string='' a_graphics_working=''
-	local b_is_mesa='false' display_full_string='' card_bus_id='' card_data=''
-	local res_tty='Resolution' xorg_data='' display_server_string='' chip_id=''
+	local b_is_mesa='false' display_full_string='' card_bus_id='' card_data='' 
+	local res_tty='Resolution' xorg_data='' display_server_string='' chip_id='' sep_pci=''
 	local spacer='' driver='' driver_string='' driver_plural='' direct_render_string=''
-	local separator_loaded='' separator_unloaded='' separator_failed='' 
+	local sep_loaded='' sep_unloaded='' sep_failed='' b_pci_driver='false' res_string=''
 	local loaded='' unloaded='' failed='' display_server_string='' b_force_tty='false'
 	local line_starter='Graphics:' part_1_data='' part_2_data='' b_advanced='true'
 	local screen_resolution="$( get_graphics_res_data 'reg' )"
@@ -12892,7 +13240,8 @@ print_graphics_data()
 	get_graphics_driver
 	
 	if [[ ${#A_GRAPHIC_DRIVERS[@]} -eq 0 ]];then
-		driver=' N/A'
+		driver=''
+		b_pci_driver='true'
 	else
 		for (( i=0; i < ${#A_GRAPHIC_DRIVERS[@]}; i++ ))
 		do
@@ -12901,16 +13250,16 @@ print_graphics_data()
 			IFS="$ORIGINAL_IFS"
 			case ${a_graphics_working[1]} in
 				loaded)
-					loaded="$loaded$separator_loaded${a_graphics_working[0]}"
-					separator_loaded=','
+					loaded="$loaded$sep_loaded${a_graphics_working[0]}"
+					sep_loaded=','
 					;;
 				unloaded)
-					unloaded="$unloaded$separator_unloaded${a_graphics_working[0]}"
-					separator_unloaded=','
+					unloaded="$unloaded$sep_unloaded${a_graphics_working[0]}"
+					sep_unloaded=','
 					;;
 				failed)
-					failed="$failed$separator_failed${a_graphics_working[0]}"
-					separator_failed=','
+					failed="$failed$sep_failed${a_graphics_working[0]}"
+					sep_failed=','
 					;;		
 			esac
 		done
@@ -12926,7 +13275,7 @@ print_graphics_data()
 	fi
 	# sometimes for some reason there is no driver found but the array is started
 	if [[ -z $driver ]];then
-		driver=' N/A'
+		b_pci_driver='true'
 	fi
 	if [[ ${#A_GRAPHIC_DRIVERS[@]} -gt 1 ]];then
 		driver_plural='s'
@@ -12941,22 +13290,21 @@ print_graphics_data()
 		fi
 	fi
 	# note: fix this, we may find a display server that has no version
-	if [[ -z $display_vendor || -z $display_version ]];then
-		display_server_string="N/A"
+	if [[ -z "${display_vendor// }" || -z "${display_version// }" ]];then
+		display_server_string="N/A "
 	else
-		display_server_string="$display_vendor $display_version"
+		# note: sometimes display vendor has leading whitespace
+		display_server_string="${display_vendor##*[ ]} $display_version "
 	fi
 	if [[ $display_server != '' ]];then
-		display_server_string="$display_server ($display_server_string)"
+		display_server_string="$display_server ($display_server_string) "
 	fi
 	
 	if [[ $B_EXTRA_EXTRA_DATA == '' && $compositor != '' ]] &&\
 	   [[ $display_server == 'wayland' || $display_server == 'mir'  ]];then
 		compositor_string="${C1}compositor$SEP3${C2} $compositor "
 	fi
-	display_server_string="${C1}Display Server${SEP3}${C2} $display_server_string $compositor_string"
-	driver_string="${C1}driver$driver_plural$SEP3${C2}$driver "
-
+	
 	if [[ $glx_renderer == '' && $B_ROOT == 'true' ]];then
 		root_x_string='for root '
 		b_advanced='false'
@@ -12972,7 +13320,6 @@ print_graphics_data()
 	if [[ $b_force_tty == 'true' || $B_SHOW_DISPLAY_DATA != 'true' || $B_RUNNING_IN_DISPLAY != 'true' ]];then
 		res_tty='tty size'
 	fi
-	
 	if [[ -n $root_x_string ]];then
 		root_x_string="${C1}Advanced Data$SEP3${C2} N/A $root_x_string"
 	fi
@@ -12985,6 +13332,15 @@ print_graphics_data()
 			IFS="$ORIGINAL_IFS"
 			card_bus_id=''
 			card_data=${a_graphics_working[0]}
+			if [[ $b_pci_driver == 'true' && ${a_graphics_working[2]} != '' ]];then
+				if [[ $sep_pci == ',' ]];then
+					driver_plural='s'
+				else
+					driver=' ' # front pad to match other matches
+				fi
+				driver=$driver$sep_pci${a_graphics_working[2]}
+				sep_pci=','
+			fi
 			if [[ $B_EXTRA_DATA == 'true' ]];then
 				if [[ -n ${a_graphics_working[1]} ]];then
 					card_bus_id="${a_graphics_working[1]}"
@@ -13013,7 +13369,8 @@ print_graphics_data()
 			part_2_data="$card_bus_id$chip_id"
 			
 			if [[ ${#A_GRAPHICS_CARD_DATA[@]} -gt 1 ]];then
-				if [[ $( calculate_line_length "$part_1_data$part_2_data" ) -gt $COLS_INNER ]];then
+				calculate_line_length "$part_1_data$part_2_data"
+				if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
 					graphics_data=$( create_print_line "$line_starter" "$part_1_data" )
 					print_screen_output "$graphics_data"
 					part_1_data=''
@@ -13035,7 +13392,8 @@ print_graphics_data()
 	fi
 	# Print cards if not dual card system
 	if [[ -n $part_1_data$part_2_data ]];then 
-		if [[ $( calculate_line_length "$part_1_data$part_2_data" ) -gt $COLS_INNER ]];then
+		calculate_line_length "$part_1_data$part_2_data"
+		if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
 			graphics_data=$( create_print_line "$line_starter" "$part_1_data" )
 			print_screen_output "$graphics_data"
 			part_1_data=''
@@ -13048,19 +13406,43 @@ print_graphics_data()
 	fi
 	line_starter=' '
 	graphics_data=''
-	
-	part_1_data="$display_server_string$driver_string"
-	part_2_data="${C1}$res_tty$SEP3${C2} $screen_resolution $root_x_string"
-	if [[ -n $( grep -vE '^[[:space:]]*$' <<< $part_1_data$part_2_data ) && \
-	      $( calculate_line_length "$part_1_data $part_2_data" ) -gt $COLS_INNER ]];then
-		graphics_data=$( create_print_line "$line_starter" "$part_1_data" )
+	if [[ $driver == '' ]];then
+		driver=' N/A'
+	fi
+	res_string="${C1}$res_tty$SEP3${C2} $screen_resolution "
+	display_server_string="${C1}Display Server${SEP3}${C2} $display_server_string$compositor_string"
+	driver_string="${C1}driver$driver_plural$SEP3${C2}$driver "
+	part_2_data="$res_string$root_x_string"
+	calculate_line_length "$display_server_string$driver_string$part_2_data"
+	if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
+		calculate_line_length "$display_server_string$driver_string"
+		if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
+			#echo one
+			graphics_data=$( create_print_line "$line_starter" "$display_server_string" )
+			print_screen_output "$graphics_data"
+			graphics_data=$( create_print_line "  " "$driver_string" )
+			print_screen_output "$graphics_data"
+		else
+			#echo two
+			graphics_data=$( create_print_line "$line_starter" "$display_server_string$driver_string" )
+			print_screen_output "$graphics_data"
+		fi
+		line_starter=' '
+		display_server_string=''
+		driver_string=''
+	else
+		#echo three
+		graphics_data=$( create_print_line "$line_starter" "$display_server_string$driver_string$part_2_data" )
 		print_screen_output "$graphics_data"
 		line_starter=' '
-		part_1_data=''
-		graphics_data=$part_2_data
+		display_server_string=''
+		driver_string=''
+		part_2_data=''
 	fi
-	if [[ -n $( grep -vE '^[[:space:]]*$' <<< $part_1_data$part_2_data ) ]];then
-		graphics_data=$( create_print_line "$line_starter" "$part_1_data$part_2_data" )
+	graphics_data=$display_server_string$driver_string$part_2_data
+	if [[ -n "${graphics_data// }" ]];then
+		#echo four
+		graphics_data=$( create_print_line "$line_starter" "$display_server_string$driver_string$part_2_data" )
 		print_screen_output "$graphics_data"
 		line_starter=' '
 	fi
@@ -13098,7 +13480,8 @@ print_graphics_data()
 		part_1_data="${C1}OpenGL$SEP3 renderer$SEP3${C2} $glx_renderer "
 		part_2_data="${C1}version$SEP3${C2} $glx_version$direct_render_string"
 		# echo $line_starter
-		if [[ $( calculate_line_length "$part_1_data$part_2_data" ) -gt $COLS_INNER ]];then
+		calculate_line_length "$part_1_data$part_2_data"
+		if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
 			graphics_data=$( create_print_line "$line_starter" "$part_1_data" )
 			print_screen_output "$graphics_data"
 			part_1_data=''
@@ -13142,7 +13525,7 @@ print_hard_disk_data()
 		get_hard_drive_data_advanced
 		
 		# temporary message to indicate not yet supported
-		if [[ $BSD_TYPE == 'bsd' && -z $Dmesg_Boot_Data ]];then
+		if [[ $BSD_TYPE == 'bsd' && -z $DMESG_BOOT_DATA ]];then
 			hdd_data=$bsd_error
 			hdd_data=$( create_print_line "$Line_Starter" "$hdd_data" )
 			print_screen_output "$hdd_data"
@@ -13200,7 +13583,8 @@ print_hard_disk_data()
 						Line_Starter=' '
 						row_starter=''
 					fi
-					if [[ $( calculate_line_length "$part_1_data$part_2_data" ) -gt $COLS_INNER ]];then
+					calculate_line_length "$part_1_data$part_2_data"
+					if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
 						hdd_data=$( create_print_line "$Line_Starter" "$part_1_data" )
 						print_screen_output "$hdd_data"
 						part_1_data=''
@@ -13223,7 +13607,8 @@ print_hard_disk_data()
 						#echo 2
 					#fi
 				else
-					if [[ $( calculate_line_length "$part_1_data$part_2_data" ) -gt $COLS_INNER ]];then
+					calculate_line_length "$part_1_data$part_2_data"
+					if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
 						hdd_data=$( create_print_line "$Line_Starter" "$part_1_data" )
 						print_screen_output "$hdd_data"
 						part_1_data=''
@@ -13237,8 +13622,8 @@ print_hard_disk_data()
 						part_2_data=''
 					fi
 				fi
-				
-# 				if [[ $( calculate_line_length "$part_2_data$part_1_data" ) -gt $COLS_INNER ]];then
+				# calculate_line_length "$part_2_data$part_1_data"
+# 				if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
 # 					if [[ -n $( grep -vE '^[[:space:]]*$' <<< $part_2_data ) ]];then
 # 						hdd_data=$( create_print_line "$Line_Starter" "$part_2_data" )
 # 						print_screen_output "$hdd_data"
@@ -13291,17 +13676,17 @@ print_info_data()
 	local info_data='' line_starter='Info:' runlvl_default='' runlvl='' runlvl_title='runlevel' 
 	local init_data='' init_type='' init_version='' rc_type='' rc_version=''
 	local client_data='' shell_data='' shell_parent='' tty_session=''
-	local memory="$( get_memory_data )"
 	local processes=$(( $( wc -l <<< "$Ps_aux_Data" ) - 1 ))
-	local up_time="$( get_uptime )"
-	if [[ -z $up_time ]];then
-		up_time='N/A - missing uptime?'
+	if [[ -z $UP_TIME ]];then
+		UP_TIME='N/A - missing uptime?'
 	fi
-	local patch_version_number=$( get_patch_version_string )
+	get_memory_data
+	get_uptime
+	get_patch_version_string
 	local gcc_installed='' gcc_others='' closing_data='' 
 	
-	if [[ -z $memory ]];then
-		memory='N/A'
+	if [[ -z $MEMORY ]];then
+		MEMORY='N/A'
 	fi
 	
 	if [[ $B_EXTRA_DATA == 'true' ]];then
@@ -13341,8 +13726,8 @@ print_info_data()
 	fi
 
 	# Some code could look superfluous but BitchX doesn't like lines not ending in a newline. F*&k that bitch!
-	# long_last=$( echo -ne "${C1}Processes$SEP3${C2} $processes${CN} | ${C1}Uptime$SEP3${C2} $up_time${CN} | ${C1}Memory$SEP3${C2} $MEM${CN}" )
-	info_data="${C1}Processes$SEP3${C2} $processes ${C1}Uptime$SEP3${C2} $up_time ${C1}Memory$SEP3${C2} $memory "
+	# long_last=$( echo -ne "${C1}Processes$SEP3${C2} $processes${CN} | ${C1}Uptime$SEP3${C2} $UP_TIME${CN} | ${C1}Memory$SEP3${C2} $MEM${CN}" )
+	info_data="${C1}Processes$SEP3${C2} $processes ${C1}Uptime$SEP3${C2} $UP_TIME ${C1}Memory$SEP3${C2} $MEMORY "
 
 	# this only triggers if no X data is present or if extra data switch is on
 	if [[ $B_SHOW_DISPLAY_DATA != 'true' || $B_EXTRA_DATA == 'true' ]];then
@@ -13385,9 +13770,10 @@ print_info_data()
 		client_data="${C1}Client$SEP3${C2} $IRC_CLIENT$IRC_CLIENT_VERSION "
 	fi
 	# info_data="$info_data"
-	closing_data="$client_data${C1}$SCRIPT_NAME$SEP3${C2} $SCRIPT_VERSION_NUMBER$patch_version_number"
+	closing_data="$client_data${C1}$SELF_NAME$SEP3${C2} $SELF_VERSION$SELF_PATCH"
 	# sometimes gcc is very long, and default runlevel can be long with systemd, so create a gcc-less line first
-	if [[ $( calculate_line_length "$info_data$init_data$gcc_installed" ) -gt $COLS_INNER ]];then
+	calculate_line_length "$info_data$init_data$gcc_installed"
+	if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
 		# info_data=$info_data
 		info_data=$( create_print_line "$line_starter" "$info_data" )
 		print_screen_output "$info_data"
@@ -13396,7 +13782,8 @@ print_info_data()
 		line_starter=' '
 		#echo 1
 	fi
-	if [[ $( calculate_line_length "$init_data$gcc_installed" ) -gt $COLS_INNER ]];then
+	calculate_line_length "$init_data$gcc_installed"
+	if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
 		info_data=$init_data
 		info_data=$( create_print_line "$line_starter" "$info_data" )
 		print_screen_output "$info_data"
@@ -13405,7 +13792,8 @@ print_info_data()
 		line_starter=' '
 		#echo 2
 	fi
-	if [[ $( calculate_line_length "$info_data$init_data$gcc_installed$closing_data" ) -gt $COLS_INNER ]];then
+	calculate_line_length "$info_data$init_data$gcc_installed$closing_data"
+	if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
 		info_data=$info_data$init_data$gcc_installed
 		info_data=$( create_print_line "$line_starter" "$info_data" )
 		print_screen_output "$info_data"
@@ -13537,7 +13925,8 @@ print_machine_data()
 		fi
 		mobo_line="${C1}Mobo$SEP3${C2} $mobo_vendor ${C1}model$SEP3${C2} $mobo_model$mobo_version$mobo_serial"
 		bios_line="${C1}$firmware_type$SEP3${C2} $bios_vendor ${C1}v$SEP3${C2} $bios_version ${C1}date$SEP3${C2} $bios_date$bios_rom"
-		if [[ $( calculate_line_length "$mobo_line$bios_line" ) -lt $COLS_INNER ]];then
+		calculate_line_length "$mobo_line$bios_line"
+		if [[ $LINE_LENGTH -lt $COLS_INNER ]];then
 			mobo_line="$mobo_line $bios_line"
 			bios_line=''
 		fi
@@ -13559,7 +13948,8 @@ print_machine_data()
 				product_serial=" ${C1}serial$SEP3${C2} ${A_MACHINE_DATA[3]} "
 			fi
 			system_line="${C1}Device$SEP3${C2} $device ${C1}System$SEP3${C2} $system_vendor ${C1}product$SEP3${C2} $product_name$product_version$product_serial"
-			if [[ -n $chassis_line && $( calculate_line_length "$system_line$chassis_line" ) -lt $COLS_INNER ]];then
+			calculate_line_length "$system_line$chassis_line"
+			if [[ -n $chassis_line && $LINE_LENGTH -lt $COLS_INNER ]];then
 				system_line="$system_line $chassis_line"
 				chassis_line=''
 			fi
@@ -13605,7 +13995,12 @@ print_module_version()
 		if [[ -z $( grep -E '^snd' <<< $modules ) ]];then
 			prefix='snd_' # sound modules start with snd_
 		fi
-		modules=$( tr '[A-Z]' '[a-z]' <<< "$modules" )
+		
+		if (( "$BASH" >= 4 ));then
+			modules="${modules,,}"
+		else 
+			modules=$( tr '[A-Z]' '[a-z]' <<< "$modules" )
+		fi
 		modules=${modules//-/_}
 		# special intel processing, generally no version info though
 		if [[ $modules == 'hda intel' ]];then
@@ -13719,13 +14114,15 @@ print_networking_data()
 			card_string="${C1}Card$card_id$SEP3${C2} ${a_network_working[0]} "
 			card_data="$driver_data$port_data"
 			part_2_data="$pci_bus_id$chip_id"
-			if [[ $( calculate_line_length "$card_string$card_data$part_2_data" ) -gt $COLS_INNER ]];then
+			calculate_line_length "$card_string$card_data$part_2_data"
+			if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
 				network_data=$( create_print_line "$line_starter" "$card_string" )
 				line_starter=' '
 				card_string=''
 				print_screen_output "$network_data"
 			fi
-			if [[ $( calculate_line_length "$card_string$card_data$part_2_data" ) -gt $COLS_INNER ]];then
+			calculate_line_length "$card_string$card_data$part_2_data"
+			if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
 				network_data=$( create_print_line "$line_starter" "$card_string$card_data" )
 				print_screen_output "$network_data"
 				line_starter=' '
@@ -13799,7 +14196,8 @@ print_network_advanced_data()
 	fi
 	network_data="${C1}IF$SEP3${C2} $if_id ${C1}state$SEP3${C2} $oper_state $speed_string$duplex_string"
 	part_2_data="${C1}mac$SEP3${C2} $mac_id"
-	if [[ $( calculate_line_length "$network_data$part_2_data" ) -gt $COLS_INNER ]];then
+	calculate_line_length "$network_data$part_2_data"
+	if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
 		network_data=$( create_print_line " " "$network_data" )
 		print_screen_output "$network_data"
 		network_data=''
@@ -14022,20 +14420,23 @@ print_optical_drive_data()
 				fi
 			fi
 			drive_data="${C1}$drive_type${counter}$SEP3${C2} $drive_string"
-			if [[ $( calculate_line_length "$drive_data$part_2_data" ) -lt $COLS_INNER ]];then
+			calculate_line_length "$drive_data$part_2_data"
+			if [[ $LINE_LENGTH -lt $COLS_INNER ]];then
 				drive_data=$( create_print_line "$Line_Starter" "$drive_data$part_2_data" )
 				print_screen_output "$drive_data"
 				Line_Starter=' '
 				drive_data=''
 				part_2_data=''
 			else
-				if [[ $( calculate_line_length "$drive_data" ) -gt $COLS_INNER ]];then
+				calculate_line_length "$drive_data"
+				if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
 					drive_data=$( create_print_line "$Line_Starter" "$drive_data" )
 					print_screen_output "$drive_data"
 					Line_Starter=' '
 					drive_data=''
 				fi
-				if [[ $( calculate_line_length "$drive_data$part_2_data" ) -lt $COLS_INNER ]];then
+				calculate_line_length "$drive_data$part_2_data"
+				if [[ $LINE_LENGTH -lt $COLS_INNER ]];then
 					drive_data=$( create_print_line "$Line_Starter" "$drive_data$part_2_data" )
 					print_screen_output "$drive_data"
 					Line_Starter=' '
@@ -14121,7 +14522,8 @@ print_optical_drive_data()
 				fi
 				drive_data="${C1}Features: speed$SEP3${C2} $speed $multisession"
 				part_2_data="$audio${C1}dvd$SEP3${C2} $dvd ${C1}rw$SEP3${C2} $rw_support $state"
-				if [[ $( calculate_line_length "$drive_data$part_2_data" ) -lt $COLS_INNER ]];then
+				calculate_line_length "$drive_data$part_2_data"
+				if [[ $LINE_LENGTH -lt $COLS_INNER ]];then
 					drive_data=$( create_print_line "$Line_Starter" "$drive_data$part_2_data" )
 					print_screen_output "$drive_data"
 					Line_Starter=' '
@@ -14143,11 +14545,11 @@ print_optical_drive_data()
 print_partition_data()
 {
 	eval $LOGFS
-	local a_partition_working='' partition_used='' partition_data=''
-	local counter=0 i=0 part_id=0 a_partition_data='' line_starter='' 
-	local partitionIdClean='' part_dev='' full_dev='' part_label='' full_label=''
+	local a_part_working='' part_used='' partition_data=''
+	local counter=0 i=0 part_id=0 a_part_data='' line_starter='' 
+	local part_id_clean='' part_dev='' full_dev='' part_label='' full_label=''
 	local part_uuid='' full_uuid='' dev_remote='' full_fs='' 
-	local b_non_dev='false' holder=''
+	local b_non_dev='false' holder='' id_size_used='' label_uuid='' fs_dev=''
 
 	# set A_PARTITION_DATA
 	get_partition_data
@@ -14155,33 +14557,33 @@ print_partition_data()
 	for (( i=0; i < ${#A_PARTITION_DATA[@]}; i++ ))
 	do
 		IFS=","
-		a_partition_working=(${A_PARTITION_DATA[i]})
+		a_part_working=(${A_PARTITION_DATA[i]})
 		IFS="$ORIGINAL_IFS"
 		full_label=''
 		full_uuid=''
 
-		if [[ $B_SHOW_PARTITIONS_FULL == 'true' ]] || [[ ${a_partition_working[4]} == 'main' ]];then
-			if [[ -n ${a_partition_working[2]} ]];then
-				partition_used="${C1}used$SEP3${C2} ${a_partition_working[2]} (${a_partition_working[3]}) "
+		if [[ $B_SHOW_PARTITIONS_FULL == 'true' ]] || [[ ${a_part_working[4]} == 'main' ]];then
+			if [[ -n ${a_part_working[2]} ]];then
+				part_used="${C1}used$SEP3${C2} ${a_part_working[2]} (${a_part_working[3]}) "
 			else
-				partition_used='' # reset partition used to null
+				part_used='' # reset partition used to null
 			fi
-			if [[ -n ${a_partition_working[5]} ]];then
-				full_fs="${a_partition_working[5]}"
+			if [[ -n ${a_part_working[5]} ]];then
+				full_fs="${a_part_working[5]}"
 			else
 				full_fs='N/A' # reset partition fs type
 			fi
 			full_fs="${C1}fs$SEP3${C2} $full_fs "
-			if [[ -n ${a_partition_working[6]} ]];then
-				if [[ -z $( grep -E '(^//|:/|non-dev)' <<< ${a_partition_working[6]} ) ]];then
-					part_dev="/dev/${a_partition_working[6]}"
+			if [[ -n ${a_part_working[6]} ]];then
+				if [[ -z $( grep -E '(^//|:/|non-dev)' <<< ${a_part_working[6]} ) ]];then
+					part_dev="/dev/${a_part_working[6]}"
 					dev_remote='dev'
-				elif [[ -n $( grep '^non-dev' <<< ${a_partition_working[6]} ) ]];then
-					holder=$( sed 's/non-dev-//' <<< ${a_partition_working[6]} )
+				elif [[ -n $( grep '^non-dev' <<< ${a_part_working[6]} ) ]];then
+					holder=$( sed 's/non-dev-//' <<< ${a_part_working[6]} )
 					part_dev="$holder"
 					dev_remote='raid'
 				else
-					part_dev="${a_partition_working[6]}"
+					part_dev="${a_part_working[6]}"
 					dev_remote='remote'
 				fi
 			else
@@ -14191,16 +14593,16 @@ print_partition_data()
 			full_dev="${C1}$dev_remote$SEP3${C2} $part_dev "
 			if [[ $B_SHOW_LABELS == 'true' || $B_SHOW_UUIDS == 'true' ]];then
 				if [[ $B_SHOW_LABELS == 'true' && $dev_remote != 'remote' ]];then
-					if [[ -n ${a_partition_working[7]} ]];then
-						part_label="${a_partition_working[7]}"
+					if [[ -n ${a_part_working[7]} ]];then
+						part_label="${a_part_working[7]}"
 					else
 						part_label='N/A'
 					fi
 					full_label="${C1}label$SEP3${C2} $part_label "
 				fi
 				if [[ $B_SHOW_UUIDS == 'true' && $dev_remote != 'remote' ]];then
-					if [[ -n ${a_partition_working[8]} ]];then
-						part_uuid="${a_partition_working[8]}"
+					if [[ -n ${a_part_working[8]} ]];then
+						part_uuid="${a_part_working[8]}"
 					else
 						part_uuid='N/A'
 					fi
@@ -14209,25 +14611,42 @@ print_partition_data()
 			fi
 			# don't show user names in output
 			if [[ $B_OUTPUT_FILTER == 'true' ]];then
-				partitionIdClean=$( sed $SED_RX "s|/home/([^/]+)/(.*)|/home/$FILTER_STRING/\2|" <<< ${a_partition_working[0]} )
+				part_id_clean=$( sed $SED_RX "s|/home/([^/]+)/(.*)|/home/$FILTER_STRING/\2|" <<< ${a_part_working[0]} )
 			else
-				partitionIdClean=${a_partition_working[0]}
+				part_id_clean=${a_part_working[0]}
 			fi
-			id_size_fs="${C1}ID-$((part_id+1))$SEP3${C2} $partitionIdClean ${C1}size$SEP3${C2} ${a_partition_working[1]} $partition_used$full_fs$full_dev"
+			id_size_used="${C1}ID-$((part_id+1))$SEP3${C2} $part_id_clean ${C1}size$SEP3${C2} ${a_part_working[1]} $part_used"
+			fs_dev="$full_fs$full_dev"
 			label_uuid="$full_label$full_uuid"
-			# label/uuid always print one per line, so only wrap if it's very long
-			if [[ $B_SHOW_UUIDS == 'true' || $B_SHOW_LABELS == 'true' ]] && \
-			   [[ $( calculate_line_length "${a_partition_data[$counter]}$id_size_fs$label_uuid" ) -gt $COLS_INNER ]];then
-				a_partition_data[$counter]="$id_size_fs"
+			calculate_line_length "${a_part_data[$counter]}$id_size_used$fs_dev"
+			if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
+				a_part_data[$counter]="$id_size_used"
 				((counter++))
-				a_partition_data[$counter]="$label_uuid"
-			else
-				if [[ $( calculate_line_length "${a_partition_data[$counter]}$id_size_fs$label_uuid" ) -gt $COLS_INNER ]];then
-					a_partition_data[$counter]="${a_partition_data[$counter]}"
-					((counter++))
-					a_partition_data[$counter]="$id_size_fs$label_uuid"
+				calculate_line_length "$fs_dev$label_uuid"
+				if [[ $LINE_LENGTH -le $COLS_INNER ]];then
+					a_part_data[$counter]="$fs_dev$label_uuid"
+					label_uuid=''
 				else
-					a_partition_data[$counter]="${a_partition_data[$counter]}$id_size_fs$label_uuid"
+					a_part_data[$counter]="$fs_dev"
+				fi
+				((counter++))
+				id_size_used=''
+				fs_dev=''
+			fi
+			# label/uuid always print one per line, so only wrap if it's very long
+			calculate_line_length "${a_part_data[$counter]}$id_size_used$fs_dev$label_uuid"
+			if [[ $B_SHOW_UUIDS == 'true' || $B_SHOW_LABELS == 'true' ]] && \
+			   [[ $LINE_LENGTH -gt $COLS_INNER ]];then
+				a_part_data[$counter]="$id_size_used$fs_dev"
+				((counter++))
+				a_part_data[$counter]="$label_uuid"
+			else
+				if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
+					a_part_data[$counter]="${a_part_data[$counter]}"
+					((counter++))
+					a_part_data[$counter]="$id_size_used$fs_dev$label_uuid"
+				else
+					a_part_data[$counter]="${a_part_data[$counter]}$id_size_used$fs_dev$label_uuid"
 				fi
 			fi
 			((counter++))
@@ -14235,15 +14654,15 @@ print_partition_data()
 		fi
 	done
 	# print out all lines, line starter on first line
-	for (( i=0; i < ${#a_partition_data[@]};i++ ))
+	for (( i=0; i < ${#a_part_data[@]};i++ ))
 	do
 		if [[ $i -eq 0 ]];then
 			line_starter='Partition:'
 		else
 			line_starter=' '
 		fi
-		if [[ -n ${a_partition_data[$i]} ]];then
-			partition_data=$( create_print_line "$line_starter" "${a_partition_data[$i]}" )
+		if [[ -n ${a_part_data[$i]} ]];then
+			partition_data=$( create_print_line "$line_starter" "${a_part_data[$i]}" )
 			print_screen_output "$partition_data"
 		fi
 	done
@@ -14253,8 +14672,7 @@ print_partition_data()
 # legacy not used
 print_program_version()
 {
-	local patch_version_number=$( get_patch_version_string )
-	local program_version="${C1}$SCRIPT_NAME$SEP3${C2} $SCRIPT_VERSION_NUMBER$patch_version_number${CN}"
+	local program_version="${C1}$SELF_NAME$SEP3${C2} $SELF_VERSION$SELF_PATCH${CN}"
 	# great trick from: http://ideatrash.net/2011/01/bash-string-padding-with-sed.html
 	# left pad: sed -e :a -e 's/^.\{1,80\}$/& /;ta'
 	# right pad: sed -e :a -e 's/^.\{1,80\}$/ &/;ta'
@@ -14290,7 +14708,7 @@ print_ps_item()
 	eval $LOGFS
 	local a_ps_data='' ps_data='' line_starter='' line_start_data='' full_line=''
 	local app_name='' app_pid='' app_cpu='' app_mem='' throttled='' app_daemon=''
-	local b_print_first=$2 line_counter=0 i=0 count_nu='' extra_data='' memory='' extra_text=''
+	local b_print_first=$2 line_counter=0 i=0 count_nu='' extra_data='' memory_info='' extra_text=''
 	
 	if [[ -n $PS_THROTTLED ]];then
 		throttled=" ${C1} - throttled from${C2} $PS_THROTTLED"
@@ -14301,19 +14719,21 @@ print_ps_item()
 			if [[  $B_EXTRA_DATA == 'true' ]];then
 				extra_text=" ${C1}- Memory$SEP3 MB / % used"
 				if [[ $B_SHOW_INFO == 'false' && $B_SHOW_PS_MEM_DATA == 'false' ]];then
-					memory=" - ${C1}Used/Total$SEP3${C2} $( get_memory_data )"
+					get_memory_data
+					memory_info=" - ${C1}Used/Total$SEP3${C2} $MEMORY"
 				fi
 			fi
-			line_start_data="${C1}CPU$SEP3 % used$extra_text$memory${C1} - top${C2} $PS_COUNT ${C1}active$throttled"
+			line_start_data="${C1}CPU$SEP3 % used$extra_text$memory_info${C1} - top${C2} $PS_COUNT ${C1}active$throttled"
 			;;
 		mem)
 			if [[  $B_EXTRA_DATA == 'true' ]];then
 				extra_text=" ${C1}- CPU$SEP3 % used"
 			fi
 			if [[ $B_SHOW_INFO == 'false' ]];then
-				memory=" - ${C1}Used/Total$SEP3${C2} $( get_memory_data )"
+				get_memory_data
+				memory_info=" - ${C1}Used/Total$SEP3${C2} $MEMORY"
 			fi
-			line_start_data="${C1}Memory$SEP3 MB / % used$memory$extra_text${C1} - top${C2} $PS_COUNT ${C1}active$throttled"
+			line_start_data="${C1}Memory$SEP3 MB / % used$memory_info$extra_text${C1} - top${C2} $PS_COUNT ${C1}active$throttled"
 			;;
 	esac
 	
@@ -14691,7 +15111,8 @@ print_ram_data()
 			memory_line="${C2}$error_string"
 		else
 			if [[ $B_SHOW_INFO == 'false' && $B_SHOW_PS_MEM_DATA == 'false' ]];then
-				memory_info="${C1}Used/Total$SEP3${C2} $( get_memory_data )"
+				get_memory_data
+				memory_info="${C1}Used/Total$SEP3${C2} $MEMORY"
 			fi
 			for (( i=0;i<${#A_MEMORY_DATA[@]};i++ ))
 			do
@@ -14745,7 +15166,8 @@ print_ram_data()
 					fi
 					memory_line="${C1}Array-$array_counter capacity$SEP3${C2} $max_capacity ${C1}devices$SEP3${C2} $nu_of_devices ${C1}EC$SEP3${C2} $error_correction "
 					line_2="$max_module_size$module_voltage"
-					if [[ -n $line_2 && $( calculate_line_length "$memory_line$line_2" ) -gt $COLS_INNER ]];then
+					calculate_line_length "$memory_line$line_2"
+					if [[ -n $line_2 && $LINE_LENGTH -gt $COLS_INNER ]];then
 						memory_line=$( create_print_line "$line_starter" "$memory_line" )
 						print_screen_output "$memory_line"
 						memory_line="$line_2"
@@ -14868,7 +15290,8 @@ print_ram_data()
 						fi
 					fi
 					memory_line="${C1}Device-$device_counter$SEP3${C2} $locator ${C1}size$SEP3${C2} $device_size$bank_connection $device_speed"
-					if [[ $( calculate_line_length "$memory_line$device_type" ) -le $COLS_INNER ]];then
+					calculate_line_length "$memory_line$device_type"
+					if [[ $LINE_LENGTH -le $COLS_INNER ]];then
 						memory_line="$memory_line$device_type"
 						device_type=''
 					fi
@@ -14876,12 +15299,14 @@ print_ram_data()
 					line_2="$device_type$bus_width"
 					# echo $( calculate_line_length "$memory_line" )
 					# echo $( calculate_line_length "$memory_line$line_2" )
-					if [[ $( calculate_line_length "$memory_line$line_2$line_3" ) -gt $COLS_INNER ]];then
+					calculate_line_length "$memory_line$line_2$line_3"
+					if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
 						memory_line=$( create_print_line "$line_starter" "$memory_line" )
 						print_screen_output "$memory_line"
 						memory_line="$line_2"
 						line_starter=' '
-						if [[ -n $memory_line && -n $line_3 && $( calculate_line_length "$memory_line$line_3" ) -gt $COLS_INNER ]];then
+						calculate_line_length "$memory_line$line_3"
+						if [[ -n $memory_line && -n $line_3 && $LINE_LENGTH -gt $COLS_INNER ]];then
 							memory_line=$( create_print_line "$line_starter" "$memory_line" )
 							print_screen_output "$memory_line"
 							memory_line="$line_3"
@@ -14971,7 +15396,7 @@ print_repo_data()
 		else
 			repo_type="package manager"
 		fi
-		repo_full=$( create_print_line "Repos:" "${C1}Error$SEP3${C2} No repo data detected. Does $SCRIPT_NAME support your $repo_type?" )
+		repo_full=$( create_print_line "Repos:" "${C1}Error$SEP3${C2} No repo data detected. Does $SELF_NAME support your $repo_type?" )
 		print_screen_output "$repo_full"
 	fi
 	eval $LOGFE
@@ -15128,15 +15553,14 @@ print_system_data()
 	local system_data='' bits='' desktop_environment='' dm_data='' de_extra_data=''
 	local de_string='' distro_string='' line_starter='System:'
 	local host_kernel_string='' host_string='' desktop_type='Desktop'
-	local host_name=$HOSTNAME 
-	local current_kernel=$( get_kernel_version ) 
+	local host_name=$HOSTNAME bit_comp=''
 	local distro="$( get_distro_data )"
 	local tty_session='' compiler_string='' distro_os='Distro'
 	
 	if [[ -n $BSD_TYPE ]];then
 		distro_os='OS'
 	fi
-	
+	get_kernel_version
 	# I think these will work, maybe, if logged in as root and in X
 	if [[ $B_RUNNING_IN_DISPLAY == 'true' ]];then
 		desktop_environment=$( get_desktop_environment )
@@ -15183,7 +15607,7 @@ print_system_data()
 	if [[ $B_EXTRA_DATA == 'true' ]];then
 		compiler_string=$( get_kernel_compiler_version )
 		if [[ -n $compiler_string ]];then
-			compiler_string=" ${C1}${compiler_string%^*}$SEP3${C2} ${compiler_string#*^}"
+			compiler_string="${C1}${compiler_string%^*}$SEP3${C2} ${compiler_string#*^} "
 		fi
 	fi
 	# check for 64 bit first
@@ -15192,7 +15616,8 @@ print_system_data()
 	else
 		bits="32"
 	fi
-	bits=" ($bits bit$compiler_string)"
+	bits="${C1}bits$SEP3${C2} $bits "
+	
 	if [[ $B_SHOW_HOST == 'true' ]];then
 		if [[ -z $HOSTNAME ]];then
 			if [[ -n $( type p hostname ) ]];then
@@ -15204,26 +15629,43 @@ print_system_data()
 		fi
 		host_string="${C1}Host$SEP3${C2} $host_name "
 	fi
-	host_kernel_string="$host_string${C1}Kernel$SEP3${C2} $current_kernel$bits "
+	host_kernel_string="$host_string${C1}Kernel$SEP3${C2} $CURRENT_KERNEL "
+	bits_comp="$bits$compiler_string"
 	de_string="${C1}$desktop_type$SEP3${C2} $desktop_environment$de_extra_data$dm_data "
 	distro_string="${C1}$distro_os$SEP3${C2} $distro "
-	
-	if [[ $( calculate_line_length "$host_kernel_string$de_string" ) -gt $COLS_INNER ]];then
-		system_data=$( create_print_line "$line_starter" "$host_kernel_string" )
-		print_screen_output "$system_data"
+	calculate_line_length "$host_kernel_string$bits_comp$de_string"
+	if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
+		calculate_line_length "$host_kernel_string$bits_comp"
+		if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
+			#echo one
+			system_data=$( create_print_line "$line_starter" "$host_kernel_string" )
+			print_screen_output "$system_data"
+			system_data=$( create_print_line "  " "$bits_comp" )
+			print_screen_output "$system_data"
+		else
+			#echo two
+			system_data=$( create_print_line "$line_starter" "$host_kernel_string$bits_comp" )
+			print_screen_output "$system_data"
+			
+		fi
 		host_kernel_string=''
+		bits_comp=''
 		line_starter=' '
 	fi
-	if [[ $( calculate_line_length "$host_kernel_string$de_string$distro_string" ) -gt $COLS_INNER ]];then
-		system_data=$( create_print_line "$line_starter" "$host_kernel_string$de_string" )
+	calculate_line_length "$host_kernel_string$bits_comp$de_string$distro_string"
+	if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
+		#echo three
+		system_data=$( create_print_line "$line_starter" "$host_kernel_string$bits_comp$de_string" )
 		print_screen_output "$system_data"
 		host_kernel_string=''
 		de_string=''
+		bits_comp=''
 		line_starter=' '
 	fi
-	system_data="$host_kernel_string$de_string$distro_string"
+	system_data="$host_kernel_string$bits_comp$de_string$distro_string"
 	if [[ -n $system_data ]];then
-		system_data="$host_kernel_string$de_string$distro_string"
+		#echo four
+		system_data="$host_kernel_string$bits_comp$de_string$distro_string"
 		system_data=$( create_print_line "$line_starter" "$system_data" )
 		print_screen_output "$system_data"
 	fi
@@ -15237,7 +15679,7 @@ print_unmounted_partition_data()
 	local a_unmounted_data='' line_starter='' unmounted_data='' full_fs=''
 	local full_dev='' full_size='' full_label='' full_uuid='' full_string=''
 	local bsd_unsupported='This feature is not yet supported for BSD systems.'
-	local line_starter='Unmounted:' part_2_data='' 
+	local line_starter='Unmounted:' part_2_data=''
 	
 	if [[ -z ${A_PARTITION_DATA} ]];then
 		get_partition_data
@@ -15284,10 +15726,11 @@ print_unmounted_partition_data()
 			if [[ $BSD_TYPE == 'bsd' ]];then
 				full_string=$bsd_unsupported
 			else
-				full_string="$full_dev$full_size"
-				part_2_data="$full_fs$full_label$full_uuid"
+				full_string="$full_dev$full_size$full_fs"
+				part_2_data="$full_label$full_uuid"
 			fi
-			if [[ $( calculate_line_length "$full_string$part_2_data" ) -gt $COLS_INNER ]];then
+			calculate_line_length "$full_string$part_2_data"
+			if [[ $LINE_LENGTH -gt $COLS_INNER ]];then
 				unmounted_data=$( create_print_line "$line_starter" "$full_string" )
 				print_screen_output "$unmounted_data"
 				line_starter=' '
