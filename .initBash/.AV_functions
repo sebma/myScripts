@@ -859,13 +859,14 @@ function vlcRecord {
 function aacDir2mp3 { shopt -s globstar && for f in **/*.aac; do /bin/mv -vi "$f" "${f/.aac/.m4a}"; done; time pacpl -v --eopts "-v" -r -k -t mp3 .; }
 
 function audioGet {
+	ls "$@" >/dev/null || return
 	for file
 	do
 		extension=${file/*./}
 		audioFormat=$(ffprobe "$file" 2>&1 | awk '/Audio/{print$4}' | sed "s/,$//")
 		outputExtension=${audioExtension[$audioFormat]}
 		outputFileName=${file/.$extension/_AUDIO.$outputExtension}
-		minimumAudioStreamSize=$(mediainfo --Output="Audio;%StreamSize%" "$file")
+		minimumAudioStreamSize=$(mediainfo --Output="Audio;%StreamSize%" "$file") || return
 		if test -s "$outputFileName" && [ $(stat -c '%s' "$outputFileName") -ge $minimumAudioStreamSize ]
 		then
 			echo "=> INFO: The file $outputFileName is already converted to $outputFileName." >&2
@@ -879,13 +880,14 @@ function audioGet {
 	done
 }
 function videoGet {
+	ls "$@" >/dev/null || return
 	for file
 	do
 		extension=${file/*./}
 		videoFormat=$(ffprobe "$file" 2>&1 | grep -v Video:.mjpeg | awk '/Video/{print$4}' | sed "s/,$//")
 		outputExtension=${videoExtension[$videoFormat]}
 		outputFileName=${file/.$extension/_VIDEO.$outputExtension}
-		minimumVideoStreamSize=$(mediainfo --Output="Video;%StreamSize%" "$file")
+		minimumVideoStreamSize=$(mediainfo --Output="Video;%StreamSize%" "$file") || return
 		if test -s "$outputFileName" && [ $(stat -c '%s' "$outputFileName") -ge $minimumVideoStreamSize ]
 		then
 			echo "=> INFO: The file $outputFileName is already converted to $outputFileName." >&2
