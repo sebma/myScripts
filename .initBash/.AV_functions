@@ -893,7 +893,7 @@ function videoGet {
 			echo "=> INFO: The file $outputFileName is already converted to $outputFileName." >&2
 			continue
 		fi
-		time $ffmpeg -i "$file" -an -codec copy $options "$outputFileName"
+		time $ffmpeg -i "$file" -an -codec copy $options "$outputFileName" -y
 		touch -r "$file" "$outputFileName"
 		sync
 		echo
