@@ -800,7 +800,7 @@ function rsyncIncludeOnly {
 	for arg
 	do
 		[ $arg = $destination ] && break
-		if [ "${arg:0:1}" = "*" ]
+		if grep -q '*' <<< $arg
 		then
 			rsyncCommand="$rsyncCommand --include=\"$arg\""
 		else
