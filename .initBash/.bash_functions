@@ -635,12 +635,13 @@ function find {
 #	firstPredicate=$1
 #	shift
 	args="$@"
-	if echo $args | \grep -q "\-ls"
+	if echo $@ | \grep -q "\-ls"
 	then
 		args=${args/-ls/}
 		$(which find) $dir $firstPredicate $args -printf "%10i %10k %M %n %-10u %-10g %10s %AY-%Am-%Ad %.12AX %p\n"
 	else
-		$(which find) $dir $firstPredicate $args
+#		$(which find) $dir $firstPredicate "$arg"
+		$(which find) $dir $firstPredicate "$@"
 	fi
 }
 function getBJC {
