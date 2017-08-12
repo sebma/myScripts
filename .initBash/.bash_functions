@@ -795,12 +795,12 @@ function totalSize {
 function rsyncIncludeOnly {
 	local destination="$(eval echo \$$#)"
 	local rsyncCommandSuffix="--include='*/' --exclude='*'"
-	local rsyncCommand="$(which rsync) -uth -P -z"
+	local rsyncCommand="$(which rsync) -r -uth -P -z"
 
 	for arg
 	do
-		[ $arg = $destination ] && break
-		if grep -q '*' <<< $arg
+		[ "$arg" = $destination ] && break
+		if grep -q '*' <<< "$arg"
 		then
 			rsyncCommand="$rsyncCommand --include=\"$arg\""
 		else
