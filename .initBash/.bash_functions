@@ -808,7 +808,7 @@ function rsyncIncludeOnly {
 		fi
 	done
 set +x
-	echo "=> $rsyncCommand $rsyncCommandSuffix $destination ..."
+	echo "=> INFO: Running: $rsyncCommand $rsyncCommandSuffix $destination" >&2
 	time $rsyncCommand $rsyncCommandSuffix $destination;
 	echo "=> Syncing disks ..."
 	time sync
