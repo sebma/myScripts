@@ -251,7 +251,7 @@ function getRestrictedFilenamesSD {
 		if ! echo $url | \egrep -wq "www"
 		then
 			fileName=$(basename $( $(which locate) -er "$url" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null)
-			if test "$fileName"
+			if test -s "$fileName"
 			then
 				echo "${color[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" >&2
 				echo
@@ -266,7 +266,7 @@ function getRestrictedFilenamesSD {
 		else
 			echo $url | grep -q youtube.com/ && urlSuffix=$(echo "$url" | cut -d= -f2)
 			test "$urlSuffix" && fileName=$(basename $( $(which locate) -er "$urlSuffix" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null)
-			if test "$fileName"
+			if test -s "$fileName"
 			then
 				echo "${color[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" >&2
 				echo
