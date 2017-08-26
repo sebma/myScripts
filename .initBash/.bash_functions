@@ -115,10 +115,20 @@ function pip {
 	firstArg=$1
 	if   [ "$firstArg" = install ] && [ $(uname -s) = Linux ]
 	then
-		groups | egrep -wq "sudo|admin" && \sudo -H $(which $caller) $@ || $(which $caller) $@ --user
+		if groups | egrep -wq "sudo|admin"
+		then
+			\sudo -H $(which $caller) $@
+		else
+			$(which $caller) $@ --user
+		fi
 	elif [ "$firstArg" = uninstall ] && [ $(uname -s) = Linux ]
 	then
-		groups | egrep -wq "sudo|admin" && \sudo -H $(which $caller) $@ || $(which $caller) $@
+		if groups | egrep -wq "sudo|admin"
+		then
+			\sudo -H $(which $caller) $@ 
+		else
+			$(which $caller) $@
+		fi
 	else
 		$(which $caller) $@
 	fi
