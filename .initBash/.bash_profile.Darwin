@@ -18,6 +18,7 @@ which matlab >/dev/null 2>&1 && test -d "$HOME/Library/Application Support/MathW
 
 git config --global credential.helper osxkeychain
 # Tu use the Picoscobe drivers with "https://github.com/colinoflynn/pico-python/" PicoScope Python Interface
-test -d /Applications/PicoScope6.app/Contents/Resources/lib && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/Applications/PicoScope6.app/Contents/Resources/lib && export DYLD_LIBRARY_PATH=$LD_LIBRARY_PATH
+test -d /Applications/PicoScope6.app/Contents/Resources/lib && export DYLD_LIBRARY_PATH=/Applications/PicoScope6.app/Contents/Resources/lib
+
 set +x
 trap - INT
