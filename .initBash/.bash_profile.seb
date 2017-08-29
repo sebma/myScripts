@@ -10,7 +10,6 @@ initDir=$HOME/$initDir
 
 #DEFINITION DES VARIABLES
 LANG=C.UTF-8
-test -d ~/local/lib && test $LD_LIBRARY_PATH && export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/local/lib || export LD_LIBRARY_PATH=~/local/lib
 export HISTSIZE=2000
 export HISTFILESIZE=4000
 #GDM_LANG=fr_FR.UTF-8
