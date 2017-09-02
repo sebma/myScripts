@@ -8,7 +8,7 @@ function addmanpath {
   echo $MANPATH | grep -wq "$1" || MANPATH=$MANPATH:$1
 }
 
-pathsList="/sbin /cal/softs/bin /usr/local/go/bin /usr/local/miniconda2/bin /usr/local/miniconda3/bin /opt/local/bin /usr/share/fslint/fslint ~/perl5/bin ~/.rvm/bin $HOME/usr/local/bin $HOME/local/bin $HOME/gnu/bin $HOME/.local/bin $HOME/shl $HOME/py $HOME/pl $HOME/bin $HOME/php $HOME/.linuxbrew/bin $HOME/miniconda2/bin"
+pathsList="/sbin /cal/softs/bin /usr/local/go/bin /usr/local/miniconda2/bin /usr/local/miniconda3/bin /opt/local/bin /usr/share/fslint/fslint ~/perl5/bin ~/.rvm/bin $HOME/usr/bin $HOME/local/bin $HOME/gnu/bin $HOME/.local/bin $HOME/shl $HOME/py $HOME/pl $HOME/bin $HOME/php $HOME/.linuxbrew/bin $HOME/miniconda2/bin"
 for path in $pathsList
 do
   addpath $path
