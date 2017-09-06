@@ -19,6 +19,7 @@ autocmd FileType xml setlocal equalprg=xmllint\ --format\ --recover\ -\ 2>/dev/n
 au BufNewFile,BufRead *.octave set filetype=matlab
 " Specify a directory for plugins
 " - Avoid using standard Vim directory names like 'plugin'
+:set expandtab!
 call plug#begin('~/.vim/plugged')
 Plug 'vim-scripts/AdvancedSorters'
 Plug 'vim-scripts/ingo-library'
