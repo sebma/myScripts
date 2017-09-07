@@ -7,6 +7,7 @@
 alias cpuInfo="\sysctl machdep.cpu | egrep 'brand_string|count|size|VMX|SVM'"
 alias df="\df -Ph"
 alias hideFiles='defaults write com.apple.finder AppleShowAllFiles NO; killall Finder /System/Library/CoreServices/Finder.app'
+alias hwinfo="\system_profiler SPHardwareDataType"
 alias l="\ls -G"
 alias ldd="\otool -L"
 alias ll="ls -blF -T"
