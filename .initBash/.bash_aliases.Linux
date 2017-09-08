@@ -6,6 +6,7 @@ prunePathsFindExpression=$(printf " -path %s -prune -o" $findExcludedPathList)
 duExcludedPathList="./proc ./sys ./dev"
 excludePathsDuExpression=$(printf " --exclude %s" $duExcludedPathList)
 test $(uname -s) = Linux  && alias brewInstall='ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)"'
+alias catFiles="\tail -vn +1"
 alias cp='\cp --preserve=timestamps -uv'
 alias defragFirefox='pgrep firefox || $(which find) ~/.mozilla/firefox/ -name "*sqlite" -ls -exec sqlite3 {} vacuum \;'
 alias df="\df -PTh"
