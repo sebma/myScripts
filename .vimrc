@@ -17,13 +17,13 @@ autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "norm
 autocmd FileType xml setlocal equalprg=xmllint\ --format\ --recover\ -\ 2>/dev/null "Pretty print XML when '=G' is pressed
 "au FileType xml exe ":silent %!xmllint --format --recover - 2>/dev/null"
 au BufNewFile,BufRead *.octave set filetype=matlab
+call plug#begin('~/.vim/plugged')
 " Specify a directory for plugins
 " - Avoid using standard Vim directory names like 'plugin'
 let g:plug_window = 'enew' "Open vim-plug without a split
-call plug#begin('~/.vim/plugged')
+" Initialize plugin system
 Plug 'vim-scripts/AdvancedSorters'
 Plug 'vim-scripts/ingo-library'
 Plug 'vim-scripts/matchit.zip' "use % to travel Shell's if, else, elif, fi.
 Plug 'vim-scripts/python_match.vim' " use % to travel Python's if, elif, etc.
-" Initialize plugin system
 call plug#end()
