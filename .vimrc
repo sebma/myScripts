@@ -3,7 +3,7 @@ if has("patch-7.4.710") | set listchars+=space:· else | set listchars+=trail:·
 set listchars+=eol:¶
 set listchars+=nbsp:☠
 set title
-"set ruler
+set ruler
 set paste nohls autoindent
 set noexpandtab ts=4
 syntax on
