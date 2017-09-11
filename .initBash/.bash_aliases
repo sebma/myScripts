@@ -56,7 +56,6 @@ alias du="LANG=C \du -h"
 alias ejectcd='\eject $CDR_DEVICE'
 alias eman="\man -L en"
 alias enman="LANG=en_US \man"
-alias env="\env | sort"
 alias erasecd='\cdrecord -v speed=12 blank=fast gracetime=10 -eject'
 alias erasewholecd='\cdrecord -v speed=12 blank=all gracetime=10 -eject'
 alias errors="\egrep -iC2 'error|erreur|java.*exception'"
