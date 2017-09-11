@@ -173,7 +173,7 @@ function gitCloneNonEmptyDir {
 	}
 }
 function gitCloneHome {
-	gitCloneNonEmptyDir $HOME
+	test·$#·-ge 2·&& gitCloneNonEmptyDir $@ $HOME
 }
 function configure {
 	test $CC || export CC=$(echo $HOSTTYPE-$OSTYPE-gcc | sed "s/armv[^-]*-/arm-/")
