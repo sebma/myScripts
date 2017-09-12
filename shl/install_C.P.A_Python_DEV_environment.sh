@@ -60,7 +60,7 @@ function installCondaPythonPackages {
 
 	if test -n $envName
 	then
-		$conda create -n "$envName" $CPARequiredPythonPackageList
+		$conda create  -n "$envName" $CPARequiredPythonPackageList
 		$conda install -n "$envName" -c conda-forge ipdb
 		echo "=> INFO: Do not forget to type : " >&2
 		echo "source activate $envName" >&2
