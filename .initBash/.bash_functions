@@ -169,7 +169,7 @@ function gitCloneNonEmptyDir {
 		git remote | grep -q origin || git remote add origin "$url"
 		git fetch
 		git pull origin master
-		#git branch --set-upstream-to=origin/master master
+		git branch --set-upstream-to=origin/master master
 	}
 }
 function gitCloneHome {
