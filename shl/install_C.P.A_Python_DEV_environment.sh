@@ -9,6 +9,7 @@ function scriptHelp {
 	$scriptName -h : this help
 	$scriptName -2 : install miniconda2
 	$scriptName -3 : install miniconda3
+	$scriptName -n Name : install miniconda and C.P.A. DEV Python requirements in "Name" environment
 EOF
 	exit 1
 }
@@ -55,18 +56,28 @@ function installCondaPythonPackages {
 	local conda=$(which conda$minicondaVersion)
 
 	local CPARequiredPythonPackageList="$2"
-#	echo "=> $conda install $CPARequiredPythonPackageList ..."
-	$conda install $CPARequiredPythonPackageList
-	$conda install -c conda-forge ipdb
-#	$conda install -c auto ansicolors
+	local envName="$3"
+
+	if test -n $envName
+	then
+		$conda create -n "$envName" $CPARequiredPythonPackageList
+		$conda install -n "$envName" -c conda-forge ipdb
+		echo "=> INFO: Do not forget to type : " >&2
+		echo "source activate $envName" >&2
+	else
+	#	echo "=> $conda install $CPARequiredPythonPackageList ..."
+		$conda install $CPARequiredPythonPackageList
+		$conda install -c conda-forge ipdb
+	fi
 }
 
 function runScriptWithArgs {
-	local OPTSTRING=23h
+	local OPTSTRING=23hn:
 
 	while getopts $OPTSTRING NAME; do
 		case "$NAME" in
 		2|3) minicondaVersion=$NAME ;;
+		n) envName="$OPTARG" ;;
 		h|*) scriptHelp ;;
 		esac
 	done
@@ -77,5 +88,5 @@ function runScriptWithArgs {
 runScriptWithArgs $@
 installMiniconda $minicondaVersion
 
-CPARequiredPythonPackageList="scipy pandas spyder=3.1.3 jedi=0.9.0 ipython=5 termcolor"
-installCondaPythonPackages $minicondaVersion "$CPARequiredPythonPackageList"
+CPARequiredPythonPackageList="python=$minicondaVersion scipy pandas spyder=3.1.3 jedi=0.9.0 ipython=5 termcolor"
+installCondaPythonPackages $minicondaVersion "$CPARequiredPythonPackageList" "$envName"

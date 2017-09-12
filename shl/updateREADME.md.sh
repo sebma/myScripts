@@ -8,7 +8,10 @@ then
 	if [ $# = 1 ] && [ -x "$1" ]
 	then
 		echo "## Usage of \"$1\" :" >> README.md
-		./"$1" --mdh | sed "1s/^.*<pre>/<pre>/" >> README.md
+		echo "<pre><code>" >> README.md
+#		./"$1" --mdh | sed "1s/^.*<pre>/<pre>/" >> README.md
+		./"$1" -h >> README.md 2>&1
+		echo "</code></pre>" >> README.md
 	fi
 
 	cat <<-EOF >> README.md
