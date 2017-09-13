@@ -63,7 +63,7 @@ function addYoutubeTDescription {
 #	rm "$artworkFile"
 	chmod -w "$file"
 }
-function sizeof {
+function sizeOf {
 	local size
 	local total="0"
 	local format=fmt18_360p
@@ -77,8 +77,10 @@ function sizeof {
 	total="$total+$size"
 	printf "%s %s Mo\n" $url $size
 	done
-	total=$(echo $total | \bc -l)
-	echo "=> total = $total Mo"
+	test $# -gt 1 && {
+		total=$(echo $total | \bc -l)
+		echo "=> total = $total Mo"
+	}
 }
 function ytget {
 	youtubeURLPrefix=https://www.youtube.com/watch?v=
