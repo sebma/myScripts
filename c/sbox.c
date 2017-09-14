@@ -1,9 +1,10 @@
 //cf. https://en.wikipedia.org/wiki/Rijndael_S-box#Example_implementation_in_C_language
 #include <stdint.h>
+#include <stdlib.h>
 
 #define ROTL8(x,shift) ((uint8_t) ((x) << (shift)) | ((x) >> (8 - (shift))))
 
-void initialize_aes_sbox(uint8_t sbox[256]) {
+void initialize_aes_sbox(uint8_t *sbox) {
 	uint8_t p = 1, q = 1;
 
 	/* loop invariant: p * q == 1 in the Galois field */
@@ -27,10 +28,10 @@ void initialize_aes_sbox(uint8_t sbox[256]) {
 	sbox[0] = 0x63;
 }
 
+uint8_t *Sbox;
 int main() {
-	uint8_t Sbox[256];
 	#include <string.h>
-	memset(Sbox,0,256*sizeof(uint8_t));
+	Sbox=(uint8_t *)malloc(256*sizeof(uint8_t));
 	initialize_aes_sbox(Sbox);
 	return 0;
 }
