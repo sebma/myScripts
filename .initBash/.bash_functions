@@ -437,7 +437,7 @@ function whatPackageContainsExecutable {
 			rpm) findPackage="rpm -qf"; searchPackage="yum whatprovides";;
 			deb) findPackage="dpkg -S"; searchPackage="apt-file search";;
 		esac
-		if $findPackage $(which $executable);then
+		if $findPackage $(which $executable | sed "s|/||");then
 			:
 		else
 			if which $executable >/dev/null 2>&1
