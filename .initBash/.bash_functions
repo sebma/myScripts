@@ -7,6 +7,23 @@ test -r $initDir/.colors && source $initDir/.colors
 test -r $initDir/.AV_functions && source $initDir/.AV_functions
 test -r $initDir/.youtube_functions && source $initDir/.youtube_functions
 
+function make {
+	if [ -s Makefile ] || [ -s makefile ]
+	then
+		$(which make) $@
+	else
+		local lastArg="$(eval echo \$$#)"
+		\mkdir ../bin 2>/dev/null
+		if which gcc >/dev/null 2>&1
+		then
+			echo $(which gcc) $lastArg.c -o ../bin/$lastArg
+			$(which gcc) $lastArg.c -o ../bin/$lastArg
+		else
+			echo $(which cc) $lastArg.c -o ../bin/$lastArg
+			$(which cc) $lastArg.c -o ../bin/$lastArg
+		fi
+	fi
+}
 function gitUpdateAllLocalRepos {
 	local dir=""
 	$(which gfind) ~ -type d -name .git | while read dir
