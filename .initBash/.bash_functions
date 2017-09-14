@@ -10,17 +10,17 @@ test -r $initDir/.youtube_functions && source $initDir/.youtube_functions
 function make {
 	if [ -s Makefile ] || [ -s makefile ]
 	then
-		$(which make) $@
+		CFLAGS=-g $(which make) $@
 	else
 		local lastArg="$(eval echo \$$#)"
 		\mkdir ../bin 2>/dev/null
 		if which gcc >/dev/null 2>&1
 		then
-			echo $(which gcc) $lastArg.c -o ../bin/$lastArg
-			$(which gcc) $lastArg.c -o ../bin/$lastArg
+			echo $(which gcc) -g $lastArg.c -o ../bin/$lastArg
+			$(which gcc) -g $lastArg.c -o ../bin/$lastArg
 		else
-			echo $(which cc) $lastArg.c -o ../bin/$lastArg
-			$(which cc) $lastArg.c -o ../bin/$lastArg
+			echo $(which cc) -g $lastArg.c -o ../bin/$lastArg
+			$(which cc) -g $lastArg.c -o ../bin/$lastArg
 		fi
 	fi
 }
