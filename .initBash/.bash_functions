@@ -16,8 +16,8 @@ function make {
 		\mkdir ../bin 2>/dev/null
 		if which gcc >/dev/null 2>&1
 		then
-			echo $(which gcc) -g $lastArg.c -o ../bin/$lastArg
-			$(which gcc) -g $lastArg.c -o ../bin/$lastArg
+			echo $(which gcc) -ggdb $lastArg.c -o ../bin/$lastArg
+			$(which gcc) -ggdb $lastArg.c -o ../bin/$lastArg
 		else
 			echo $(which cc) -g $lastArg.c -o ../bin/$lastArg
 			$(which cc) -g $lastArg.c -o ../bin/$lastArg
