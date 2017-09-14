@@ -12,15 +12,20 @@ function make {
 	then
 		CFLAGS=-g $(which make) $@
 	else
-		local lastArg="$(eval echo \$$#)"
 		\mkdir ../bin 2>/dev/null
 		if which gcc >/dev/null 2>&1
 		then
-			echo $(which gcc) -ggdb $lastArg.c -o ../bin/$lastArg
-			$(which gcc) -ggdb $lastArg.c -o ../bin/$lastArg
+			for file
+			do
+				echo $(which gcc) -ggdb $file.c -o ../bin/$file
+				$(which gcc) -ggdb $file.c -o ../bin/$file
+			done
 		else
-			echo $(which cc) -g $lastArg.c -o ../bin/$lastArg
-			$(which cc) -g $lastArg.c -o ../bin/$lastArg
+			for file
+			do
+				echo $(which cc) -g $file.c -o ../bin/$file
+				$(which cc) -g $file.c -o ../bin/$file
+			done
 		fi
 	fi
 }
