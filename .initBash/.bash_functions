@@ -7,6 +7,17 @@ test -r $initDir/.colors && source $initDir/.colors
 test -r $initDir/.AV_functions && source $initDir/.AV_functions
 test -r $initDir/.youtube_functions && source $initDir/.youtube_functions
 
+function gitUpdateAllLocalRepos {
+	local dir=""
+	$(which gfind) ~ -type d -name .git | while read dir
+	do
+		cd $dir/..
+		echo "=> Updating <$dir> local repo. ..." >&2
+		\grep -w url ./.git/config && \git pull
+		cd - >/dev/null
+	done
+	unset dir
+}
 function env {
 	$(which env) $@ | sort
 }
