@@ -13,6 +13,7 @@ nmap <c-l> :set list!<CR>
 nmap <c-t> :sort u<CR>
 nmap <c-n> :set nu! \| :set ruler<CR>
 nmap <F5> :e<CR>
+nmap <F8> :TagbarToggle<CR>
 "autocmd StdinReadPost * set buftype=nofile
 autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif "Remember last cursor position
 autocmd FileType xml setlocal equalprg=xmllint\ --format\ --recover\ -\ 2>/dev/null "Pretty print XML when '=G' is pressed
@@ -26,4 +27,5 @@ Plug 'vim-scripts/AdvancedSorters'
 Plug 'vim-scripts/ingo-library'
 Plug 'vim-scripts/matchit.zip' "use % to travel Shell's if, else, elif, fi.
 Plug 'vim-scripts/python_match.vim' " use % to travel Python's if, elif, etc.
+Plug 'vim-scripts/tagbar'
 call plug#end()
