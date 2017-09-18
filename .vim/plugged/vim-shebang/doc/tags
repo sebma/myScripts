@@ -1,0 +1,9 @@
+Run	vim-shebang.txt	/*Run*
+vim-shebang	vim-shebang.txt	/*vim-shebang*
+vim-shebang-configuration	vim-shebang.txt	/*vim-shebang-configuration*
+vim-shebang-contents	vim-shebang.txt	/*vim-shebang-contents*
+vim-shebang-install	vim-shebang.txt	/*vim-shebang-install*
+vim-shebang-introduction	vim-shebang.txt	/*vim-shebang-introduction*
+vim-shebang-supported-filetypes	vim-shebang.txt	/*vim-shebang-supported-filetypes*
+vim-shebang-usage	vim-shebang.txt	/*vim-shebang-usage*
+vim-shebang.txt	vim-shebang.txt	/*vim-shebang.txt*
