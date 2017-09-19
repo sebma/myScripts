@@ -5,12 +5,13 @@ set -o nounset
 if [ README.template -nt README.md ] || [ $0 -nt README.md ]
 then
 	cat README.template > README.md
-	if [ $# = 1 ] && [ -x "$1" ]
+	lastArg="$(eval echo \$$#)"
+	if [ $# -ge 1 ] && [ -x "$lastArg" ]
 	then
 		echo "## Usage of \"$1\" :" >> README.md
 		echo "<pre><code>" >> README.md
-#		./"$1" --mdh | sed "1s/^.*<pre>/<pre>/" >> README.md
-		./"$1" -h >> README.md 2>&1
+		args=$(sed "s|\(.*\) |\1 ./|" <<< $@) #On remplace le dernier " " par " ./"
+		$args -h
 		echo "</code></pre>" >> README.md
 	fi
 
