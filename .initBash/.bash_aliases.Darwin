@@ -32,7 +32,10 @@ alias topf='$(which find) . $prunePathsFindExpression -xdev -type f -size +10M -
 alias umount="\diskutil unmount"
 alias updatedb="time sudo gupdatedb"
 function applescript2app {
-		test $1 && osacompile -o "/Applications/${1/.applescript/.app}" "$1"
+	for file
+	do
+		osacompile -o "/Applications/${file/.applescript/.app}" "$file"
+	done
 }
 function initVars {
 	local duExcludedPathList="./proc ./sys ./dev"
