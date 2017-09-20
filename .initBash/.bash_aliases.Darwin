@@ -31,6 +31,9 @@ alias topf5='$(which find) . $prunePathsFindExpression -xdev -type f -size +10M 
 alias topf='$(which find) . $prunePathsFindExpression -xdev -type f -size +10M -exec ls -lT {} \; 2>/dev/null | sort -nrk5 | column -t | head -n | awk '\''{total+=$5;print}END{print"=> total = "total" MiB"}'\'''
 alias umount="\diskutil unmount"
 alias updatedb="time sudo gupdatedb"
+function applescript2app {
+		test $1 && osacompile -o "/Applications/${1/.applescript/.app}" "$1"
+}
 function initVars {
 	local duExcludedPathList="./proc ./sys ./dev"
 	excludePathsDuExpression=$(printf " --exclude %s" $duExcludedPathList)
