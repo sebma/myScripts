@@ -13,6 +13,7 @@ nmap <c-l> :set list!<CR>
 nmap <c-t> :sort u<CR>
 nmap <c-n> :set nu! \| :set ruler<CR>
 nmap <F5> :e<CR>
+map <F6> <C-W>w
 nmap <F8> :TagbarToggle<CR>
 "autocmd StdinReadPost * set buftype=nofile
 autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif "Remember last cursor position
