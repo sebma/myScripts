@@ -8,6 +8,7 @@ on run
 end run
 EOF
 	echo "=> Here is the command to create ${bin^}.app :"
-	echo osacompile -o /Application/${bin^}.app ${bin^}.applescript
+	echo "=> osacompile -o /Applications/${bin^}.app ${bin^}.applescript ..."
+	osacompile -o /Applications/${bin^}.app ${bin^}.applescript
 #	rm -iv ${bin^}.applescript
 done
