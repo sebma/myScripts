@@ -42,6 +42,7 @@ function installMiniconda {
 			then
 				./$installerScript
 			else
+				$(which brew) -v || exit
 				$(which brew) cask install miniconda
 			fi
 		fi
