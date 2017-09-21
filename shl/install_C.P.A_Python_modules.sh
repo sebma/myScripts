@@ -41,9 +41,11 @@ function installMiniconda {
 			$(which brew) -v || exit
 			if [ $Version = 2 ] 
 			then
+				$(which brew) update
 				$(which brew) tap caskroom/versions
 				$(which brew) cask install miniconda2
 			else
+				$(which brew) update
 				$(which brew) tap caskroom/cask
 				$(which brew) cask install miniconda
 			fi
