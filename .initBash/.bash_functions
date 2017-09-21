@@ -7,6 +7,20 @@ test -r $initDir/.colors && source $initDir/.colors
 test -r $initDir/.AV_functions && source $initDir/.AV_functions
 test -r $initDir/.youtube_functions && source $initDir/.youtube_functions
 
+function brewInstall {
+	case $(uname) in 
+		Darwin)
+			command -v brew >/dev/null || $(which ruby) -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+			set -x
+			$(which brew) update
+			$(which brew) tap caskroom/cask
+			$(which brew) tap caskroom/versions;set +x ;;
+		Linux)
+			command -v brew >/dev/null || $(which ruby) -e "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)"
+			$(which brew) update ;;
+		*) echo "=> ERROR : brew does not support $(uname)." >&2; exit 1;;
+	esac
+}
 function make {
 	if [ -s Makefile ] || [ -s makefile ]
 	then
