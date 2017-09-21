@@ -241,7 +241,7 @@ function configure {
 	then
 		mkdir -p build
 		cd build
-		if groups | egrep -wq "sudo|adm|root" && grep -q /usr <<< $prefix
+		if groups | \egrep -wq "sudo|adm|root" && grep -q /usr <<< $prefix
 		then
 			unset CC
 			cmake .. $@
