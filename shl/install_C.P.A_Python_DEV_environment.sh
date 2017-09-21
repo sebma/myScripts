@@ -38,11 +38,12 @@ function installMiniconda {
 		[ $(uname -s) = Linux  ] && sudo ./$installerScript
 		if [ $(uname -s) = Darwin ] 
 		then
+			$(which brew) -v || exit
 			if [ $Version = 2 ] 
 			then
-				./$installerScript
+				$(which brew) tap caskroom/versions
+				$(which brew) cask install miniconda2
 			else
-				$(which brew) -v || exit
 				$(which brew) tap caskroom/cask
 				$(which brew) cask install miniconda
 			fi
