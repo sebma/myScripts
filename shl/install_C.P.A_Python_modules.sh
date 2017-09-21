@@ -43,6 +43,7 @@ function installMiniconda {
 				./$installerScript
 			else
 				$(which brew) -v || exit
+				$(which brew) tap caskroom/cask
 				$(which brew) cask install miniconda
 			fi
 		fi
