@@ -36,7 +36,16 @@ function installMiniconda {
 		test -f $installerScript || curl -#O $condaInstallerURL
 		chmod +x $installerScript
 		[ $(uname -s) = Linux  ] && sudo ./$installerScript
-		[ $(uname -s) = Darwin ] && ./$installerScript
+		if [ $(uname -s) = Darwin ] 
+		then
+			if [ $Version = 2 ] 
+			then
+				./$installerScript
+			else
+				$(which brew) cask install miniconda
+			fi
+		fi
+
 		test $? = 0 && rm -v $installerScript || exit
 	#	sudo chown -R $USER:$(id -gn) /usr/local/miniconda$Version
 	fi
