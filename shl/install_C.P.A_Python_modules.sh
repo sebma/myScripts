@@ -2,14 +2,14 @@
 
 set -o nounset
 
-scriptName=$(basename $0)
+scriptBaseName=$(basename $0)
 function scriptHelp {
 	cat <<-EOF >&2
 	=> Usage:
-	$scriptName -h : this help
-	$scriptName -2 : install miniconda2
-	$scriptName -3 : install miniconda3
-	$scriptName -n Name : install miniconda and C.P.A. DEV Python requirements in "Name" environment
+	$scriptBaseName -h : this help
+	$scriptBaseName -2 : install miniconda2
+	$scriptBaseName -3 : install miniconda3
+	$scriptBaseName -n Name : install miniconda and C.P.A. DEV Python requirements in "Name" environment
 EOF
 	exit 1
 }
@@ -35,21 +35,28 @@ function installMiniconda {
 		installerScript=$(basename $condaInstallerURL)
 		test -f $installerScript || curl -#O $condaInstallerURL
 		chmod +x $installerScript
-		[ $(uname -s) = Linux  ] && sudo ./$installerScript
+
 		if [ $(uname -s) = Darwin ] 
 		then
-			$(which brew) -v || exit
+			$(which brew) -v || {
+				echo "=> ERROR : Homebrew is not installed, you must install it first." >&2
+				exit -1
+			}
+
+			$(which brew) update
 			if [ $Version = 2 ] 
 			then
-				$(which brew) update
 				$(which brew) tap caskroom/versions
 				$(which brew) cask install miniconda2
 			else
-				$(which brew) update
 				$(which brew) tap caskroom/cask
 				$(which brew) cask install miniconda
 			fi
+		elif [ $(uname -s) = Linux  ] 
+		then 
+			groups | \egrep -wq "sudo|adm|root" && sudo ./$installerScript || ./$installerScript
 		fi
+		
 
 		test $? = 0 && rm -v $installerScript || exit
 	#	sudo chown -R $USER:$(id -gn) /usr/local/miniconda$Version
