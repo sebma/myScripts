@@ -73,6 +73,7 @@ cd ~
 
 test -r /usr/share/bash-completion/bash_completion && source /usr/share/bash-completion/bash_completion
 test -x "$(which brew)" && [ $BASH_VERSINFO -ge 4 ] && [ -r $(brew --prefix)/share/bash-completion/bash_completion ] && source $(brew --prefix)/share/bash-completion/bash_completion
+which register-python-argcomplete >/dev/null 2>&1 && eval "$(register-python-argcomplete conda)"
 
 #[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
 date
