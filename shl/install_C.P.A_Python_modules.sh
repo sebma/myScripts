@@ -48,6 +48,7 @@ function installMiniconda {
 			then
 				$(which brew) tap caskroom/versions
 				$(which brew) cask install miniconda2
+				$(which conda) install argcomplete # Add: eval "$(register-python-argcomplete conda)" to your .profile
 			else
 				$(which brew) tap caskroom/cask
 				$(which brew) cask install miniconda
