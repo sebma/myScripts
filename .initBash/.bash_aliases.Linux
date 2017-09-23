@@ -8,7 +8,7 @@ excludePathsDuExpression=$(printf " --exclude %s" $duExcludedPathList)
 test $(uname -s) = Linux  && alias brewInstall='ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)"'
 alias catFiles="\tail -vn +1"
 alias cp='\cp --preserve=timestamps -uv'
-alias defragFirefox='pgrep firefox || $(which find) ~/.mozilla/firefox/ -name "*sqlite" -ls -exec sqlite3 {} vacuum \;'
+alias firefoxDefrag='pgrep firefox || $(which find) ~/.mozilla/firefox/ -name "*sqlite" -ls -exec sqlite3 {} vacuum \;'
 alias df="\df -PTh"
 alias l="ls --color"
 alias ll="ls -blF --time-style=+'%Y-%m-%d %T'"
