@@ -410,7 +410,7 @@ function open {
 	[ $(uname -s) = Darwin ] && openCommand=$(which open)
 	for file
 	do
-		$openCommand "$file"
+		$openCommand "$file" 2>&1 | egrep -v "MBuntu-Y-For-Unity"
 	done
 }
 function distribType {
