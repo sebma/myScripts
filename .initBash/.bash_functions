@@ -537,6 +537,17 @@ function dfc {
 		$(which dfc) -TWfc always | \egrep "FILESYSTEM|$firstArg$argsRE"
 	fi
 }
+function apt-get {
+	args=$@
+	firstArg=$1
+	case $firstArg in
+	install|purge) sudo $(which apt) $args -V;;
+	download)
+		$(which apt-get) $args --print-uris
+		$(which apt-get) $args;;
+	*) $(which apt-get) $args;;
+	esac
+}
 function apt {
 	args=$@
 	firstArg=$1
