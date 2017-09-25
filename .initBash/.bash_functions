@@ -781,12 +781,11 @@ function updateYoutubePlaylistLUAForVLC {
 	fi
 }
 function locate {
-	groups | \egrep -wq "sudo|admin" || locateOptions="--database $HOME/.local/lib/mlocate/mlocate.db"
+	groups | \egrep -wq "sudo|admin" && locateOptions="-e" || locateOptions="--database $HOME/.local/lib/mlocate/mlocate.db -e"
 	echo "$@" | grep -q "\-[a-z]*r" && $(which locate) $locateOptions "$@" || $(which locate) $locateOptions -ir "${@}"
 }
 function locateBin {
-	groups | \egrep -wq "sudo|admin" || locateOptions="--database $HOME/.local/lib/mlocate/mlocate.db"
-	echo "$@" | grep -q "\-[a-z]*r" && $(which locate) $locateOptions "$@" | grep bin/ || $(which locate) $locateOptions -ir "${@}" | grep bin/
+	locate "${@}" | grep bin/
 }
 function txt2pdf {
 	for file
