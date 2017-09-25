@@ -537,7 +537,7 @@ function dfc {
 		$(which dfc) -TWfc always | \egrep "FILESYSTEM|$firstArg$argsRE"
 	fi
 }
-function apt-get {
+function aptGet {
 	args=$@
 	firstArg=$1
 	case $firstArg in
@@ -545,6 +545,15 @@ function apt-get {
 	download)
 		$(which apt-get) $args --print-uris
 		$(which apt-get) $args;;
+	*) $(which apt-get) $args;;
+	esac
+}
+function apt_get {
+	args=$@
+	firstArg=$1
+	case $firstArg in
+	install|purge) sudo $(which apt) $args -V;;
+	download) $(which apt-get) $args --print-uris && $(which apt-get) $args;;
 	*) $(which apt-get) $args;;
 	esac
 }
@@ -562,15 +571,6 @@ function aptitude {
 	case $firstArg in
 	install|reinstall|purge) sudo $(which aptitude) $args -V;;
 	*) $(which aptitude) $args;;
-	esac
-}
-function apt_get {
-	args=$@
-	firstArg=$1
-	case $firstArg in
-	install|purge) sudo $(which apt) $args -V;;
-	download) $(which apt-get) $args --print-uris && $(which apt-get) $args;;
-	*) $(which apt-get) $args;;
 	esac
 }
 function httpserver {
