@@ -48,12 +48,11 @@ function initVars {
 	prunePathsFindExpression=$(printf " -path %s -prune -o" $findExcludedPathList)
 }
 function locate {
-	groups | \egrep -wq "sudo|admin" || locateOptions="--database $HOME/.local/lib/mlocate/mlocate.db"
+	groups | \egrep -wq "sudo|admin" && locateOptions="-e" || locateOptions="--database $HOME/.local/lib/mlocate/mlocate.db -e"
 	echo "$@" | grep -q "\-[a-z]*r" && $(which glocate) $locateOptions "$@" || $(which glocate) $locateOptions -ir "${@}"
 }
 function locateBin {
-	groups | \egrep -wq "sudo|admin" || locateOptions="--database $HOME/.local/lib/mlocate/mlocate.db"
-	echo "$@" | grep -q "\-[a-z]*r" && $(which glocate) $locateOptions "$@" | grep bin/ || $(which glocate) $locateOptions -ir "${@}" | grep bin/
+    locate "${@}" | grep bin/
 }
 function mount {
 	arg=$1
