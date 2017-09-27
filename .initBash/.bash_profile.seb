@@ -22,6 +22,7 @@ export UPMC=$UPMC_ID@ssh.ufr-info-p6.jussieu.fr
 export ENST=mansfeld@ssh.enst.fr
 export JOLLA=nemo@jolla-wlan
 #export HOMEBREW_TEMP=$HOME/tmp
+export HOMEBREW_NO_GITHUB_API=1
 #export GOPATH=$HOME/work
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:~/gnu/lib/pkgconfig:~/local/lib/pkgconfig
 PERL5LIB="$HOME/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
