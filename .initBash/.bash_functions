@@ -14,7 +14,7 @@ function odf2 {
 	}
 	format=$1
 	shift
-	for files
+	for file
 	do
 		echo "$(which loffice) --headless --convert-to $format $file ..."
 		$(which loffice) --headless --convert-to $format $file
