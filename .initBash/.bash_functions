@@ -8,12 +8,19 @@ test -r $initDir/.AV_functions && source $initDir/.AV_functions
 test -r $initDir/.youtube_functions && source $initDir/.youtube_functions
 
 function odf2 {
+	formats="pdf|doc|docx|odt|odp|ods|ppt|pptx|xls|xlsx"
 	test $# -lt 2 && {
-		echo "=> Usage: $BASH_FUNC pdf|doc|docx|odt|odp|ods|ppt|pptx|xls|xlsx file1 [file2] [file3] ..." >&2
+		echo "=> Usage: $FUNCNAME $formats file1 [file2] [file3] ..." >&2
 		return 1
 	}
-	format=$1
-	shift
+
+	format=$1; shift
+	case $format in
+#		"$formats") ;;
+		pdf|doc|docx|odt|odp|ods|ppt|pptx|xls|xlsx) ;;
+		*) echo "=> Cannot convert to the <$format> format." >&2; return 2 ;;
+	esac
+
 	for file
 	do
 		extension=${file/*./}
