@@ -17,9 +17,11 @@ function odf2 {
 	for file
 	do
 		extension=${file/*./}
-		echo "$(which loffice) --headless --convert-to $format $file ..."
-		$(which loffice) --headless --convert-to $format $file
-		\ls -l ${file/$extension/$format}
+		ls $file >/dev/null && {
+			echo "$(which loffice) --headless --convert-to $format $file ..."
+			$(which loffice) --headless --convert-to $format $file
+			\ls -l ${file/$extension/$format}
+		}
 	done
 }
 function brewInstall {
