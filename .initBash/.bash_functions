@@ -7,6 +7,19 @@ test -r $initDir/.colors && source $initDir/.colors
 test -r $initDir/.AV_functions && source $initDir/.AV_functions
 test -r $initDir/.youtube_functions && source $initDir/.youtube_functions
 
+function odf2 {
+	test $# -lt 2 && {
+		echo "=> Usage: $BASH_FUNC pdf|doc|docx|ppt|pptx|xls|xlsx file1 [file2] [file3] ..." >&2
+		format=$1
+		shift
+		for files
+		do
+			echo "$(which loffice) --headless --convert-to $format $file ..."
+			$(which loffice) --headless --convert-to $format $file
+		done
+		return 1
+	}
+}
 function brewInstall {
 	case $(uname) in 
 		Darwin)
