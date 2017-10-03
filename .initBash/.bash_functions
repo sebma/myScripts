@@ -714,7 +714,7 @@ function resizePics_2048 {
 	for src
 	do
 		ext=$(echo "$src" | awk -F. '{print$NF}')
-		dst="${src/.$ext/-SMALLER}.$ext"
+		dst="${src/.$ext/-SMALLER_2048}.$ext"
 		convert -verbose -resize '2048x1536>' "$src" "$dst"
 		touch -r "$src" "$dst"
 	done
