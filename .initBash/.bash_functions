@@ -710,6 +710,15 @@ function resizePics {
 		touch -r "$src" "$dst"
 	done
 }
+function resizePics_1536 {
+	for src
+	do
+		ext=$(echo "$src" | awk -F. '{print$NF}')
+		dst="${src/.$ext/-SMALLER_1536}.$ext"
+		convert -verbose -resize '1536x1152>' "$src" "$dst"
+		touch -r "$src" "$dst"
+	done
+}
 function resizePics_2048 {
 	for src
 	do
