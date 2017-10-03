@@ -715,7 +715,25 @@ function resizePics_2048 {
 	do
 		ext=$(echo "$src" | awk -F. '{print$NF}')
 		dst="${src/.$ext/-SMALLER_2048}.$ext"
-		convert -verbose -resize '2048x1536>' "$src" "$dst"
+		convert -verbose -resize "$((2*1024))x$((2*768))>" "$src" "$dst"
+		touch -r "$src" "$dst"
+	done
+}
+function resizePics_3072 {
+	for src
+	do
+		ext=$(echo "$src" | awk -F. '{print$NF}')
+		dst="${src/.$ext/-SMALLER_3072}.$ext"
+		convert -verbose -resize "$((3*1024))x$((3*768))>" "$src" "$dst"
+		touch -r "$src" "$dst"
+	done
+}
+function resizePics_4096 {
+	for src
+	do
+		ext=$(echo "$src" | awk -F. '{print$NF}')
+		dst="${src/.$ext/-SMALLER_4096}.$ext"
+		convert -verbose -resize "$((4*1024))x$((4*768))>" "$src" "$dst"
 		touch -r "$src" "$dst"
 	done
 }
