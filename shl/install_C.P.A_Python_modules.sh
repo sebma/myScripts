@@ -2,14 +2,15 @@
 
 set -o nounset
 
+envName=""
 scriptBaseName=$(basename $0)
 function scriptHelp {
 	cat <<-EOF >&2
 	=> Usage:
 	$scriptBaseName -h : this help
+	$scriptBaseName -n Name : install miniconda and C.P.A. DEV Python requirements in "Name" environment
 	$scriptBaseName -2 : install miniconda2
 	$scriptBaseName -3 : install miniconda3
-	$scriptBaseName -n Name : install miniconda and C.P.A. DEV Python requirements in "Name" environment
 EOF
 	exit 1
 }
@@ -57,7 +58,6 @@ function installMiniconda {
 		then 
 			groups | \egrep -wq "sudo|adm|root" && sudo ./$installerScript || ./$installerScript
 		fi
-		
 
 		test $? = 0 && rm -v $installerScript || exit
 	#	sudo chown -R $USER:$(id -gn) /usr/local/miniconda$Version
@@ -70,7 +70,6 @@ function installMiniconda {
 		local condaRelativeDirName=../../miniconda$Version/bin
 		ln -vsf $condaRelativeDirName/conda conda$Version && ln -vsf $condaRelativeDirName/conda-env conda-env$Version && ln -vsf $condaRelativeDirName/activate activate$Version && ln -vsf $condaRelativeDirName/deactivate deactivate$Version
 	fi
-	set +x
 }
 
 function installCondaPythonPackages {
@@ -79,16 +78,19 @@ function installCondaPythonPackages {
 	local CPARequiredPythonPackageList="$2"
 	local envName="$3"
 
-	if test -n $envName
+	if test -n "$envName" && ! $conda env list | grep -wq "$envName"
 	then
+		set -x
 		$conda create  -n "$envName" $CPARequiredPythonPackageList
 		$conda install -n "$envName" -c conda-forge ipdb
+		set +x
 		echo "=> INFO: Do not forget to type : " >&2
 		echo "source activate $envName" >&2
 	else
-		echo "=> $conda install $CPARequiredPythonPackageList ..."
+		set -x
 		$conda install $CPARequiredPythonPackageList
 		$conda install -c conda-forge ipdb
+		set +x
 	fi
 }
 
