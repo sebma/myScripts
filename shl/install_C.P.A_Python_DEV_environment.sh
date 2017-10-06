@@ -2,14 +2,15 @@
 
 set -o nounset
 
+envName=""
 scriptBaseName=$(basename $0)
 function scriptHelp {
 	cat <<-EOF >&2
 	=> Usage:
 	$scriptBaseName -h : this help
+	$scriptBaseName -n Name : install miniconda and C.P.A. DEV Python requirements in "Name" environment
 	$scriptBaseName -2 : install miniconda2
 	$scriptBaseName -3 : install miniconda3
-	$scriptBaseName -n Name : install miniconda and C.P.A. DEV Python requirements in "Name" environment
 EOF
 	exit 1
 }
@@ -69,26 +70,27 @@ function installMiniconda {
 		local condaRelativeDirName=../../miniconda$Version/bin
 		ln -vsf $condaRelativeDirName/conda conda$Version && ln -vsf $condaRelativeDirName/conda-env conda-env$Version && ln -vsf $condaRelativeDirName/activate activate$Version && ln -vsf $condaRelativeDirName/deactivate deactivate$Version
 	fi
-	set +x
 }
 
 function installCondaPythonPackages {
 	local minicondaVersion=$1
 	local conda=$(which conda$minicondaVersion)
-
 	local CPARequiredPythonPackageList="$2"
 	local envName="$3"
 
-	if test -n $envName
+	if test -n "$envName" && ! $conda env list | grep -wq "$envName"
 	then
+		set -x
 		$conda create  -n "$envName" $CPARequiredPythonPackageList
 		$conda install -n "$envName" -c conda-forge ipdb
+		set +x
 		echo "=> INFO: Do not forget to type : " >&2
 		echo "source activate $envName" >&2
 	else
-	#	echo "=> $conda install $CPARequiredPythonPackageList ..."
+		set -x
 		$conda install $CPARequiredPythonPackageList
 		$conda install -c conda-forge ipdb
+		set +x
 	fi
 }
 
@@ -109,5 +111,6 @@ function runScriptWithArgs {
 runScriptWithArgs $@
 installMiniconda $minicondaVersion
 
-CPARequiredPythonPackageList="python=$minicondaVersion scipy pandas spyder=3.1.3 jedi=0.9.0 ipython=5 termcolor"
+#CPARequiredPythonPackageList="python=$minicondaVersion scipy pandas spyder=3.1.3 jedi=0.9.0 ipython=5 termcolor"
+CPARequiredPythonPackageList="python=$minicondaVersion scipy pandas spyder ipython termcolor"
 installCondaPythonPackages $minicondaVersion "$CPARequiredPythonPackageList" "$envName"
