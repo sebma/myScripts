@@ -125,7 +125,7 @@ function lprPageRange {
 	test $pageRange && echo $pageRange | grep -ivq "[A-Z]" && $(which lpr) -o page-ranges=$pageRange $@ && lpq
 }
 function lprColorPageRange {
-	colorPrinter="$(lpstat -a | awk '/[Cc](olor|ouleur)/{prt=$1;exit}END{print prt}')"
+	colorPrinter="$(lpstat -a | awk '/[Cc](olor|ouleur)/{print$1;exit}')"
 	test $colorPrinter && lprPageRange $@ -P $colorPrinter
 }
 function getFiles {
