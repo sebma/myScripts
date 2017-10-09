@@ -58,10 +58,11 @@ which xdg-mime >/dev/null && xdg-mime default evince.desktop application/pdf
 which lpstat >/dev/null 2>&1 && defaultPrinter=$(LANG=C lpstat -a 2>/dev/null | awk '/accepting/{print$1}') || defaultPrinter=""
 if which lpstat >/dev/null 2>&1 && lpstat -p 2>/dev/null | grep -q printer 
 then
-	export colorPrinter="$(lpstat -a | awk '/[Cc](olor|ouleur)/{print$1;exit}')"
 	lpoptions -o media=A4 -o fit-to-page -o Duplex=DuplexNoTumble -o sides=two-sided-long-edge -o page-border=single -o prettyprint
+	export colorPrinter="$(lpstat -a | awk '/[Cc](olor|ouleur)/{print$1;exit}')"
 	lpoptions -p $colorPrinter -o media=A4 -o fit-to-page -o Duplex=DuplexNoTumble -o sides=two-sided-long-edge -o page-border=single -o prettyprint
 fi
+
 #lpoptions -p $defaultPrinter/Duplex2PagesPerSheet -o media=A4 -o fit-to-page -o Duplex=DuplexNoTumble -o sides=two-sided-long-edge -o page-border=double -o number-up=2 -o number-up-layout=btlr  -o page-border=single -o prettyprint
 #lpoptions -p $defaultPrinter/Duplex4PagesPerSheet -o media=A4 -o fit-to-page -o Duplex=DuplexNoTumble -o sides=two-sided-long-edge -o page-border=double -o number-up=4 -o page-border=single -o prettyprint
 
