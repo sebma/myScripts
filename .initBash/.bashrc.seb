@@ -60,7 +60,11 @@ if which lpstat >/dev/null 2>&1 && lpstat -p 2>/dev/null | grep -q printer
 then
 	lpoptions -o media=A4 -o fit-to-page -o Duplex=DuplexNoTumble -o sides=two-sided-long-edge -o page-border=single -o prettyprint
 	export colorPrinter="$(lpstat -a | awk '/[Cc](olor|ouleur)/{print$1;exit}')"
+<<<<<<< HEAD
 	lpoptions -p $colorPrinter -o media=A4 -o fit-to-page -o Duplex=DuplexNoTumble -o sides=two-sided-long-edge -o page-border=single -o prettyprint
+=======
+	test $colorPrinter && lpoptions -p $colorPrinter -o media=A4 -o fit-to-page -o Duplex=DuplexNoTumble -o sides=two-sided-long-edge -o page-border=single -o prettyprint
+>>>>>>> 4400a58f795a5e6cc0cbb3263b9896acb23848f0
 fi
 
 #lpoptions -p $defaultPrinter/Duplex2PagesPerSheet -o media=A4 -o fit-to-page -o Duplex=DuplexNoTumble -o sides=two-sided-long-edge -o page-border=double -o number-up=2 -o number-up-layout=btlr  -o page-border=single -o prettyprint
