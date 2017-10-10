@@ -25,5 +25,15 @@ git config --global credential.helper osxkeychain
 # Tu use the Picoscobe drivers with "https://github.com/colinoflynn/pico-python/" PicoScope Python Interface
 test -d /Applications/PicoScope6.app/Contents/Resources/lib && export DYLD_LIBRARY_PATH=/Applications/PicoScope6.app/Contents/Resources/lib
 
-set +x
+#Impression a partir de CUPS/Lpr + gs
+if ! grep -q "Sandboxing Relaxed" /etc/cups/cups-files.conf
+then
+	echo Sandboxing Relaxed | sudo tee -a /etc/cups/cups-files.conf
+	launchctl stop org.cups.cupsd
+	launchctl start org.cups.cupsd
+	cupsctl WebInterface=yes
+	echo "=> The cups admin console is http://localhost:631/admin"
+fi
+
 trap - INT
+set +x
