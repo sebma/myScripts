@@ -7,6 +7,18 @@ test -r $initDir/.colors && source $initDir/.colors
 test -r $initDir/.AV_functions && source $initDir/.AV_functions
 test -r $initDir/.youtube_functions && source $initDir/.youtube_functions
 
+function renameFileInsideZIP {
+	test $# -lt 3 && {
+		echo "=> Usage: $FUNCNAME oldName newName zipFile" >&2
+		return 1
+	}
+	lastArg="$(eval echo \$$#)"
+	zipFile=$lastArg
+	oldName=$1
+	newName=$2
+#	$(which printf) "@ $oldName\n@=$newName\n" | $(which zipnote) -w $zipFile #necessite zip > v3.1beta
+	$(which 7za) $zipFile $oldName $newName
+}
 function odf2 {
 	formats="pdf|doc|docx|odt|odp|ods|ppt|pptx|xls|xlsx"
 	test $# -lt 2 && {
