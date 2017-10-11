@@ -111,5 +111,5 @@ function runScriptWithArgs {
 runScriptWithArgs $@
 installMiniconda $minicondaVersion
 
-CPARequiredPythonPackageList="python=$minicondaVersion scipy pandas ipython termcolor"
-installCondaPythonPackages $minicondaVersion "$CPARequiredPythonPackageList" "$envName"
+CPARequiredPythonPackageList="python=$minicondaVersion matplotlib scipy pandas ipython termcolor"
+installCondaPythonPackages $minicondaVersion matplotlib "$CPARequiredPythonPackageList" "$envName"
