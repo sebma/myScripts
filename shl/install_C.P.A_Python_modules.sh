@@ -112,4 +112,4 @@ runScriptWithArgs $@
 installMiniconda $minicondaVersion
 
 CPARequiredPythonPackageList="python=$minicondaVersion matplotlib scipy pandas ipython termcolor"
-installCondaPythonPackages $minicondaVersion matplotlib "$CPARequiredPythonPackageList" "$envName"
+installCondaPythonPackages $minicondaVersion "$CPARequiredPythonPackageList" "$envName"
