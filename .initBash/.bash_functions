@@ -994,6 +994,20 @@ function mpv {
 #	done
 	}
 }
+function mpvplaylist {
+	which mpv >/dev/null && {
+		if tty | egrep -q "/dev/pts/[0-9]|/dev/ttys[0-9]+"; then
+			$(which mpv) -geometry 0%:100%  --playlist $@
+		else
+			if [ -c /dev/fb0 ]; then 
+				$(which mpv) -vo drm  --playlist $@
+			else
+				echo "=> Function $FUNCNAME - ERROR: Framebuffer is not supported in this configuration." 1>&2
+				return 1
+			fi
+		fi
+	}
+}
 function ddPV {
 	test $# -lt 2 && {
 		echo "=> Usage: $FUNCNAME if=FILE of=FILE OPTIONS ..." >&2
