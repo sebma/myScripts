@@ -126,7 +126,7 @@ alias mountfreebox="mount | \grep -wq freebox-server || curlftpfs 'freebox@freeb
 alias mountfreeboxanna="mount | \grep -wq freeboxanna || curlftpfs 'freebox@78.201.68.5/Disque dur' /freeboxanna/ ; mount | \grep -w freeboxanna"
 alias mpvlive='which mpv >/dev/null && $(which mpv) --no-resume-playback'
 alias mpvlocal='which mpv >/dev/null && DISPLAY=:0 $(which mpv) --no-ytdl'
-alias mpvplaylist='which mpv >/dev/null && $(which mpv) --playlist'
+#alias mpvplaylist='which mpv >/dev/null && $(which mpv) --playlist'
 alias mutt="LANG=C.UTF-8 \mutt"
 alias muttDebug="LANG=C.UTF-8 \mutt -nd5"
 alias mv='\mv -vi'
