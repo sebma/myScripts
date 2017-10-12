@@ -56,6 +56,7 @@ then
     export http_proxy=http://proxy:$proxyPort
     export https_proxy=$http_proxy
 fi
+which gnuplot >/dev/null 2>&1 && export GNUTERM=qt
 #FIN DE DEFINITION DES VARIABLES
 
 #Creation du .cache dans /tmp et pointage de ce dernier via un lien symbolique
