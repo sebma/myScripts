@@ -101,10 +101,10 @@ def main() :
 			intersection = foundKey[ foundKey == expectedKey ]
 			commonBytesDict[nbTexts][nbSamples] = intersection.size
 			commonBytesArray[i][j] = intersection.size
+			nbTestsDone += 1
 			printf( "nbCommonBytes = %2d remaining tests to do : %5d " % ( commonBytesDict[nbTexts][nbSamples], totalTests-nbTestsDone ) )
 			seb_CPA.toc()
 			j += 1
-			nbTestsDone += 1
 		i += 1
 
 	myTime = datetime.today().strftime('%HH%M')
