@@ -29,6 +29,8 @@ alias sshStop="sudo launchctl unload /System/Library/LaunchDaemons/ssh.plist"
 alias start="launchctl start"
 alias stat="\stat -x"
 alias stop="launchctl stop"
+#alias svgView="$(which open) -a safari"
+alias svgView="$(which open) -a firefox"
 alias tcpPorts="\netstat -np tcp"
 alias topf10='$(which find) . $prunePathsFindExpression -xdev -type f -size +10M -exec ls -lT {} \; 2>/dev/null | sort -nrk5 | column -t | head -10 | awk '\''{total+=$5;print}END{print"=> total = "total" MiB"}'\'''
 alias topf50='$(which find) . $prunePathsFindExpression -xdev -type f -size +10M -exec ls -lT {} \; 2>/dev/null | sort -nrk5 | column -t | head -50 | awk '\''{total+=$5;print}END{print"=> total = "total" MiB"}'\'''
