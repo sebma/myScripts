@@ -26,11 +26,11 @@ from termcolor import cprint
 #from numba import jit
 #@jit
 
-def Print(*args) :
-	if not arguments.quiet : print(*args)
+def Print(*args, **kwargs) :
+	if not arguments.quiet : print(*args, **kwargs)
 
-def CPrint(*args) :
-	if not arguments.quiet : cprint(*args)
+def CPrint(*args, **kwargs) :
+	if not arguments.quiet : cprint(*args, **kwargs)
 
 def resetNumpyPrintOptions() :
 	np.set_printoptions(edgeitems=3,infstr='inf',
@@ -972,7 +972,8 @@ def main() :
 
 		Print('\n=> The expected lastRoundKey is ' + byteArray2HexString(expectedLastRoundKey) )
 
-		intersection = compareKeys( lastRoundKey, expectedLastRoundKey )
+		intersection = compareKeys ( lastRoundKey, expectedLastRoundKey )
+#		difference   = np.setdiff1d( lastRoundKey, expectedLastRoundKey ) # 10x plus lent que compareKeys()
 
 		if arguments.verbosity :
 			Print('=> lastRoundKey \t = %s' % lastRoundKey)
@@ -980,7 +981,8 @@ def main() :
 			Print('=> Intersection = %s' % intersection )
 
 		commonBytes = intersection.size
-		if commonBytes == keyByteSize :
+		different = keyByteSize - commonBytes
+		if not different :
 			CPrint('=> The lastRoundKey found is\t' + byteArray2HexString(lastRoundKey), 'blue' )
 			CPrint('\n=> Number of bytes in common at the same postion = %d' % commonBytes, 'blue' )
 			roundKeys = revertKeyExpension( lastRoundKey )
@@ -997,7 +999,8 @@ def main() :
 
 		Print('\n=> The expected K0 Key is ' + byteArray2HexString(expectedRound0Key) )
 
-		intersection = compareKeys( round0Key, expectedRound0Key )
+		intersection = compareKeys ( round0Key, expectedRound0Key )
+#		difference   = np.setdiff1d( round0Key, expectedRound0Key ) # 10x plus lent que compareKeys()
 
 		if arguments.verbosity :
 			Print('=> round0Key \t\t = %s' % round0Key)
@@ -1005,7 +1008,8 @@ def main() :
 			Print('=> Intersection = %s' % intersection )
 
 		commonBytes = intersection.size
-		if commonBytes == keyByteSize :
+		different = keyByteSize - commonBytes
+		if not different :
 			CPrint('=> The round0Key found is ' + byteArray2HexString(round0Key), 'blue' )
 			CPrint('\n=> Number of bytes in common at the same postion = %d' % commonBytes, 'blue' )
 		else :
