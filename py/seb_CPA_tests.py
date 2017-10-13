@@ -70,7 +70,7 @@ def main() :
 	textsComplete = seb_CPA.importTexts()
 	powerTracesComplete = seb_CPA.importTraces()
 
-	if not arguments.nfStop :   arguments.nfStop   = textsComplete.shape[0]
+	if not arguments.nfStop : arguments.nfStop = textsComplete.shape[0]
 	if not arguments.nsStop : arguments.nsStop = powerTracesComplete.shape[0]
 
 	X = nbTextsRange    = np.arange( arguments.nfStart,   arguments.nfStop,   arguments.nfStep,   dtype = np.uint32 )
