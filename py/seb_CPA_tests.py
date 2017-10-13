@@ -132,9 +132,9 @@ def main() :
 
 	fig.colorbar(surface, shrink=0.5, aspect=5)
 
-	fig.savefig( outputDataFilePrefix + ".png", fig.dpi )
-	fig.savefig( outputDataFilePrefix + ".svg", fig.dpi )
-	fig.savefig( outputDataFilePrefix + ".pdf", fig.dpi )
+	fig.savefig( outputDataFilePrefix + ".png", dpi = fig.dpi )
+	fig.savefig( outputDataFilePrefix + ".svg", dpi = fig.dpi )
+	fig.savefig( outputDataFilePrefix + ".pdf", dpi = fig.dpi )
 
 	plt.show()
 
