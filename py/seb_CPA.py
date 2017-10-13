@@ -407,6 +407,7 @@ def printRoundKeys(roundKeys) :
 
 def byteArray2HexString(array) :
 	myStr = binascii.hexlify(array).upper()
+	myStr = myStr.decode("ascii") #Pour Python3 : convertit le type "bytes" en "string"
 	myStr = ' '.join( [ myStr[i:i+8] for i in range(0, len(myStr), 8) ] )
 
 	return myStr
