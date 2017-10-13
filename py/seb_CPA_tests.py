@@ -88,7 +88,7 @@ def main() :
 	print( "=> Nombre de tests total a effectuer = %d" % totalTests )
 
 	commonBytesDict = collections.defaultdict( dict ) # 2D dictionnary
-	i = 0
+	i = nbTestsDone = 0
 	for nbTexts in nbTextsRange :
 		texts = textsComplete[:nbTexts]
 #			seb_CPA.printTexts(texts)
@@ -96,14 +96,19 @@ def main() :
 		for nbSamples in nbSamplesRange :
 			printf( "=> nbTexts = %5d nbSamples = %5d " % (nbTexts,nbSamples) )
 			powerTraces = powerTracesComplete[:nbSamples,:nbTexts]
+			seb_CPA.tic()
 			foundKey = eval( aes_CCA_model )
 			intersection = foundKey[ foundKey == expectedKey ]
 			commonBytesDict[nbTexts][nbSamples] = intersection.size
 			commonBytesArray[i][j] = intersection.size
-			print( "nbCommonBytes = %d remaining tests to do = %d" % ( commonBytesDict[nbTexts][nbSamples], totalTests-(i+1)*(j+1) ) )
+			printf( "nbCommonBytes = %2d remaining tests to do : %5d " % ( commonBytesDict[nbTexts][nbSamples], totalTests-nbTestsDone ) )
+			seb_CPA.toc()
 			j += 1
+			nbTestsDone += 1
 		i += 1
 
+	myTime = datetime.today().strftime('%HH%M')
+	outputDataFilePrefix = scriptBaseName.split('.')[0] + '_' + yearMonthDay + '_' + myTime
 	X, Y = np.meshgrid( X, Y )
 
 	matLabDic = {
@@ -111,18 +116,25 @@ def main() :
 		'nbSamples' : Y,
 		'nbCommonBytes': Z
 	}
-	sio.savemat( scriptBaseName.split('.')[0] + '_' + yearMonthDay +'.mat', matLabDic )
+	sio.savemat( outputDataFilePrefix +'.mat', matLabDic )
 
+	fig = plt.figure()
 	ax = plt.axes(projection='3d')
 
 	print( "\n=> It took : " + str(datetime.now()-startTime) + " to finish the job.\n" )
 
-	ax.plot_surface(X, Y, Z, cmap=plt.cm.jet, rstride=1, cstride=1, linewidth=0)
+	surface = ax.plot_surface(X, Y, Z, cmap=plt.cm.jet, rstride=1, cstride=1, linewidth=0)
 	#ax.plot_surface(X, Y, Z, cmap=plt.cm.jet)
 
 	# Customize the z axis.
 #	ax.set_zlim(0, .16)
 	ax.w_zaxis.set_major_locator(LinearLocator(6))
+
+	fig.colorbar(surface, shrink=0.5, aspect=5)
+
+	fig.savefig( outputDataFilePrefix + ".png", fig.dpi )
+	fig.savefig( outputDataFilePrefix + ".svg", fig.dpi )
+	fig.savefig( outputDataFilePrefix + ".pdf", fig.dpi )
 
 	plt.show()
 
