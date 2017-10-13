@@ -94,9 +94,9 @@ def tic():
 
 def toc():
 	if 'startTime_for_tictoc' in globals():
-		Print("Elapsed time is " + str(time.time() - startTime_for_tictoc) + " seconds.")
+		print("Elapsed time is %.3f seconds. " % (time.time() - startTime_for_tictoc) )
 	else:
-		Print("Toc: start time not set")
+		print("Toc: start time not set")
 
 def totalTime() :
 	Print( "\n=> Total time until now = " + str(datetime.now()-startTime) + "s." )
