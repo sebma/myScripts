@@ -108,9 +108,13 @@ function runScriptWithArgs {
 	shift $((OPTIND-1)) #non-option arguments
 }
 
-runScriptWithArgs $@
-installMiniconda $minicondaVersion
+function main {
+	runScriptWithArgs $@
+	installMiniconda $minicondaVersion
 
-#CPARequiredPythonPackageList="python=$minicondaVersion matplotlib scipy pandas spyder=3.1.3 jedi=0.9.0 ipython=5 termcolor"
-CPARequiredPythonPackageList="python=$minicondaVersion matplotlib scipy pandas spyder ipython termcolor"
-installCondaPythonPackages $minicondaVersion "$CPARequiredPythonPackageList" "$envName"
+	#CPARequiredPythonPackageList="python=$minicondaVersion matplotlib scipy pandas spyder=3.1.3 jedi=0.9.0 ipython=5 termcolor"
+	CPARequiredPythonPackageList="python=$minicondaVersion matplotlib scipy pandas spyder ipython termcolor"
+	installCondaPythonPackages $minicondaVersion "$CPARequiredPythonPackageList" "$envName"
+}
+
+main $@
