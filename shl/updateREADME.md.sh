@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 
 set -o nounset
+#LICENSE="[GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)"
+
+if [ $# -ge 1 ] && [ $1 = "-h" ]
+then
+	echo "=> Usage : $(basename $0) [scriptName/binName]" >&2
+	exit -1
+fi
 
 if [ README.template -nt README.md ] || [ $0 -nt README.md ]
 then
@@ -22,8 +29,8 @@ then
 
 ## License
 
-[GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)  
-[GPLv3 in MarkDown](LICENSE.md)
+[LICENSE in MarkDown](LICENSE.md)
+$LICENSE  
 EOF
 	test $? = 0 && echo "=> INFO : README.md has been successfully updated."
 	git ls-files README.md | grep -qx README.md || git add README.md
