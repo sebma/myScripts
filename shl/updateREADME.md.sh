@@ -2,6 +2,7 @@
 
 set -o nounset
 #LICENSE="[GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)"
+LICENSE=""
 
 if [ $# -ge 1 ] && [ $1 = "-h" ]
 then
