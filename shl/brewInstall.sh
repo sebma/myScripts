@@ -6,7 +6,9 @@ case $(uname) in
 		set -x
 		$(which brew) update
 		$(which brew) tap caskroom/cask
-		$(which brew) tap caskroom/versions;set +x ;;
+		$(which brew) tap caskroom/drivers
+#		$(which brew) tap caskroom/versions #deprecated
+		set +x ;;
 	Linux)
 		command -v brew >/dev/null || $(which ruby) -e "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)"
 		$(which brew) update ;;
