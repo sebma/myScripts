@@ -540,6 +540,9 @@ function watchProcess {
 		sleep 1
 	done | uniq
 }
+function processSPY {
+	watchProcess $@
+}
 function website {
 	$(which apt-cache) show $@ | egrep "Homepage:|Package:" | sort -u
 #	open $($(which apt-cache) show $@ | egrep "Homepage:" | sort -u)
