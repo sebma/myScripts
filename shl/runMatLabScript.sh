@@ -3,8 +3,8 @@
 args=$@
 if which matlab >/dev/null
 then
-#	$(which matlab) -nojvm -r "${args/.m/}" # Incompatible avec fig = gcf; appelle par la fonction surf()
-	$(which matlab) -nodesktop -nosplash -r "${args/.m/}"
+#	$(which matlab) -nojvm -r "${args/.m/}; exit" # Incompatible avec fig = gcf; appelle par la fonction surf()
+	$(which matlab) -nodesktop -nosplash -r "${args/.m/}; exit"
 else
 	matlabScript=$1
 	shift
