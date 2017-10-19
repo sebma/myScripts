@@ -92,7 +92,7 @@ function seb_CPA( varargin )
 	fprintf('\n=> The finalKey is %s\n', finalKey);
 	fprintf('=> DONE.\n');
 	toc
-	exit
+	return
 end
 
 function res = ROTL8(x,shift)
