@@ -8,7 +8,7 @@ function show3DSurf( varargin )
 	Y = matFileStructure.(matFileFieldNames{2});
 	Z = matFileStructure.(matFileFieldNames{3});
 	whos
-	surf(X,Y,Z);
-	pause
+	surf(X,Y,Z)
+%	pause
 	return
 end
