@@ -36,22 +36,23 @@ function installMiniconda {
 		test -f $installerScript || curl -#O $condaInstallerURL
 		chmod +x $installerScript
 
+		brew=$(which brew)
 		if [ $(uname -s) = Darwin ] 
 		then
-			$(which brew) -v || {
+			$brew -v || {
 				echo "=> ERROR : Homebrew is not installed, you must install it first." >&2
 				exit -1
 			}
 
-			$(which brew) update
+			$brew update
 			if [ $Version = 2 ] 
 			then
-				$(which brew) tap caskroom/versions
-				$(which brew) cask install miniconda2
+				$brew tap caskroom/versions
+				$brew cask install miniconda2
 				$(which conda) install argcomplete # Add: eval "$(register-python-argcomplete conda)" to your .profile
 			else
-				$(which brew) tap caskroom/cask
-				$(which brew) cask install miniconda
+				$brew tap caskroom/cask
+				$brew cask install miniconda
 			fi
 		elif [ $(uname -s) = Linux  ] 
 		then 
