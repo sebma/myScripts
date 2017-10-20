@@ -1,12 +1,7 @@
 #!/usr/bin/env bash
 
-if [ $(uname -s) = Darwin ]
-then
-	octaveShebang='#!'"$(which env) octave-cli"
-elif [ $(uname -s) = Linux ]
-then
-	octaveShebang='#!'"$(which env) octave-cli"
-fi
+octaveShebang='#!'"$(which octave-cli)"
+matlab2D_3D_PlottingFunctions="animatedline|area|bar|bar3|bar3h|barh|comet|comet3|compass|coneplot|contour|contour3|contourf|contourslice|errorbar|ezpolar|fcontour|feather|fimplicit|fimplicit3|fmesh|fplot|fplot3|fsurf|heatmap|histogram|histogram2|image|imagesc|loglog|mesh|meshc|meshz|pareto|pcolor|pie|pie3|plot|plot3|plotmatrix|polarhistogram|polarplot|polarscatter|quiver|quiver3|ribbon|scatter|scatter3|semilogx|semilogy|slice|spy|stairs|stem|stem3|streamline|streamparticles|streamribbon|streamslice|streamtube|surf|surfc|surfl|waterfall"
 
 for matlabScript
 do
@@ -20,7 +15,7 @@ do
 	fi
 
 	printf "$octaveShebang" > $octaveScript
-	test $(uname) = Darwin && egrep -wq "surf|plot" $matlabScript && echo " --persist" >> $octaveScript || echo >> $octaveScript
+	egrep -wq "$matlab2D_3D_PlottingFunctions" $matlabScript && echo " --persist" >> $octaveScript || echo >> $octaveScript
 
 	egrep -vw "^main|/usr/bin/.*methlabs" $matlabScript >> $octaveScript
 	mainFunctionName=$(awk -F "[ (=]" '/function.(\w+ =)?\w+/{print$(NF-3);exit}' $octaveScript)
