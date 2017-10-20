@@ -1,25 +1,30 @@
 #!/usr/bin/env bash
 
 brew=$(which brew)
-brewCask="$(which brew) cask"
+brewFormulasToInstall="watch bash python3 gdb git remake"
+brewOptionalFormulasToInstall="macvim cgdb octave bash-completion@2 brew-cask-completion pip-completion zsh-completions"
+
 if [ $(uname -s) = Darwin ]
 then
 	$brew update
-	formulas="watch gdb remake cgdb"
-	for formula in $formulas
+	for formula in $brewFormulasToInstall
 	do
 #		set -x
 		$brew list | grep -wq $formula || $brew install $formula
 		set +x
 	done
+
 	$brew tap caskroom/cask
 	$brew tap caskroom/drivers
-	$brewCask list | grep -wq mono-mdk || $brewCask install https://raw.githubusercontent.com/caskroom/homebrew-cask/84b7491d6a2c7124fd54ac177cb55f61192018bf/Casks/mono-mdk.rb #Installation de mono-mdk v5.0.1.1
-	casks="picoscope arduino"
-	for cask in $casks
+
+	brewCask="$(which brew) cask"
+	mono_mdk_V5_0_1_1_Formula_URL="https://raw.githubusercontent.com/caskroom/homebrew-cask/84b7491d6a2c7124fd54ac177cb55f61192018bf/Casks/mono-mdk.rb" #mono-mdk v5.0.1.1 est un pre-requis pour Picoscope6
+	brewCaskFormulasToInstall="$mono_mdk_V5_0_1_1_Formula_URL picoscope arduino"
+
+	for cask in $brewCaskFormulasToInstall
 	do
 #		set -x
-		$brewCask list | grep -wq $cask || $brewCask install $cask
+		$brewCask list | grep -wq $(basename $cask .rb) || $brewCask install $cask
 		set +x
 	done
 	gem list --local | grep -wq iStats || gem install iStats
