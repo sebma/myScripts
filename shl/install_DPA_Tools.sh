@@ -5,7 +5,7 @@ brewCask="$(which brew) cask"
 if [ $(uname -s) = Darwin ]
 then
 	$brew update
-	formulas="watch remake cgdb"
+	formulas="watch gdb remake cgdb"
 	for formula in $formulas
 	do
 #		set -x
