@@ -53,7 +53,11 @@ then
 	which randverse >/dev/null 2>&1 && randverse && echo
 fi
 
-which xdg-mime >/dev/null && xdg-mime default evince.desktop application/pdf
+if which xdg-mime >/dev/null 
+then
+	xdg-mime query default application/pdf | grep -wq evince.desktop || xdg-mime default evince.desktop application/pdf
+fi
+
 #test -f ~/.rvm/scripts/rvm && source ~/.rvm/scripts/rvm
 which lpstat >/dev/null 2>&1 && defaultPrinter=$(LANG=C lpstat -a 2>/dev/null | awk '/accepting/{print$1}') || defaultPrinter=""
 if which lpstat >/dev/null 2>&1 && lpstat -p 2>/dev/null | grep -q printer 
