@@ -53,9 +53,9 @@ trap 'echo "=> Ignoring this step and continuing the script <$(basename $BASH_SO
 if which gsettings >/dev/null 2>&1 && [ $DISPLAY ]; then
 	ldd $(which gsettings) 2>&1 | grep -q not.found || {
 	gsettings set org.gnome.desktop.wm.preferences mouse-button-modifier "<Alt>" && gsettings set org.gnome.desktop.wm.preferences resize-with-right-button true && gsettings set org.gnome.desktop.input-sources xkb-options "['terminate:ctrl_alt_bksp']"
-}
+} >/dev/null
 fi
 trap - INT
 
 which matlab >/dev/null 2>&1 && test -d "$HOME/.matlab" && export MATLAB=$(\ls -d "$HOME/.matlab/"* | head -1)
-git config --global credential.helper "cache --timeout=86400"
+which git >/dev/null && git config --global credential.helper "cache --timeout=86400"
