@@ -9,7 +9,6 @@ case $(uname) in
 		$brew update
 		$brew tap caskroom/cask
 		$brew tap caskroom/drivers
-#		$brew tap homebrew/versions # deprecated : See https://docs.brew.sh/Versions.html
 		$brew tap caskroom/versions # For "brew cask" packages
 		set +x ;;
 	Linux)
