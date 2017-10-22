@@ -18,7 +18,7 @@ alias burncdrw='\cdrecord -v -dao driveropts=burnfree fs=14M speed=12 gracetime=
 alias burnclone='\cdrecord -v -clone -raw driveropts=burnfree fs=14M speed=16 gracetime=10 -eject -overburn'
 alias burniso='\cdrecord -v -dao driveropts=burnfree fs=14M speed=24 gracetime=10 -eject -overburn'
 alias cclive="\cclive -c"
-alias ccze="\ccze -A"
+which ccze >/dev/null 2>&1 && alias ccze="\ccze -A"
 alias cdda_info="\icedax -gHJq -vtitles"
 alias cdrdao='\df | grep -q $CDR_DEVICE && umount -vv $CDR_DEVICE ; \cdrdao'
 alias cget="\curl -O"
@@ -48,7 +48,6 @@ alias dbus-suspend='\dbus-send --system --print-reply --dest="org.freedesktop.UP
 alias deborphan="\deborphan | sort"
 alias dig="\dig +search +short"
 alias diskinfo='\cdrdao disk-info'
-alias dmesg="\ccze -A < /var/log/dmesg"
 alias doc2pdf=" \lowriter --headless --convert-to pdf"
 alias docx2pdf="\lowriter --headless --convert-to pdf"
 alias dos2unix='\perl -pi -e "s/\r//g"'
@@ -77,7 +76,7 @@ alias getPip="\wget -qO- https://bootstrap.pypa.io/get-pip.py | python"
 alias getUuid="\blkid -o value -s UUID"
 alias gitLocalUndelete="\git ls-files -d | grep . && \git ls-files -d | \xargs git checkout-index"
 alias gitStatus="\git status -bs -uno"
-alias gitUpdate='\grep -w "^[[:blank:]]url" ./.git/config && \git pull'
+alias gitUpdate='\grep -w "^[[:blank:]]url" ./.git/config;\git pull'
 alias gitURL='\grep -w "^[[:blank:]]url" ./.git/config'
 alias grepInHome="time \grep --exclude-dir=Audios --exclude-dir=Music --exclude-dir=Podcasts --exclude-dir=Videos --exclude-dir=Karambiri --exclude-dir=iso --exclude-dir=Downloads --exclude-dir=Documents --exclude-dir=src --exclude-dir=Pictures --exclude-dir=.thunderbird --exclude-dir=deb --exclude-dir=apks --exclude-dir=.mozilla --exclude-dir=.PlayOnLinux --exclude-dir=PlayOnLinux\'s\ virtual\ drives --exclude-dir=.cache --exclude-dir=Sauvegarde_MB525 --exclude-dir=A_Master_RES --exclude-dir=SailFishSDK --exclude=.*history"
 alias gunzip="\gunzip -Nv"
