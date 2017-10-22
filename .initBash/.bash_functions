@@ -46,15 +46,18 @@ function odf2 {
 function brewInstall {
 	case $(uname) in 
 		Darwin)
-			command -v brew >/dev/null || $(which ruby) -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+			which brew >/dev/null 2>&1 || $(which ruby) -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+			brew=$(which brew) || return 1
 			set -x
-			$(which brew) update
-			$(which brew) tap caskroom/cask
-			$(which brew) tap caskroom/versions;set +x ;;
+			$brew update
+			$brew tap caskroom/cask
+			$brew tap caskroom/drivers
+			$brew tap caskroom/versions;set +x ;;
 		Linux)
-			command -v brew >/dev/null || $(which ruby) -e "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)"
-			$(which brew) update ;;
-		*) echo "=> ERROR : brew does not support $(uname)." >&2; exit 1;;
+			which brew >/dev/null 2>&1 || $(which ruby) -e "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install)"
+			brew=$(which brew) || return 1
+			$brew update ;;
+		*) echo "=> ERROR : brew does not support <$(uname)> operating system." >&2; exit 1;;
 	esac
 }
 function make {
