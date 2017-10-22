@@ -46,7 +46,7 @@ if tty -s #Si c'est une session interactive
 then
 	if which aplay >/dev/null 2>&1 && LANG=C aplay -l | grep -wq "card"
 	then
-		audioCardNumber=$(LANG=C aplay -l | awk -F "[ :]" '/^card/{number=$2}END{print number}')
+		audioCardNumber=$(LANG=C aplay -l 2>/dev/null | awk -F "[ :]" '/^card/{number=$2}END{print number}')
 		test $audioCardNumber && amixer -c $audioCardNumber -- sset Master 100%
 	fi
 	echo
