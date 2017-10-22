@@ -85,7 +85,8 @@ function gitUpdateAllLocalRepos {
 	do
 		cd $dir/..
 		echo "=> Updating <$dir> local repo. ..." >&2
-		\grep -w "^[[:blank:]]url" ./.git/config && \git pull
+		\grep -w "^[[:blank:]]url" ./.git/config
+		\git pull
 		cd - >/dev/null
 	done
 	unset dir
