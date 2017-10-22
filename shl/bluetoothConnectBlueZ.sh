@@ -12,7 +12,7 @@ if which bluetoothctl >/dev/null 2>&1; then
 
 	echo "=> bluetoothController = $bluetoothController"
 
-	bluetoothControllerMACAddress=$(printf "list\nquit\n" | bluetoothctl | awk /^Controller/'{print$2}')
+	bluetoothControllerMACAddress=$(printf "list\nquit\n" | bluetoothctl | awk /^Controller/'{print$2;exit}')
 	
 	deviceList=$(printf "power on\nscan on\ndevices\nquit\n" | bluetoothctl | grep ^Device)
 	if [ -z "$deviceList" ]; then {
@@ -38,12 +38,13 @@ if which bluetoothctl >/dev/null 2>&1; then
 	
 	if echo "$deviceList" | awk '/^Device/{print$NF}' | grep -q "$deviceName"; then {
 		deviceHW=$(echo "$deviceList" | awk /^Device.*$deviceName/'{print$2}')
-		cat<<EOF | bluetoothctl
+		cat<<EOF | bluetoothctl -a
 	power on
+	default-agent
 	select $bluetoothControllerMACAddress
-	trust $deviceHW
 	pairable on
 	pair $deviceHW
+	trust $deviceHW
 	paired-devices
 	connect $deviceHW
 	info $deviceHW
@@ -65,6 +66,7 @@ elif which hciconfig >/dev/null 2>&1; then
 	}
 	fi
 	echo "=> bluetoothController = $bluetoothController"
+	sudo hciconfig $bluetoothController up
 	
 	deviceList=$(time -p hcitool scan | grep -v Scanning)
 	if [ -z "$deviceList" ]; then {
