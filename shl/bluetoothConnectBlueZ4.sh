@@ -7,6 +7,7 @@ if [ -z "$bluetoothController" ]; then {
 }
 fi
 echo "=> bluetoothController = $bluetoothController"
+sudo hciconfig $bluetoothController up
 
 deviceList=$(time -p hcitool scan | grep -v Scanning)
 if [ -z "$deviceList" ]; then {
