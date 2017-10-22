@@ -1,7 +1,6 @@
 #!sh
 wifiInterface="$(iwconfig 2>/dev/null | awk '/^[^ \t]/ { if ($1 ~ /^[0-9]+:/) { print $2 } else { print $1 } }' | iw dev 2>/dev/null | awk '/Interface/{lastInterface=$NF}END{print lastInterface}')"
 alias autoremove="sudo $(which apt-get 2>/dev/null) autoremove -V"
-test $(uname -s) = Darwin && alias brewInstall='ruby -e "$(curl -fsSL  https://raw.githubusercontent.com/Homebrew/install/master/install)"'
 alias checkSudoFile="\visudo -cf"
 alias full-upgrade="sudo $(which apt 2>/dev/null) full-upgrade -V --download-only && sync && sudo $(which apt 2>/dev/null) full-upgrade -V --yes"
 alias nmRestart="sudo service network-manager restart"
