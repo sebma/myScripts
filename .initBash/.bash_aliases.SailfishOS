@@ -5,7 +5,6 @@ duExcludedPathList="./proc ./sys ./dev ./opt/alien"
 excludePathsDuExpression=$(printf " --exclude %s" $duExcludedPathList)
 
 alias androidVersion="\grep version.release /opt/alien/system/build.prop"
-unalias dmesg
 alias notesGrep='sqlite3 ~/.local/share/jolla-notes/QML/OfflineStorage/Databases/8b63c31a7656301b3f7bcbbfef8a2b6f.sqlite "select body from notes;" | grep'
 alias notesSearch=notesGrep
 alias os=version
