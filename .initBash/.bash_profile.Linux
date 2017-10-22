@@ -53,7 +53,7 @@ trap 'echo "=> Ignoring this step and continuing the script <$(basename $BASH_SO
 if which gsettings >/dev/null 2>&1 && [ $DISPLAY ]; then
 	if ! ldd $(which gsettings) 2>&1 | grep -q not.found; then
 	gsettings set org.gnome.desktop.wm.preferences mouse-button-modifier "<Alt>" && gsettings set org.gnome.desktop.wm.preferences resize-with-right-button true && gsettings set org.gnome.desktop.input-sources xkb-options "['terminate:ctrl_alt_bksp']"
-fi >/dev/null
+	fi >/dev/null
 fi
 trap - INT
 
