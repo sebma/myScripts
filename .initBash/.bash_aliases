@@ -18,7 +18,7 @@ alias burncdrw='\cdrecord -v -dao driveropts=burnfree fs=14M speed=12 gracetime=
 alias burnclone='\cdrecord -v -clone -raw driveropts=burnfree fs=14M speed=16 gracetime=10 -eject -overburn'
 alias burniso='\cdrecord -v -dao driveropts=burnfree fs=14M speed=24 gracetime=10 -eject -overburn'
 alias cclive="\cclive -c"
-which ccze >/dev/null 2>&1 && alias ccze="\ccze -A"
+which ccze >/dev/null 2>&1 && alias ccze="\ccze -A" && alias dmesg="\ccze -A < /var/log/dmesg"
 alias cdda_info="\icedax -gHJq -vtitles"
 alias cdrdao='\df | grep -q $CDR_DEVICE && umount -vv $CDR_DEVICE ; \cdrdao'
 alias cget="\curl -O"
