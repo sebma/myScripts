@@ -1,4 +1,6 @@
 # vim: set syn=sh noet
+#test -n "$bashRCLoaded" && return
+bashRCLoaded=1
 function addpath {
   test ! -d "$1" && return
   echo $PATH | grep -wq "$1" || PATH=$PATH:$1
@@ -75,8 +77,8 @@ then
 	grep -qw pdflatex= $HOME/.pdfnup.conf || echo pdflatex=$(which pdflatex) >> $HOME/.pdfnup.conf
 fi
 
-echo "=> Starting ssh-add from <$(basename $BASH_SOURCE)> ..."
 which ssh-add >/dev/null && {
+	echo "=> Starting ssh-add from <$(basename $BASH_SOURCE)> ..."
 	trap 'echo "=> Ignoring this step and continuing the script <$(basename $BASH_SOURCE)> ..." >&2' INT
 	if ! ssh-add -l 2>/dev/null | grep -q "$UPMC_ID"
 	then
@@ -84,7 +86,7 @@ which ssh-add >/dev/null && {
 	fi
 	trap - INT
 }
-cd ~
+cd
 
 test -r /usr/share/bash-completion/bash_completion && source /usr/share/bash-completion/bash_completion
 test -x "$(which brew)" && [ $BASH_VERSINFO -ge 4 ] && [ -r $(brew --prefix)/share/bash-completion/bash_completion ] && source $(brew --prefix)/share/bash-completion/bash_completion
