@@ -1,4 +1,5 @@
 # vim: set syn=sh noet
+export bashProfileLoaded=1
 [ $BASH_VERSINFO = 3 ] && [ -x ~/usr/local/bin/bash ] && exec ~/usr/local/bin/bash -l
 
 initDir=$(basename $initDir) #Pour creer des liens symboliques relatifs a $HOME
@@ -55,7 +56,11 @@ if [ $domain != localhost ] && nc -v -z -w 4 $proxyName $proxyPort >/dev/null 2>
 then
     test -z $http_proxy && export http_proxy=http://proxy:$proxyPort
 fi
-test -n $http_proxy && export https_proxy=$http_proxy
+
+if test -n $http_proxy; then
+	export https_proxy=$http_proxy
+	export dnsSuffix=$(basename $http_proxy | cut -d. -f2- | cut -d: -f1)
+fi
 
 which gnuplot >/dev/null 2>&1 && export GNUTERM=qt
 
