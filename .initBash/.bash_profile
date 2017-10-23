@@ -9,7 +9,7 @@
 #umask 022
 scriptDir=$(cd $(dirname $BASH_SOURCE);pwd);test $HOME = / && export HOME=$scriptDir ; cd #Pour les cas tordus ou HOME pointerai sur "/", example sur les µLinux ou Android
 
-export initDir=~/.initBash
+export initDir=$HOME/.initBash
 test -f $initDir/.bash_profile.seb && source $initDir/.bash_profile.seb
 
 # if running bash
