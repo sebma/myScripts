@@ -38,7 +38,7 @@ groups 2>/dev/null | egrep -wq "sudo|admin" || {
 }
 
 export domain=$(awk -F"[ .]" '/domain/{print$(NF-1);exit}' /etc/resolv.conf /private/etc/resolv.conf 2>/dev/null)
-test "$domain" || export domain=localhost
+test -z $domain && export domain=localhost # Si le domaine est inconnu
 case $domain in
 jussieu|enst)
 	export proxyName=proxy
@@ -51,11 +51,11 @@ jussieu|enst)
 esac
 
 #Si le proxy est joignable
-if nc -v -z -w 4 $proxyName $proxyPort >/dev/null 2>&1
+if [ $domain != localhost ] && nc -v -z -w 4 $proxyName $proxyPort >/dev/null 2>&1
 then
-    export http_proxy=http://proxy:$proxyPort
-    export https_proxy=$http_proxy
+    test -z $http_proxy && export http_proxy=http://proxy:$proxyPort
 fi
+test -n $http_proxy && export https_proxy=$http_proxy
 
 which gnuplot >/dev/null 2>&1 && export GNUTERM=qt
 
