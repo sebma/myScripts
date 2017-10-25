@@ -24,7 +24,7 @@ if which iw >/dev/null; then
 	sudo iw dev $wiFiDevice link
 else
 	which iwlist >/dev/null && {
-		iwlist $wiFiDevice bitrate 
+		sudo iwlist $wiFiDevice bitrate 
 		iwlist $wiFiDevice frequency
 		sudo iwlist $wiFiDevice encryption
 		iwlist $wiFiDevice event
