@@ -57,7 +57,7 @@ then
     test -z $http_proxy && export http_proxy=http://proxy:$proxyPort
 fi
 
-if test -n $http_proxy; then
+if test -n "$http_proxy"; then
 	export https_proxy=$http_proxy
 	export dnsSuffix=$(basename $http_proxy | cut -d. -f2- | cut -d: -f1)
 fi
