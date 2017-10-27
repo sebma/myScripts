@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 FORM=$(zenity --forms \ --title="Simple shortcut maker" --text="Create new .desktop file" \
         --add-entry="Program Name" \
