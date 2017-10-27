@@ -851,7 +851,7 @@ function updateYoutubePlaylistLUAForVLC {
 	fi
 }
 function locate {
-	groups | \egrep -wq "sudo|admin" && locateOptions="-e" || locateOptions="--database $HOME/.local/lib/mlocate/mlocate.db -e"
+	groups 2>/dev/null | \egrep -wq "sudo|admin" && locateOptions="-e" || locateOptions="--database $HOME/.local/lib/mlocate/mlocate.db -e"
 	echo "$@" | grep -q "\-[a-z]*r" && $(which locate) $locateOptions "$@" || $(which locate) $locateOptions -ir "${@}"
 }
 function locateBin {
