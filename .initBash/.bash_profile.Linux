@@ -37,7 +37,13 @@ groups 2>/dev/null | egrep -wq "sudo|admin" || mkdir -p ~/.local/lib/mlocate/ ~/
 [ $TERM = linux ] && setterm -blength 0 > $(tty)
 
 #Choix d'une splash image grub aleatoire
-test -w /boot/grub/today.jpg && find /datas/ImagesVersets/ -type f | egrep -q '(png|jpg)$' && cp -pv "$(shuf -n1 -e /datas/ImagesVersets/*/*.{jpg,png})" /boot/grub/today.jpg
+if test -w /boot/grub/today.jpg 
+then
+	for dir in /datas/ImagesVersets $HOME/ImagesVersets
+	do
+		test -d $dir && find $dir -type f | egrep -q '(png|jpg)$' && cp -pv "$(shuf -n1 -e $dir/*/*.{jpg,png})" /boot/grub/today.jpg
+	done
+fi
 
 #Cleanup previous XFCE Sessions
 rm -f ~/.cache/sessions/xf*
@@ -57,7 +63,10 @@ if which gsettings >/dev/null 2>&1 && [ $DISPLAY ]; then
 fi
 trap - INT
 
-dconf read /org/gnome/shell/favorite-apps | grep -i firefox.desktop || dconf write /org/gnome/shell/favorite-apps "$(dconf read /org/gnome/shell/favorite-apps | sed "s/\]/, 'Firefox.desktop']/")"
+if [ $(dconf read /org/gnome/shell/favorite-apps | wc -c) != 0 ]
+then
+	dconf read /org/gnome/shell/favorite-apps | grep -wqi firefox.desktop || dconf write /org/gnome/shell/favorite-apps "$(dconf read /org/gnome/shell/favorite-apps | sed "s/\]/, 'Firefox.desktop']/")"
+fi
 
 which matlab >/dev/null 2>&1 && test -d "$HOME/.matlab" && export MATLAB=$(\ls -d "$HOME/.matlab/"* | head -1)
 which git >/dev/null && git config --global credential.helper "cache --timeout=86400"
