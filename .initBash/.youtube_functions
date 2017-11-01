@@ -205,7 +205,7 @@ function getRestrictedFilenamesHD {
 	for url
 	do
 		let i++
-		echo "=> Downloading url #$i/$# ..."
+		echo "=> Downloading url # $i/$# ..."
 		$youtube_dl -qs $url 2>&1 | grep --color -A1 ^ERROR: && continue
 		if echo $url | \egrep -vq "www"
 		then
@@ -248,7 +248,7 @@ function getRestrictedFilenamesSD {
 	for url
 	do
 		let i++
-		echo "=> Downloading url #$i/$# ..."
+		echo "=> Downloading url # $i/$# ..."
 		$youtube_dl -qs $url 2>&1 | grep --color -A1 ^ERROR: && continue
 		if ! echo $url | \egrep -wq "www"
 		then
@@ -306,7 +306,7 @@ function getRestrictedFilenamesLD {
 	for url
 	do
 		let i++
-		echo "=> Downloading url #$i/$# ..."
+		echo "=> Downloading url # $i/$# ..."
 		$youtube_dl -qs $url 2>&1 | grep --color -A1 ^ERROR: && continue
 		if echo $url | \egrep -vq "www"
 		then
@@ -362,7 +362,7 @@ function getPlaylistsRestrictedFilenamesHD {
 			urlPrefix=$dailymotionURLPrefix
 		fi
 
-		listOfUrls=$($youtube_dl --get-id "$playList" | sed "s|^|$urlPrefix|g" | tr "\n" " ")
+		listOfUrls=$($youtube_dl --ignore-errors --get-id "$playList" | sed "s|^|$urlPrefix|g" | tr "\n" " ")
 		getRestrictedFilenamesHD $listOfUrls
 	done
 }
@@ -382,7 +382,7 @@ function getPlaylistsRestrictedFilenamesSD {
 			urlPrefix=$dailymotionURLPrefix
 		fi
 
-		listOfUrls=$($youtube_dl --get-id "$playList" | sed "s|^|$urlPrefix|g" | tr "\n" " ")
+		listOfUrls=$($youtube_dl --ignore-errors --get-id "$playList" | sed "s|^|$urlPrefix|g" | tr "\n" " ")
 		getRestrictedFilenamesSD $listOfUrls
 	done
 }
