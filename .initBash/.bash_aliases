@@ -207,8 +207,9 @@ alias vimatlab="vim +'setf matlab'"
 alias vihistory='\vim ~/.bash_history'
 alias vioctave=vimatlab
 alias view='vim -R'
-alias viewcer="\openssl x509 -noout -text -inform PEM -subject -issuer -dates -purpose -nameopt multiline -in"
-alias viewcrt="\openssl x509 -noout -text -inform PEM -in"
+alias viewcer="\openssl x509 -noout -text -inform DER -subject -issuer -dates -purpose -nameopt multiline -in"
+alias viewpem="\openssl x509 -noout -text -inform PEM -subject -issuer -dates -purpose -nameopt multiline -in"
+alias viewcrt="viewcer"
 alias viewcsr="\openssl req -noout -text -inform PEM -in"
 alias viewder="\openssl x509 -noout -text -inform DER -in"
 alias vlclocal='DISPLAY=:0 vlc'
