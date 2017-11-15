@@ -7,6 +7,20 @@ test -r $initDir/.colors && source $initDir/.colors
 test -r $initDir/.AV_functions && source $initDir/.AV_functions
 test -r $initDir/.youtube_functions && source $initDir/.youtube_functions
 
+function pem2cer {
+	for pemCertificate
+	do
+		openssl x509 -inform PEM -in "$pemCertificate" -outform DER -out "${pemCertificate/.pem/.cer}"
+		ls -l "${pemCertificate/.pem/.cer}"
+	done
+}
+function cer2pem {
+	for cerCertificate
+	do
+		openssl x509 -inform DER -in "$cerCertificate" -outform PEM -out "${cerCertificate/.pem/.cer}"
+		ls -l "${cerCertificate/.pem/.cer}"
+	done
+}
 function renameFileInsideZIP {
 	test $# -lt 3 && {
 		echo "=> Usage: $FUNCNAME oldName newName zipFile" >&2
