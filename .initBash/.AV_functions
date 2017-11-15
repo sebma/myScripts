@@ -866,11 +866,12 @@ function audioGet {
 		extension=${file/*./}
 		audioFormat=$(ffprobe "$file" 2>&1 | awk '/Audio/{print$4}' | sed "s/,$//")
 		outputExtension=${audioExtension[$audioFormat]}
-		outputFileName=${file/.$extension/_AUDIO.$outputExtension}
+#		outputFileName=${file/.$extension/_AUDIO.$outputExtension}
+		outputFileName=$(basename $file .$extension)/_AUDIO.$outputExtension
 		minimumAudioStreamSize=$(mediainfo --Output="Audio;%StreamSize%" "$file") || return
 		if test -s "$outputFileName" && [ $(stat -c '%s' "$outputFileName") -ge $minimumAudioStreamSize ]
 		then
-			echo "=> INFO: The file $outputFileName is already converted to $outputFileName." >&2
+			echo "=> INFO: The file $file has already been converted to $outputFileName." >&2
 			continue
 		fi
 		time $ffmpeg -i "$file" -vn -sn -codec copy $options "$outputFileName" -y
@@ -887,11 +888,12 @@ function videoGet {
 		extension=${file/*./}
 		videoFormat=$(ffprobe "$file" 2>&1 | grep -v Video:.mjpeg | awk '/Video/{print$4}' | sed "s/,$//")
 		outputExtension=${videoExtension[$videoFormat]}
-		outputFileName=${file/.$extension/_VIDEO.$outputExtension}
+#		outputFileName=${file/.$extension/_VIDEO.$outputExtension}
+		outputFileName=$(basename $file .$extension)/_VIDEO.$outputExtension
 		minimumVideoStreamSize=$(mediainfo --Output="Video;%StreamSize%" "$file") || return
 		if test -s "$outputFileName" && [ $(stat -c '%s' "$outputFileName") -ge $minimumVideoStreamSize ]
 		then
-			echo "=> INFO: The file $outputFileName is already converted to $outputFileName." >&2
+			echo "=> INFO: The file $file has already been converted to $outputFileName." >&2
 			continue
 		fi
 		time $ffmpeg -i "$file" -an -codec copy $options "$outputFileName" -y
