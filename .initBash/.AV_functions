@@ -867,7 +867,7 @@ function audioGet {
 		audioFormat=$(ffprobe "$file" 2>&1 | awk '/Audio/{print$4}' | sed "s/,$//")
 		outputExtension=${audioExtension[$audioFormat]}
 #		outputFileName=${file/.$extension/_AUDIO.$outputExtension}
-		outputFileName=$(basename $file .$extension)/_AUDIO.$outputExtension
+		outputFileName=$(basename $file .$extension)_AUDIO.$outputExtension
 		minimumAudioStreamSize=$(mediainfo --Output="Audio;%StreamSize%" "$file") || return
 		if test -s "$outputFileName" && [ $(stat -c '%s' "$outputFileName") -ge $minimumAudioStreamSize ]
 		then
@@ -889,7 +889,7 @@ function videoGet {
 		videoFormat=$(ffprobe "$file" 2>&1 | grep -v Video:.mjpeg | awk '/Video/{print$4}' | sed "s/,$//")
 		outputExtension=${videoExtension[$videoFormat]}
 #		outputFileName=${file/.$extension/_VIDEO.$outputExtension}
-		outputFileName=$(basename $file .$extension)/_VIDEO.$outputExtension
+		outputFileName=$(basename $file .$extension)_VIDEO.$outputExtension
 		minimumVideoStreamSize=$(mediainfo --Output="Video;%StreamSize%" "$file") || return
 		if test -s "$outputFileName" && [ $(stat -c '%s' "$outputFileName") -ge $minimumVideoStreamSize ]
 		then
