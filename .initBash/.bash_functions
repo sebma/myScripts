@@ -532,12 +532,30 @@ function lsbin {
 	done | grep bin/ | sort -u
 }
 function fixAptKeys {
-	time sudo apt-get update 2>&1 >/dev/null | awk '/Release:.*not available: NO_PUBKEY/{print "sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys "$NF}' | sh -x
-	sudo apt-key update
+	time \sudo apt-get update 2>&1 > /dev/null | awk '/Release:.*not available: NO_PUBKEY/{print substr($NF,9)}' | sort -u | while read key
+	do
+		echo -e "\n=> Processing key: $key"
+		sudo apt-key del $key
+		sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $key 
+	done
+	\sudo apt-key update 2>&1 | awk '/gpg: keyblock resource .*resource limit/{print gensub("\`|.:","","g",$4)" "}' | while read keyFile
+	do
+		sudo rm -v $keyFile
+	done
 }
 function fixAptKeysBis {
-	time sudo apt-get update 2> /tmp/keymissing; for key in $(grep "NO_PUBKEY" /tmp/keymissing |sed "s/.*NO_PUBKEY //"); do echo -e "\nProcessing key: $key"; sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $key ; done
-	sudo apt-key update
+	time sudo apt-get update 2>/tmp/keymissing >/dev/null
+	for key in $(grep "NO_PUBKEY" /tmp/keymissing | sed "s/.*NO_PUBKEY //" | sort -u | cut -c 9-)
+	do
+		echo -e "\n=> Processing key: $key"
+		sudo apt-key del $key
+		sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $key 
+	done
+#	\rm -v /tmp/keymissing
+	\sudo apt-key update 2>&1 | awk '/gpg: keyblock resource .*resource limit/{print gensub("\`|.:","","g",$4)" "}' | while read keyFile
+	do
+		sudo rm -v $keyFile
+	done
 }
 function updateRepositoryKeys {
 	time sudo apt-get update 2>&1 >/dev/null | awk '/Release:.*not available: NO_PUBKEY/{print "sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys "$NF}' | sh -x
