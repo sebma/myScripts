@@ -3,10 +3,10 @@
 set -o nounset
 set -o errexit
 
-if [ $(ssh -V 2>&1 | cut -d_ -f2 | cut -d. -f1) -lt 6 ]
+if [ $($(which ssh) -V 2>&1 | cut -d_ -f2 | cut -d. -f1) -lt 6 ]
 then
     printf "=> You cannot fetch <ssh-keygen -F> return code because OpenSSH is to old on that server: " >&2
-    ssh -V
+	$(which ssh) -V
     exit 1
 fi
 
