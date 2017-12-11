@@ -186,12 +186,17 @@ function ssh {
 	local reachable=""
 	local sshOptions="-A -Y -C"
 	type ssh >/dev/null || return
-	remoteSSHServer=$(echo $@ | awk '{sub("^(-[[:alnum:]_]+ )+","");sub("[[:alnum:]_]+@","");print$1}')
-	if which netcat >/dev/null 2>&1
+	remoteSSHServer=$(echo $@ | awk '{sub("^(-[[:alnum:]_]+ ?)+","");sub("[[:alnum:]_]+@","");print$1}')
+	if test -n "$remoteSSHServer"
 	then
-		netcat -v -z -w 5 $remoteSSHServer 22 2>&1 | egrep -v "succeeded|open" || $(which ssh) $sshOptions $@
+		if which netcat >/dev/null 2>&1
+		then
+			netcat -v -z -w 5 $remoteSSHServer 22 2>&1 | egrep -v "succeeded|open" || $(which ssh) $sshOptions $@
+		else
+			$(which bash) -c ": < /dev/tcp/$remoteSSHServer/ssh" && $(which ssh) $sshOptions $@
+		fi
 	else
-		$(which bash) -c ": < /dev/tcp/$remoteSSHServer/ssh" && $(which ssh) $sshOptions $@
+		$(which ssh) $@
 	fi
 }
 function aria2c {
