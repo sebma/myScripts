@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
 package_name=$1
-ppa_user_name=$(apt-cache policy $package_name | grep -m1 500.http | awk -F/ '{print$4}')
-ppa_name=$(apt-cache policy $package_name | grep -m1 500.http | awk -F/ '{print$5}' | awk '{print$NF}')
-if [ $ppa_name = "$(lsb_release -sc)-updates" ]
+
+if apt-get changelog $package_name &>/dev/null
 then
 	apt-get changelog $package_name
 else
+	ppa_user_name=$(apt-cache policy $package_name | grep -m1 500.http | awk -F/ '{print$4}')
+	ppa_name=$(apt-cache policy $package_name | grep -m1 500.http | awk -F/ '{print$5}' | awk '{print$NF}')
 	package_version=$(apt-cache policy $package_name | awk -F"[ :]" '/Candidate:/{print$NF}')
 	URL=https://launchpad.net/~$ppa_user_name/+archive/ubuntu/$ppa_name/+files/${package_name}_${package_version}_source.changes
 	#echo "=> URL = $URL"
