@@ -55,6 +55,7 @@ alias doublons='\fdupes -rnASd'
 alias driveinfo='\cdrecord -prcap'
 alias du="LANG=C \du -h"
 alias ejectcd='\eject $CDR_DEVICE'
+alias ethmac="\ifconfig eth | awk '/HWaddr/{print\$NF}'"
 alias eman="\man -L en"
 alias enman="LANG=en_US \man"
 alias erasecd='\cdrecord -v speed=12 blank=fast gracetime=10 -eject'

@@ -7,6 +7,10 @@ test -r $initDir/.colors && source $initDir/.colors
 test -r $initDir/.AV_functions && source $initDir/.AV_functions
 test -r $initDir/.youtube_functions && source $initDir/.youtube_functions
 
+function wlanmac {
+	wlanIF=$(iwconfig 2>&1 | awk '/ESSID:/{print$1}')
+	test "$wlanIF" && ip link show $wlanIF | awk '/link\/ether /{print$2}'
+}
 function apt-cache {
 	firstArg=$1
 	if [ "$firstArg" = search ]
