@@ -7,7 +7,7 @@ duExcludedPathList="./proc ./sys ./dev"
 excludePathsDuExpression=$(printf " --exclude %s" $duExcludedPathList)
 alias catFiles="\tail -vn +1"
 alias cp='\cp --preserve=timestamps -uv'
-alias firefoxDefrag='pgrep firefox || $(which find) ~/.mozilla/firefox/ -name "*sqlite" -ls -exec sqlite3 {} vacuum \;'
+alias firefoxDefrag='pgrep firefox || time $(which find) ~/.mozilla/firefox/ -name "*sqlite" -ls -exec sqlite3 {} vacuum \;'
 alias df="\df -PTh"
 alias l="ls --color"
 alias ll="ls -blF --time-style=+'%Y-%m-%d %T'"
