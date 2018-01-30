@@ -32,4 +32,5 @@ Plug 'vim-scripts/matchit.zip' "use % to travel Shell's if, else, elif, fi.
 Plug 'vim-scripts/python_match.vim' " use % to travel Python's if, elif, etc.
 Plug 'vim-scripts/tagbar'
 Plug 'sbdchd/vim-shebang'
+Plug 'sirjofri/vim-biblereader'
 call plug#end()
