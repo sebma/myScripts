@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 PackagesDevice=""
 srcListFile=/etc/apt/sources.list

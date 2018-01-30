@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function updateRepositoryKeys {
 	pubkeyList="$(sudo apt-get update 2>&1 > /dev/null | awk '/PUBKEY/{print $NF}')"

@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/usr/bin/env ksh
 
 perlScript=$1
 awk '/use .*;/{print$2}' $perlScript | sed "s/;$//" | while read modul

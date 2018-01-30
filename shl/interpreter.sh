@@ -1,4 +1,4 @@
-#!/bin/env ksh
+#!/usr/bin/env ksh
 
 get_interpreter() {
 	typeset scriptPID=$$

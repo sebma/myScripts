@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/usr/bin/env bash
 
 fileList=`mktemp`
 find . -type f > $fileList
