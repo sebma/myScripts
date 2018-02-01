@@ -192,6 +192,49 @@ function getRestrictedFilenames {
 	done
 	sync
 }
+function getRestrictedFilenamesBEST {
+	youtube_dl=$(which youtube-dl)
+	youtubeURLPrefix=https://www.youtube.com/watch?v=
+	dailymotionURLPrefix=https://www.dailymotion.com/video/
+	format=best[ext=mp4]/best[ext=webm]/best[ext=flv]
+	test $# != 0 && {
+		echo "=> There are $# urls to download ..."
+#		echo "=> listOfUrls = $@ ..."
+	}
+	i=0
+	for url
+	do
+		let i++
+		echo "=> Downloading url # $i/$# ..."
+		$youtube_dl -qs $url 2>&1 | grep --color -A1 ^ERROR: && continue
+		if echo $url | \egrep -vq "www"
+		then
+			if   $youtube_dl -qs $youtubeURLPrefix$url   2>/dev/null
+			then
+				url=$youtubeURLPrefix$url
+			elif $youtube_dl -qs $dailymotionURLPrefix$url 2>/dev/null
+			then
+				url=$dailymotionURLPrefix$url
+			fi
+		fi
+
+#		format=$($youtube_dl -F $url | grep -vw only  | egrep '(m4a|mp4|flv) .*([0-9]+x[0-9]+)|(unknown)' | sort -k 2,2 -k 3,3rn | awk '{printf$1"/"}')
+		echo "=> url = $url"
+		echo
+		fileName=$($youtube_dl -f $format --get-filename "$url" --restrict-filenames)
+		echo "=> fileName = <$fileName>"
+		echo
+		if [ -f "$fileName" ] && [ ! -w "$fileName" ]
+		then
+			echo "${color[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" >&2
+			echo
+			continue
+		fi
+		$youtube_dl -f $format "$url" --restrict-filenames && mp4tags -m "$url" "$fileName" && chmod -w "$fileName" && echo && $(which ffprobe) -hide_banner "$fileName"
+		echo
+	done
+	sync
+}
 function getRestrictedFilenamesHD {
 	youtube_dl=$(which youtube-dl)
 	youtubeURLPrefix=https://www.youtube.com/watch?v=
