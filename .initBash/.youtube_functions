@@ -66,14 +66,14 @@ function addYoutubeTDescription {
 function sizeOf {
 	local size
 	local total="0"
-	local format=fmt18_360p
-	echo $1 | grep -q ^http || {
-	format=$1
+	local format=18
+	echo $1 | \egrep -q "^https?://" || {
+		format=$1
 	shift
 	}
 	for url in "$@"
 	do
-	size=$(curl -sI "$(youtube-dl -gf mp4 $url)" | awk 'BEGIN{IGNORECASE=1}/Content-Length:/{print$2/2^20}')
+	size=$(curl -sI "$(youtube-dl -gf $format $url)" | awk 'BEGIN{IGNORECASE=1}/Content-Length:/{print$2/2^20}')
 	total="$total+$size"
 	printf "%s %s Mo\n" $url $size
 	done
