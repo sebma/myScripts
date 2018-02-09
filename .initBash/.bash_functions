@@ -87,6 +87,15 @@ function brewInstall {
 		*) echo "=> ERROR : brew does not support <$(uname)> operating system." >&2; exit 1;;
 	esac
 }
+function brewUnInstall {
+	case $(uname) in 
+		Darwin)
+			$(which ruby) -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall)"
+		Linux)
+			$(which ruby) -e "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/uninstall)"
+		*) echo "=> ERROR : brew does not support <$(uname)> operating system." >&2; exit 1;;
+	esac
+}
 function make {
 	if [ -s Makefile ] || [ -s makefile ]
 	then
