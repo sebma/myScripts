@@ -16,19 +16,7 @@ audioExtension=( [libspeex]=oga [speex]=oga [opus]=oga [vorbis]=ogg [aac]=m4a [m
 videoExtension=( [h264]=m4v [mpeg1video]=mpg [mpeg2video]=vob [mpeg4]=avi [flv1]=flv [wmv3]=wmv )
 audioDecode=( [libspeex]=$(which speexdec 2>/dev/null) [speex]=$(which speexdec 2>/dev/null) [opus]=$(which opusdec 2>/dev/null) [vorbis]=$(which oggdec 2>/dev/null) )
 
-function mpvSD {
-	local formats="18 43 sd http-480 best"
-	local formatsRegExp=$(echo "\<($formats)\>" | sed "s/ /|/g")
-	for url
-	do
-		format=$($(which youtube-dl) -F $url | awk "/$formatsRegExp/"'{exit}END{print $1}')
-		echo "=> format = $format"
-		nohup $(which mpv) --ytdl-format $format $url &
-		sleep 20
-		tail -20 nohup.out
-		\pgrep -a mpv
-	done
-}
+
 function mpvFrench {
 #	sid=$($ffprobe "$video" 2>&1 | awk -F ':|\\(' "/Stream .*$language.*Subtitle:/"'{sid=$2;sid+=-1}END{print sid}'); test -z $sid || sid="--sid=$sid"
 	language=fra
