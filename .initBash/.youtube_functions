@@ -6,11 +6,12 @@ test -r $initDir/.colors && source $initDir/.colors
 youtube_dl=$(which youtube-dl)
 
 function ytdlFormats {
-	url="$1"
-	test $url && {
+	for url
+	do
+		echo "=> url = $url"
 		streamID=$(basename "$url" | cut -d= -f2)
 		$youtube_dl -F "$url" | \egrep -v "only|$streamID"
-	}
+	done
 }
 function YTRenameFromFiles {
 #	local file="$1"
