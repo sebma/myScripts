@@ -161,7 +161,9 @@ function getRestrictedFilenamesFORMAT {
 	do
 		let i++
 		echo "=> Downloading url # $i/$# ..."
-		$youtube_dl -f "$format" -qs $url 2>&1 | grep --color -A1 ^ERROR: && continue
+		fileName=$($youtube_dl -f $format --get-filename "$url" --restrict-filenames || $youtube_dl -f $fallback --get-filename "$url" --restrict-filenames)
+		test -z "$fileName" && continue
+#		$youtube_dl -f "$format" -qs $url 2>&1 | \grep --color -A1 ^ERROR: && continue
 		if ! echo $url | \egrep -wq "www"
 		then
 			fileName=$(basename $( $(which locate) -er "$url" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null)
