@@ -133,6 +133,7 @@ alias mpvLD="mpv --ytdl-format 'best[height<=240]'"
 alias mpvSD="mpv --ytdl-format 'best[height<=360]'"
 alias mpvHD="mpv --ytdl-format 'best[height<=720]'"
 alias mpvFHD="mpv --ytdl-format 'best[height<=1080]'"
+alias mpvFORMAT="mpv --ytdl-format"
 alias mutt="LANG=C.UTF-8 \mutt"
 alias muttDebug="LANG=C.UTF-8 \mutt -nd5"
 alias mv='\mv -vi'
