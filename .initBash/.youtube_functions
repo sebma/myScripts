@@ -404,30 +404,21 @@ function ytdlSDFormats {
 	done
 }
 function getPlaylistsRestrictedFilenamesHD {
-	youtube_dl=$(which youtube-dl)
-	youtubeURLPrefix=https://www.youtube.com/watch?v=
-	dailymotionURLPrefix=https://www.dailymotion.com/video/
-
 	for playList
 	do
 		echo "=> Treating playList : $playList ..." >&2
-		if   echo $playList | grep -q youtube
+		if   echo $playList | \egrep -q "youtube|dailymotion"
 		then
-			urlPrefix=$youtubeURLPrefix
-		elif echo $playList | grep -q dailymotion
-		then
-			urlPrefix=$dailymotionURLPrefix
+			listOfUrls=$(hxwls "$playList" | sort -u | \egrep -w "watch|video" | tr "\n" " ")
+		else
+			urlPrefix=$(echo "$playList" | sed -r "s/https?:..//" | cut -d/ -f1)
+			listOfUrls=$($youtube_dl --ignore-errors --get-id "$playList" | sed "s|^|$urlPrefix|g" | tr "\n" " ")
 		fi
 
-		listOfUrls=$($youtube_dl --ignore-errors --get-id "$playList" | sed "s|^|$urlPrefix|g" | tr "\n" " ")
 		getRestrictedFilenamesHD $listOfUrls
 	done
 }
 function getPlaylistsRestrictedFilenamesSD {
-	youtube_dl=$(which youtube-dl)
-	youtubeURLPrefix=https://www.youtube.com/watch?v=
-	dailymotionURLPrefix=https://www.dailymotion.com/video/
-
 	for playList
 	do
 		echo "=> Treating playList : $playList ..." >&2
