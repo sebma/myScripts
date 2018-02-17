@@ -100,7 +100,8 @@ function ytget {
 	do
 		let i++
 		echo "=> Downloading url #$i/$# ..."
-		$youtube_dl -f "$format" -qs $url 2>&1 | grep --color -A1 ^ERROR: && continue
+		echo "=> url = $url"
+		$youtube_dl -f "$format" -qs "$url" 2>&1 | grep --color -A1 ^ERROR: && continue
 		if echo $url | \egrep -vq "www"
 		then
 			if   $youtube_dl -e $youtubeURLPrefix$url	 >/dev/null 2>&1
@@ -121,7 +122,6 @@ function ytget {
 			format=480
 		fi
 
-		echo "=> url = $url"
 		echo
 		fileName=$($youtube_dl -f $format --get-filename "$url" || $youtube_dl --get-filename "$url")
 		echo "=> fileName = <$fileName>"
@@ -161,9 +161,10 @@ function getRestrictedFilenamesFORMAT {
 	do
 		let i++
 		echo "=> Downloading url # $i/$# ..."
+		echo "=> url = $url"
 		fileName=$($youtube_dl -f $format --get-filename "$url" --restrict-filenames || $youtube_dl -f $fallback --get-filename "$url" --restrict-filenames)
 		test -z "$fileName" && continue
-#		$youtube_dl -f "$format" -qs $url 2>&1 | \grep --color -A1 ^ERROR: && continue
+#		$youtube_dl -f "$format" -qs "$url" 2>&1 | \grep --color -A1 ^ERROR: && continue
 		if ! echo $url | \egrep -wq "www"
 		then
 			streamID=$url
@@ -182,8 +183,7 @@ function getRestrictedFilenamesFORMAT {
 			fi
 		else
 			echo $url | grep -q youtube.com/ && urlSuffix=$(echo "$url" | cut -d= -f2)
-			test "$urlSuffix" && fileName=$(basename $( $(which locate) -er "$urlSuffix.*__${format}__" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null)
-			if test -s "$fileName"
+			if test "$urlSuffix" && fileName=$(basename $( $(which locate) -er "$urlSuffix.*__${format}__" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null) && test -s "$fileName"
 			then
 				echo "${color[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" >&2
 				echo
@@ -191,7 +191,6 @@ function getRestrictedFilenamesFORMAT {
 			fi
 		fi
 
-		echo "=> url = $url"
 		echo
 		fileName=$($youtube_dl -f $format --get-filename "$url" --restrict-filenames || $youtube_dl -f $fallback --get-filename "$url" --restrict-filenames)
 		echo "=> fileName = <$fileName>"
@@ -221,7 +220,8 @@ function getRestrictedFilenamesBEST {
 	do
 		let i++
 		echo "=> Downloading url # $i/$# ..."
-		$youtube_dl -f "$format" -qs $url 2>&1 | grep --color -A1 ^ERROR: && continue
+		echo "=> url = $url"
+		$youtube_dl -f "$format" -qs "$url" 2>&1 | grep --color -A1 ^ERROR: && continue
 		if echo $url | \egrep -vq "www"
 		then
 			if   $youtube_dl -f "$format" -qs $youtubeURLPrefix$url   2>/dev/null
@@ -234,7 +234,6 @@ function getRestrictedFilenamesBEST {
 		fi
 
 #		format=$($youtube_dl -F $url | grep -vw only  | egrep '(m4a|mp4|flv) .*([0-9]+x[0-9]+)|(unknown)' | sort -k 2,2 -k 3,3rn | awk '{printf$1"/"}')
-		echo "=> url = $url"
 		echo
 		fileName=$($youtube_dl -f $format --get-filename "$url" --restrict-filenames)
 		echo "=> fileName = <$fileName>"
@@ -264,7 +263,8 @@ function getRestrictedFilenamesHD {
 	do
 		let i++
 		echo "=> Downloading url # $i/$# ..."
-		$youtube_dl -f "$format" -qs $url 2>&1 | grep --color -A1 ^ERROR: && continue
+		echo "=> url = $url"
+		$youtube_dl -f "$format" -qs "$url" 2>&1 | grep --color -A1 ^ERROR: && continue
 		if echo $url | \egrep -vq "www"
 		then
 			if   $youtube_dl -f "$format" -qs $youtubeURLPrefix$url   2>/dev/null
@@ -277,7 +277,6 @@ function getRestrictedFilenamesHD {
 		fi
 
 		format=$($youtube_dl -F $url | grep -vw only  | egrep '(m4a|mp4|flv) .*([0-9]+x[0-9]+)|(unknown)' | sort -k 2,2 -k 3,3rn | awk '{printf$1"/"}')
-		echo "=> url = $url"
 		echo
 		fileName=$($youtube_dl -f $format --get-filename "$url" --restrict-filenames)
 		echo "=> fileName = <$fileName>"
@@ -307,7 +306,8 @@ function getRestrictedFilenamesSD {
 	do
 		let i++
 		echo "=> Downloading url # $i/$# ..."
-		$youtube_dl -f "$format" -qs $url 2>&1 | grep --color -A1 ^ERROR: && continue
+		echo "=> url = $url"
+		$youtube_dl -f "$format" -qs "$url" 2>&1 | grep --color -A1 ^ERROR: && continue
 		if ! echo $url | \egrep -wq "www"
 		then
 			fileName=$(basename $( $(which locate) -er "$url" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null)
@@ -325,8 +325,65 @@ function getRestrictedFilenamesSD {
 			fi
 		else
 			echo $url | grep -q youtube.com/ && urlSuffix=$(echo "$url" | cut -d= -f2)
-			test "$urlSuffix" && fileName=$(basename $( $(which locate) -er "$urlSuffix" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null)
+			if test "$urlSuffix" && fileName=$(basename $( $(which locate) -er "$urlSuffix" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null) && test -s "$fileName"
+			then
+				echo "${color[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" >&2
+				echo
+				continue
+			fi
+		fi
+
+#		format=$($youtube_dl -F $url | egrep -vw "only|hls-[0-9]+"  | egrep '(webm|mp4|flv) .*([0-9]+p?(x[0-9]+)?)|(unknown)' | egrep -wv "22|hd|http-720" | sort -k 2,2 -k 3,3rn | awk '{printf$1"/"}')
+		format="mp4[height<=?360]"
+		echo
+		fileName=$($youtube_dl -f $format --get-filename "$url" --restrict-filenames || $youtube_dl -f $fallback --get-filename "$url" --restrict-filenames)
+		echo "=> fileName = <$fileName>"
+		echo
+		if [ -f "$fileName" ] && [ ! -w "$fileName" ]
+		then
+			echo "${color[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" >&2
+			echo
+			continue
+		fi
+		$youtube_dl -f $format "$url" --restrict-filenames && mp4tags -m "$url" "$fileName" && chmod -w "$fileName" && echo && $(which ffprobe) -hide_banner "$fileName"
+		echo
+	done
+	sync
+}
+function getRestrictedFilenamesSD_PREV {
+	youtube_dl=$(which youtube-dl)
+	youtubeURLPrefix=https://www.youtube.com/watch?v=
+	dailymotionURLPrefix=https://www.dailymotion.com/video/
+	format="mp4"
+	test $# != 0 && {
+		echo "=> There are $# urls to download ..."
+#		echo "=> listOfUrls = $@ ..."
+	}
+	i=0
+	for url
+	do
+		let i++
+		echo "=> Downloading url # $i/$# ..."
+		echo "=> url = $url"
+		$youtube_dl -f "$format" -qs "$url" 2>&1 | grep --color -A1 ^ERROR: && continue
+		if ! echo $url | \egrep -wq "www"
+		then
+			fileName=$(basename $( $(which locate) -er "$url" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null)
 			if test -s "$fileName"
+			then
+				echo "${color[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" >&2
+				echo
+				continue
+			elif  $youtube_dl -f "$format" -qs $youtubeURLPrefix$url	   2>/dev/null
+			then
+				url=$youtubeURLPrefix$url
+			elif $youtube_dl -f "$format" -qs $dailymotionURLPrefix$url 2>/dev/null
+			then
+				url=$dailymotionURLPrefix$url
+			fi
+		else
+			echo $url | grep -q youtube.com/ && urlSuffix=$(echo "$url" | cut -d= -f2)
+			if test "$urlSuffix" && fileName=$(basename $( $(which locate) -er "$urlSuffix" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null) && test -s "$fileName"
 			then
 				echo "${color[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" >&2
 				echo
@@ -365,7 +422,8 @@ function getRestrictedFilenamesLD {
 	do
 		let i++
 		echo "=> Downloading url # $i/$# ..."
-		$youtube_dl -f "$format" -qs $url 2>&1 | grep --color -A1 ^ERROR: && continue
+		echo "=> url = $url"
+		$youtube_dl -f "$format" -qs "$url" 2>&1 | grep --color -A1 ^ERROR: && continue
 		if echo $url | \egrep -vq "www"
 		then
 			if   $youtube_dl -f "$format" -qs $youtubeURLPrefix$url   2>/dev/null
@@ -378,7 +436,6 @@ function getRestrictedFilenamesLD {
 		fi
 
 		format=$($youtube_dl -F $url | egrep -vw "only|hls-[0-9]+"  | egrep '(webm|mp4|flv) .*([0-9]+x[0-9]+)|(unknown)' | egrep -wv "22|hd|http-720|18|hq|http-480" | sort -k 2,2 -k 3,3rn | awk '{printf$1"/"}')
-		echo "=> url = $url"
 		echo
 		fileName=$($youtube_dl -f $format --get-filename "$url" --restrict-filenames || $youtube_dl --get-filename "$url" --restrict-filenames)
 		echo "=> fileName = <$fileName>"
