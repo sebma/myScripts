@@ -14,7 +14,7 @@ time sudo apt update
 
 case $ubuntuRelease in
 	14.04|14.10)
-		appList="mbuntu-y-ithemes-v4 mbuntu-y-icons-v4 mbuntu-y-bscreen-v4 mbuntu-y-lightdm-v4 slingscold indicator-synapse libreoffice-style-sifr";;
+		appList="mbuntu-y-ithemes-v4 mbuntu-y-icons-v4 mbuntu-y-bscreen-v4 mbuntu-y-lightdm-v4 slingscold indicator-synapse libreoffice-style-sifr appmenu-qt appmenu-qt5 plasma-widget-menubar";;
 		cd && wget -O config.sh http://drive.noobslab.com/data/Mac-14.10/config.sh
 		chmod +x config.sh;./config.sh
 	15.04) appList="mbuntu-y-ithemes-v5 mbuntu-y-icons-v5 slingscold mutate libreoffice-style-sifr mbuntu-y-lightdm-v5";;
