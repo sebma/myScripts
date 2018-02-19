@@ -256,6 +256,7 @@ function getRestrictedFilenamesHD {
 	format=mp4
 	test $# != 0 && {
 		echo "=> There are $# urls to download ..."
+		echo
 #		echo "=> listOfUrls = $@ ..."
 	}
 	i=0
@@ -299,6 +300,7 @@ function getRestrictedFilenamesSD {
 	format="mp4"
 	test $# != 0 && {
 		echo "=> There are $# urls to download ..."
+		echo
 #		echo "=> listOfUrls = $@ ..."
 	}
 	i=0
@@ -357,6 +359,7 @@ function getRestrictedFilenamesSD_PREV {
 	format="mp4"
 	test $# != 0 && {
 		echo "=> There are $# urls to download ..."
+		echo
 #		echo "=> listOfUrls = $@ ..."
 	}
 	i=0
@@ -415,6 +418,7 @@ function getRestrictedFilenamesLD {
 	format="mp4"
 	test $# != 0 && {
 		echo "=> There are $# urls to download ..."
+		echo
 #		echo "=> listOfUrls = $@ ..."
 	}
 	i=0
@@ -482,7 +486,7 @@ function getPlaylistsRestrictedFilenamesSD {
 		echo "=> Treating playList : $playList ..." >&2
 		if   echo $playList | \egrep -q "youtube|dailymotion|vevo"
 		then
-			listOfUrls=$(hxwls "$playList" | sort -u | \egrep -w "watch|video" | tr "\n" " ")
+			listOfUrls=$(hxwls "$playList" 2>&1 | sort -u | \egrep -w "watch|video" | tr "\n" " ")
 		else
 			urlPrefix=$(echo "$playList" | sed -r "s/https?:..//" | cut -d/ -f1)
 			listOfUrls=$($youtube_dl --ignore-errors --get-id "$playList" | sed "s|^|$urlPrefix|g" | tr "\n" " ")
