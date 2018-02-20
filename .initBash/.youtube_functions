@@ -469,7 +469,7 @@ function getPlaylistsRestrictedFilenamesHD {
 	for playList
 	do
 		echo "=> Treating playList : $playList ..." >&2
-		if echo $playList | \egrep -q "youtube|dailymotion|vevo"
+		if echo $playList | \egrep -q "youtube|dailymotion|vevo|tonvid"
 		then
 			listOfUrls=$(hxwls "$playList" | sort -u | \egrep -w "watch|video" | tr "\n" " ")
 		else
@@ -484,7 +484,7 @@ function getPlaylistsRestrictedFilenamesSD {
 	for playList
 	do
 		echo "=> Treating playList : $playList ..." >&2
-		if echo $playList | \egrep -q "youtube|dailymotion|vevo"
+		if echo $playList | \egrep -q "youtube|dailymotion|vevo|tonvid"
 		then
 			listOfUrls=$(hxwls "$playList" 2>&1 | sort -u | \egrep -w "watch|video" | tr "\n" " ")
 		else
