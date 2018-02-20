@@ -193,7 +193,10 @@ function getFiles {
 		return 2
 	}
 	baseUrl=$(echo $url | awk -F/ '{print$3}')
-	$(which wget) --no-parent --continue --timestamping --random-wait --user-agent=Mozilla --content-disposition --convert-links --page-requisites --recursive --reject index.html --accept "$@"
+#	$(which wget) --no-parent --continue --timestamping --random-wait --user-agent=Mozilla --content-disposition --convert-links --page-requisites --recursive --reject index.html --accept "$@"
+	set -x
+	$(which wget) --no-parent --continue --timestamping --random-wait --user-agent=Mozilla --content-disposition --convert-links --page-requisites --recursive --accept "$@"
+	set +x
 }
 function ssh {
 	local reachable=""
@@ -244,7 +247,7 @@ function pip {
 	test $caller || caller="pip"
 	which $caller >/dev/null || { echo "$0: ERROR $caller is not installed">&2;return 1; }
 	firstArg=$1
-	if   [ "$firstArg" = install ] && [ $(uname -s) = Linux ]
+	if   [ "$firstArg" = install ]
 	then
 		if groups | egrep -wq "sudo|admin"
 		then
@@ -252,7 +255,7 @@ function pip {
 		else
 			$(which $caller) $@ --user
 		fi
-	elif [ "$firstArg" = uninstall ] && [ $(uname -s) = Linux ]
+	elif [ "$firstArg" = uninstall ]
 	then
 		if groups | egrep -wq "sudo|admin"
 		then
@@ -260,6 +263,9 @@ function pip {
 		else
 			$(which $caller) $@
 		fi
+	elif [ "$firstArg" = search ]
+	then
+		$(which $caller) $@ | sort
 	else
 		$(which $caller) $@
 	fi
