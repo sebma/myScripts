@@ -606,7 +606,7 @@ function timeprocess {
 function watchProcess {
 	test $# = 1 && while true
 	do
-		\pgrep -lf "$1" && break
+		\pgrep -alf "$1" && break
 		sleep 1
 	done | uniq
 }
