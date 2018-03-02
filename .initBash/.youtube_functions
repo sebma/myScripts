@@ -486,7 +486,8 @@ function getPlaylistsRestrictedFilenamesSD {
 		echo "=> Treating playList : $playList ..." >&2
 		if echo $playList | \egrep -q "youtube|dailymotion|vevo|tonvid"
 		then
-			listOfUrls=$(hxwls "$playList" | sort -u | \egrep -w "watch|video" | tr "\n" " ")
+			listOfUrls=$(hxwls "$playList" | sort -u | \egrep -w "watch|video" | tr "\n" " " || return)
+			test $? != 0 && return
 		else
 			urlPrefix=$(echo "$playList" | sed -r "s/https?:..//" | cut -d/ -f1)
 			listOfUrls=$($youtube_dl --ignore-errors --get-id "$playList" | sed "s|^|$urlPrefix|g" | tr "\n" " ")
