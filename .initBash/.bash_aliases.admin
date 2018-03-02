@@ -4,6 +4,7 @@ alias autoremove="sudo $(which apt-get 2>/dev/null) autoremove -V"
 alias checkSudoFile="\visudo -cf"
 alias full-upgrade="sudo $(which apt 2>/dev/null) full-upgrade -V --download-only && sync && sudo $(which apt 2>/dev/null) full-upgrade -V --yes"
 alias nmRestart="sudo service network-manager restart"
+alias pgrep="\pgrep -lf"
 alias reinstall="sudo $(which apt 2>/dev/null) install --reinstall -V"
 alias restart_nm="sudo service network-manager restart"
 alias rtmpdumprd='\sudo iptables -t nat -A OUTPUT -p tcp --dport 1935 -m owner \! --uid-owner root -j REDIRECT'
