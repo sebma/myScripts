@@ -55,7 +55,13 @@ alias doublons='\fdupes -rnASd'
 alias driveinfo='\cdrecord -prcap'
 alias du="LANG=C \du -h"
 alias ejectcd='\eject $CDR_DEVICE'
-alias ethmac="\ifconfig eth | awk '/HWaddr/{print\$NF}'"
+alias ethmac="\ifconfig eth | awk '/HWaddr/{print\$1\"\\t\"\$NF}'"
+alias wifimac="\ifconfig wlan | awk '/HWaddr/{print\$1\"\\t\"\$NF}'"
+alias wlanmac=wifimac
+alias ip@="\ifconfig | awk -F ' *|:' '/^\w+/{printf\"\\n\"\$1\"\\t\"}/inet adr:/{print\$4}' | grep -v '^$'"
+alias mac@="\ifconfig | awk '/HWaddr/{print\$1\"\\t\"\$NF}'"
+#alias ip@="\ip addr show | awk '/^[0-9]+:/{printf\"\\n\"\$2\"\\t\"}/inet /{print\$2}' | grep -v '^$'"
+#alias mac@="\ip addr show | awk '/^[0-9]+:/{printf\"\\n\"\$2\"\\t\"}/ether/{print\$2}' | grep -v '^$'"
 alias eman="\man -L en"
 alias enman="LANG=en_US \man"
 alias erasecd='\cdrecord -v speed=12 blank=fast gracetime=10 -eject'
