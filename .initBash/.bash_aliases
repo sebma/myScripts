@@ -58,8 +58,8 @@ alias ejectcd='\eject $CDR_DEVICE'
 alias ethmac="\ifconfig eth | awk '/HWaddr/{print\$1\"\\t\"\$NF}'"
 alias wifimac="\ifconfig wlan | awk '/HWaddr/{print\$1\"\\t\"\$NF}'"
 alias wlanmac=wifimac
-alias ip@="\ifconfig | awk -F ' *|:' '/^\w+/{printf\"\\n\"\$1\"\\t\"}/inet adr:/{print\$4}' | grep -v '^$'"
-alias mac@="\ifconfig | awk '/HWaddr/{print\$1\"\\t\"\$NF}'"
+alias ip@="LANG=C \ifconfig | awk -F ' *|:' '/^\w+/{printf\"\\n\"\$1\"\\t\"}/inet addr:/{print\$4}' | grep -v '^$'"
+alias mac@="LANG=C \ifconfig | awk '/HWaddr/{print\$1\"\\t\"\$NF}'"
 #alias ip@="\ip addr show | awk '/^[0-9]+:/{printf\"\\n\"\$2\"\\t\"}/inet /{print\$2}' | grep -v '^$'"
 #alias mac@="\ip addr show | awk '/^[0-9]+:/{printf\"\\n\"\$2\"\\t\"}/ether/{print\$2}' | grep -v '^$'"
 alias eman="\man -L en"
