@@ -18,7 +18,7 @@ nmap <F8> :TagbarToggle<CR>
 "autocmd StdinReadPost * set buftype=nofile
 autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif "Remember last cursor position
 autocmd FileType xml setlocal equalprg=xmllint\ --format\ --recover\ -\ 2>/dev/null "Pretty print XML when '=G' is pressed
-let g:tagbar_ctags_bin = "$HOME/gnu/bin/ctags"
+"let g:tagbar_ctags_bin = "$HOME/gnu/bin/ctags"
 autocmd VimEnter * nested :call tagbar#autoopen(1) "open it only if you're opening Vim with a supported file/files
 "autocmd FileType xml exe ":silent %!xmllint --format --recover - 2>/dev/null"
 autocmd BufNewFile,BufRead *.octave set filetype=matlab
