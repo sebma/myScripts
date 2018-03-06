@@ -56,7 +56,7 @@ function installMiniconda {
 			fi
 		elif [ $(uname -s) = Linux  ] 
 		then 
-			groups | \egrep -wq "sudo|adm|root" && sudo ./$installerScript || ./$installerScript
+			groups | \egrep -wq "sudo|adm|root" && sudo ./$installerScript -p /usr/local/miniconda$Version || ./$installerScript
 		fi
 		
 
@@ -64,8 +64,11 @@ function installMiniconda {
 	#	sudo chown -R $USER:$(id -gn) /usr/local/miniconda$Version
 	fi
 
-	if ! which conda$Version >/dev/null #Si le lien symbolique, par exemple: conda2 n'est pas dans le PATH
+	if ! which -a conda >/dev/null
 	then
+	       	echo "=> conda$Version est pas dans le PATH, modifier le fichier ~/.bashrc, fermer le terminal et relancer <$0>." >&2
+		exit 1
+	else
 		local condaVersionPath=$(which -a conda | grep miniconda$Version)
 		cd $(dirname $condaVersionPath)
 		local condaRelativeDirName=../../miniconda$Version/bin
