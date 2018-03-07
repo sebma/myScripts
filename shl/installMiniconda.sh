@@ -69,11 +69,15 @@ function installMiniconda {
 	       	echo "=> conda$Version est pas dans le PATH, modifier le fichier ~/.bashrc, fermer le terminal et relancer <$0>." >&2
 		exit 1
 	else
+		test $(uname) = Linux && groups | \egrep -wq "sudo|adm|admin|root" && symlinkCommand="sudo ln -vsf" || symlinkCommand="ln -vsf"
 		local condaVersionPath=$(which -a conda | grep miniconda$Version)
-		cd $(dirname $condaVersionPath)
 		local condaRelativeDirName=../../miniconda$Version/bin
-		test $(uname) = Linux && groups | \egrep -wq "sudo|adm|root" && symlinkCommand="sudo ln -vsf" || symlinkCommand="ln -vsf"
-		$symlinkCommand $condaRelativeDirName/conda conda$Version && $symlinkCommand $condaRelativeDirName/conda-env conda-env$Version && $symlinkCommand $condaRelativeDirName/activate activate$Version && $symlinkCommand $condaRelativeDirName/deactivate deactivate$Version
+
+		cd $(dirname $condaVersionPath)
+		for cmd in conda conda-env activate deactivate
+		do
+			test ! -L $cmd$Version && echo "=> Creating symlink $cmd in $PWD ..." && $symlinkCommand $condaRelativeDirName/$cmd $cmd$Version 
+		done
 	fi
 	set +x
 }
