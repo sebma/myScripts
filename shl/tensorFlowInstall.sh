@@ -33,7 +33,7 @@ fi
 case $distrib in 
 	Ubuntu)
 		installCommand="sudo apt install -V"
-		consoleTools="lsb-release bash-completion vim command-not-found gpm dfc git smartmontools inxi aria2 gdebi-core"
+		consoleTools="lsb-release bash-completion vim python-argcomplete command-not-found gpm dfc git smartmontools inxi aria2 gdebi-core"
 		updateRepo="sudo apt update"
 		$updateRepo
 		$installCommand $consoleTools $graphicTools
