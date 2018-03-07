@@ -33,17 +33,23 @@ fi
 case $distrib in 
 	Ubuntu)
 		installCommand="sudo apt install -V"
-		consoleTools="lsb-release bash-completion vim python-argcomplete command-not-found gpm dfc git smartmontools inxi aria2 gdebi-core"
+		consoleTools="lsb-release bash-completion vim python-argcomplete command-not-found gpm dfc git smartmontools inxi aria2 gdebi-core speedtest-cli"
 		updateRepo="sudo apt update"
 		$updateRepo
 		$installCommand $consoleTools $graphicTools
-		dpkg -l | awk '/^ii/{print$2}' | grep -Pq "nvidia-\d+$" || $installCommand nvidia-384
 		sudo gdebi -n $cudaPackageName
 		keyIDsList="$(LANG=C $updateRepo 2>&1 | awk '/NO_PUBKEY/{print $NF}' | sort -u | tr '\n' ' ')"
 		test -n "$keyIDsList" && sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $keyIDsList
+		sudo add-apt-repository ppa:graphics-drivers/ppa
 		$updateRepo
-		$installCommand cuda
+#		dpkg -l | awk '/^ii/{print$2}' | grep -Pq "nvidia-\d+$" || $installCommand nvidia-384
+		$installCommand cuda nvidia-390
 		rm -v $cudaPackageName
 	;;
 	*);;
 esac
+
+# conda install argcomplete
+# conda create -n tensorFlow python=3 tensorflow scikit-learn keras
+# conda install -n tensorFlow ipython argcomplete
+# conda install -n tensorFlow -c aaronzs tensorflow-gpu
