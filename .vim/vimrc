@@ -6,6 +6,7 @@ set title
 set nopaste | set ruler
 set nohls autoindent
 set noexpandtab ts=4
+set incsearch
 syntax on
 
 " Shortcut to rapidly toggle `set list` with CTRL+L
