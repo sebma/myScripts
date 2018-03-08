@@ -11,6 +11,7 @@ then
 		exit 1
 	fi
 
+	shellInitFileName=~/.$(basename $SHELL)rc
 	distrib="$(\lsb_release -si)"
 	distribCodeName="$(\lsb_release -sc)"
 	case $distrib in
@@ -102,13 +103,21 @@ then
 			condaInstallerURL=https://repo.continuum.io/miniconda/$minicondaInstallerScript
 			curl -#O $condaInstallerURL
 			chmod -v +x $minicondaInstallerScript
-			groups | \egrep -wq "sudo|adm|root" && sudo ./$minicondaInstallerScript -p /usr/local/miniconda3 || ./$minicondaInstallerScript
+			if groups | \egrep -wq "sudo|adm|root" 
+			then
+				CONDA_HOME=/usr/local/miniconda3
+				sudo ./$minicondaInstallerScript -p $CONDA_HOME 
+			else
+				./$minicondaInstallerScript
+				CONDA_HOME=$HOME/miniconda3
+			fi
 			test $? = 0 && rm -vi $minicondaInstallerScript
+			echo $PATH | grep -q $CONDA_HOME || echo 'export PATH=$CONDA_HOME/bin${PATH:+:${PATH}}' >> $shellInitFileName
 		fi
 	fi
 
 	echo
-	echo "=> Installing libcupti-dev, conda and tensorflow-gpu conda environment ..."
+	echo "=> Installing tensorflow-gpu conda environment ..."
 	echo
 	$installCommand libcupti-dev
 	conda install argcomplete
@@ -119,7 +128,6 @@ then
 	conda install -n $tensorFlowEnvName -c aaronzs tensorflow-gpu
 	
 	CUDA_HOME=/usr/local/cuda
-	shellInitFileName=~/.$(basename $SHELL)rc
 	grep -q CUDA_HOME ~/.$(basename $SHELL)rc || echo export CUDA_HOME=$CUDA_HOME >> $shellInitFileName
 	echo $PATH | grep -q $CUDA_HOME || echo 'export PATH=$CUDA_HOME/bin${PATH:+:${PATH}}' >> $shellInitFileName
 	echo $LD_LIBRARY_PATH | grep -q $CUDA_HOME || echo 'export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CUDA_HOME/lib64:$CUDA_HOME/extras/CUPTI/lib64"' >> $shellInitFileName
