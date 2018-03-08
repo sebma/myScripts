@@ -106,9 +106,9 @@ then
 			if groups | \egrep -wq "sudo|adm|root" 
 			then
 				CONDA_HOME=/usr/local/miniconda3
-				sudo ./$minicondaInstallerScript -p $CONDA_HOME 
+				sudo ./$minicondaInstallerScript -p $CONDA_HOME -b
 			else
-				./$minicondaInstallerScript
+				./$minicondaInstallerScript -b
 				CONDA_HOME=$HOME/miniconda3
 			fi
 			test $? = 0 && rm -vi $minicondaInstallerScript
