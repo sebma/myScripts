@@ -57,7 +57,7 @@ function installMiniconda {
 			fi
 		elif [ $(uname -s) = Linux  ] 
 		then 
-			groups | \egrep -wq "sudo|adm|root" && sudo ./$minicondaInstallerScript -p /usr/local/miniconda$Version || ./$minicondaInstallerScript
+			groups | \egrep -wq "sudo|adm|root" && sudo ./$minicondaInstallerScript -p /usr/local/miniconda$Version -b || ./$minicondaInstallerScript -b
 		fi
 		
 
