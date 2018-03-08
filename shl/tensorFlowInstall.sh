@@ -16,9 +16,7 @@ then
 			updateRepo="sudo apt update"
 			$updateRepo
 
-			graphicTools="gsmartcontrol gparted lshw-gtk numlockx smart-notifier xubuntu-desktop"
-			test $# -ge 1 && $cudaPackageFileName=$1 || cudaPackageFileName=cuda-repo-ubuntu1704_9.1.85-1_amd64.deb
-			wget -N http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1704/x86_64/$cudaPackageFileName
+			graphicTools="gsmartcontrol gparted lshw-gtk numlockx smart-notifier xubuntu-desktop xfce4-mount-plugin"
 		;;
 		Debian)
 			repoBaseURL=http://ftp.fr.debian.org/debian/
@@ -27,7 +25,7 @@ then
 			updateRepo="sudo apt update"
 			$updateRepo
 
-			graphicTools="gsmartcontrol gparted lshw-gtk numlockx smart-notifier xfce4"
+			graphicTools="gsmartcontrol gparted lshw-gtk numlockx smart-notifier xfce4 xfce4-mount-plugin"
 		;;
 		*) ;;
 	esac
@@ -42,9 +40,11 @@ case $distrib in
 		installCommand="sudo apt install -V"
 		consoleTools="lsb-release bash-completion vim python-argcomplete command-not-found gpm dfc git smartmontools inxi aria2 gdebi-core speedtest-cli"
 		$installCommand $consoleTools $graphicTools
-		if ! dpkg -l "cuda-repo-ubuntu*" | grep -q "^ii.*cuda-repo-ubuntu" #Si le depot cuda n'est pas configure
+		cudaRepoURL=http://developer.download.nvidia.com/compute/cuda/repos/ubuntu$(lsb_release -sr | cut -d. -f1)04/$(uname -p)
+#		if ! dpkg -l "cuda-repo-ubuntu*" | grep -q "^ii.*cuda-repo-ubuntu" #Si le depot cuda n'est pas configure
+		if ! grep $cudaRepoURL /etc/apt/sources.list /etc/apt/sources.list.d/*
 		then
-			sudo gdebi -n $cudaPackageFileName
+			echo deb $cudaRepoURL / | sudo tee /etc/apt/sources.list.d/cuda.list
 			keyIDsList="$(LANG=C $updateRepo 2>&1 | awk '/NO_PUBKEY/{print $NF}' | sort -u | tr '\n' ' ')"
 			test -n "$keyIDsList" && sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $keyIDsList
 			$updateRepo
@@ -62,6 +62,8 @@ wget -N https://s3.amazonaws.com/open-source-william-falcon/$cuDNN_ArchiveFile
 tar -xzvf $cuDNN_ArchiveFile
 sudo cp -pv cuda/include/cudnn.h /usr/local/cuda/include
 sudo cp -pv cuda/lib64/libcudnn* /usr/local/cuda/lib64
+sync
+rm -fr cuda
 sudo chmod -v a+r /usr/local/cuda/include/cudnn.h /usr/local/cuda/lib64/libcudnn*
 
 conda install argcomplete
@@ -71,4 +73,5 @@ conda install -n $tensorFlowEnvName python=3 tensorflow scikit-learn keras
 conda install -n $tensorFlowEnvName ipython argcomplete
 conda install -n $tensorFlowEnvName -c aaronzs tensorflow-gpu
 
-rm -vi $cudaPackageFileName $cuDNN_ArchiveFile
+rm -vi $cuDNN_ArchiveFile
+alias
