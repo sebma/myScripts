@@ -103,6 +103,7 @@ then
 			curl -#O $condaInstallerURL
 			chmod -v +x $minicondaInstallerScript
 			groups | \egrep -wq "sudo|adm|root" && sudo ./$minicondaInstallerScript -p /usr/local/miniconda3 || ./$minicondaInstallerScript
+			test $? = 0 && rm -vi $minicondaInstallerScript
 		fi
 	fi
 
