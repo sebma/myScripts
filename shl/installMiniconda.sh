@@ -22,19 +22,20 @@ function installMiniconda {
 		echo "=> INFO: Miniconda version $Version is already installed." >&2
 	else
 		case $(uname -s) in
-		Darwin)	condaInstallerURL=https://repo.continuum.io/miniconda/Miniconda$Version-latest-MacOSX-x86_64.sh
-			;;
+		Darwin)	minicondaInstallerScript=Miniconda$Version-latest-MacOSX-x86_64.sh
+		;;
 		Linux) [ $(uname -m) = i686 ] && archi=x86 || archi=$(uname -m)
-				condaInstallerURL=https://repo.continuum.io/miniconda/Miniconda$Version-latest-$(uname -s)-$archi.sh
-			;;
+			minicondaInstallerScript=Miniconda$Version-latest-$(uname -s)-$archi.sh
+		;;
 		*) ;;
 		esac
 
 	#	sudo mkdir -v /usr/local/miniconda$Version
 	#	sudo chown -v $USER:$(id -gn) /usr/local/miniconda$Version
-		installerScript=$(basename $condaInstallerURL)
-		test -f $installerScript || curl -#O $condaInstallerURL
-		chmod +x $installerScript
+
+		condaInstallerURL=https://repo.continuum.io/miniconda/$minicondaInstallerScript
+		test ! -f $minicondaInstallerScript && echo "=> Downloading $condaInstallerURL ..." && curl -#O $condaInstallerURL
+		chmod +x $minicondaInstallerScript
 
 		brew=$(which brew)
 		if [ $(uname -s) = Darwin ] 
@@ -56,11 +57,11 @@ function installMiniconda {
 			fi
 		elif [ $(uname -s) = Linux  ] 
 		then 
-			groups | \egrep -wq "sudo|adm|root" && sudo ./$installerScript -p /usr/local/miniconda$Version || ./$installerScript
+			groups | \egrep -wq "sudo|adm|root" && sudo ./$minicondaInstallerScript -p /usr/local/miniconda$Version || ./$minicondaInstallerScript
 		fi
 		
 
-		test $? = 0 && rm -v $installerScript || exit
+		test $? = 0 && rm -v $minicondaInstallerScript || exit
 	#	sudo chown -R $USER:$(id -gn) /usr/local/miniconda$Version
 	fi
 
@@ -118,5 +119,5 @@ function runScriptWithArgs {
 runScriptWithArgs $@
 installMiniconda $minicondaVersion
 
-requiredPythonPackageList="python=$minicondaVersion scipy pandas ipython termcolor"
+#requiredPythonPackageList="python=$minicondaVersion scipy pandas ipython termcolor"
 #installCondaPythonPackages $minicondaVersion "$requiredPythonPackageList" "$envName"
