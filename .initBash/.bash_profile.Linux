@@ -56,6 +56,7 @@ then
 fi
 
 trap 'echo "=> Ignoring this step and continuing the script <$(basename $BASH_SOURCE)> ..." >&2' INT
+setxkbmap -option terminate:ctrl_alt_bksp
 if which gsettings >/dev/null 2>&1 && [ $DISPLAY ]; then
 	ldd $(which gsettings) 2>&1 | grep -q not.found || {
 		gsettings get org.gnome.desktop.input-sources xkb-options 2>&1 | grep -q GLib-GIO-Message && export GIO_EXTRA_MODULES=/usr/lib/x86_64-linux-gnu/gio/modules/
