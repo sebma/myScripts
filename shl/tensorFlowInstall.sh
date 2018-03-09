@@ -5,6 +5,7 @@ function main {
 	set -o nounset
 	
 	local os=$(uname -s)
+	local isAdmin=$(groups | egrep -wq "sudo|adm|admin|root" && echo true || echo false)
 	
 	if [ $os = Linux ]
 	then
@@ -15,8 +16,7 @@ function main {
 		fi
 	
 		shellInitFileName=~/.$(basename $SHELL)rc
-		if groups | egrep -wq "sudo|adm|admin|root" 
-#		if false
+		if $isAdmin
 		then
 			sudo=sudo
 			distrib="$(\lsb_release -si)"
@@ -147,7 +147,7 @@ function main {
 		echo
 		echo "=> Installing Miniconda3 ..."
 		echo
-		if groups | egrep -wq "sudo|adm|admin|root" 
+		if $isAdmin
 		then
 			CONDA_HOME=/usr/local/miniconda3
 			CONDA_ENVS=$CONDA_HOME/envs
