@@ -5,7 +5,7 @@ function main {
 	set -o nounset
 	
 	local os=$(uname -s)
-	local isAdmin=$(groups | egrep -wq "sudo|adm|admin|root" && echo true || echo false)
+	local -r isAdmin=$(groups | egrep -wq "sudo|adm|admin|root" && echo true || echo false)
 	
 	if [ $os = Linux ]
 	then
