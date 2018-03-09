@@ -25,13 +25,13 @@ then
 			updateRepo="sudo apt update"
 			$updateRepo
 
-			graphicTools="gsmartcontrol gparted lshw-gtk numlockx smart-notifier xubuntu-desktop xfce4-mount-plugin"
+			graphicTools="gsmartcontrol gparted lshw-gtk numlockx smart-notifier xfce4 xfce4-mount-plugin xubuntu-desktop"
 			installCommand="sudo apt install -V"
 	
 			echo
 			echo "=> Installing $(lsb_release -sd) console tools ..."
 			echo
-			consoleTools="lsb-release bash-completion vim python-argcomplete command-not-found gpm dfc git smartmontools inxi aria2 gdebi-core speedtest-cli"
+			consoleTools="lsb-release bash-completion vim python-argcomplete command-not-found gpm conky-all dfc git smartmontools inxi aria2 gdebi-core speedtest-cli"
 			$installCommand $consoleTools
 	
 			echo
