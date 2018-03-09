@@ -126,6 +126,7 @@ then
 	conda install -n $tensorFlowEnvName python=3 tensorflow scikit-learn keras
 	conda install -n $tensorFlowEnvName ipython argcomplete
 	conda install -n $tensorFlowEnvName -c aaronzs tensorflow-gpu
+	conda list -n $tensorFlowEnvName | egrep -w "packages in environment|keras|python|scikit-learn|tensorflow|tensorflow-gpu"
 	
 	CUDA_HOME=/usr/local/cuda
 	grep -q CUDA_HOME ~/.$(basename $SHELL)rc || echo export CUDA_HOME=$CUDA_HOME >> $shellInitFileName
