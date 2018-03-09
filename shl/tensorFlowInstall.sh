@@ -109,7 +109,7 @@ then
 				sudo ./$minicondaInstallerScript -p $CONDA_HOME -b
 			else
 				./$minicondaInstallerScript -b
-				CONDA_HOME=$HOME/miniconda3
+				CONDA_HOME=$HOME/.miniconda3
 			fi
 			test $? = 0 && rm -vi $minicondaInstallerScript
 			echo $PATH | grep -q $CONDA_HOME || echo 'export PATH=$CONDA_HOME/bin${PATH:+:${PATH}}' >> $shellInitFileName
@@ -129,7 +129,7 @@ then
 	conda list -n $tensorFlowEnvName | egrep -w "packages in environment|keras|python|scikit-learn|tensorflow"
 	
 	CUDA_HOME=/usr/local/cuda
-	grep -q CUDA_HOME ~/.$(basename $SHELL)rc || echo export CUDA_HOME=$CUDA_HOME >> $shellInitFileName
+	test -n "$CUDA_HOME" || echo export CUDA_HOME=$CUDA_HOME >> $shellInitFileName
 	echo $PATH | grep -q $CUDA_HOME || echo 'export PATH=$CUDA_HOME/bin${PATH:+:${PATH}}' >> $shellInitFileName
 	echo $LD_LIBRARY_PATH | grep -q $CUDA_HOME || echo 'export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CUDA_HOME/lib64:$CUDA_HOME/extras/CUPTI/lib64"' >> $shellInitFileName
 	echo
