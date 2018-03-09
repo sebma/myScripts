@@ -32,11 +32,13 @@ PERL_MB_OPT="--install_base \"$HOME/perl5\""; export PERL_MB_OPT;
 PERL_MM_OPT="INSTALL_BASE=$HOME/perl5"; export PERL_MM_OPT;
 export PIP_FORMAT=columns
 
-groups 2>/dev/null | egrep -wq "sudo|admin" || {
+typeset -r isAdmin=$(groups 2>/dev/null | egrep -wq "sudo|adm|admin|root" && echo true || echo false)
+if ! $isAdmin
+then
 	export HOSTALIASES=~/.hosts
 	export PYTHONUSERBASE=$HOME/.local
 	export HOMEBREW_PREFIX=$HOME/usr/local
-}
+fi
 
 export domain=$(awk -F"[ .]" '/domain/{print$(NF-1);exit}' /etc/resolv.conf /private/etc/resolv.conf 2>/dev/null)
 test -z $domain && export domain=localhost # Si le domaine est inconnu
