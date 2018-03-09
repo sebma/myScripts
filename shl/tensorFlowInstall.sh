@@ -123,15 +123,16 @@ then
 	conda install argcomplete
 	tensorFlowEnvName=tensorFlow
 	conda env list | grep -q $tensorFlowEnvName || conda create -n $tensorFlowEnvName
-	conda install -n $tensorFlowEnvName python=3 tensorflow scikit-learn keras
+	conda install -n $tensorFlowEnvName python=3 scikit-learn keras
 	conda install -n $tensorFlowEnvName ipython argcomplete
-	conda install -n $tensorFlowEnvName -c aaronzs tensorflow-gpu
-	conda list -n $tensorFlowEnvName | egrep -w "packages in environment|keras|python|scikit-learn|tensorflow|tensorflow-gpu"
+	conda install -n $tensorFlowEnvName -c aaronzs tensorflow tensorflow-gpu
+	conda list -n $tensorFlowEnvName | egrep -w "packages in environment|keras|python|scikit-learn|tensorflow"
 	
 	CUDA_HOME=/usr/local/cuda
 	grep -q CUDA_HOME ~/.$(basename $SHELL)rc || echo export CUDA_HOME=$CUDA_HOME >> $shellInitFileName
 	echo $PATH | grep -q $CUDA_HOME || echo 'export PATH=$CUDA_HOME/bin${PATH:+:${PATH}}' >> $shellInitFileName
 	echo $LD_LIBRARY_PATH | grep -q $CUDA_HOME || echo 'export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CUDA_HOME/lib64:$CUDA_HOME/extras/CUPTI/lib64"' >> $shellInitFileName
+	echo
 	rm -vi /tmp/$cuDNN_ArchiveFileBaseName
 
 elif [ $(uname -s) = Darwin ]
