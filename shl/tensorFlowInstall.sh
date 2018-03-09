@@ -175,8 +175,7 @@ function main {
 		echo "=> Installing tensorflow-gpu conda environment ..."
 		echo
 		tensorFlowEnvName=tensorFlow
-		set -x
-		conda env list | grep -q $tensorFlowEnvName || $sudo $(which conda) create -n $tensorFlowEnvName -p $CONDA_ENVS
+		conda env list | grep -q $tensorFlowEnvName || $sudo $(which conda) create -p $CONDA_ENVS/$tensorFlowEnvName
 		$sudo $(which conda) install -n $tensorFlowEnvName python=3 scikit-learn keras
 		$sudo $(which conda) install -n $tensorFlowEnvName ipython argcomplete
 		$sudo $(which conda) install -n $tensorFlowEnvName -c aaronzs tensorflow tensorflow-gpu
