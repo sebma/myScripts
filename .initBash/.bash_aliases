@@ -160,10 +160,10 @@ alias phpInterpreter="\php -a"
 groups 2>/dev/null | egrep -wq "admin|sudo" && alias pipInstall=" sudo -H easy_install pip"  || alias pipInstall="easy_install --user pip"
 groups 2>/dev/null | egrep -wq "admin|sudo" && alias pip3Install="sudo -H easy_install3 pip" || alias pip3Install="easy_install3 --user pip"
 alias pipUpdate="pip install -U pip"
-alias ppt2pdf="\loimpress --headless --convert-to pdf"
-alias pps2pdf="\loimpress --headless --convert-to pdf"
-alias pptx2pdf="\loimpress --headless --convert-to pdf"
-alias ppsx2pdf="\loimpress --headless --convert-to pdf"
+alias ppt2pdf=odp2pdf
+alias pps2pdf=odp2pdf
+alias pptx2pdf=odp2pdf
+alias ppsx2pdf=odp2pdf
 alias ports="lsof -ni -P | grep LISTEN"
 alias tcpPorts="\netstat -ntl"
 alias prettyjson='\python -m json.tool'
