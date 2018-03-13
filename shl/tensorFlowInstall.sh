@@ -38,7 +38,7 @@ function main {
 					echo
 					echo "=> Installing $(lsb_release -sd) console tools ..."
 					echo
-					consoleTools="lsb-release bash-completion vim python-argcomplete command-not-found gpm conky-all dfc git smartmontools inxi aria2 gdebi-core speedtest-cli"
+					consoleTools="lsb-release bash-completion vim python-argcomplete htop command-not-found gpm conky-all dfc git smartmontools inxi aria2 gdebi-core speedtest-cli"
 					$installCommand $consoleTools
 			
 					echo
@@ -86,8 +86,7 @@ function main {
 					fi
 	
 					CUDA_HOME=$(dirname $(dirname $(which nvcc)))
-					dpkg -l | grep -q "^ii.*libcupti-dev" || $installCommand libcupti-dev
-					conda list | grep -q argcomplete || conda install argcomplete
+					conda list | grep -q argcomplete || $sudo $(which conda) install argcomplete
 				;;
 				Debian)
 					echo "=> Checking and fixing (if necessary) the standard $distrib repositories ..."
@@ -150,6 +149,7 @@ function main {
 		echo
 		if $isAdmin
 		then
+			sudo="sudo -H"
 			CONDA_HOME=/usr/local/miniconda3
 			CONDA_ENVS=$CONDA_HOME/envs
 		else
@@ -176,11 +176,17 @@ function main {
 		echo "=> Installing tensorflow-gpu conda environment ..."
 		echo
 		tensorFlowEnvName=tensorFlow
+		condaForgeModulesList="ipdb glances"
+		tensorFlowExtraModulesList="ipython argcomplete matplotlib numpy pandas scikit-learn keras-gpu"
 		conda env list | grep -q $tensorFlowEnvName || $sudo $(which conda) create -p $CONDA_ENVS/$tensorFlowEnvName python=3 ipython argcomplete --yes
-		$sudo $(which conda) install -n $tensorFlowEnvName -c aaronzs tensorflow tensorflow-gpu --yes
-		tensorFlowExtraModulesList="ipython argcomplete scikit-learn keras matplotlib numpy pandas"
+		echo "=> BEFORE :"
+		conda list -n $tensorFlowEnvName | egrep "packages in environment|tensorflow|python|$(echo $tensorFlowExtraModulesList $condaForgeModulesList | tr ' ' '|')"
+		$sudo $(which conda) install -n $tensorFlowEnvName -c aaronzs tensorflow-gpu --yes
+		$sudo $(which conda) install -n $tensorFlowEnvName -c lukepfister scikit.cuda --yes || echo
+		$sudo $(which conda) install -n $tensorFlowEnvName -c conda-forge $condaForgeModulesList --yes
 		$sudo $(which conda) install -n $tensorFlowEnvName $tensorFlowExtraModulesList
-		conda list -n $tensorFlowEnvName | egrep -w "packages in environment|tensorflow|tensorflow-gpu|$(echo $tensorFlowExtraModulesList | tr ' ' '|')"
+		echo "=> AFTER :"
+		conda list -n $tensorFlowEnvName | egrep "packages in environment|tensorflow|python|$(echo $tensorFlowExtraModulesList $condaForgeModulesList | tr ' ' '|')"
 	fi
 }
 
