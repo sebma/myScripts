@@ -77,7 +77,7 @@ function main {
 						if ! grep $cudaRepoURL /etc/apt/sources.list /etc/apt/sources.list.d/*
 						then
 							echo deb $cudaRepoURL / | sudo tee /etc/apt/sources.list.d/cuda.list
-							keyIDsList="$(LANG=C $updateRepo 2>&1 | awk '/NO_PUBKEY/{print $NF}' | sort -u | tr '\n' ' ')"
+							keyIDsList="$(LANG=C sudo apt update 2>&1 | awk '/NO_PUBKEY/{print $NF}' | sort -u | tr '\n' ' ')"
 							test -n "$keyIDsList" && sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $keyIDsList
 							$updateRepo
 						fi
@@ -112,8 +112,9 @@ function main {
 				printf "==> INFO: cuDNN is already installed and the version is : %s\n" $(grep -v CUDNN_VERSION $CUDA_HOME/include/cudnn.h | awk '/CUDNN_MAJOR|CUDNN_MINOR|CUDNN_PATCHLEVEL/{printf$NF"."}')
 			else
 				echo
+				cuDNNVersion=7.1
 				cudaVersion=$(echo $cudaPackageName | cut -d- -f2- | tr "-" .)
-				cuDNN_ArchiveFileBaseName=cudnn-$cudaVersion-linux-x64-v7.1.tgz
+				cuDNN_ArchiveFileBaseName=cudnn-$cudaVersion-linux-x64-v$cuDNNVersion.tgz
 				wget -P /tmp -N https://s3.amazonaws.com/open-source-william-falcon/$cuDNN_ArchiveFileBaseName
 				sync
 				du -h /tmp/$cuDNN_ArchiveFileBaseName
@@ -175,11 +176,11 @@ function main {
 		echo "=> Installing tensorflow-gpu conda environment ..."
 		echo
 		tensorFlowEnvName=tensorFlow
-		conda env list | grep -q $tensorFlowEnvName || $sudo $(which conda) create -p $CONDA_ENVS/$tensorFlowEnvName
-		$sudo $(which conda) install -n $tensorFlowEnvName python=3 scikit-learn keras
-		$sudo $(which conda) install -n $tensorFlowEnvName ipython argcomplete
-		$sudo $(which conda) install -n $tensorFlowEnvName -c aaronzs tensorflow tensorflow-gpu
-		conda list -n $tensorFlowEnvName | egrep -w "packages in environment|keras|python|scikit-learn|tensorflow"
+		conda env list | grep -q $tensorFlowEnvName || $sudo $(which conda) create -p $CONDA_ENVS/$tensorFlowEnvName python=3 ipython argcomplete --yes
+		$sudo $(which conda) install -n $tensorFlowEnvName -c aaronzs tensorflow tensorflow-gpu --yes
+		tensorFlowExtraModulesList="ipython argcomplete scikit-learn keras matplotlib numpy pandas"
+		$sudo $(which conda) install -n $tensorFlowEnvName $tensorFlowExtraModulesList
+		conda list -n $tensorFlowEnvName | egrep -w "packages in environment|tensorflow|tensorflow-gpu|$(echo $tensorFlowExtraModulesList | tr ' ' '|')"
 	fi
 }
 
