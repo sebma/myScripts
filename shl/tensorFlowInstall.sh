@@ -182,7 +182,7 @@ function main {
 		echo "=> BEFORE :"
 		conda list -n $tensorFlowEnvName | egrep "packages in environment|tensorflow|python|$(echo $tensorFlowExtraModulesList $condaForgeModulesList | tr ' ' '|')"
 		$sudo $(which conda) install -n $tensorFlowEnvName -c aaronzs tensorflow-gpu --yes
-		$sudo $(which conda) install -n $tensorFlowEnvName -c lukepfister scikit.cuda --yes || echo
+		$sudo $(which conda) install -n $tensorFlowEnvName -c lukepfister scikit.cuda --yes || true
 		$sudo $(which conda) install -n $tensorFlowEnvName -c conda-forge $condaForgeModulesList --yes
 		$sudo $(which conda) install -n $tensorFlowEnvName $tensorFlowExtraModulesList
 		echo "=> AFTER :"
