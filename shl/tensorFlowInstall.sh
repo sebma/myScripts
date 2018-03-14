@@ -194,8 +194,10 @@ function main {
 		echo "=> AFTER :"
 		conda list -n $tensorFlowEnvName | egrep "packages in environment|tensorflow|python|$(echo $tensorFlowExtraModulesList $condaForgeModulesList | tr ' ' '|')"
 
-		$sudo $pip install --prefix $CONDA_ENVS/$tensorFlowEnvName/ gpustat
-		sudo sed -i '1s|#!.*python|#!'"$CONDA_ENVS/$tensorFlowEnvName/bin/python|" $CONDA_ENVS/$tensorFlowEnvName/bin/gpustat
+		conda list -n $tensorFlowEnvName | grep gpustat || {
+			$sudo $pip install --prefix $CONDA_ENVS/$tensorFlowEnvName gpustat
+			sudo sed -i '1s|#!.*python|#!'"$CONDA_ENVS/$tensorFlowEnvName/bin/python|" $CONDA_ENVS/$tensorFlowEnvName/bin/gpustat
+		}
 	fi
 }
 
