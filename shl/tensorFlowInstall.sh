@@ -23,14 +23,14 @@ function main {
 			distribCodeName="$(\lsb_release -sc)"
 			case $distrib in
 				Ubuntu)
+					needUpdate=0
 					echo "=> Checking and fixing (if necessary) the standard $distrib repositories ..."
-					echo
 					repoBaseURL=http://fr.archive.ubuntu.com/ubuntu/
-					grep -q "$distribCodeName " /etc/apt/sources.list || sudo add-apt-repository "deb $repoBaseURL $distribCodeName main restricted universe multiverse"
-					grep -q "$distribCodeName-security" /etc/apt/sources.list || sudo add-apt-repository "deb $repoBaseURL $distribCodeName-security main restricted universe multiverse"
-					grep -q "$distribCodeName-updates" /etc/apt/sources.list || sudo add-apt-repository "deb $repoBaseURL $distribCodeName-updates main restricted universe multiverse"
+					grep -q "$distribCodeName " /etc/apt/sources.list || { sudo add-apt-repository "deb $repoBaseURL $distribCodeName main restricted universe multiverse";needUpdate=1; }
+					grep -q "$distribCodeName-security" /etc/apt/sources.list || { sudo add-apt-repository "deb $repoBaseURL $distribCodeName-security main restricted universe multiverse";needUpdate=1; }
+					grep -q "$distribCodeName-updates" /etc/apt/sources.list || { sudo add-apt-repository "deb $repoBaseURL $distribCodeName-updates main restricted universe multiverse";needUpdate=1; }
 					updateRepo="sudo apt update"
-					$updateRepo
+					test $needUpdate == 1 && echo && $updateRepo
 		
 					graphicTools="gsmartcontrol gparted lshw-gtk numlockx smart-notifier xfce4 xfce4-mount-plugin xubuntu-desktop"
 					installCommand="sudo apt install -V"
@@ -39,7 +39,8 @@ function main {
 					echo "=> Installing $(lsb_release -sd) console tools ..."
 					echo
 					consoleTools="lsb-release bash-completion vim python-argcomplete htop command-not-found gpm conky-all dfc git smartmontools inxi aria2 gdebi-core speedtest-cli"
-					$installCommand $consoleTools
+					consoleToolsNumber=$(echo $consoleTools | wc -w)
+					test $(dpkg -l $consoleTools | grep -c ^ii) == $consoleToolsNumber && echo "==> INFO : The console tools are already installed." || $installCommand $consoleTools
 			
 					echo
 					echo "=> Installing NVIDIA drivers and the lightwight Xfce environment ..."
@@ -49,7 +50,8 @@ function main {
 						echo
 						cat /proc/driver/nvidia/version
 						echo
-						$installCommand $graphicTools
+						graphicToolsNumber=$(echo $graphicTools | wc -w)
+						test $(dpkg -l $graphicTools | grep -c ^ii) == $graphicToolsNumber && echo "==> INFO : The graphic tools are already installed." || $installCommand $graphicTools
 					else
 						echo
 						if ! test -s /etc/apt/sources.list.d/graphics-drivers-ubuntu-ppa-$distribCodeName.list 
@@ -86,7 +88,8 @@ function main {
 					fi
 	
 					CUDA_HOME=$(dirname $(dirname $(which nvcc)))
-					conda list | grep -q argcomplete || $sudo $(which conda) install argcomplete
+					conda=$(which conda)
+					conda list | grep -q argcomplete || $sudo $conda install argcomplete
 				;;
 				Debian)
 					echo "=> Checking and fixing (if necessary) the standard $distrib repositories ..."
@@ -178,13 +181,14 @@ function main {
 		tensorFlowEnvName=tensorFlow
 		condaForgeModulesList="ipdb glances"
 		tensorFlowExtraModulesList="ipython argcomplete matplotlib numpy pandas scikit-learn keras-gpu"
-		conda env list | grep -q $tensorFlowEnvName || $sudo $(which conda) create -p $CONDA_ENVS/$tensorFlowEnvName python=3 ipython argcomplete --yes
+		conda env list | grep -q $tensorFlowEnvName || $sudo $conda create -p $CONDA_ENVS/$tensorFlowEnvName python=3 ipython argcomplete --yes
 		echo "=> BEFORE :"
 		conda list -n $tensorFlowEnvName | egrep "packages in environment|tensorflow|python|$(echo $tensorFlowExtraModulesList $condaForgeModulesList | tr ' ' '|')"
-		$sudo $(which conda) install -n $tensorFlowEnvName -c aaronzs tensorflow-gpu --yes
-		$sudo $(which conda) install -n $tensorFlowEnvName -c lukepfister scikit.cuda --yes || true
-		$sudo $(which conda) install -n $tensorFlowEnvName -c conda-forge $condaForgeModulesList --yes
-		$sudo $(which conda) install -n $tensorFlowEnvName $tensorFlowExtraModulesList
+		set -x
+		$sudo $conda install -n $tensorFlowEnvName -c aaronzs tensorflow-gpu --yes
+		$sudo $conda install -n $tensorFlowEnvName -c lukepfister scikit.cuda --yes || true
+		$sudo $conda install -n $tensorFlowEnvName -c conda-forge $condaForgeModulesList --yes
+		$sudo $conda install -n $tensorFlowEnvName $tensorFlowExtraModulesList
 		echo "=> AFTER :"
 		conda list -n $tensorFlowEnvName | egrep "packages in environment|tensorflow|python|$(echo $tensorFlowExtraModulesList $condaForgeModulesList | tr ' ' '|')"
 	fi
