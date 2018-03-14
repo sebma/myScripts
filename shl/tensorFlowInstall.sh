@@ -173,6 +173,7 @@ function main {
 
 		echo $PATH | grep -q $CONDA_HOME || echo 'export PATH=$CONDA_HOME/bin${PATH:+:${PATH}}' >> $shellInitFileName
 		conda=$(which conda)
+		pip=$(which pip)
 		conda list | grep -q argcomplete || $sudo $conda install argcomplete
 
 		echo
@@ -181,7 +182,7 @@ function main {
 		tensorFlowEnvName=tensorFlow
 		condaForgeModulesList="ipdb glances"
 		tensorFlowExtraModulesList="ipython argcomplete matplotlib numpy pandas scikit-learn keras-gpu"
-		conda env list | grep -q $tensorFlowEnvName || $sudo $conda create -p $CONDA_ENVS/$tensorFlowEnvName python=3 ipython argcomplete --yes
+		conda env list | grep -q $tensorFlowEnvName || $sudo $conda create --prefix $CONDA_ENVS/$tensorFlowEnvName python=3 ipython argcomplete --yes
 		conda env list
 		echo "=> BEFORE :"
 		conda list -n $tensorFlowEnvName | egrep "packages in environment|tensorflow|python|$(echo $tensorFlowExtraModulesList $condaForgeModulesList | tr ' ' '|')"
@@ -192,6 +193,9 @@ function main {
 		$sudo $conda install -n $tensorFlowEnvName $tensorFlowExtraModulesList
 		echo "=> AFTER :"
 		conda list -n $tensorFlowEnvName | egrep "packages in environment|tensorflow|python|$(echo $tensorFlowExtraModulesList $condaForgeModulesList | tr ' ' '|')"
+
+		$sudo $pip install --prefix $CONDA_ENVS/$tensorFlowEnvName/ gpustat
+		sudo sed -i '1s|#!.*python|#!'"$CONDA_ENVS/$tensorFlowEnvName/bin/python|" $CONDA_ENVS/$tensorFlowEnvName/bin/gpustat
 	fi
 }
 
