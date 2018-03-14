@@ -32,7 +32,6 @@ function main {
 					updateRepo="sudo apt update"
 					test $needUpdate == 1 && echo && $updateRepo
 		
-					graphicTools="gsmartcontrol gparted lshw-gtk numlockx smart-notifier xfce4 xfce4-mount-plugin xubuntu-desktop"
 					installCommand="sudo apt install -V"
 			
 					echo
@@ -44,6 +43,7 @@ function main {
 			
 					echo
 					echo "=> Installing NVIDIA drivers and the lightwight Xfce environment ..."
+					graphicTools="xclip xsel gsmartcontrol gparted lshw-gtk numlockx smart-notifier xfce4 xfce4-mount-plugin xubuntu-desktop"
 					if test -f /proc/driver/nvidia/version
 					then
 						echo "==> INFO : The NVIDIA drivers are already installed :"
