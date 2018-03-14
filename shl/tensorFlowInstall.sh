@@ -88,8 +88,6 @@ function main {
 					fi
 	
 					CUDA_HOME=$(dirname $(dirname $(which nvcc)))
-					conda=$(which conda)
-					conda list | grep -q argcomplete || $sudo $conda install argcomplete
 				;;
 				Debian)
 					echo "=> Checking and fixing (if necessary) the standard $distrib repositories ..."
@@ -174,6 +172,8 @@ function main {
 		fi
 
 		echo $PATH | grep -q $CONDA_HOME || echo 'export PATH=$CONDA_HOME/bin${PATH:+:${PATH}}' >> $shellInitFileName
+		conda=$(which conda)
+		conda list | grep -q argcomplete || $sudo $conda install argcomplete
 
 		echo
 		echo "=> Installing tensorflow-gpu conda environment ..."
@@ -182,6 +182,7 @@ function main {
 		condaForgeModulesList="ipdb glances"
 		tensorFlowExtraModulesList="ipython argcomplete matplotlib numpy pandas scikit-learn keras-gpu"
 		conda env list | grep -q $tensorFlowEnvName || $sudo $conda create -p $CONDA_ENVS/$tensorFlowEnvName python=3 ipython argcomplete --yes
+		conda env list
 		echo "=> BEFORE :"
 		conda list -n $tensorFlowEnvName | egrep "packages in environment|tensorflow|python|$(echo $tensorFlowExtraModulesList $condaForgeModulesList | tr ' ' '|')"
 		set -x
