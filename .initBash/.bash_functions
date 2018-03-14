@@ -11,7 +11,7 @@ function wlanmac {
 	wlanIF=$(iwconfig 2>&1 | awk '/ESSID:/{print$1}')
 	test "$wlanIF" && ip link show $wlanIF | awk '/link\/ether /{print$2}'
 }
-function apt-cache {
+function apt_cache {
 	firstArg=$1
 	if [ "$firstArg" = search ]
 	then
@@ -651,17 +651,6 @@ function aptGet {
 	firstArg=$1
 	case $firstArg in
 	install|purge) sudo $(which apt) $args -V;;
-	download)
-		$(which apt-get) $args --print-uris
-		$(which apt-get) $args;;
-	*) $(which apt-get) $args;;
-	esac
-}
-function apt_get {
-	args=$@
-	firstArg=$1
-	case $firstArg in
-	install|purge) sudo $(which apt) $args -V;;
 	download) $(which apt-get) $args --print-uris && $(which apt-get) $args;;
 	*) $(which apt-get) $args;;
 	esac
@@ -773,18 +762,6 @@ function rename_All_APKs {
 			[ "$package" = $packageNewFileName ] || mv -v "$package" $packageNewFileName
 		fi
 	done
-}
-function apt_cache {
-	args=$@
-	command=$1
-	if echo $command | grep -q search
-	then
-		shift
-		args=$@
-		$(which apt-cache) search $args | sort
-	else
-		$(which apt-cache) $@
-	fi
 }
 function resizePics {
 	for src
