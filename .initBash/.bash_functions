@@ -454,7 +454,7 @@ function addKeys {
 function downgradePackages {
 	for package
 	do
-		previousVersion=$(apt-cache show $package | grep Version | sed -n '2p' | cut -d' ' -f2)
+		previousVersion=$($(which apt-cache) show $package | grep Version | sed -n '2p' | cut -d' ' -f2)
 		sudo $(which apt) install -V $package=$previousVersion
 	done
 }
