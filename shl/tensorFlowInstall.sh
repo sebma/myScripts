@@ -191,13 +191,18 @@ function main {
 		$sudo $conda install -n $tensorFlowEnvName -c lukepfister scikit.cuda --yes || true
 		$sudo $conda install -n $tensorFlowEnvName -c conda-forge $condaForgeModulesList --yes
 		$sudo $conda install -n $tensorFlowEnvName $tensorFlowExtraModulesList
+		set +x
 		echo "=> AFTER :"
 		conda list -n $tensorFlowEnvName | egrep "packages in environment|tensorflow|python|$(echo $tensorFlowExtraModulesList $condaForgeModulesList | tr ' ' '|')"
 
 		conda list -n $tensorFlowEnvName | grep gpustat || {
+			set -x
 			$sudo $pip install --prefix $CONDA_ENVS/$tensorFlowEnvName gpustat
 			sudo sed -i '1s|#!.*python|#!'"$CONDA_ENVS/$tensorFlowEnvName/bin/python|" $CONDA_ENVS/$tensorFlowEnvName/bin/gpustat
+			set +x
 		}
+
+		which gpustat >/dev/null 2>&1 && echo && gpustat -cpu -P
 	fi
 }
 
