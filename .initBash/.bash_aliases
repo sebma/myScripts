@@ -132,6 +132,7 @@ alias manen=enman
 alias manfr=frman
 alias mountfreebox="mount | \grep -wq freebox-server || curlftpfs 'freebox@freebox-server.local/Disque dur' /mnt/freebox/ ; mount | \grep -w freebox-server"
 alias mountfreeboxanna="mount | \grep -wq freeboxanna || curlftpfs 'freebox@78.201.68.5/Disque dur' /freeboxanna/ ; mount | \grep -w freeboxanna"
+alias mkdir="\mkdir -pv"
 alias mpvlive='mpv --no-resume-playback'
 alias mpvlocal='mpv --no-ytdl'
 alias mpvplaylist='mpv --playlist'
