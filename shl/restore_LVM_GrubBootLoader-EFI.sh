@@ -6,7 +6,11 @@ set -o errexit
 
 $sudo lvs | grep -q root || {
 	$sudo pvscan
-	$sudo vgscan
+	LinuxVGName=$(LANG=C $sudo vgscan | awk -F'"' '/Found volume/{print$2}')
+	for vg in $LinuxVGName
+	do
+		$sudo vgchange -a y $vg
+	done
 	$sudo lvscan
 }
 rootFSDevice=$($sudo lvs | awk '/root/{print$2"-"$1}')
