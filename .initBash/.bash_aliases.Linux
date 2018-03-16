@@ -16,7 +16,7 @@ alias llm="ll --block-size=M"
 alias ls="ls --color -F"
 alias mkdir="\mkdir -pv"
 #alias os="\lsb_release -sd"
-alias pkill="\pkill -efu $USER"
+alias pkill='\pkill -efu $USER'
 alias quota="\quota -s"
 alias rsync="time \rsync -uth -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST $RSYNC_EXCLUSION"
 alias scp="time \rsync -h --progress -u -zt --skip-compress=$RSYNC_SKIP_COMPRESS_LIST $RSYNC_EXCLUSION"
