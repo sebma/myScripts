@@ -14,7 +14,6 @@ alias ll="ls -blF --time-style=+'%Y-%m-%d %T'"
 alias llk="ll --block-size=K"
 alias llm="ll --block-size=M"
 alias ls="ls --color -F"
-alias mkdir="\mkdir -pv"
 #alias os="\lsb_release -sd"
 alias pkill='\pkill -efu $USER'
 alias quota="\quota -s"
