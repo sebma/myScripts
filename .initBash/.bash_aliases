@@ -182,6 +182,7 @@ alias restartWifi="nmcli nm wifi off;nmcli nm wifi on;sleep 10;wanip"
 alias restart_conky="\pgrep conky && \killall -SIGHUP conky || conky -d"
 alias conky_restart=restart_conky
 alias restore_my_stty="\stty erase ^?"
+alias regrep="$(which rgrep >/dev/null 2>&1) && \rgrep -E || egrep -Ir"
 alias rgrep="$(which rgrep >/dev/null 2>&1) && \rgrep || grep -Ir"
 alias rm="\rm -i"
 alias rpml="\rpm --root ~/local -Uvh"
