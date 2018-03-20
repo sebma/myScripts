@@ -4,6 +4,9 @@
 #echo "=> BASH_SOURCE[0] = ${BASH_SOURCE[0]}"
 test -r $initDir/.colors && source $initDir/.colors
 youtube_dl=$(which youtube-dl)
+os=$(uname -s)
+test $os = Linux  && locate=$(which locate)
+test $os = Darwin && locate=$(which glocate)
 
 function ytdlFormats {
 	for url
@@ -168,7 +171,7 @@ function getRestrictedFilenamesFORMAT {
 		if ! echo $url | \egrep -wq "www"
 		then
 			streamID=$url
-			fileName=$(basename $( $(which locate) -er "$streamID.*__${format}__" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null)
+			fileName=$(basename $( $locate -er "$streamID.*__${format}__" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null)
 			if test -s "$fileName"
 			then
 				echo "${color[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" >&2
@@ -183,7 +186,7 @@ function getRestrictedFilenamesFORMAT {
 			fi
 		else
 			echo $url | grep -q youtube.com/ && urlSuffix=$(echo "$url" | cut -d= -f2)
-			if test "$urlSuffix" && fileName=$(basename $( $(which locate) -er "$urlSuffix.*__${format}__" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null) && test -s "$fileName"
+			if test "$urlSuffix" && fileName=$(basename $( $locate -er "$urlSuffix.*__${format}__" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null) && test -s "$fileName"
 			then
 				echo "${color[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" >&2
 				echo
@@ -312,7 +315,7 @@ function getRestrictedFilenamesSD {
 		$youtube_dl -f "$format" -qs "$url" 2>&1 | grep --color -A1 ^ERROR: && continue
 		if ! echo $url | \egrep -wq "www"
 		then
-			fileName=$(basename $( $(which locate) -er "$url" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null)
+			fileName=$(basename $( $locate -er "$url" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null)
 			if test -s "$fileName"
 			then
 				echo "${color[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" >&2
@@ -327,7 +330,7 @@ function getRestrictedFilenamesSD {
 			fi
 		else
 			echo $url | grep -q youtube.com/ && urlSuffix=$(echo "$url" | cut -d= -f2)
-			if test "$urlSuffix" && fileName=$(basename $( $(which locate) -er "$urlSuffix" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null) && test -s "$fileName"
+			if test "$urlSuffix" && fileName=$(basename $( $locate -er "$urlSuffix" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null) && test -s "$fileName"
 			then
 				echo "${color[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" >&2
 				echo
@@ -371,7 +374,7 @@ function getRestrictedFilenamesSD_PREV {
 		$youtube_dl -f "$format" -qs "$url" 2>&1 | grep --color -A1 ^ERROR: && continue
 		if ! echo $url | \egrep -wq "www"
 		then
-			fileName=$(basename $( $(which locate) -er "$url" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null)
+			fileName=$(basename $( $locate -er "$url" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null)
 			if test -s "$fileName"
 			then
 				echo "${color[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" >&2
@@ -386,7 +389,7 @@ function getRestrictedFilenamesSD_PREV {
 			fi
 		else
 			echo $url | grep -q youtube.com/ && urlSuffix=$(echo "$url" | cut -d= -f2)
-			if test "$urlSuffix" && fileName=$(basename $( $(which locate) -er "$urlSuffix" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null) && test -s "$fileName"
+			if test "$urlSuffix" && fileName=$(basename $( $locate -er "$urlSuffix" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null) && test -s "$fileName"
 			then
 				echo "${color[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" >&2
 				echo
