@@ -33,7 +33,7 @@ alias stat="\stat -x"
 alias stop="launchctl stop"
 #alias svgView="$(which open) -a safari"
 alias svgView="$(which open) -a firefox"
-alias tcpPorts="\netstat -np tcp"
+alias tcpPorts="$(which netstat) -nap tcp"
 alias topf10='$(which find) . $prunePathsFindExpression -xdev -type f -size +10M -exec ls -lT {} \; 2>/dev/null | sort -nrk5 | column -t | head -10 | awk '\''{total+=$5;print}END{print"=> total = "total" MiB"}'\'''
 alias topf50='$(which find) . $prunePathsFindExpression -xdev -type f -size +10M -exec ls -lT {} \; 2>/dev/null | sort -nrk5 | column -t | head -50 | awk '\''{total+=$5;print}END{print"=> total = "total" MiB"}'\'''
 alias topf5='$(which find) . $prunePathsFindExpression -xdev -type f -size +10M -exec ls -lT {} \; 2>/dev/null | sort -nrk5 |  column -t | head -5 | awk '\''{total+=$5;print}END{print"=> total = "total" MiB"}'\'''
@@ -65,17 +65,29 @@ function mount {
 	diskutil list | grep -q $arg && [ -b /dev/$arg ] && diskutil mount $arg
 }
 function netstat {
-	args=$@
-	if echo $args | egrep -q "\-[^ t]*t"
+	local mac_netstat_options="AaLnWgisf:p:I:w:c:mr"
+	local OPTSTRING="ltu$mac_netstat_options"
+	local args=$@
+	local option
+	local wasInWhile=false
+	while getopts $OPTSTRING option; do
+		wasInWhile=true
+		echo $option | \egrep -q "l|t|u" && args="$(echo "$args" | sed -E "s/$option|-$option | -$option//g")"
+		case "$option" in
+			l) args="$args -a" ;; #Show listening ports
+			t) args="$args -p tcp" ;;
+			u) args="$args -p udp" ;;
+			"") echo "=> ERROR : the <option> variable is empty." >&2; return 1;;
+			'?') echo "=> ERROR : the <option> variable is <$?>." >&2; return 2;;
+		esac
+	done
+	
+	if $wasInWhile 
 	then
-		args=$(echo $args | tr -d 't')
-		$(which netstat) -p tcp $args
-	elif echo $args | egrep -q "\-[^ u]*u"
-	then
-		args=$(echo $args | tr -d 'u')
-		$(which netstat) -p udp $args
+		$(which netstat) $args 
 	else
-		$(which netstat) $args
+		echo "=> ERROR : There was a problem with the <getopts> builtin." >&2
+		return 1;
 	fi
 }
 function restart {
@@ -96,7 +108,7 @@ function topflines {
 	test $# = 0 && args=. || args=$@
 	$(which gfind) $args $prunePathsFindExpression -xdev -type f -size +10M -exec ls -lT {} \; 2>/dev/null | sort -nrk5 | column -t | head -n $(($LINES-4)) | awk '{total+=$5;print}END{if(total) print"=> total = "total" MiB"}'
 }
-groups | egrep -wq "admin|sudo" && alias pipInstall="sudo -H easy_install pip" || alias pipInstall="easy_install --user pip"
+groups | \egrep -wq "admin|sudo" && alias pipInstall="sudo -H easy_install pip" || alias pipInstall="easy_install --user pip"
 initVars
 which gcp >/dev/null 2>&1 && alias cp='\gcp -puv' || alias cp='\cp -pv'
 which pgrep >/dev/null 2>&1 || alias pgrep="\ps -fC"
