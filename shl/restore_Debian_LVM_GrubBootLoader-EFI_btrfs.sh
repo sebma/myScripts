@@ -20,5 +20,7 @@ $sudo chroot /mnt /bin/bash <<-EOF # mise a la racine du disque monte
 	grub-install /dev/sda || grub-install --force /dev/sda        # installation de grub sur le MBR
 	sync
 	umount -av
+	exit
 EOF
 $sudo umount -v /mnt/{sys,proc,dev/pts,dev,}
+$sudo umount -v /mnt

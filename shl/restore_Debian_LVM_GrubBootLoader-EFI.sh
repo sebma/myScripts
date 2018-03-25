@@ -35,5 +35,7 @@ $sudo chroot /mnt /bin/bash <<-EOF # mise a la racine du disque monte
 	set +x
 	sync
 	umount -av
+	exit
 EOF
 $sudo umount -v /mnt/sys /mnt/proc /mnt/dev/pts /mnt/dev
+$sudo umount -v /mnt

@@ -12,7 +12,7 @@ $sudo lvs | grep -q root || {
 rootFSDevice=$($sudo lvs | awk '/root/{print$2"-"$1}')
 #mount -t proc /proc /mnt/proc # Pour que Grub2 trouve /proc/mounts
 $sudo mkdir -p /mnt/{dev/pts,proc,sys}
-mount | grep -q $rootFSDevice || $sudo mount /dev/mapper/$rootFSDevice /mnt          # montage de celle-ci en remplacant le X par le bon numero de partition
+mount | grep -q $rootFSDevice || $sudo mount -o subvol=@ /dev/mapper/$rootFSDevice /mnt          # montage de celle-ci en remplacant le X par le bon numero de partition
 for i in dev dev/pts proc sys ; do $sudo mount --bind /$i /mnt/$i ; done
 $sudo chroot /mnt /bin/bash <<-EOF # mise a la racine du disque monte
 	mount -av                      # montage des partitions dans le chroot
@@ -20,5 +20,7 @@ $sudo chroot /mnt /bin/bash <<-EOF # mise a la racine du disque monte
 	grub-install /dev/sda || grub-install --force /dev/sda        # installation de grub sur le MBR
 	sync
 	umount -av
+	exit
 EOF
 $sudo umount -v /mnt/{sys,proc,dev/pts,dev,}
+$sudo umount -v /mnt

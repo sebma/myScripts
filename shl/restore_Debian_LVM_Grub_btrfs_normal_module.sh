@@ -19,5 +19,7 @@ $sudo chroot /mnt /bin/bash <<-EOF
 	cp -puv /usr/lib/grub/x86_64-efi/*.mod /boot/grub/x86_64-efi/
 	sync
 	umount -av
+	exit
 EOF
 $sudo umount -v /mnt/{sys,proc,dev/pts,dev,}
+$sudo umount -v /mnt
