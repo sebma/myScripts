@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
-which iw >/dev/null && wiFiDevice=$(iw dev | awk '/Interface/{lastInterface=$NF}END{print lastInterface}')
-which iwconfig >/dev/null && wiFiDevice="$(iwconfig 2>/dev/null | awk '/^[^ \t]/ { if ($1 ~ /^[0-9]+:/) { print $2 } else { print $1 } }')"
+which iwconfig >/dev/null && wiFiDevice="$(iwconfig 2>/dev/null | awk '/^[^ \t]/ { if ($1 ~ /^[0-9]+:/) { interface=$2 } else { interface=$1 } }END{print interface}')"
+which iw >/dev/null && wiFiDevice=$(iw dev | awk '/interface/{interface=$NF}END{print interface}')
 
 [ "$wiFiDevice" ] || {
 	echo "=> ERROR : Could not find any wireless network card." >&2
