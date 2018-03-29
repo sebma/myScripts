@@ -129,6 +129,7 @@ alias lspci="\lspci -nn"
 alias lxterm="\lxterm -sb -fn 9x15"
 alias manen=enman
 alias manfr=frman
+alias mpath='\echo $PATH | tr ":" "\n"'
 alias mountfreebox="mount | \grep -wq freebox-server || curlftpfs 'freebox@freebox-server.local/Disque dur' /mnt/freebox/ ; mount | \grep -w freebox-server"
 alias mountfreeboxanna="mount | \grep -wq freeboxanna || curlftpfs 'freebox@78.201.68.5/Disque dur' /freeboxanna/ ; mount | \grep -w freeboxanna"
 alias mkdir="\mkdir -pv"
