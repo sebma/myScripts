@@ -1,5 +1,0 @@
-language: sh
-
-install: sudo pip install vim-vint
-
-script: vint .

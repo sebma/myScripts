@@ -1,7 +1,0 @@
-dependencies:
-    pre:
-        - sudo pip install vim-vint
-
-test:
-    override:
-        - vint .
