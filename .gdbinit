@@ -1,1 +1,1 @@
-set history save on
+.config/.gdbinit

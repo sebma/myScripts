@@ -1,0 +1,7 @@
+%#!octave-cli
+PS2('octave:\#? ');
+history_size(10000);
+packs = pkg('list');
+for jj = 1:numel(packs),
+  pkg('load', packs{jj}.name);
+end
