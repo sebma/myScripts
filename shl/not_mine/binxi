@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 ########################################################################
-SELF_NAME='inxi' 
+SELF_NAME='binxi' 
 # don't quote the following, parsers grab these too
-SELF_VERSION=2.3.40
-SELF_DATE=2017-09-21
-SELF_PATCH=00
+SELF_VERSION=2.3.56
+SELF_DATE=2018-03-22
+SELF_PATCH=003-b
 ########################################################################
 ####  SPECIAL THANKS
 ########################################################################
@@ -21,20 +21,22 @@ SELF_PATCH=00
 ####  Gaim/Pidgin, Weechat, KVIrc and Kopete.
 ####  Original infobash author and copyright holder:
 ####  Copyright (C) 2005-2007  Michiel de Boer a.k.a. locsmif
-####  inxi version: Copyright (C) 2008-2017 Harald Hope
+####  inxi version: Copyright (C) 2008-2018 Harald Hope
 ####                Additional features (C) Scott Rogers - kde, cpu info
 ####  Further fixes (listed as known): Horst Tritremmel <hjt at sidux.com>
 ####  Steven Barrett (aka: damentz) - usb audio patch; swap percent used patch
 ####  Jarett.Stevens - dmidecde -M patch for older systems with the /sys 
 ####
-####  Current script home page/wiki/git: https://github.com/smxi/inxi 
-####  Documentation/wiki pages will move to https://smxi.org soon.
-####  Script forums: http://techpatterns.com/forums/forum-33.html
+####  Current project home page/wiki/git: https://github.com/smxi/inxi 
+####  Documentation/wiki pages can be found at https://smxi.org/docs/inxi.htm
+####  Project forums: http://techpatterns.com/forums/forum-33.html
 ####  IRC support: irc.oftc.net channel #smxi
 ####  Version control:
 ####   * https://github.com/smxi/inxi
 ####   * git: git pull https://github.com/smxi/inxi master
-####   * source checkout url: https://github.com/smxi/inxi
+####   * For basic version, no gz files, much smaller, do:
+####     git clone https://github.com/smxi/inxi --branch master-plain --single-branch
+####   * source repository url: https://github.com/smxi/inxi
 ####
 ####  This program is free software; you can redistribute it and/or modify
 ####  it under the terms of the GNU General Public License as published by
@@ -51,6 +53,10 @@ SELF_PATCH=00
 ####
 ####  If you don't understand what Free Software is, please read (or reread)
 ####  this page: http://www.gnu.org/philosophy/free-sw.html
+####  
+####  But the main thing about Free Software is that its' about the freedom
+####  of the individual user, not the corporations that try to coopt it. This
+####  grows easy to forget when people confuse freedom with open source.
 ########################################################################
 ####
 #### PACKAGE NAME NOTES
@@ -61,8 +67,8 @@ SELF_PATCH=00
 ####
 ####  DEPENDENCIES
 ####  * bash >=3.0 (bash); df, readlink, stty, tr, uname, wc (coreutils);
-####    gawk (gawk); grep (grep); lspci (pciutils);
-####    ps, find (findutils)
+####    gawk (gawk); grep (grep); lspci (pciutils); ps; find (findutils);
+####    perl (Modules: [HTTP::Tiny IF NO wget/curl/fetch/ftp]; Net::FTP; File::Find);
 ####  * Also the proc filesystem should be present and mounted for Linux
 ####  * Some features, like -M and -d will not work, or will work incompletely,
 ####    if /sys is missing
@@ -94,6 +100,8 @@ SELF_PATCH=00
 ####       Note: requires setup of lm-sensors (sensors-detect and adding modules/modprobe/reboot,
 ####       and ideally, pwmconfig) prior to full output being available. 
 ####  -S   For desktop environment, user must be in X and have xprop installed (in X11-utils)
+####  -xx@14 - it really helps to have 'tree' installed on Linux systems with /sys for 
+####       debugger data collection, that creates a very useful map of /sys.
 ########################################################################
 ####  BSD Adjustments
 ####  * sed -i '' form supported by using SED_I="-i ''".
@@ -117,7 +125,7 @@ SELF_PATCH=00
 ####    The ONLY time you should use ';' (semi-colon) is in this single case: if [[ condition ]];then.
 ####    Never use compound 'if': ie, if [[ condition ]] && statement.
 ####  * Note: [[ -n $something ]] - double brackets does not require quotes for variables: ie, "$something".
-####  * Always use quotes, double or single, for all string values.
+####  * Always use quotes, double or single, for all string values. Really. It won't kill you.
 ####  * All new code/methods must be in a function.
 
 ####  * For all boolean tests, use 'true' / 'false'.
@@ -262,6 +270,7 @@ A_CPU_CORE_DATA=''
 A_CPU_DATA=''
 A_CPU_TYPE_PCNT_CCNT=''
 A_DEBUG_BUFFER=''
+
 A_GCC_VERSIONS=''
 A_GLX_DATA=''
 A_GRAPHICS_CARD_DATA=''
@@ -276,7 +285,7 @@ A_OPTICAL_DRIVE_DATA=''
 A_PARTITION_DATA=''
 A_PCICONF_DATA=''
 A_PS_DATA=''
-A_RAID_DATA=''
+A_RAID_DATA=()
 A_SENSORS_DATA=''
 A_UNMOUNTED_PARTITION_DATA=''
 A_WEATHER_DATA=''
@@ -285,11 +294,11 @@ A_DISPLAY_SERVER_DATA=''
 ### BOOLEANS ###
 ## standard boolean flags ##
 B_BSD_DISK_SET='false'
-B_BSD_RAID='false'
 B_COLOR_SCHEME_SET='false'
 B_CONSOLE_IRC='false'
 # triggers full display of cpu flags
 B_CPU_FLAGS_FULL='false'
+B_CURL='true'
 # test for dbus irc client
 B_DBUS_CLIENT='false'
 # kde dcop
@@ -303,6 +312,7 @@ B_DMIDECODE_SET='false'
 B_EXTRA_DATA='false'
 # triggered by -xx
 B_EXTRA_EXTRA_DATA='false'
+B_FETCH='true'
 B_FORCE_DMIDECODE='false'
 B_ID_SET='false'
 # override certain errors due to currupted data
@@ -311,6 +321,7 @@ B_LABEL_SET='false'
 B_LSPCI='false'
 B_LOG_COLORS='false'
 B_LOG_FULL_DATA='false'
+B_MAN='true'
 B_MAPPER_SET='false'
 B_OUTPUT_FILTER='false'
 B_OVERRIDE_FILTER='false'
@@ -380,6 +391,7 @@ B_USB_NETWORKING='false'
 # set to true here for debug logging from script start
 B_USE_LOGGING='false'
 B_UUID_SET='false'
+B_WGET='true'
 B_XORG_LOG='false'
 
 ## Directory/file exist flags; test as [[ $(boolean) ]] not [[ $boolean ]]
@@ -479,18 +491,17 @@ ALTERNATE_FTP='' # for data uploads
 ALTERNATE_WEATHER_LOCATION='' # weather alternate location
 SELF_CONFIG_DIR=''
 SELF_DATA_DIR=''
-LOG_FILE='inxi.log'
-LOG_FILE_1='inxi.1.log'
-LOG_FILE_2='inxi.2.log'
-MAN_FILE_DOWNLOAD='https://github.com/smxi/inxi/raw/master/inxi.1.gz'
+LOG_FILE='binxi.log'
+LOG_FILE_1='binxi.1.log'
+LOG_FILE_2='binxi.2.log'
+MAN_FILE_DOWNLOAD='https://smxi.org/in/binxi.1.gz'
+#MAN_FILE_DOWNLOAD='https://github.com/smxi/inxi/raw/inxi-legacy/binxi.1.gz'
 SELF_PATH='' # filled-in in Main
-SELF_DOWNLOAD='https://github.com/smxi/inxi/raw/master/'
+#SELF_DOWNLOAD='https://github.com/smxi/inxi/raw/master/'
+SELF_DOWNLOAD='https://github.com/smxi/inxi/raw/inxi-legacy/'
 SELF_DOWNLOAD_BRANCH_1='https://github.com/smxi/inxi/raw/one/'
 SELF_DOWNLOAD_BRANCH_2='https://github.com/smxi/inxi/raw/two/'
 SELF_DOWNLOAD_BRANCH_3='https://github.com/smxi/inxi/raw/three/'
-SELF_DOWNLOAD_BRANCH_4='https://github.com/smxi/inxi/raw/four/'
-SELF_DOWNLOAD_BRANCH_BSD='https://github.com/smxi/inxi/raw/bsd/'
-SELF_DOWNLOAD_BRANCH_GNUBSD='https://github.com/smxi/inxi/raw/gnubsd/'
 SELF_DOWNLOAD_DEV='https://smxi.org/test/'
 # note, you can use any ip url here as long as it's the only line on the output page.
 # Also the ip address must be the last thing on that line. If you abuse this ip tool 
@@ -520,6 +531,7 @@ LSPCI_V_DATA=''
 LSPCI_N_DATA=''
 MEMORY=''
 PS_THROTTLED=''
+RAID_TYPE=''
 REPO_DATA=''
 SYSCTL_A_DATA=''
 UP_TIME=''
@@ -561,7 +573,7 @@ COLOR_SCHEME=''
 C1=''
 C2=''
 CN=''
-## Always leave these blank, these are only going to be set in inxi.conf files, that makes testing
+## Always leave these blank, these are only going to be set in binxi.conf files, that makes testing
 ## for user changes easier after sourcing the files
 ESC='\x1b'
 GLOBAL_COLOR_SCHEME=''
@@ -653,7 +665,7 @@ DISTROS_DERIVED="antix-version aptosid-version kanotix-version knoppix-version m
 # debian_version excluded from DISTROS_PRIMARY so Debian can fall through to /etc/issue detection. Same goes for Ubuntu.
 DISTROS_EXCLUDE_LIST="debian_version devuan_version ubuntu_version"
 DISTROS_PRIMARY="arch-release gentoo-release redhat-release slackware-version SuSE-release"
-DISTROS_LSB_GOOD="mandrake-release mandriva-release mandrakelinux-release"
+DISTROS_LSB_GOOD="mandrake-release mandriva-release mandrakelinux-release manjaro-release"
 # this is being used both by core distros and derived distros now, eg, solusos 1 uses it for solusos id, while
 # debian, solusos base, uses it as well, so we have to know which it is.
 DISTROS_OS_RELEASE_GOOD="arch-release SuSE-release "
@@ -666,7 +678,7 @@ DISTROS_OS_RELEASE_GOOD="arch-release SuSE-release "
 # we're saving about 10+% of the total script exec time by hand building the ban lists here, using hard quotes.
 
 BAN_LIST_NORMAL='chipset|components|computing|computer|corporation|communications|electronics|electrical|electric|gmbh|group|incorporation|industrial|international|nee|revision|semiconductor|software|technologies|technology|ltd\.|\<ltd\>|inc\.|\<inc\>|intl\.|co\.|\<co\>|corp\.|\<corp\>|\(tm\)|\(r\)|®|\(rev ..\)'
-BAN_LIST_CPU='@||cpu |cpu deca|dual core|dual-core|tri core|tri-core|quad core|quad-core|ennea|genuine|hepta|hexa|multi|octa|penta|processor|single|triple|[0-9\.]+ *[MmGg][Hh][Zz]'
+BAN_LIST_CPU='@|cpu |cpu deca|([0-9]+|single|dual|triple|tri|quad|penta|hepta|hexa|octa|multi)[ -]core|ennea|genuine|multi|processor|single|triple|[0-9\.]+ *[MmGg][Hh][Zz]'
 # See github issue 75 for more details on value: *, triggers weird behaviors if present in value
 # /sys/devices/virtual/dmi/id/product_name:['*']
 # this is for bash arrays AND avoiding * in arrays: ( fred * greg ) expands to the contents of the directory
@@ -684,8 +696,13 @@ USB_NETWORK_SEARCH="$USB_NETWORK_SEARCH|Actiontec.*Wireless|Actiontec.*Network|A
 USB_NETWORK_SEARCH="$USB_NETWORK_SEARCH|050d:935b|0bda:8189|0bda:8197"
 
 ########################################################################
-#### MAIN: Where it all begins
+#### STARTUP
 ########################################################################
+
+#### -------------------------------------------------------------------
+#### MAIN
+#### -------------------------------------------------------------------
+
 main()
 {
 	# This must be set first so log paths are present when logging starts.
@@ -826,7 +843,7 @@ main()
 	
 	# all the pre-start stuff is in place now
 	B_SCRIPT_UP='true'
-	script_debugger "Debugger: $SELF_NAME is up and running..."
+	self_debugger "Debugger: $SELF_NAME is up and running..."
 	
 	# then create the output
 	print_it_out
@@ -837,52 +854,91 @@ main()
 	exit 0
 }
 
-set_user_paths()
+#### -------------------------------------------------------------------
+#### INITIALIZE
+#### -------------------------------------------------------------------
+
+# No args taken.
+check_recommended_apps()
 {
-	local b_conf='false' b_data='false'
-	
-	if [[ -n $XDG_CONFIG_HOME ]];then
-		SELF_CONFIG_DIR=$XDG_CONFIG_HOME
-		b_conf=true
-	elif [[ -d $HOME/.config ]];then
-		SELF_CONFIG_DIR=$HOME/.config
-		b_conf=true
-	else 
-		SELF_CONFIG_DIR="$HOME/.$SELF_NAME"
+	eval $LOGFS
+	local bash_array_test=( "one" "two" )
+
+	# check for array ability of bash, this is only good for the warning at this time
+	# the boolean could be used later
+	# bash version 2.05b is used in DSL
+	# bash version 3.0 is used in Puppy Linux; it has a known array bug <reference to be placed here>
+	# versions older than 3.1 don't handle arrays
+	# distro's using below 2.05b are unknown, released in 2002
+	if [[ ${bash_array_test[1]} -eq "two" ]];then
+		B_BASH_ARRAY='true'
+	else
+		self_debugger "Suggestion: update to Bash v3.1 for optimal $SELF_NAME output"
 	fi
-	if [[ -n $XDG_DATA_HOME ]];then
-		SELF_DATA_DIR=$XDG_DATA_HOME/$SELF_NAME
-		b_data=true
-	elif [[ -d $HOME/.local/share ]];then
-		SELF_DATA_DIR=$HOME/.local/share/$SELF_NAME
-		b_data=true
-	else 
-		SELF_DATA_DIR="$HOME/.$SELF_NAME"
+	# test for a few apps that bsds may not have after initial tests
+	if type -p lspci &>/dev/null;then
+		B_LSPCI='true'
 	fi
-	# note, this used to be created/checked in specific instance, but we'll just do it
-	# universally so it's done at script start.
-	if [[ ! -d $SELF_DATA_DIR ]];then
-		mkdir $SELF_DATA_DIR
+	if [[ -n $BSD_TYPE ]];then
+		if type -p sysctl &>/dev/null;then
+			B_SYSCTL='true'
+		fi
+		if type -p pciconf &>/dev/null;then
+			B_PCICONF='true'
+		fi
 	fi
-	
-	if [[ $b_conf == 'true' && -f $HOME/.$SELF_NAME/$SELF_NAME.conf ]];then
-		mv -f $HOME/.$SELF_NAME/$SELF_NAME.conf $SELF_CONFIG_DIR
-		echo "Moved $SELF_NAME.conf from $HOME/.$SELF_NAME to $SELF_CONFIG_DIR"
+	# now setting qdbus/dcop for first run, some systems can have both by the way
+	if type -p qdbus &>/dev/null;then
+		B_QDBUS='true'
 	fi
-	if [[ $b_data == 'true' && -d $HOME/.$SELF_NAME ]];then
-		mv -f $HOME/.$SELF_NAME/* $SELF_DATA_DIR
-		rm -Rf $HOME/.$SELF_NAME
-		echo "Moved data dir $HOME/.$SELF_NAME to $SELF_DATA_DIR"
+	if type -p dcop &>/dev/null;then
+		B_DCOP='true'
 	fi
-	
-	LOG_FILE=$SELF_DATA_DIR/$LOG_FILE
-	LOG_FILE_1=$SELF_DATA_DIR/$LOG_FILE_1
-	LOG_FILE_2=$SELF_DATA_DIR/$LOG_FILE_2
+	eval $LOGFE
 }
 
-#### -------------------------------------------------------------------
-#### basic tests: set script data, booleans, PATH, version numbers
-#### -------------------------------------------------------------------
+# Determine if any of the absolutely necessary tools are absent
+# No args taken.
+check_required_apps()
+{
+	eval $LOGFS
+	local app_name=''
+	# bc removed from deps for now
+	local depends="df gawk grep ps readlink tr uname wc"
+	
+	if [[ -z $BSD_TYPE  ]];then
+		depends="$depends lspci"
+	elif [[ $BSD_TYPE == 'bsd' ]];then
+		depends="$depends sysctl"
+		# debian-bsd has lspci but you must be root to run it
+	elif [[ $BSD_TYPE == 'debian-bsd' ]];then
+		depends="$depends sysctl lspci"
+	fi
+	# no need to add xprop because it will just give N/A if not there, but if we expand use of xprop,
+	# should add that here as a test, then use the B_SHOW_DISPLAY_DATA flag to trigger the tests in de function
+	local x_apps="xrandr xdpyinfo glxinfo" 
+
+	if [[ $B_RUNNING_IN_DISPLAY == 'true' ]];then
+		for app_name in $x_apps
+		do
+			if ! type -p $app_name &>/dev/null;then
+				self_debugger "Resuming in non X mode: $app_name not found. For package install advice run: $SELF_NAME --recommends"
+				B_SHOW_DISPLAY_DATA='false'
+				break
+			fi
+		done
+	fi
+
+	app_name=''
+
+	for app_name in $depends
+	do
+		if ! type -p $app_name &>/dev/null;then
+			error_handler 5 "$app_name"
+		fi
+	done
+	eval $LOGFE
+}
 
 # Set PATH data so we can access all programs as user. Set BAN lists.
 # initialize some boleans, these directories are used throughout the script
@@ -919,30 +975,12 @@ initialize_data()
 	else
 		error_handler 6
 	fi
-	
 	initialize_paths
-	
 	if type -p dig &>/dev/null;then
 		DNSTOOL='dig'
 	fi
 	# set downloaders. 
-	if ! type -p wget &>/dev/null;then
-		# first check for bsd stuff
-		if type -p fetch &>/dev/null;then
-			DOWNLOADER='fetch'
-			NO_SSL=' --no-verify-peer'
-		elif type -p curl &>/dev/null;then
-			DOWNLOADER='curl'
-			NO_SSL=' --insecure'
-		elif [[ $BSD_VERSION == 'openbsd' ]] && type -p ftp &>/dev/null;then
-			DOWNLOADER='ftp'
-		else
-			DOWNLOADER='no-downloader'
-		fi
-	else
-		NO_SSL=' --no-check-certificate'
-	fi
-	
+ 	set_downloader
 	if [[ -n $BSD_TYPE ]];then
 		if [[ -e $FILE_DMESG_BOOT ]];then
 			B_DMESG_BOOT_FILE='true'
@@ -1010,6 +1048,103 @@ initialize_data()
 	eval $LOGFE
 }
 
+initialize_paths()
+{
+	local path='' added_path='' b_path_found='' sys_path=''
+	# Extra path variable to make execute failures less likely, merged below
+	local extra_paths="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/opt/local/bin"
+	
+	# this needs to be set here because various options call the parent initialize function directly.
+	SELF_PATH=$( dirname "$0" )
+	# Fallback paths put into $extra_paths; This might, among others, help on gentoo.
+	# Now, create a difference of $PATH and $extra_paths and add that to $PATH:
+	IFS=":"
+	for path in $extra_paths
+	do
+		b_path_found='false'
+		for sys_path in $PATH
+		do
+			if [[ $path == $sys_path ]];then
+				b_path_found='true'
+			fi
+		done
+		if [[ $b_path_found == 'false' ]];then
+			added_path="$added_path:$path"
+		fi
+	done
+
+	IFS="$ORIGINAL_IFS"
+	PATH="$PATH$added_path"
+	# echo "PATH='$PATH'"
+	##/bin/sh -c 'echo "PATH in subshell=\"$PATH\""'
+}
+
+# arg: $1 - version number: main/patch/date
+parse_version_data()
+{
+	# note, this is only now used for self updater function
+	case $1 in
+		date)
+			SELF_DATE=$( gawk -F '=' '
+			/^SELF_DATE/ {
+				print $NF
+				exit
+			}' "$SELF_PATH/$SELF_NAME" )
+			;;
+		main)
+			SELF_VERSION=$( gawk -F '=' '
+			/^SELF_VERSION/ {
+				print $NF
+				exit
+			}' "$SELF_PATH/$SELF_NAME" )
+			;;
+		patch)
+			SELF_PATCH=$( gawk -F '=' '
+			/^SELF_PATCH/ {
+				print $NF
+				exit
+			}' "$SELF_PATH/$SELF_NAME" )
+			;;
+	esac
+}
+
+# Set the colorscheme
+# args: $1 = <scheme number>|<"none">
+set_color_scheme()
+{
+	eval $LOGFS
+	local i='' a_output_colors='' a_color_codes=''
+
+	if [[ $1 -ge ${#A_COLOR_SCHEMES[@]} ]];then
+		set -- 1
+	fi
+	# Set a global variable to allow checking for chosen scheme later
+	SCHEME="$1"
+	if [[ $B_IRC == 'false' ]];then
+		a_color_codes=( $ANSI_COLORS )
+	else
+		a_color_codes=( $IRC_COLORS )
+	fi
+	for (( i=0; i < ${#A_COLORS_AVAILABLE[@]}; i++ ))
+	do
+		eval "${A_COLORS_AVAILABLE[i]}=\"${a_color_codes[i]}\""
+	done
+	IFS=","
+	a_output_colors=( ${A_COLOR_SCHEMES[$1]} )
+	IFS="$ORIGINAL_IFS"
+	# then assign the colors globally
+	C1="${!a_output_colors[0]}"
+	C2="${!a_output_colors[1]}"
+	CN="${!a_output_colors[2]}"
+	# ((COLOR_SCHEME++)) ## note: why is this? ##
+	# handle some explicit colors that are used for no color 0
+	if [[ $SCHEME -eq 0 ]];then
+		NORMAL=''
+		RED=''
+	fi
+	eval $LOGFE
+}
+
 # args: $1 - default OR override default cols max integer count
 set_display_width()
 {
@@ -1060,208 +1195,81 @@ set_display_width()
 	# echo cm: $COLS_MAX ci: $COLS_INNER
 }
 
-# arg: $1 - version number: main/patch/date
-parse_version_data()
+set_downloader()
 {
-	# note, this is only now used for self updater function
-	case $1 in
-		date)
-			SELF_DATE=$( gawk -F '=' '
-			/^SELF_DATE/ {
-				print $NF
-				exit
-			}' "$SELF_PATH/$SELF_NAME" )
-			;;
-		main)
-			SELF_VERSION=$( gawk -F '=' '
-			/^SELF_VERSION/ {
-				print $NF
-				exit
-			}' "$SELF_PATH/$SELF_NAME" )
-			;;
-		patch)
-			SELF_PATCH=$( gawk -F '=' '
-			/^SELF_PATCH/ {
-				print $NF
-				exit
-			}' "$SELF_PATH/$SELF_NAME" )
-			;;
-	esac
-}
-
-initialize_paths()
-{
-	local path='' added_path='' b_path_found='' sys_path=''
-	# Extra path variable to make execute failures less likely, merged below
-	local extra_paths="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/opt/local/bin"
-	
-	# this needs to be set here because various options call the parent initialize function directly.
-	SELF_PATH=$( dirname "$0" )
-	# Fallback paths put into $extra_paths; This might, among others, help on gentoo.
-	# Now, create a difference of $PATH and $extra_paths and add that to $PATH:
-	IFS=":"
-	for path in $extra_paths
-	do
-		b_path_found='false'
-		for sys_path in $PATH
-		do
-			if [[ $path == $sys_path ]];then
-				b_path_found='true'
-			fi
-		done
-		if [[ $b_path_found == 'false' ]];then
-			added_path="$added_path:$path"
-		fi
-	done
-
-	IFS="$ORIGINAL_IFS"
-	PATH="$PATH$added_path"
-	# echo "PATH='$PATH'"
-	##/bin/sh -c 'echo "PATH in subshell=\"$PATH\""'
-}
-
-# No args taken.
-check_recommended_apps()
-{
-	eval $LOGFS
-	local bash_array_test=( "one" "two" )
-
-	# check for array ability of bash, this is only good for the warning at this time
-	# the boolean could be used later
-	# bash version 2.05b is used in DSL
-	# bash version 3.0 is used in Puppy Linux; it has a known array bug <reference to be placed here>
-	# versions older than 3.1 don't handle arrays
-	# distro's using below 2.05b are unknown, released in 2002
-	if [[ ${bash_array_test[1]} -eq "two" ]];then
-		B_BASH_ARRAY='true'
+	# curl/wget are faster than HTTP::Tiny
+	if $B_CURL == 'true' && type -p curl &>/dev/null;then
+		DOWNLOADER='curl'
+		NO_SSL=' --insecure'
+	# wget has had some issues with not testing their code leading to -O failure
+	elif $B_WGET == 'true' && type -p wget &>/dev/null;then
+		DOWNLOADER='wget'
+		NO_SSL=' --no-check-certificate'
+	# check for bsd stuff
+	elif $B_FETCH == 'true' && type -p fetch &>/dev/null;then
+		DOWNLOADER='fetch'
+		NO_SSL=' --no-verify-peer'
+	# this is much slower than curl or wget
+	elif type -p perl &>/dev/null && perl -MHTTP::Tiny -e 1 &>/dev/null;then
+ 		DOWNLOADER='perl' # does not use ssl by default
+	elif [[ $BSD_VERSION == 'openbsd' ]] && type -p ftp &>/dev/null;then
+		DOWNLOADER='ftp'
 	else
-		script_debugger "Suggestion: update to Bash v3.1 for optimal inxi output"
+		DOWNLOADER='no-downloader'
 	fi
-	# test for a few apps that bsds may not have after initial tests
-	if type -p lspci &>/dev/null;then
-		B_LSPCI='true'
-	fi
-	if [[ -n $BSD_TYPE ]];then
-		if type -p sysctl &>/dev/null;then
-			B_SYSCTL='true'
-		fi
-		if type -p pciconf &>/dev/null;then
-			B_PCICONF='true'
-		fi
-	fi
-	# now setting qdbus/dcop for first run, some systems can have both by the way
-	if type -p qdbus &>/dev/null;then
-		B_QDBUS='true'
-	fi
-	if type -p dcop &>/dev/null;then
-		B_DCOP='true'
-	fi
-	eval $LOGFE
+	# echo $DOWNLOADER
 }
 
-# Determine if any of the absolutely necessary tools are absent
-# No args taken.
-check_required_apps()
+set_user_paths()
 {
-	eval $LOGFS
-	local app_name=''
-	# bc removed from deps for now
-	local depends="df gawk grep ps readlink tr uname wc"
+	local b_conf='false' b_data='false'
 	
-	if [[ -z $BSD_TYPE  ]];then
-		depends="$depends lspci"
-	elif [[ $BSD_TYPE == 'bsd' ]];then
-		depends="$depends sysctl"
-		# debian-bsd has lspci but you must be root to run it
-	elif [[ $BSD_TYPE == 'debian-bsd' ]];then
-		depends="$depends sysctl lspci"
+	if [[ -n $XDG_CONFIG_HOME ]];then
+		SELF_CONFIG_DIR=$XDG_CONFIG_HOME
+		b_conf=true
+	elif [[ -d $HOME/.config ]];then
+		SELF_CONFIG_DIR=$HOME/.config
+		b_conf=true
+	else 
+		SELF_CONFIG_DIR="$HOME/.$SELF_NAME"
 	fi
-	# no need to add xprop because it will just give N/A if not there, but if we expand use of xprop,
-	# should add that here as a test, then use the B_SHOW_DISPLAY_DATA flag to trigger the tests in de function
-	local x_apps="xrandr xdpyinfo glxinfo" 
-
-	if [[ $B_RUNNING_IN_DISPLAY == 'true' ]];then
-		for app_name in $x_apps
-		do
-			if ! type -p $app_name &>/dev/null;then
-				script_debugger "Resuming in non X mode: $app_name not found. For package install advice run: $SELF_NAME --recommends"
-				B_SHOW_DISPLAY_DATA='false'
-				break
-			fi
-		done
+	if [[ -n $XDG_DATA_HOME ]];then
+		SELF_DATA_DIR=$XDG_DATA_HOME/$SELF_NAME
+		b_data=true
+	elif [[ -d $HOME/.local/share ]];then
+		SELF_DATA_DIR=$HOME/.local/share/$SELF_NAME
+		b_data=true
+	else 
+		SELF_DATA_DIR="$HOME/.$SELF_NAME"
 	fi
-
-	app_name=''
-
-	for app_name in $depends
-	do
-		if ! type -p $app_name &>/dev/null;then
-			error_handler 5 "$app_name"
-		fi
-	done
-	eval $LOGFE
+	# note, this used to be created/checked in specific instance, but we'll just do it
+	# universally so it's done at script start.
+	if [[ ! -d $SELF_DATA_DIR ]];then
+		mkdir $SELF_DATA_DIR
+	fi
+	
+	if [[ $b_conf == 'true' && -f $HOME/.$SELF_NAME/$SELF_NAME.conf ]];then
+		mv -f $HOME/.$SELF_NAME/$SELF_NAME.conf $SELF_CONFIG_DIR
+		echo "Moved $SELF_NAME.conf from $HOME/.$SELF_NAME to $SELF_CONFIG_DIR"
+	fi
+	if [[ $b_data == 'true' && -d $HOME/.$SELF_NAME ]];then
+		mv -f $HOME/.$SELF_NAME/* $SELF_DATA_DIR
+		rm -Rf $HOME/.$SELF_NAME
+		echo "Moved data dir $HOME/.$SELF_NAME to $SELF_DATA_DIR"
+	fi
+	
+	LOG_FILE=$SELF_DATA_DIR/$LOG_FILE
+	LOG_FILE_1=$SELF_DATA_DIR/$LOG_FILE_1
+	LOG_FILE_2=$SELF_DATA_DIR/$LOG_FILE_2
 }
 
-## note: this is now running inside each gawk sequence directly to avoid exiting gawk
-## looping in bash through arrays, then re-entering gawk to clean up, then writing back to array
-## in bash. For now I'll leave this here because there's still some interesting stuff to get re methods
-# Enforce boilerplate and buzzword filters
-# args: $1 - BAN_LIST_NORMAL/BAN_LIST_CPU; $2 - string to sanitize
-sanitize_characters()
-{
-	eval $LOGFS
-	# Cannot use strong quotes to unquote a string with pipes in it!
-	# bash will interpret the |'s as usual and try to run a subshell!
-	# Using weak quotes instead, or use '"..."'
-	echo "$2" | gawk "
-	BEGIN {
-		IGNORECASE=1
-	}
-	{
-		gsub(/${!1}/,\"\")
-		gsub(/ [ ]+/,\" \")    ## ([ ]+) with (space)
-		gsub(/^ +| +$/,\"\")   ## (pipe char) with (nothing)
-		print                  ## prints (returns) cleaned input
-	}"
-	eval $LOGFE
-}
+########################################################################
+#### UTILITIES
+########################################################################
 
-# Set the colorscheme
-# args: $1 = <scheme number>|<"none">
-set_color_scheme()
-{
-	eval $LOGFS
-	local i='' a_output_colors='' a_color_codes=''
-
-	if [[ $1 -ge ${#A_COLOR_SCHEMES[@]} ]];then
-		set -- 1
-	fi
-	# Set a global variable to allow checking for chosen scheme later
-	SCHEME="$1"
-	if [[ $B_IRC == 'false' ]];then
-		a_color_codes=( $ANSI_COLORS )
-	else
-		a_color_codes=( $IRC_COLORS )
-	fi
-	for (( i=0; i < ${#A_COLORS_AVAILABLE[@]}; i++ ))
-	do
-		eval "${A_COLORS_AVAILABLE[i]}=\"${a_color_codes[i]}\""
-	done
-	IFS=","
-	a_output_colors=( ${A_COLOR_SCHEMES[$1]} )
-	IFS="$ORIGINAL_IFS"
-	# then assign the colors globally
-	C1="${!a_output_colors[0]}"
-	C2="${!a_output_colors[1]}"
-	CN="${!a_output_colors[2]}"
-	# ((COLOR_SCHEME++)) ## note: why is this? ##
-	# handle some explicit colors that are used for no color 0
-	if [[ $SCHEME -eq 0 ]];then
-		NORMAL=''
-		RED=''
-	fi
-	eval $LOGFE
-}
+#### -------------------------------------------------------------------
+#### COLOR SELECTOR
+#### -------------------------------------------------------------------
 
 select_default_color_scheme()
 {
@@ -1408,378 +1416,40 @@ select_default_color_scheme()
 		fi
 	else
 		print_screen_output "$LINE1"
-		print_lines_basic "0" "" "After finding the scheme number you like, simply run this again in a terminal to set the configuration data file for your irc client. You can set color schemes for the following: start inxi with -c plus:"
+		print_lines_basic "0" "" "After finding the scheme number you like, simply run this again in a terminal to set the configuration data file for your irc client. You can set color schemes for the following: start $SELF_NAME with -c plus:"
 		print_screen_output "94 (console, no X - $console); 95 (terminal, X - $virt_term); 96 (irc, gui, X - $irc_gui);"
 		print_screen_output "97 (irc, X, in terminal - $irc_x_term); 98 (irc, no X - $irc_console); 99 (global - $global)"
 		exit 0
 	fi
-
 	eval $LOGFE
 }
-
-########################################################################
-#### UTILITY FUNCTIONS
-########################################################################
 
 #### -------------------------------------------------------------------
-#### error handler, debugger, script updater
+#### DEBUGGERS
 #### -------------------------------------------------------------------
-
-# Error handling
-# args: $1 - error number; $2 - optional, extra information; $3 - optional extra info
-error_handler()
-{
-	eval $LOGFS
-	local error_message=''
-
-	# assemble the error message
-	case $1 in
-		2)	error_message="large flood danger, debug buffer full!"
-			;;
-		3)	error_message="unsupported color scheme number: $2"
-			;;
-		4)	error_message="unsupported verbosity level: $2"
-			;;
-		5)	error_message="dependency not met: $2 not found in path.\nFor distribution installation package names and missing apps information, run: $SELF_NAME --recommends"
-			;;
-		6)	error_message="/proc not found! Quitting..."
-			;;
-		7)	error_message="One of the options you entered in your script parameters: $2\nis not supported.The option may require extra arguments to work.\nFor supported options (and their arguments), check the help menu: $SELF_NAME -h"
-			;;
-		8)	error_message="the self-updater failed, $DOWNLOADER exited with error: $2.\nYou probably need to be root.\nHint, to make for easy updates without being root, do: chown <user name> $SELF_PATH/$SELF_NAME"
-			;;
-		9)	error_message="unsupported debugging level: $2"
-			;;
-		10)
-			error_message="the alt download url you provided: $2\nappears to be wrong, download aborted. Please note, the url\nneeds to end in /, without $SELF_NAME, like: http://yoursite.com/downloads/"
-			;;
-		11)
-			error_message="unsupported testing option argument: -! $2"
-			;;
-		12)
-			error_message="the git branch download url: $2\nappears to be empty currently. Make sure there is an actual source branch version\nactive before you try this again. Check https://github.com/smxi/inxi\nto verify the branch status."
-			;;
-		13)
-			error_message="The -t option requires the following extra arguments (no spaces between letters/numbers):\nc m cm [required], for example: -t cm8 OR -t cm OR -t c9\n(numbers: 1-20, > 5 throttled to 5 in irc clients) You entered: $2"
-			;;
-		14)
-			error_message="failed to write correctly downloaded $SELF_NAME to location $SELF_PATH.\nThis usually means you don't have permission to write to that location, maybe you need to be root?\nThe operation failed with error: $2"
-			;;
-		15)
-			error_message="failed set execute permissions on $SELF_NAME at location $SELF_PATH.\nThis usually means you don't have permission to set permissions on files there, maybe you need to be root?\nThe operation failed with error: $2"
-			;;
-		16)
-			error_message="$SELF_NAME downloaded but the file data is corrupted. Purged data and using current version."
-			;;
-		17)
-			error_message="All $SELF_NAME self updater features have been disabled by the distribution\npackage maintainer. This includes the option you used: $2"
-			;;
-		18)
-			error_message="The argument you provided for $2 does not have supported syntax.\nPlease use the following formatting:\n$3"
-			;;
-		19)
-			error_message="The option $2 has been deprecated. Please use $3 instead.\nSee -h for instructions and syntax."
-			;;
-		20)
-			error_message="The option you selected has been deprecated. $2\nSee the -h (help) menu for currently supported options."
-			;;
-		21)
-			error_message="Width option requires an integer value of 80 or more.\nYou entered: $2"
-			;;
-		*)	error_message="error unknown: $@"
-			set -- 99
-			;;
-	esac
-	# then print it and exit
-	print_screen_output "Error $1: $error_message"
-	eval $LOGFE
-	exit $1
-}
-
-# prior to script up set, pack the data into an array
-# then we'll print it out later.
-# args: $1 - $@ debugging string text
-script_debugger()
-{
-	eval $LOGFS
-	if [[ $B_SCRIPT_UP == 'true' ]];then
-		# only return if debugger is off and no pre start up errors have occurred
-		if [[ $DEBUG -eq 0 && $DEBUG_BUFFER_INDEX -eq 0 ]];then
-			return 0
-		# print out the stored debugging information if errors occurred
-		elif [[ $DEBUG_BUFFER_INDEX -gt 0 ]];then
-			for (( DEBUG_BUFFER_INDEX=0; DEBUG_BUFFER_INDEX < ${#A_DEBUG_BUFFER[@]}; DEBUG_BUFFER_INDEX++ ))
-			do
-				print_screen_output "${A_DEBUG_BUFFER[$DEBUG_BUFFER_INDEX]}"
-			done
-			DEBUG_BUFFER_INDEX=0
-		fi
-		# or print out normal debugger messages if debugger is on
-		if [[ $DEBUG -gt 0 ]];then
-			print_screen_output "$1"
-		fi
-	else
-		if [[ $B_DEBUG_FLOOD == 'true' && $DEBUG_BUFFER_INDEX -gt 10 ]];then
-			error_handler 2
-		# this case stores the data for later printout, will print out only
-		# at B_SCRIPT_UP == 'true' if array index > 0
-		else
-			A_DEBUG_BUFFER[$DEBUG_BUFFER_INDEX]="$1"
-			# increment count for next pre script up debugging error
-			(( DEBUG_BUFFER_INDEX++ ))
-		fi
-	fi
-	eval $LOGFE
-}
-
-# NOTE: no logging available until get_parameters is run, since that's what sets logging
-# in order to trigger earlier logging manually set B_USE_LOGGING to true in top variables.
-# $1 alone: logs data; $2 with or without $3 logs func start/end.
-# $1 type (fs/fe/cat/raw) or logged data; [$2 is $FUNCNAME; [$3 - function args]]
-log_function_data()
-{
-	if [ "$B_USE_LOGGING" == 'true' ];then
-		local logged_data='' spacer='   ' line='----------------------------------------'
-		case $1 in
-			fs)
-				logged_data="Function: $2 - Primary: Start"
-				if [ -n "$3" ];then
-					logged_data="$logged_data\n${spacer}Args: $3"
-				fi
-				spacer=''
-				;;
-			fe)
-				logged_data="Function: $2 - Primary: End"
-				spacer=''
-				;;
-			cat)
-				if [[ $B_LOG_FULL_DATA == 'true' ]];then
-					for cat_file in $2
-					do
-						logged_data="$logged_data\n$line\nFull file data: cat $cat_file\n\n$( cat $cat_file )\n$line\n"
-					done
-					spacer=''
-				fi
-				;;
-			raw)
-				if [[ $B_LOG_FULL_DATA == 'true' ]];then
-					logged_data="\n$line\nRaw system data:\n\n$2\n$line\n"
-					spacer=''
-				fi
-				;;
-			*)
-				logged_data="$1"
-				;;
-		esac
-		# Create any required line breaks and strip out escape color code, either ansi (case 1)or irc (case 2).
-		# This pattern doesn't work for irc colors, if we need that someone can figure it out
-		if [[ -n $logged_data ]];then
-			if [[ $B_LOG_COLORS != 'true' ]];then
-				echo -e "${spacer}$logged_data" | sed $SED_RX 's/\x1b\[[0-9]{1,2}(;[0-9]{1,2}){0,2}m//g' >> $LOG_FILE
-			else
-				echo -e "${spacer}$logged_data" >> $LOG_FILE
-			fi
-		fi
-	fi
-}
-
-# called in the initial -@ 10 script args setting so we can get logging as soon as possible
-# will have max 3 files, inxi.log, inxi.1.log, inxi.2.log
-create_rotate_logfiles()
-{
-	# do the rotation if logfile exists
-	if [[ -f $LOG_FILE ]];then
-		# copy if present second to third
-		if [[ -f $LOG_FILE_1 ]];then
-			mv -f $LOG_FILE_1 $LOG_FILE_2
-		fi
-		# then copy initial to second
-		mv -f $LOG_FILE $LOG_FILE_1
-	fi
-	# now create the logfile
-	touch $LOG_FILE
-	# and echo the start data
-	echo "=========================================================" >> $LOG_FILE
-	echo "START $SELF_NAME LOGGING:"                               >> $LOG_FILE
-	echo "Script started: $( date +%Y-%m-%d-%H:%M:%S )"              >> $LOG_FILE
-	echo "=========================================================" >> $LOG_FILE
-}
-
-# args: $1 - download url, not including file name; $2 - string to print out
-# $3 - update type option
-# note that $1 must end in / to properly construct the url path
-script_self_updater()
-{
-	eval $LOGFS
-	local downloader_error=0 file_contents='' downloader_man_error=0 
-	local man_file_location=$( set_man_location )
-	local man_file_path="$man_file_location/inxi.1.gz" 
-	
-	if [[ $B_IRC == 'true' ]];then
-		print_screen_output "Sorry, you can't run the $SELF_NAME self updater option (-$3) in an IRC client."
-		exit 1
-	fi
-
-	print_screen_output "Starting $SELF_NAME self updater."
-	print_screen_output "Currently running $SELF_NAME version number: $SELF_VERSION"
-	print_screen_output "Current version patch number: $SELF_PATCH"
-	print_screen_output "Current version release date: $SELF_DATE"
-	print_screen_output "Updating $SELF_NAME in $SELF_PATH using $2 as download source..."
-	case $DOWNLOADER in
-		curl)
-			file_contents="$( curl $NO_SSL_OPT -s $1$SELF_NAME )" || downloader_error=$?
-			;;
-		fetch)
-			file_contents="$( fetch $NO_SSL_OPT -q -o - $1$SELF_NAME )" || downloader_error=$?
-			;;
-		ftp)
-			file_contents="$( ftp $NO_SSL_OPT -o - $1$SELF_NAME 2>/dev/null )" || downloader_error=$?
-			;;
-		wget)
-			file_contents="$( wget $NO_SSL_OPT -q -O - $1$SELF_NAME )" || downloader_error=$?
-			;;
-		no-downloader)
-			downloader_error=1
-			;;
-	esac
-
-	# then do the actual download
-	if [[  $downloader_error -eq 0 ]];then
-		# make sure the whole file got downloaded and is in the variable
-		if [[ -n $( grep '###\*\*EOF\*\*###' <<< "$file_contents" ) ]];then
-			echo "$file_contents" > $SELF_PATH/$SELF_NAME || error_handler 14 "$?"
-			chmod +x $SELF_PATH/$SELF_NAME || error_handler 15 "$?"
-			parse_version_data 'main'
-			parse_version_data 'patch'
-			parse_version_data 'date'
-			print_screen_output "Successfully updated to $2 version: $SELF_VERSION"
-			print_screen_output "New $2 version patch number: $SELF_PATCH"
-			print_screen_output "New $2 version release date: $SELF_DATE"
-			print_screen_output "To run the new version, just start $SELF_NAME again."
-			print_screen_output "----------------------------------------"
-			print_screen_output "Starting download of man page file now."
-			if [[ ! -d $man_file_location ]];then
-				print_screen_output "The required man directory was not detected on your system, unable to continue: $man_file_location"
-			else
-				if [[ $B_ROOT == 'true' ]];then
-					print_screen_output "Checking Man page download URL..."
-					if [[ -f /usr/share/man/man8/inxi.8.gz ]];then
-						print_screen_output "Updating man page location to man1."
-						mv -f /usr/share/man/man8/inxi.8.gz $man_file_location/inxi.1.gz 
-						if type -p mandb &>/dev/null;then
-							exec $( type -p mandb ) -q 
-						fi
-					fi
-					if [[ $DOWNLOADER == 'wget' ]];then
-						wget $NO_SSL_OPT -q --spider $MAN_FILE_DOWNLOAD || downloader_man_error=$?
-					fi
-					if [[ $downloader_man_error -eq 0 ]];then
-						if [[ $DOWNLOADER == 'wget' ]];then
-							print_screen_output "Man file download URL verified: $MAN_FILE_DOWNLOAD"
-						fi
-						print_screen_output "Downloading Man page file now."
-						case $DOWNLOADER in
-							curl)
-								curl $NO_SSL_OPT -s -o $man_file_path $MAN_FILE_DOWNLOAD || downloader_man_error=$?
-								;;
-							fetch)
-								fetch $NO_SSL_OPT -q -o $man_file_path $MAN_FILE_DOWNLOAD || downloader_man_error=$?
-								;;
-							ftp)
-								ftp $NO_SSL_OPT -o $man_file_path $MAN_FILE_DOWNLOAD 2>/dev/null || downloader_man_error=$?
-								;;
-							wget)
-								wget $NO_SSL_OPT -q -O $man_file_path $MAN_FILE_DOWNLOAD || downloader_man_error=$?
-								;;
-							no-downloader)
-								downloader_man_error=1
-								;;
-						esac
-						if [[ $downloader_man_error -gt 0 ]];then
-							print_screen_output "Oh no! Something went wrong downloading the Man gz file at: $MAN_FILE_DOWNLOAD"
-							print_screen_output "Check the error messages for what happened. Error: $downloader_man_error"
-						else
-							print_screen_output "Download/install of man page successful. Check to make sure it works: man inxi"
-						fi
-					else
-						print_screen_output "Man file download URL failed, unable to continue: $MAN_FILE_DOWNLOAD"
-					fi
-				else
-					print_screen_output "Updating / Installing the Man page requires root user, writing to: $man_file_location"
-					print_screen_output "If you want the man page, you'll have to run $SELF_NAME -$3 as root."
-				fi
-			fi
-			exit 0
-		else
-			error_handler 16
-		fi
-	# now run the error handlers on any wget failure
-	else
-		if [[ $2 == 'source server' ]];then
-			error_handler 8 "$downloader_error"
-		elif [[ $2 == 'alt server' ]];then
-			error_handler 10 "$1"
-		else
-			error_handler 12 "$1"
-		fi
-	fi
-	eval $LOGFS
-}
-
-set_man_location()
-{
-	local location='' default_location='/usr/share/man/man1' 
-	local man_paths=$(man --path 2>/dev/null) man_local='/usr/local/share/man'
-	local b_use_local=false
-	
-	if [[ -n "$man_paths" && -n $( grep $man_local <<< "$man_paths" ) ]];then
-		b_use_local=true
-	fi
-	
-	# for distro installs, existing inxi man manual installs, do nothing
-	if [[ -f $default_location/inxi.1.gz ]];then
-		location=$default_location
-	else
-		if [[ $b_use_local == 'true' ]];then
-			if [[ ! -d $man_local/man1 ]];then
-				mkdir $man_local/man1
-			fi
-			location="$man_local/man1"
-		fi
-# 		print_screen_output "Updating man page location to man1."
-# 		mv -f /usr/share/man/man1/inxi.1.gz /usr/local/share/man/man1/inxi.1.gz 
-# 		if type -p mandb &>/dev/null;then
-# 			exec $( type -p mandb ) -q 
-# 		fi
-	fi
-	
-	if [[ -z "$location" ]];then
-		location=$default_location
-	fi
-	
-	echo $location
-}
 
 # args: $1 - debug data type: sys|xorg|disk
 debug_data_collector()
 {
-	local xiin_app='' sys_data_file='' error='' b_run_xiin='false' b_xiin_downloaded='false'
-	local Debug_Data_Dir='' bsd_string='' xorg_d_files='' xorg_file='' a_distro_ids=''
-	local completed_gz_file='' Xiin_File='xiin.py' ftp_upload='ftp.techpatterns.com/incoming'
+	local sys_data_file='' error='' bsd_string='' sys_traverse_data=''
+	local xorg_d_files='' xorg_file='' a_distro_ids=''
+	local completed_gz_file='' Ftp_Upload='ftp.techpatterns.com/incoming'
 	local Line='-------------------------' 
 	local start_directory=$( pwd )
-	local host='' debug_i='' root_string='' b_perl_worked='false' b_uploaded='false'
+	local host='' debug_i='' root_string='' b_uploaded='false'
+	
+	if [[ -n $ALTERNATE_FTP ]];then
+		Ftp_Upload=$ALTERNATE_FTP
+	fi
 	
 	if (( "$BASH" >= 4 ));then
 		host="${HOSTNAME,,}"
 	else 
 		host=$( tr '[A-Z]' '[a-z]' <<< "$HOSTNAME" )
 	fi
-	
 	if [[ $B_DEBUG_I == 'true' ]];then
 		debug_i='i'
 	fi
-	
 	if [[ -n $host ]];then
 		host=${host// /-}
 	else
@@ -1792,27 +1462,26 @@ debug_data_collector()
 		root_string='-root'
 	fi
 	
-	Debug_Data_Dir="inxi$bsd_string-$host-$(date +%Y%m%d-%H%M%S)-$1$root_string" 
+	local Debug_Data_Dir="$SELF_NAME$bsd_string-$host-$(date +%Y%m%d-%H%M%S)-$1$root_string" 
+	local debug_gz="$Debug_Data_Dir.tar.gz"
 	
 	if [[ $B_IRC == 'false' ]];then
-		if [[ -n $ALTERNATE_FTP ]];then
-			ftp_upload=$ALTERNATE_FTP
-		fi
-		echo "Starting debugging data collection type: $1"
+		echo "Starting $SELF_NAME debugging data collection type: $1"
 		cd $SELF_DATA_DIR
 		if [[ -d $SELF_DATA_DIR/$Debug_Data_Dir ]];then
 			echo "Deleting previous $SELF_NAME debugger data directory..."
 			rm -rf $SELF_DATA_DIR/$Debug_Data_Dir
 		fi
 		mkdir $SELF_DATA_DIR/$Debug_Data_Dir
-		if [[ -f $SELF_DATA_DIR/$Debug_Data_Dir.tar.gz ]];then
+		if [[ -f $SELF_DATA_DIR/$debug_gz ]];then
 			echo 'Deleting previous tar.gz file...'
-			rm -f $SELF_DATA_DIR/$Debug_Data_Dir.tar.gz
+			rm -f $SELF_DATA_DIR/$debug_gz
 		fi
-		
-		echo 'Collecting system info: sensors, lsusb, lspci, lspci -v data, plus /proc data'
-		echo 'also checking for dmidecode data: note, you must be root to have dmidecode work.'
 		echo "Data going into: $SELF_DATA_DIR/$Debug_Data_Dir"
+		echo 'Note: for dmidecode data you must be root.'
+		echo $Line
+		echo "Collecting system data..."
+		
 		# bsd tools http://cb.vu/unixtoolbox.xhtml
 		# freebsd
 		if type -p pciconf &>/dev/null;then
@@ -1854,21 +1523,6 @@ debug_data_collector()
 		# diskinfo -v <disk>
 		# fdisk <disk>
 		dmidecode &> $Debug_Data_Dir/dmidecode.txt
-		
-		get_repo_data "$SELF_DATA_DIR/$Debug_Data_Dir"
-		
-		if type -p shopt &>/dev/null;then
-			shopt -s nullglob
-			a_distro_ids=(/etc/*[-_]{release,version})
-			shopt -u nullglob
-			echo ${a_distro_ids[@]} &> $Debug_Data_Dir/etc-distro-files.txt
-			for distro_file in ${a_distro_ids[@]} /etc/issue
-			do
-				if [[ -f $distro_file ]];then
-					cat $distro_file &> $Debug_Data_Dir/distro-file${distro_file//\//-}
-				fi
-			done
-		fi
 		dmesg &> $Debug_Data_Dir/dmesg.txt
 		lscpu &> $Debug_Data_Dir/lscpu.txt
 		lspci &> $Debug_Data_Dir/lspci.txt
@@ -1880,18 +1534,20 @@ debug_data_collector()
 		lspci -mmnn &> $Debug_Data_Dir/lspci-mmnn.txt
 		lspci -mmnnv &> $Debug_Data_Dir/lspci-mmnnv.txt
 		lspci -v &> $Debug_Data_Dir/lspci-v.txt
-		lsusb &> $Debug_Data_Dir/lsusb.txt
+		if type -p lsusb &>/dev/null;then
+			lsusb &> $Debug_Data_Dir/lsusb.txt
+			lsusb -v &> $Debug_Data_Dir/lsusb-v.txt
+		else
+			touch $Debug_Data_Dir/lsusb-absent
+		fi
 		if type -p hciconfig &>/dev/null;then
 			hciconfig -a &> $Debug_Data_Dir/hciconfig-a.txt
 		else
 			touch $Debug_Data_Dir/hciconfig-absent
 		fi
-		ls /sys &> $Debug_Data_Dir/ls-sys.txt
 		ps aux &> $Debug_Data_Dir/ps-aux.txt
 		ps -e &> $Debug_Data_Dir/ps-e.txt
 		ps -p 1 &> $Debug_Data_Dir/ps-p-1.txt
-		echo "Collecting init data..."
-		cat /proc/1/comm &> $Debug_Data_Dir/proc-1-comm.txt
 		runlevel &> $Debug_Data_Dir/runlevel.txt
 		if type -p rc-status &>/dev/null;then
 			rc-status -a &> $Debug_Data_Dir/rc-status-a.txt
@@ -1917,32 +1573,26 @@ debug_data_collector()
 		else
 			touch $Debug_Data_Dir/strings-absent
 		fi
-		local id_dir='/sys/class/power_supply/' 
-		local ids=$( ls $id_dir 2>/dev/null )
-		if [[ -n $ids ]];then
-			for batid in $ids 
-			do
-				cat $id_dir$batid'/uevent' &> $Debug_Data_Dir/sys-power-supply-$batid.txt
-			done
-		else
-			touch $Debug_Data_Dir/sys-power-supply-none
-		fi
-		
 		# leaving this commented out to remind that some systems do not
 		# support strings --version, but will just simply hang at that command
 		# which you can duplicate by simply typing: strings then hitting enter, you will get hang.
 		# strings --version  &> $Debug_Data_Dir/strings.txt
+		
+		if type -p aticonfig &>/dev/null;then
+			aticonfig --adapter=all --od-gettemperature &> $Debug_Data_Dir/aticonfig-all-od-get-temp.txt
+		else
+			touch $Debug_Data_Dir/aticonfig-absent
+		fi
 		if type -p nvidia-smi &>/dev/null;then
 			nvidia-smi -q &> $Debug_Data_Dir/nvidia-smi-q.txt
 			nvidia-smi -q -x &> $Debug_Data_Dir/nvidia-smi-xq.txt
 		else
 			touch $Debug_Data_Dir/nvidia-smi-absent
 		fi
-		head -n 1 /proc/asound/card*/codec* &> $Debug_Data_Dir/proc-asound-card-codec.txt
-		if [[ -f /proc/version ]];then
-			cat /proc/version &> $Debug_Data_Dir/proc-version.txt
+		if type -p nvidia-settings &>/dev/null;then
+			nvidia-settings -c :0.0 -q all &> $Debug_Data_Dir/nvidia-settings-all.txt
 		else
-			touch $Debug_Data_Dir/proc-version-absent
+			touch $Debug_Data_Dir/nvidia-settings-absent
 		fi
 		echo $CC &> $Debug_Data_Dir/cc-content.txt
 		ls /usr/bin/gcc* &> $Debug_Data_Dir/gcc-sys-versions.txt
@@ -1961,10 +1611,44 @@ debug_data_collector()
 		else
 			touch $Debug_Data_Dir/systemd-detect-virt-absent
 		fi
+		echo "Collecting Perl module data..."
 		if type -p perl &>/dev/null;then
-			perl -MFile::Find=find -MFile::Spec::Functions -Tlwe 'find { wanted => sub { print canonpath $_ if /\.pm\z/ }, no_chdir => 1 }, @INC' &> $Debug_Data_Dir/perl-modules.txt
+			perl -MFile::Find=find -MFile::Spec::Functions -Tlwe 'find { wanted => sub { print canonpath $_ if /\.pm\z/ }, no_chdir => 1 }, @INC' 2>/dev/null | sort &> $Debug_Data_Dir/perl-modules.txt
 		else
 			touch $Debug_Data_Dir/perl-missing.txt
+		fi
+		echo "Collecting system file data..."
+		cat /proc/1/comm &> $Debug_Data_Dir/proc-1-comm.txt
+		if type -t get_repo_data &>/dev/null;then
+			get_repo_data "$SELF_DATA_DIR/$Debug_Data_Dir"
+		fi
+		head -n 1 /proc/asound/card*/codec* &> $Debug_Data_Dir/proc-asound-card-codec.txt
+		if [[ -f /proc/version ]];then
+			cat /proc/version &> $Debug_Data_Dir/proc-version.txt
+		else
+			touch $Debug_Data_Dir/proc-version-absent
+		fi
+		local id_dir='/sys/class/power_supply/' 
+		local ids=$( ls $id_dir 2>/dev/null )
+		if [[ -n $ids ]];then
+			for batid in $ids 
+			do
+				cat $id_dir$batid'/uevent' &> $Debug_Data_Dir/sys-power-supply-$batid.txt
+			done
+		else
+			touch $Debug_Data_Dir/sys-power-supply-none
+		fi
+		if type -p shopt &>/dev/null;then
+			shopt -s nullglob
+			a_distro_ids=(/etc/*[-_]{release,version})
+			shopt -u nullglob
+			echo ${a_distro_ids[@]} &> $Debug_Data_Dir/etc-distro-files.txt
+			for distro_file in ${a_distro_ids[@]} /etc/issue
+			do
+				if [[ -f $distro_file ]];then
+					cat $distro_file &> $Debug_Data_Dir/distro-file${distro_file//\//-}
+				fi
+			done
 		fi
 		cat /etc/src.conf &> $Debug_Data_Dir/bsd-etc-src-conf.txt
 		cat /etc/make.conf &> $Debug_Data_Dir/bsd-etc-make-conf.txt
@@ -1984,8 +1668,9 @@ debug_data_collector()
 		echo $XDG_CONFIG_DIRS &> $Debug_Data_Dir/xdg_config_dirs.txt
 		echo $XDG_DATA_HOME &> $Debug_Data_Dir/xdg_data_home.txt
 		echo $XDG_DATA_DIRS &> $Debug_Data_Dir/xdg_data_dirs.txt
-		
-		check_recommends_user_output &> $Debug_Data_Dir/check-recommends-user-output.txt
+		if type -t check_recommends_user_output &>/dev/null;then
+			check_recommends_user_output &> $Debug_Data_Dir/check-recommends-user-output.txt
+		fi
 		if [[ $1 == 'xorg' || $1 == 'all' ]];then
 			if [[ $B_RUNNING_IN_DISPLAY != 'true' ]];then
 				echo 'Warning: only some of the data collection can occur if you are not in X'
@@ -1995,7 +1680,7 @@ debug_data_collector()
 				echo 'Warning: only some of the data collection can occur if you are running as Root user'
 				touch $Debug_Data_Dir/warning-root-user
 			fi
-			echo 'Collecting Xorg log and xorg.conf files'
+			echo 'Collecting Xorg log and xorg.conf files...'
 			if [[ -e $FILE_XORG_LOG ]];then
 				cat $FILE_XORG_LOG &> $Debug_Data_Dir/xorg-log-file.txt
 			else
@@ -2058,7 +1743,6 @@ debug_data_collector()
 			else
 				touch $Debug_Data_Dir/xorg-absent
 			fi
-			
 			echo $GNOME_DESKTOP_SESSION_ID &> $Debug_Data_Dir/gnome-desktop-session-id.txt
 			# kde 3 id
 			echo $KDE_FULL_SESSION &> $Debug_Data_Dir/kde3-full-session.txt
@@ -2147,15 +1831,16 @@ debug_data_collector()
 			swapon -s &> $Debug_Data_Dir/swapon-s.txt
 			sysctl -b kern.geom.conftxt &> $Debug_Data_Dir/bsd-sysctl-b-kern.geom.conftxt.txt
 			sysctl -b kern.geom.confxml &> $Debug_Data_Dir/bsd-sysctl-b-kern.geom.confxml.txt
-			zfs list &> $Debug_Data_Dir/bsd-zfs-list.txt
-			zpool list &> $Debug_Data_Dir/bsd-zpool-list.txt
-			zpool list -v &> $Debug_Data_Dir/bsd-zpool-list-v.txt
+			zfs list &> $Debug_Data_Dir/zfs-list.txt
+			zpool list &> $Debug_Data_Dir/zpool-list.txt
+			zpool list -v &> $Debug_Data_Dir/zpool-list-v.txt
 			df -P --exclude-type=aufs --exclude-type=squashfs --exclude-type=unionfs --exclude-type=devtmpfs --exclude-type=tmpfs --exclude-type=iso9660 &> $Debug_Data_Dir/df-P-excludes.txt
 			df -P &> $Debug_Data_Dir/bsd-df-P-no-excludes.txt
 			cat /proc/mdstat &> $Debug_Data_Dir/proc-mdstat.txt
 			cat $FILE_PARTITIONS &> $Debug_Data_Dir/proc-partitions.txt
 			cat $FILE_SCSI &> $Debug_Data_Dir/proc-scsi.txt
 			cat $FILE_MOUNTS &> $Debug_Data_Dir/proc-mounts.txt
+			cat $FILE_MDSTAT &> $Debug_Data_Dir/proc-mdstat.txt
 			cat /proc/sys/dev/cdrom/info &> $Debug_Data_Dir/proc-cdrom-info.txt
 			ls /proc/ide/ &> $Debug_Data_Dir/proc-ide.txt
 			cat /proc/ide/*/* &> $Debug_Data_Dir/proc-ide-hdx-cat.txt
@@ -2174,163 +1859,73 @@ debug_data_collector()
 		fi
 		# create the error file in case it's needed
 		if [[ $B_UPLOAD_DEBUG_DATA == 'true' || $1 == 'disk' || $1 == 'sys' || $1 == 'all' ]];then
-			touch $SELF_DATA_DIR/$Debug_Data_Dir/xiin-error.txt
+			touch $SELF_DATA_DIR/$Debug_Data_Dir/sys-dir-error.txt
 		fi
+		# just on the off chance bsds start having a fake /sys
+		ls /sys &> $Debug_Data_Dir/sys-ls-1.txt
 		# note, only bash 4> supports ;;& for case, so using if/then here
 		if [[ -z $BSD_TYPE ]] && [[ $1 == 'disk' || $1 == 'sys' || $1 == 'all' ]];then
 			echo $Line
-			sys_data_file=$SELF_DATA_DIR/$Debug_Data_Dir/xiin-sys.txt
+			sys_data_file=$SELF_DATA_DIR/$Debug_Data_Dir/sys-dir-traverse.txt
 			echo "Getting file paths in /sys..."
-			ls_sys 1
-			ls_sys 2
-			ls_sys 3
-			ls_sys 4
+			sys_tree
 			# note, this generates more lines than the full sys parsing, so only use if required
 			# ls_sys 5 
 			touch $sys_data_file
 			if type -p perl &>/dev/null;then
 				echo "Parsing /sys files..."
 				echo -n "Using Perl: " && perl --version | grep -oE 'v[0-9.]+'
-				sys_traverse_data="$( perl -e '
-				use File::Find;
-				use strict;
-				# use warnings;
-				use 5.010;
-				my @content = (); 
-				find( \&wanted, "/sys");
-				process_data( @content );
-				sub wanted {
-					return if -d; # not directory
-					return unless -e; # Must exist
-					return unless -r; # Must be readable
-					return unless -f; # Must be file
-					# note: a new file in 4.11 /sys can hang this, it is /parameter/ then
-					# a few variables. Since inxi does not need to see that file, we will
-					# not use it. Also do not need . files or __ starting files
-					return if $File::Find::name =~ /\/(\.[a-z]|__|parameters\/|debug\/)/;
-					# comment this one out if you experience hangs or if 
-					# we discover syntax of foreign language characters
-					return unless -T; # Must be ascii like
-					# print $File::Find::name . "\n";
-					push @content, $File::Find::name;
-					return;
-				}
-				sub process_data {
-					my $result = "";
-					my $row = "";
-					my $fh;
-					my $data="";
-					my $sep="";
-					# no sorts, we want the order it comes in
-					# @content = sort @content; 
-					foreach (@content){
-						$data="";
-						$sep="";
-						open($fh, "<$_");
-						while ($row = <$fh>) {
-							chomp $row;
-							$data .= $sep . "\"" . $row . "\"";
-							$sep=", ";
-						}
-						$result .= "$_:[$data]\n";
-						# print "$_:[$data]\n"
-					}
-					# print scalar @content . "\n";
-					print "$result";
-				} ' )"
+				sys_traverse_data="$( sys_traverse_data )"
 				if [[ -z "$sys_traverse_data" ]];then
 					echo -e "ERROR: failed to generate /sys data - removing data file.\nContinuing with incomplete data collection."
 					echo "Continuing with incomplete data collection."
 					rm -f $sys_data_file
-					echo "/sys data generation failed. No data collected." >> $Debug_Data_Dir/xiin-error.txt
+					echo "/sys data generation failed. No data collected." >> $Debug_Data_Dir/sys-dir-error.txt
 				else
-					b_perl_worked='true'
 					echo 'Completed /sys data collection.'
 					echo -n "$sys_traverse_data" > $sys_data_file
 				fi
 			fi
-			if [[ -z "$sys_traverse_data" ]];then
-				download_xiin 'sys'
-				if [[ $? -eq 0 ]];then
-					b_run_xiin='true'
-					b_xiin_downloaded='true'
-					echo "Running $Xiin_File tool now on /sys..."
-					echo -n "Using " && python --version
-					python --version &> $Debug_Data_Dir/python-version.txt
-					python ./$Xiin_File -d /sys -f $sys_data_file
-					if [[ $? -ne 0 ]];then
-						error=$?
-						echo -e "ERROR: $Xiin_File exited with error $error - removing data file.\nContinuing with incomplete data collection."
-						rm -f $sys_data_file
-						echo "$Xiin_File data generation failed with python error $error" >> $Debug_Data_Dir/xiin-error.txt
-					fi
-				fi
-			fi
-			
 		fi
-		# has to be before gz cleanup
-		if [[ $B_UPLOAD_DEBUG_DATA == 'true' ]];then
-			if [[ $b_xiin_downloaded == 'false' && $b_perl_worked == 'false' ]];then
-				echo $Line
-				download_xiin 'upload'
-				if [[ $? -eq 0 ]];then
-					b_run_xiin='true'
-				fi
-			fi
-		fi
-		echo $Line
-		echo "Creating $SELF_NAME output file now. This can take a few seconds..."
-		echo "Starting $SELF_NAME from: $start_directory"
-		cd $start_directory
-		$SELF_PATH/$SELF_NAME -F${debug_i}Rfrploudmxxx -c 0 -@ 8 -y 120 > $SELF_DATA_DIR/$Debug_Data_Dir/inxi-F${debug_i}Rfrploudmxxxy120.txt
-		cp $LOG_FILE $SELF_DATA_DIR/$Debug_Data_Dir
-		if [[ -f $SELF_DATA_DIR/$Debug_Data_Dir.tar.gz ]];then
-			echo "Found and removing previous tar.gz data file: $Debug_Data_Dir.tar.gz"
-			rm -f $SELF_DATA_DIR/$Debug_Data_Dir.tar.gz
+		# running in inxi
+		if type -t check_recommends_user_output &>/dev/null;then
+			echo $Line
+			echo "Creating $SELF_NAME output file now. This can take a few seconds..."
+			echo "Starting $SELF_NAME from: $start_directory"
+			cd $start_directory
+			$SELF_PATH/$SELF_NAME -F${debug_i}Rfrploudmxxx -c 0 -@ 8 -y 120 > $SELF_DATA_DIR/$Debug_Data_Dir/$SELF_NAME-F${debug_i}Rfrploudmxxxy120.txt
+			cp $LOG_FILE $SELF_DATA_DIR/$Debug_Data_Dir
+		elif type -p $SELF_NAME &>/dev/null;then
+			echo $Line
+			echo "Creating basic $SELF_NAME output file..."
+			$SELF_NAME -Fxxx > $Debug_Data_Dir/$SELF_NAME-Fxxx.txt
+		else 
+			touch $Debug_Data_Dir/$SELF_NAME-absent.txt
 		fi
 		cd $SELF_DATA_DIR
-		echo 'Creating tar.gz compressed file of this material now. Contents:'
 		echo $Line
-		tar -cvzf $Debug_Data_Dir.tar.gz $Debug_Data_Dir
-		echo $Line
+		echo 'Creating tar.gz compressed file of this material...'
+		tar -czf $debug_gz $Debug_Data_Dir
 		echo 'Cleaning up leftovers...'
 		rm -rf $Debug_Data_Dir
 		echo 'Testing gzip file integrity...'
-		gzip -t $Debug_Data_Dir.tar.gz
+		gzip -t $debug_gz
 		if [[ $? -gt 0 ]];then
 			echo 'Data in gz is corrupted, removing gzip file, try running data collector again.'
-			rm -f $Debug_Data_Dir.tar.gz
+			rm -f $debug_gz
 			echo "Data in gz is corrupted, removed gzip file" >> $Debug_Data_Dir/gzip-error.txt
 		else
 			echo 'All done, you can find your data gzipped directory here:'
-			completed_gz_file=$SELF_DATA_DIR/$Debug_Data_Dir.tar.gz
+			completed_gz_file=$SELF_DATA_DIR/$debug_gz
 			echo $completed_gz_file
 			if [[ $B_UPLOAD_DEBUG_DATA == 'true' ]];then
 				echo $Line
-				if [[ $b_perl_worked == 'true' ]];then
-					upload_debugger_data "$completed_gz_file"
-					if [[ $? -gt 0 ]];then
-						echo "Error: looks like the Perl ftp upload failed. Error number: $?"
-					else
-						b_uploaded='true'
-						echo "Hurray! Looks like the Perl ftp upload worked!"
-					fi
-				fi
-				if [[ $b_uploaded == 'false' ]];then
-					if [[ $b_run_xiin == 'true' ]];then
-						echo "Running automatic upload of data to remote server $ftp_upload now..."
-						python ./$Xiin_File --version
-						python ./$Xiin_File -u $completed_gz_file $ftp_upload
-						if [[ $? -gt 0 ]];then
-							echo $Line
-							echo "Error: looks like the Python ftp upload failed. Error number: $?"
-							# echo "The ftp upload failed. Error number: $?" >> $Debug_Data_Dir/xiin-error.txt
-						fi
-					else
-						echo 'Unable to run the automatic ftp upload because no uploaders appear to be working or available.'
-						# that has been removed at this point, so no more logging
-						# echo "Unable to run the automoatic ftp upload because of an error with the xiin download" >> $Debug_Data_Dir/xiin-error.txt
-					fi
+				upload_debugger_data "$completed_gz_file" "$Ftp_Upload"
+				if [[ $? -gt 0 ]];then
+					echo "Error: looks like the Perl ftp upload failed. Error number: $?"
+				else
+					b_uploaded='true'
+					echo "Hurray! Looks like the Perl ftp upload worked!"
 				fi
 			else
 				echo 'You can upload this here using most file managers: ftp.techpatterns.com/incoming'
@@ -2342,7 +1937,8 @@ debug_data_collector()
 	fi
 	exit 0
 }
-## args: $1 - level
+
+## args: $1 - depth
 ls_sys()
 {
 	local files=''
@@ -2372,10 +1968,115 @@ ls_sys()
 		else if (!/^total / ) { 
 			print $0
 		} 
-	}' &> $Debug_Data_Dir/sys-level-$1.txt
+	}' &> $Debug_Data_Dir/sys-ls-$1.txt
 }
 
-## args: $1 - debugger file name
+# prior to script up set, pack the data into an array
+# then we'll print it out later.
+# args: $1 - $@ debugging string text
+self_debugger()
+{
+	eval $LOGFS
+	if [[ $B_SCRIPT_UP == 'true' ]];then
+		# only return if debugger is off and no pre start up errors have occurred
+		if [[ $DEBUG -eq 0 && $DEBUG_BUFFER_INDEX -eq 0 ]];then
+			return 0
+		# print out the stored debugging information if errors occurred
+		elif [[ $DEBUG_BUFFER_INDEX -gt 0 ]];then
+			for (( DEBUG_BUFFER_INDEX=0; DEBUG_BUFFER_INDEX < ${#A_DEBUG_BUFFER[@]}; DEBUG_BUFFER_INDEX++ ))
+			do
+				print_screen_output "${A_DEBUG_BUFFER[$DEBUG_BUFFER_INDEX]}"
+			done
+			DEBUG_BUFFER_INDEX=0
+		fi
+		# or print out normal debugger messages if debugger is on
+		if [[ $DEBUG -gt 0 ]];then
+			print_screen_output "$1"
+		fi
+	else
+		if [[ $B_DEBUG_FLOOD == 'true' && $DEBUG_BUFFER_INDEX -gt 10 ]];then
+			error_handler 2
+		# this case stores the data for later printout, will print out only
+		# at B_SCRIPT_UP == 'true' if array index > 0
+		else
+			A_DEBUG_BUFFER[$DEBUG_BUFFER_INDEX]="$1"
+			# increment count for next pre script up debugging error
+			(( DEBUG_BUFFER_INDEX++ ))
+		fi
+	fi
+	eval $LOGFE
+}
+
+sys_traverse_data()
+{
+	local sys_traverse_data="$( perl -e '
+	use File::Find;
+	use strict;
+	# use warnings;
+	use 5.008;
+	my @content = (); 
+	find( \&wanted, "/sys");
+	process_data( @content );
+	sub wanted {
+		return if -d; # not directory
+		return unless -e; # Must exist
+		return unless -r; # Must be readable
+		return unless -f; # Must be file
+		# note: a new file in 4.11 /sys can hang this, it is /parameter/ then
+		# a few variables. Since inxi does not need to see that file, we will
+		# not use it. Also do not need . files or __ starting files
+		return if $File::Find::name =~ /\/(\.[a-z]|__|kernel\/|parameters\/|debug\/)/;
+		# comment this one out if you experience hangs or if 
+		# we discover syntax of foreign language characters
+		# Must be ascii like. This is questionable and might require further
+		# investigation, it is removing some characters that we might want
+		return unless -T; 
+		# print $File::Find::name . "\n";
+		push @content, $File::Find::name;
+		return;
+	}
+	sub process_data {
+		my $result = "";
+		my $row = "";
+		my $fh;
+		my $data="";
+		my $sep="";
+		# no sorts, we want the order it comes in
+		# @content = sort @content; 
+		foreach (@content){
+			$data="";
+			$sep="";
+			open($fh, "<$_");
+			while ($row = <$fh>) {
+				chomp $row;
+				$data .= $sep . "\"" . $row . "\"";
+				$sep=", ";
+			}
+			$result .= "$_:[$data]\n";
+			# print "$_:[$data]\n"
+		}
+		# print scalar @content . "\n";
+		print "$result";
+	} ' )"
+	echo "$sys_traverse_data"
+}
+
+sys_tree()
+{
+	if type -p tree &>/dev/null;then
+		tree -a -L 10 /sys > $Debug_Data_Dir/sys-tree-full-10.txt
+		for branch in $( tree -i -L 1  -d --noreport /sys | grep -v 'sys$' );do
+			tree -a -L 10 /sys/$branch > $Debug_Data_Dir/sys-tree-$branch-10.txt
+		done
+	else
+		# ls_sys 1
+		ls_sys 2
+		ls_sys 3
+		ls_sys 4
+	fi
+}
+
+## args: $1 - debugger file name; $2 - ftp destination [does not work]
 upload_debugger_data()
 {
 	local result='' debugger_file=$1 
@@ -2387,19 +2088,19 @@ upload_debugger_data()
 		echo "Required Perl module Net::FTP not installed."
 		return 3
 	fi
-	export debugger_file
 	echo "Starting Perl Uploader..."
 	
 	result="$( perl -e '
 	use strict;
 	use warnings;
+	use 5.008;
 	use Net::FTP;
 	my ($ftp, $host, $user, $pass, $dir, $fpath, $error);
 	$host = "ftp.techpatterns.com";
 	$user = "anonymous";
 	$pass = "anonymous\@techpatterns.com";
 	$dir = "incoming";
-	$fpath = $ENV{debugger_file};
+	$fpath = $ARGV[0];
 	# NOTE: important: must explicitly set to passive true/1
 	$ftp = Net::FTP->new($host, Debug => 0, Passive => 1);
 	$ftp->login($user, $pass) || die $ftp->message;
@@ -2408,100 +2109,247 @@ upload_debugger_data()
 	print "Connected to FTP server.\n";
 	$ftp->put($fpath) || die $ftp->message;
 	$ftp->quit;
-	print "Uploaded file.\n";
+	print "Uploaded file $fpath.\n";
 	print $ftp->message;
-	' )"
+	' $debugger_file  )" 
 	
-	echo "$result"
+	if [[ "$result" != '' ]];then
+		echo "$result"
+	fi
 	if [[ "$result" == *Goodbye* ]];then
 		return 0
 	else
 		return 1
 	fi
 }
-# $1 - download type [sys|upload]
-download_xiin()
+
+#### -------------------------------------------------------------------
+#### DOWNLOADER
+#### -------------------------------------------------------------------
+
+download_file()
 {
-	local xiin_download='' xiin_url="https://github.com/smxi/inxi/raw/xiin/$Xiin_File" 
-	local downloader_error=0 download_type='uploader'
-	
-	if [[ $1 == 'sys' ]];then
-		download_type='tree traverse'
+	local retvalue=0
+	local data=$( perl -e 'use strict;
+	use warnings;
+	use 5.008;
+	use HTTP::Tiny;
+	sub get_file {
+		my ($type, $url, $file) = @_;
+		my $response = HTTP::Tiny->new->get($url);
+		my $return = 0;
+		my $debug = 0;
+		my $fh;
+		
+		if ($response->{success} == 0 ){
+			# print "Failed to connect to server/file!\n";
+			$return = 1;
+		}
+		else {
+			if ( $debug ){
+				print "$response->{success}\n";
+				print "$response->{status} $response->{reason}\n";
+				while (my ($key, $value) = each %{$response->{headers}}) {
+					for (ref $value eq "ARRAY" ? @$value : $value) {
+						print "$key: $_\n";
+					}
+				}
+			}
+			if ( $type eq "stdout" || $type eq "ua-stdout" ){
+				print "$response->{content}" if length $response->{content};
+			}
+			elsif ($type eq "spider"){
+				# do nothing, just use the return value
+			}
+			elsif ($type eq "file"){
+				open($fh, ">", $file);
+				print $fh $response->{content};
+				close $fh;
+			}
+		}
+		return $return;
+	}
+	get_file($ARGV[0],$ARGV[1],$ARGV[2]);' "$1" "$2" "$3" )
+	retvalue=$?
+	if [[ "$data" != '' ]];then
+		echo "$data"
 	fi
-	touch $Debug_Data_Dir/download_xiin.txt
-	echo "download_xiin: \$1 - $1" >> $Debug_Data_Dir/download_xiin.txt
-	echo "Downloading required $download_type tool $Xiin_File..."
-	if [[ -f xiin && ! -f $Xiin_File ]];then
-		mv -f xiin $Xiin_File
-	fi
-	# -Nc is creating really weird download anomalies, so using -O instead
-	case $DOWNLOADER in
-		curl)
-			xiin_download="$( curl $NO_SSL_OPT -s $xiin_url )" || downloader_error=$?
+	return $retvalue
+}
+# download_file 'stdout' 'https://cnn.com/robots.txt' '';echo $?; exit
+
+#### -------------------------------------------------------------------
+#### ERROR HANDLER
+#### -------------------------------------------------------------------
+
+# Error handling
+# args: $1 - error number; $2 - optional, extra information; $3 - optional extra info
+error_handler()
+{
+	eval $LOGFS
+	local error_message=''
+
+	# assemble the error message
+	case $1 in
+		2)	error_message="large flood danger, debug buffer full!"
 			;;
-		fetch)
-			xiin_download="$( fetch $NO_SSL_OPT -q -o - $xiin_url )" || downloader_error=$?
+		3)	error_message="unsupported color scheme number: $2"
 			;;
-		ftp)
-			xiin_download="$( ftp $NO_SSL_OPT -o - $xiin_url 2>/dev/null )" || downloader_error=$?
+		4)	error_message="unsupported verbosity level: $2"
 			;;
-		wget)
-			xiin_download="$( wget $NO_SSL_OPT -q -O - $xiin_url )" || downloader_error=$?
+		5)	error_message="dependency not met: $2 not found in path.\nFor distribution installation package names and missing apps information, run: $SELF_NAME --recommends"
 			;;
-		no-downloader)
-			downloader_error=100
+		6)	error_message="/proc not found! Quitting..."
+			;;
+		7)	error_message="One of the options you entered in your script parameters: $2\nis not supported.The option may require extra arguments to work.\nFor supported options (and their arguments), check the help menu: $SELF_NAME -h"
+			;;
+		8)	error_message="the self-updater failed, $DOWNLOADER exited with error: $2.\nYou probably need to be root.\nHint, to make for easy updates without being root, do: chown <user name> $SELF_PATH/$SELF_NAME"
+			;;
+		9)	error_message="unsupported debugging level: $2"
+			;;
+		10)
+			error_message="the alt download url you provided: $2\nappears to be wrong, download aborted. Please note, the url\nneeds to end in /, without $SELF_NAME, like: http://yoursite.com/downloads/"
+			;;
+		11)
+			error_message="unsupported testing option argument: -! $2"
+			;;
+		12)
+			error_message="the git branch download url: $2\nappears to be empty currently. Make sure there is an actual source branch version\nactive before you try this again. Check https://github.com/smxi/$SELF_NAME\nto verify the branch status."
+			;;
+		13)
+			error_message="The -t option requires the following extra arguments (no spaces between letters/numbers):\nc m cm [required], for example: -t cm8 OR -t cm OR -t c9\n(numbers: 1-20, > 5 throttled to 5 in irc clients) You entered: $2"
+			;;
+		14)
+			error_message="failed to write correctly downloaded $SELF_NAME to location $SELF_PATH.\nThis usually means you don't have permission to write to that location, maybe you need to be root?\nThe operation failed with error: $2"
+			;;
+		15)
+			error_message="failed set execute permissions on $SELF_NAME at location $SELF_PATH.\nThis usually means you don't have permission to set permissions on files there, maybe you need to be root?\nThe operation failed with error: $2"
+			;;
+		16)
+			error_message="$SELF_NAME downloaded but the file data is corrupted. Purged data and using current version."
+			;;
+		17)
+			error_message="All $SELF_NAME self updater features have been disabled by the distribution\npackage maintainer. This includes the option you used: $2"
+			;;
+		18)
+			error_message="The argument you provided for $2 does not have supported syntax.\nPlease use the following formatting:\n$3"
+			;;
+		19)
+			error_message="The option $2 has been deprecated. Please use $3 instead.\nSee -h for instructions and syntax."
+			;;
+		20)
+			error_message="The option you selected has been deprecated. $2\nSee the -h (help) menu for currently supported options."
+			;;
+		21)
+			error_message="Width option requires an integer value of 80 or more.\nYou entered: $2"
+			;;
+		*)	error_message="error unknown: $@"
+			set -- 99
 			;;
 	esac
-	# if nothing got downloaded kick out error, otherwise we'll use an older version
-	if [[ $downloader_error -gt 0 && ! -f $Xiin_File ]];then
-		echo -e "ERROR: Failed to download required file: $Xiin_File\nMaybe the remote site is down or your networking is broken?"
-		if [[ $1 == 'sys' ]];then
-			echo "Continuing with incomplete data collection."
-		else
-			echo "$SELF_NAME will be unable to automatically upload the debugger data."
+	# then print it and exit
+	print_screen_output "Error $1: $error_message"
+	eval $LOGFE
+	exit $1
+}
+
+#### -------------------------------------------------------------------
+#### LOGGING
+#### -------------------------------------------------------------------
+
+# called in the initial -@ 10 script args setting so we can get logging as soon as possible
+# will have max 3 files, binxi.log, binxi.1.log, binxi.2.log
+create_rotate_logfiles()
+{
+	# do the rotation if logfile exists
+	if [[ -f $LOG_FILE ]];then
+		# copy if present second to third
+		if [[ -f $LOG_FILE_1 ]];then
+			mv -f $LOG_FILE_1 $LOG_FILE_2
 		fi
-		echo "$Xiin_File download failed and no existing $Xiin_File: error: $downloader_error" >> $Debug_Data_Dir/xiin-error.txt
-		return 1
-	elif [[ -n $( grep -s '# EOF' <<< "$xiin_download" ) || -f $Xiin_File ]];then
-		if [[ -n $( grep -s '# EOF' <<< "$xiin_download" ) ]];then
-			echo "Updating $Xiin_File from remote location"
-			echo "$xiin_download" > $Xiin_File
-		else
-			echo "Using local $Xiin_File due to download failure"
+		# then copy initial to second
+		mv -f $LOG_FILE $LOG_FILE_1
+	fi
+	# now create the logfile
+	touch $LOG_FILE
+	# and echo the start data
+	echo "=========================================================" >> $LOG_FILE
+	echo "START $SELF_NAME LOGGING:"                               >> $LOG_FILE
+	echo "Script started: $( date +%Y-%m-%d-%H:%M:%S )"              >> $LOG_FILE
+	echo "=========================================================" >> $LOG_FILE
+}
+
+# NOTE: no logging available until get_parameters is run, since that's what sets logging
+# in order to trigger earlier logging manually set B_USE_LOGGING to true in top variables.
+# $1 alone: logs data; $2 with or without $3 logs func start/end.
+# $1 type (fs/fe/cat/raw) or logged data; [$2 is $FUNCNAME; [$3 - function args]]
+log_function_data()
+{
+	if [ "$B_USE_LOGGING" == 'true' ];then
+		local logged_data='' spacer='   ' line='----------------------------------------'
+		case $1 in
+			fs)
+				logged_data="Function: $2 - Primary: Start"
+				if [ -n "$3" ];then
+					logged_data="$logged_data\n${spacer}Args: $3"
+				fi
+				spacer=''
+				;;
+			fe)
+				logged_data="Function: $2 - Primary: End"
+				spacer=''
+				;;
+			cat)
+				if [[ $B_LOG_FULL_DATA == 'true' ]];then
+					for cat_file in $2
+					do
+						logged_data="$logged_data\n$line\nFull file data: cat $cat_file\n\n$( cat $cat_file )\n$line\n"
+					done
+					spacer=''
+				fi
+				;;
+			raw)
+				if [[ $B_LOG_FULL_DATA == 'true' ]];then
+					logged_data="\n$line\nRaw system data:\n\n$2\n$line\n"
+					spacer=''
+				fi
+				;;
+			*)
+				logged_data="$1"
+				;;
+		esac
+		# Create any required line breaks and strip out escape color code, either ansi (case 1)or irc (case 2).
+		# This pattern doesn't work for irc colors, if we need that someone can figure it out
+		if [[ -n $logged_data ]];then
+			if [[ $B_LOG_COLORS != 'true' ]];then
+				echo -e "${spacer}$logged_data" | sed $SED_RX 's/\x1b\[[0-9]{1,2}(;[0-9]{1,2}){0,2}m//g' >> $LOG_FILE
+			else
+				echo -e "${spacer}$logged_data" >> $LOG_FILE
+			fi
 		fi
-		return 0
-	else
-		if [[ $1 == 'sys' ]];then
-			echo -e "ERROR: $Xiin_File downloaded but the program file data is corrupted.\nContinuing with incomplete data collection."
-		else
-			echo -e "ERROR: $Xiin_File downloaded but the program file data is corrupted.\nWill not be able to automatically upload debugger data file."
-		fi
-		echo "$Xiin_File downloaded but the program file data is corrupted." >> $Debug_Data_Dir/xiin-error.txt
-		return 2
 	fi
 }
+
+#### -------------------------------------------------------------------
+#### RECOMMENDS
+#### -------------------------------------------------------------------
 
 check_recommends_user_output()
 {
 	local Line=$LINE1
 	local gawk_version='N/A' sed_version='N/A' sudo_version='N/A' python_version='N/A'
-	local downloaders_bsd='' perl_version='N/A'
+	local perl_version='N/A'
 	
 	if [[ $B_IRC == 'true' ]];then
 		print_screen_output "Sorry, you can't run this option in an IRC client."
 		exit 1
-	fi
-	if [[ -n $BSD_TYPE ]];then
-		downloaders_bsd='
-		fetch:BSD-only~BSD-only~BSD-only~:-i_wan_ip;-w/-W;-U/-!_[11-15]_(BSDs)
-		ftp:ftp-OpenBSD-only~ftp-OpenBSD-only~ftp-OpenBSD-only~:-i_wan_ip;-w/-W;-U/-!_[11-15]_(OpenBSD_only)'
 	fi
 	initialize_paths
 	print_lines_basic "0" "" "$SELF_NAME will now begin checking for the programs it needs to operate. First a check of the main languages and tools $SELF_NAME uses. Python is only for debugging data uploads unless Perl is missing."
 	echo $Line
 	echo "Bash version: $( bash --version 2>&1 | awk 'BEGIN {IGNORECASE=1} /^GNU bash/ {print $4}' )"
 	if type -p gawk &>/dev/null;then
-		gawk_version=$( gawk --version 2>&1 | awk 'BEGIN {IGNORECASE=1} /^GNU Awk/ {print $3}' )
+		gawk_version=$( gawk --version 2>&1 | gawk 'BEGIN {IGNORECASE=1} /^GNU Awk/ {print $3}' )
 	fi
 	if type -p sed &>/dev/null;then
 		# sed (GNU sed) 4.4 OR GNU sed version 4.4
@@ -2524,7 +2372,7 @@ check_recommends_user_output()
 	echo "Gawk version: $gawk_version"
 	echo "Sed version: $sed_version"
 	echo "Sudo version: $sudo_version"
-	echo "Python version: $python_version (deprecated)"
+	echo "Python version: $python_version (legacy, no longer used)"
 	echo "Perl version: $perl_version"
 	echo $Line
 	
@@ -2567,20 +2415,30 @@ check_recommends_user_output()
 	
 	echo 'All tests completed.' 
 }
+
+# Should come after above for debugging tests
 # args: $1 - check item
 check_recommends_items()
 {
 	local item='' item_list='' item_string='' missing_items='' missing_string=''
 	local package='' application='' feature='' type='' starter='' finisher=''
-	local package_deb='' package_pacman='' package_rpm='' 
+	local package_deb='' package_pacman='' package_rpm='' downloaders_bsd='' 
 	local print_string='' separator='' width=56
 	local required_dirs='/proc /sys'
+	
+	if [[ -n $BSD_TYPE ]];then
+		downloaders_bsd='fetch:BSD-only~BSD-only~BSD-only~:-i_wan_ip;-w/-W;-U/-!_[11-15]_[OR]
+		ftp:ftp-OpenBSD-only~ftp-OpenBSD-only~ftp-OpenBSD-only~:-i_wan_ip;-w/-W;-U/-!_[11-15]_[OR]'
+	fi
 	# package-owner: 1 - debian/ubuntu; 2 - arch; 3 - yum/rpm
 	# pardus: pisi sf -q /usr/bin/package
+	# https://wiki.archlinux.org/index.php/Perl_Policy
+	# https://www.debian.org/doc/packaging-manuals/perl-policy/index.html
 	local required_apps='
 	df:coreutils~coreutils~coreutils~:partition_data 
 	gawk:gawk~gawk~gawk~:core_tool
 	grep:grep~grep~grep~:string_search 
+	perl:perl~perl~perl~:debugger_uploader;_debugger_/sys_traverse
 	lspci:pciutils~pciutils~pciutils~:hardware_data 
 	ps:procps~procps~procps~:process_data 
 	readlink:coreutils~coreutils~coreutils~: 
@@ -2596,10 +2454,10 @@ check_recommends_items()
 	xrandr:x11-xserver-utils~xrandr~x11-server-utils~:-G_single_screen_resolution
 	'
 	local recommended_apps='
-	dig:dnsutils~dnsutils~bind-utils:-i_first_wlan_ip_default_test
+	dig:dnsutils~dnsutils~bind-utils:-i_wlan_IP_(Default)
 	dmidecode:dmidecode~dmidecode~dmidecode~:-M_if_no_sys_machine_data;_-m_memory 
 	file:file~file~file~:-o_unmounted_file_system
-	hciconfig:bluez~bluez-utils~bluez-utils~:-n_-i_bluetooth_data
+	hciconfig:bluez~bluez-utils~bluez-utils~:-n_-i_bluetooth_data-dev_only-not_used
 	hddtemp:hddtemp~hddtemp~hddtemp~:-Dx_show_hdd_temp 
 	ifconfig:net-tools~net-tools~net-tools~:-i_ip_lan-deprecated
 	ip:iproute~iproute2~iproute~:-i_ip_lan
@@ -2609,13 +2467,15 @@ check_recommends_items()
 	modinfo:module-init-tools~module-init-tools~module-init-tools~:-Ax,-Nx_module_version 
 	runlevel:sysvinit~sysvinit~systemd~:-I_runlevel
 	sudo:sudo~sudo~sudo~:-Dx_hddtemp-user;-o_file-user
+	tree:tree~tree~tree~:-@1[1-5]_debugger_sys_tree
 	uptime:procps~procps~procps~:-I_uptime_(check_which_package_owns_Debian)
 	'
 	
 	local downloaders="
-	wget:wget~wget~wget~:-i_wan_ip;-w/-W;-U/-!_[11-15]_(if_supported)
-	curl:curl~curl~curl~:-i_wan_ip;-w/-W;-U/-!_[11-15]_(if_supported)
+	curl:curl~curl~curl~:-i_wan_ip;-w/-W;-U/-!_[11-15]_[Default|OR]
+	wget:wget~wget~wget~:-i_wan_ip;-w/-W;-U/-!_[11-15]_[OR]
 	$downloaders_bsd
+	perl:perl~perl~perl~:-i_wan_ip;-w/-W;-U/-!_[11-15]_[Module_HTTP::Tiny]
 	"
 	local recommended_dirs='
 	/sys/class/dmi/id:-M_system,_motherboard,_bios
@@ -2638,7 +2498,6 @@ check_recommends_items()
 	$FILE_SCSI:-D_Advanced_hard_disk_data_[used_rarely]
 	$FILE_XORG_LOG:-G_graphics_driver_load_status
 	"
-	
 	if [[ -n $COLS_INNER ]];then
 		if [[ $COLS_INNER -ge 90 ]];then
 			width=${#LINE1} # match width of $LINE1
@@ -2646,7 +2505,6 @@ check_recommends_items()
 			width=$(( $COLS_INNER - 11 ))
 		fi
 	fi
-	
 	case $1 in
 		downloaders)
 			item_list=$downloaders
@@ -2719,8 +2577,8 @@ check_recommends_items()
 			application=$( cut -d ':' -f 1 <<< $item )
 			package=$( cut -d ':' -f 2 <<< $item )
 			location=$( type -p $application )
-			if [[ $( awk -F ":" '{print NF-1}' <<< $item ) -eq 2 ]];then
-				feature=$( cut -d ':' -f 3 <<< $item )
+			if [[ $( awk -F ":" '{print NF-1}' <<< $item ) -ge 2 ]];then
+				feature=$( cut -d ':' -f 3-6 <<< $item )
 			else
 				feature=''
 			fi
@@ -2777,8 +2635,259 @@ check_recommends_items()
 }
 
 #### -------------------------------------------------------------------
-#### print / output cleaners
+#### UPDATER
 #### -------------------------------------------------------------------
+
+# args: $1 - download url, not including file name; $2 - string to print out
+# $3 - update type option
+# note that $1 must end in / to properly construct the url path
+self_updater()
+{
+	eval $LOGFS
+	set_downloader
+	local downloader_error=0 file_contents='' downloader_man_error=0 
+	local man_file_location=$( set_man_location )
+	local man_file_path="$man_file_location/$SELF_NAME.1.gz" 
+	
+	if [[ $B_IRC == 'true' ]];then
+		print_screen_output "Sorry, you can't run the $SELF_NAME self updater option (-$3) in an IRC client."
+		exit 1
+	fi
+	print_screen_output "Starting $SELF_NAME self updater."
+	print_screen_output "Currently running $SELF_NAME version number: $SELF_VERSION"
+	print_screen_output "Current version patch number: $SELF_PATCH"
+	print_screen_output "Current version release date: $SELF_DATE"
+	print_screen_output "Updating $SELF_NAME in $SELF_PATH using $2 as download source..."
+	case $DOWNLOADER in
+		curl)
+			file_contents="$( curl $NO_SSL_OPT -L -s $1$SELF_NAME )" || downloader_error=$?
+			;;
+		fetch)
+			file_contents="$( fetch $NO_SSL_OPT -q -o - $1$SELF_NAME )" || downloader_error=$?
+			;;
+		ftp)
+			file_contents="$( ftp $NO_SSL_OPT -o - $1$SELF_NAME 2>/dev/null )" || downloader_error=$?
+			;;
+		perl)
+			file_contents="$( download_file 'stdout' $1$SELF_NAME )" || downloader_error=$?
+			;;
+		wget)
+			file_contents="$( wget $NO_SSL_OPT -q -O - $1$SELF_NAME )" || downloader_error=$?
+			;;
+		no-downloader)
+			downloader_error=1
+			;;
+	esac
+
+	# then do the actual download
+	if [[  $downloader_error -eq 0 ]];then
+		# make sure the whole file got downloaded and is in the variable
+		if [[ -n $( grep '###\*\*EOF\*\*###' <<< "$file_contents" ) ]];then
+			echo "$file_contents" > $SELF_PATH/$SELF_NAME || error_handler 14 "$?"
+			chmod +x $SELF_PATH/$SELF_NAME || error_handler 15 "$?"
+			parse_version_data 'main'
+			parse_version_data 'patch'
+			parse_version_data 'date'
+			print_screen_output "Successfully updated to $2 version: $SELF_VERSION"
+			print_screen_output "New $2 version patch number: $SELF_PATCH"
+			print_screen_output "New $2 version release date: $SELF_DATE"
+			print_screen_output "To run the new version, just start $SELF_NAME again."
+			print_screen_output "----------------------------------------"
+			print_screen_output "Starting download of man page file now."
+			if [[ $B_MAN == 'false' ]];then
+				print_screen_output "Skipping man download because branch version is being used."
+			elif [[ ! -d $man_file_location ]];then
+				print_screen_output "The required man directory was not detected on your system, unable to continue: $man_file_location"
+			else
+				if [[ $B_ROOT == 'true' ]];then
+					print_screen_output "Checking Man page download URL..."
+					if [[ -f /usr/share/man/man8/$SELF_NAME.8.gz ]];then
+						print_screen_output "Updating man page location to man1."
+						mv -f /usr/share/man/man8/$SELF_NAME.8.gz $man_file_location/$SELF_NAME.1.gz 
+						if type -p mandb &>/dev/null;then
+							exec $( type -p mandb ) -q 
+						fi
+					fi
+					case $DOWNLOADER in
+						perl)
+							download_file 'spider' $MAN_FILE_DOWNLOAD || downloader_man_error=$?
+							;;
+						wget)
+							wget $NO_SSL_OPT -q --spider $MAN_FILE_DOWNLOAD || downloader_man_error=$?
+							;;
+					esac
+					if [[ $downloader_man_error -eq 0 ]];then
+						if [[ $DOWNLOADER == 'wget' ]];then
+							print_screen_output "Man file download URL verified: $MAN_FILE_DOWNLOAD"
+						fi
+						print_screen_output "Downloading Man page file now."
+						case $DOWNLOADER in
+							curl)
+								curl $NO_SSL_OPT -L -s -o $man_file_path $MAN_FILE_DOWNLOAD || downloader_man_error=$?
+								;;
+							fetch)
+								fetch $NO_SSL_OPT -q -o $man_file_path $MAN_FILE_DOWNLOAD || downloader_man_error=$?
+								;;
+							ftp)
+								ftp $NO_SSL_OPT -o $man_file_path $MAN_FILE_DOWNLOAD 2>/dev/null || downloader_man_error=$?
+								;;
+							perl)
+								download_file 'file' $MAN_FILE_DOWNLOAD $man_file_path || downloader_man_error=$?
+								;;
+							wget)
+								wget $NO_SSL_OPT -q -O $man_file_path $MAN_FILE_DOWNLOAD || downloader_man_error=$?
+								;;
+							no-downloader)
+								downloader_man_error=1
+								;;
+						esac
+						if [[ $downloader_man_error -gt 0 ]];then
+							print_screen_output "Oh no! Something went wrong downloading the Man gz file at: $MAN_FILE_DOWNLOAD"
+							print_screen_output "Check the error messages for what happened. Error: $downloader_man_error"
+						else
+							print_screen_output "Download/install of man page successful. Check to make sure it works: man $SELF_NAME"
+						fi
+					else
+						print_screen_output "Man file download URL failed, unable to continue: $MAN_FILE_DOWNLOAD"
+					fi
+				else
+					print_screen_output "Updating / Installing the Man page requires root user, writing to: $man_file_location"
+					print_screen_output "If you want the man page, you'll have to run $SELF_NAME -$3 as root."
+				fi
+			fi
+			exit 0
+		else
+			error_handler 16
+		fi
+	# now run the error handlers on any wget failure
+	else
+		if [[ $2 == 'source server' ]];then
+			error_handler 8 "$downloader_error"
+		elif [[ $2 == 'alt server' ]];then
+			error_handler 10 "$1"
+		else
+			error_handler 12 "$1"
+		fi
+	fi
+	eval $LOGFS
+}
+
+set_man_location()
+{
+	local location='' default_location='/usr/share/man/man1' 
+	local man_paths=$(man --path 2>/dev/null) man_local='/usr/local/share/man'
+	local b_use_local=false
+	
+	if [[ -n "$man_paths" && -n $( grep $man_local <<< "$man_paths" ) ]];then
+		b_use_local=true
+	fi
+	
+	# for distro installs, existing inxi man manual installs, do nothing
+	if [[ -f $default_location/$SELF_NAME.1.gz ]];then
+		location=$default_location
+	else
+		if [[ $b_use_local == 'true' ]];then
+			if [[ ! -d $man_local/man1 ]];then
+				mkdir $man_local/man1
+			fi
+			location="$man_local/man1"
+		fi
+# 		print_screen_output "Updating man page location to man1."
+# 		mv -f /usr/share/man/man1/inxi.1.gz /usr/local/share/man/man1/inxi.1.gz 
+# 		if type -p mandb &>/dev/null;then
+# 			exec $( type -p mandb ) -q 
+# 		fi
+	fi
+	
+	if [[ -z "$location" ]];then
+		location=$default_location
+	fi
+	
+	echo $location
+}
+
+########################################################################
+#### OUTPUT
+########################################################################
+
+#### -------------------------------------------------------------------
+#### FILTERS
+#### -------------------------------------------------------------------
+
+# this removes newline and pipes.
+# args: $1 - string to clean
+remove_erroneous_chars()
+{
+	eval $LOGFS
+	## RS is input record separator
+	## gsub is substitute;
+	gawk '
+	BEGIN {
+		RS=""
+	}
+	{
+		gsub(/\n$/,"")         ## (newline; end of string) with (nothing)
+		gsub(/\n/," ");        ## (newline) with (space)
+		gsub(/^ *| *$/, "")    ## (pipe char) with (nothing)
+		gsub(/  +/, " ")       ## ( +) with (space)
+		gsub(/ [ ]+/, " ")     ## ([ ]+) with (space)
+		gsub(/^ +| +$/, "")    ## (pipe char) with (nothing)
+		printf $0
+	}' "$1"      ## prints (returns) cleaned input
+	eval $LOGFE
+}
+## note: this is now running inside each gawk sequence directly to avoid exiting gawk
+## looping in bash through arrays, then re-entering gawk to clean up, then writing back to array
+## in bash. For now I'll leave this here because there's still some interesting stuff to get re methods
+# Enforce boilerplate and buzzword filters
+# args: $1 - BAN_LIST_NORMAL/BAN_LIST_CPU; $2 - string to sanitize
+sanitize_characters()
+{
+	eval $LOGFS
+	# Cannot use strong quotes to unquote a string with pipes in it!
+	# bash will interpret the |'s as usual and try to run a subshell!
+	# Using weak quotes instead, or use '"..."'
+	echo "$2" | gawk "
+	BEGIN {
+		IGNORECASE=1
+	}
+	{
+		gsub(/${!1}/,\"\")
+		gsub(/ [ ]+/,\" \")    ## ([ ]+) with (space)
+		gsub(/^ +| +$/,\"\")   ## (pipe char) with (nothing)
+		print                  ## prints (returns) cleaned input
+	}"
+	eval $LOGFE
+}
+
+#### -------------------------------------------------------------------
+#### PRINT
+#### -------------------------------------------------------------------
+
+# args: $1 - string to strip color code characters out of
+# returns count of string length minus colors
+# note; this cleanup may not be working on bsd sed
+calculate_line_length()
+{
+	local string=$1
+	# ansi: [1;34m irc: \x0312
+	# note: using special trick for bsd sed, tr - NOTE irc sed must use " double quote
+	string=$( sed -e 's/'$ESC'\[[0-9]\{1,2\}\(;[0-9]\{1,2\}\)\{0,2\}m//g' -e "s/\\\x0[0-9]\{1,3\}//g" <<< $string )
+	#echo $string
+	LINE_LENGTH=${#string}
+	# echo ${#string}
+}
+
+## this handles all verbose line construction with indentation/line starter
+## args: $1 - null (, actually: " ") or line starter; $2 - line content
+create_print_line()
+{
+	eval $LOGFS
+	# convoluted, yes, but it works to trim spaces off end
+	local line=${2%${2##*[![:space:]]}}
+	printf "${C1}%-${INDENT}s${C2} %s" "$1" "$line${CN}"
+	eval $LOGFE
+}
 
 # inxi speaks through here. When run by Konversation script alias mode, uses DCOP
 # for dcop to work, must use 'say' operator, AND colors must be evaluated by echo -e
@@ -2822,43 +2931,131 @@ print_screen_output()
 	eval $LOGFE
 }
 
-## this handles all verbose line construction with indentation/line starter
-## args: $1 - null (, actually: " ") or line starter; $2 - line content
-create_print_line()
+# uses $TERM_COLUMNS to set width using $COLS_MAX as max width
+# IMPORTANT: Must come after print_screen_output for debugging purposes
+# IMPORTANT: minimize use of subshells here or the output is too slow
+# IMPORTANT: each text chunk must be a continuous line, no line breaks. For anyone who uses a 
+# code editor that can't do visual (not hard coded) line wrapping, upgrade to one that can.
+# args: $1 - 0 1 2 3 4 for indentation level; $2 -line starter, like -m; $3 - content of block.
+print_lines_basic()
 {
-	eval $LOGFS
-	# convoluted, yes, but it works to trim spaces off end
-	local line=${2%${2##*[![:space:]]}}
-	printf "${C1}%-${INDENT}s${C2} %s" "$1" "$line${CN}"
-	eval $LOGFE
+	local line_width=$COLS_MAX
+	local print_string='' indent_inner='' indent_full='' indent_x='' 
+	local indent_working='' indent_working_full=''
+	local line_starter='' line_1_starter='' line_x_starter='' 
+	# note: to create a padded string below
+	local fake_string=' ' temp_count='' line_count='' spacer=''
+	local indent_main=6 indent_x='' b_indent_x='true' 
+	
+	case $1 in
+		# for no options, start at left edge
+		0)	indent_full=0
+			line_1_starter=''
+			line_x_starter=''
+			b_indent_x='false'
+			;;
+		1)	indent_full=$indent_main
+			temp_count=${#2}
+			if [[ $temp_count -le $indent_full ]];then
+				indent_working=$indent_full
+			else
+				indent_working=$temp_count #$(( $temp_count + 1 ))
+			fi
+			line_1_starter="$( sed -e :a -e "s/^.\{1,$indent_working\}$/& /;ta" <<< $2 )"
+			;;
+		# first left pad 2 and 3, then right pad them
+		2)	indent_full=$(( $indent_main + 6 ))
+			indent_inner=3
+			temp_count=${#2}
+			if [[ $temp_count -le $indent_inner ]];then
+				indent_working=$indent_inner
+				#indent_working_full=$indent_full
+			else
+				indent_working=$(( $temp_count + 1 ))
+				#indent_working_full=$(( $indent_full - $indent_inner - 1 ))
+			fi
+			line_1_starter="$( sed -e :a -e "s/^.\{1,$indent_working\}$/& /;ta" <<< $2 )"
+			line_1_starter="$( sed -e :a -e "s/^.\{1,$indent_full\}$/ &/;ta" <<< "$line_1_starter" )"
+			;;
+		3)	indent_full=$(( $indent_main + 8 ))
+			indent_inner=3
+			temp_count=${#2}
+			if [[ $temp_count -le $indent_inner ]];then
+				indent_working=$indent_inner
+			else
+				indent_working=$(( $temp_count + 1 ))
+			fi
+			line_1_starter="$( sed -e :a -e "s/^.\{1,$indent_working\}$/& /;ta" <<< $2 )"
+			line_1_starter="$( sed -e :a -e "s/^.\{1,$indent_full\}$/ &/;ta" <<< "$line_1_starter" )"
+			;;
+		# for long options
+		4)	indent_full=$(( $indent_main + 8 ))
+			temp_count=${#2}
+			if [[ $temp_count -lt $indent_full ]];then
+				indent_working=$indent_full
+			else
+				indent_working=$temp_count #$(( $temp_count + 1 ))
+			fi
+			line_1_starter="$( sed -e :a -e "s/^.\{1,$indent_working\}$/& /;ta" <<< $2 )"
+			;;
+	esac
+	
+	if [[ $b_indent_x == 'true' ]];then
+		indent_x=$(( $indent_full + 1 ))
+		line_x_starter="$(printf "%${indent_x}s" '')"
+	fi
+	
+	line_count=$(( $line_width - $indent_full ))
+	
+	# bash loop is slow, only run this if required
+	if [[ ${#3} -gt $line_count ]];then
+		for word in $3
+		do
+			temp_string="$print_string$spacer$word"
+			spacer=' '
+			if [[ ${#temp_string} -lt $line_count ]];then
+				print_string=$temp_string # lose any white space start/end
+				# echo -n $(( $line_width - $indent_full ))
+			else
+				if [[ -n $line_1_starter ]];then
+					line_starter="$line_1_starter"
+					line_1_starter=''
+				else
+					line_starter="$line_x_starter"
+				fi
+				# clean up forced connections, ie, stuff we don't want wrapping
+				print_string=${print_string//\^/ }
+				print_screen_output "$line_starter$print_string"
+				print_string="$word$spacer" # needed to handle second word on new line
+				temp_string=''
+				spacer=''
+			fi
+		done
+	else
+		# echo no loop
+		print_string=$3
+	fi
+	# print anything left over
+	if [[ -n $print_string ]];then
+		if [[ -n $line_1_starter ]];then
+			line_starter="$line_1_starter"
+			line_1_starter=''
+		else
+			line_starter="$line_x_starter"
+		fi
+		print_string=${print_string//\^/ }
+		print_screen_output "$line_starter$print_string"
+	fi
 }
+# print_lines_basic '1' '-m' 'let us teest this string and lots more and stuff and more stuff and x is wy and z is x and fred is dead and gus is alive an yes we have to go now'
+# print_lines_basic '2' '7' 'and its substring this string and lots more and stuff and more stuff and x is wy and z is x and fred is dead and gus is alive an yes we have to go now'
+# print_lines_basic '2' '12' 'and its sss substring'
+# print_lines_basic '3' '12' 'and its sss substring this string and lots more and stuff and more stuff and x is wy and z is x and fred is dead and gus is alive an yes we have to go now'
+# exit
 
-# this removes newline and pipes.
-# args: $1 - string to clean
-remove_erroneous_chars()
-{
-	eval $LOGFS
-	## RS is input record separator
-	## gsub is substitute;
-	gawk '
-	BEGIN {
-		RS=""
-	}
-	{
-		gsub(/\n$/,"")         ## (newline; end of string) with (nothing)
-		gsub(/\n/," ");        ## (newline) with (space)
-		gsub(/^ *| *$/, "")    ## (pipe char) with (nothing)
-		gsub(/  +/, " ")       ## ( +) with (space)
-		gsub(/ [ ]+/, " ")     ## ([ ]+) with (space)
-		gsub(/^ +| +$/, "")    ## (pipe char) with (nothing)
-		printf $0
-	}' "$1"      ## prints (returns) cleaned input
-	eval $LOGFE
-}
-
-#### -------------------------------------------------------------------
-#### parameter handling, print usage functions.
-#### -------------------------------------------------------------------
+########################################################################
+#### OPTION AND VERSION HANDLERS
+########################################################################
 
 # Get the parameters. Note: standard options should be lower case, advanced or testing, upper
 # args: $1 - full script startup args: $@
@@ -2873,7 +3070,7 @@ get_parameters()
 		weather_flag=''
 	fi
 	if [[ $1 == '--version' ]];then
-		print_version_info
+		show_version_info
 		exit 0
 	elif [[ $1 == '--help' ]];then
 		show_options
@@ -3100,12 +3297,14 @@ get_parameters()
 				fi
 				;;
 			U)	if [[ $B_ALLOW_UPDATE == 'true' ]];then
-					script_self_updater "$SELF_DOWNLOAD" 'source server' "$opt"
+					#self_updater "$SELF_DOWNLOAD" 'source server' "$opt"
+					B_MAN='true'
+					self_updater "$SELF_DOWNLOAD" 'legacy branch server' "$opt"
 				else
 					error_handler 17 "-$opt"
 				fi
 				;;
-			V)	print_version_info
+			V)	show_version_info
 				exit 0
 				;;
 			w)	B_SHOW_WEATHER=true
@@ -3203,32 +3402,29 @@ get_parameters()
 					3)	B_TESTING_1='true'
 						B_TESTING_2='true'
 						;;
-					1[0-6]|http*)
+					#1[0-3]|http*)
+					10|http*)
 						if [[ $B_ALLOW_UPDATE == 'true' ]];then
 							case $OPTARG in
 								10)
-									script_self_updater "$SELF_DOWNLOAD_DEV" 'dev server' "$opt $OPTARG"
+									self_updater "$SELF_DOWNLOAD_DEV" 'dev server' "$opt $OPTARG"
+									B_MAN='false'
 									;;
 								11)
-									script_self_updater "$SELF_DOWNLOAD_BRANCH_1" 'branch one server' "$opt $OPTARG"
+									self_updater "$SELF_DOWNLOAD_BRANCH_1" 'branch one server' "$opt $OPTARG"
+									B_MAN='false'
 									;;
 								12)
-									script_self_updater "$SELF_DOWNLOAD_BRANCH_2" 'branch two server' "$opt $OPTARG"
+									self_updater "$SELF_DOWNLOAD_BRANCH_2" 'branch two server' "$opt $OPTARG"
+									B_MAN='false'
 									;;
 								13)
-									script_self_updater "$SELF_DOWNLOAD_BRANCH_3" 'branch three server' "$opt $OPTARG"
-									;;
-								14)
-									script_self_updater "$SELF_DOWNLOAD_BRANCH_4" 'branch four server' "$opt $OPTARG"
-									;;
-								15)
-									script_self_updater "$SELF_DOWNLOAD_BRANCH_BSD" 'branch bsd server' "$opt $OPTARG"
-									;;
-								16)
-									script_self_updater "$SELF_DOWNLOAD_BRANCH_GNUBSD" 'branch gnubsd server' "$opt $OPTARG"
+									self_updater "$SELF_DOWNLOAD_BRANCH_3" 'branch three server' "$opt $OPTARG"
+									B_MAN='false'
 									;;
 								http*)
-									script_self_updater "$OPTARG" 'alt server' "$opt <http...>"
+									self_updater "$OPTARG" 'alt server' "$opt <http...>"
+									B_MAN='false'
 									;;
 							esac
 						else
@@ -3258,6 +3454,24 @@ get_parameters()
 						DISPLAY_OPT="-display $DISPLAY"
 						B_SHOW_DISPLAY_DATA='true'
 						B_RUNNING_IN_DISPLAY='true'
+						;;
+					41)
+						B_CURL='false'
+						set_downloader
+						;;
+					42)
+						B_FETCH='false'
+						set_downloader
+						;;
+					43)
+						B_WGET='false'
+						set_downloader
+						;;
+					44)
+						B_CURL='false'
+						B_FETCH='false'
+						B_WGET='false'
+						set_downloader
 						;;
 					ftp*)
 						ALTERNATE_FTP="$OPTARG"
@@ -3347,7 +3561,7 @@ show_options()
 	print_lines_basic "1" "-I" "Information: processes, uptime, memory, irc client (or shell type), $SELF_NAME version."
 	print_lines_basic "1" "-l" "$partition_string_u labels. Default: short $partition_string -P. For full -p output, use: -pl (or -plu)."
 	print_lines_basic "1" "-m" "Memory (RAM) data. Physical system memory array(s), capacity, how many devices (slots) supported, and individual memory devices (sticks of memory etc). For devices, shows device locator, size, speed, type (like: DDR3). If neither -I nor -tm are selected, also shows ram used/total. Also see -x, -xx, -xxx"
-	print_lines_basic "1" "-M" "Machine data. Device type (desktop, server, laptop, VM etc.), Motherboard, Bios, and if present, System Builder (Like Lenovo). Shows UEFI/BIOS/UEFI [Legacy}. Older systems/kernels without the required /sys data can use dmidecode instead, run as root. Dmidecode can be forced with -! 33"
+	print_lines_basic "1" "-M" "Machine data. Device type (desktop, server, laptop, VM etc.), Motherboard, Bios, and if present, System Builder (Like Lenovo). Shows UEFI/BIOS/UEFI [Legacy]. Older systems/kernels without the required /sys data can use dmidecode instead, run as root. Dmidecode can be forced with -! 33"
 	print_lines_basic "1" "-n" "Advanced Network card information. Same as -Nn. Shows interface, speed, mac id, state, etc."
 	print_lines_basic "1" "-N" "Network card information. With -x, shows PCI BusID, Port number."
 	print_lines_basic "1" "-o" "Unmounted $partition_string information (includes UUID and LABEL if available). Shows file system type if you have file installed, if you are root OR if you have added to /etc/sudoers (sudo v. 1.7 or newer) Example:^<username>^ALL^=^NOPASSWD:^/usr/bin/file^"
@@ -3417,7 +3631,7 @@ show_options()
 	if [[ $B_ALLOW_WEATHER == 'true' ]];then
 		print_lines_basic "2" "-w -W" "Location (uses -z/irc filter), weather observation time, wind chill, heat index, dew point (shows extra lines for data where relevant)."
 	fi
-	print_lines_basic "1" "-y" "Required extra option: integer, 80 or greater. Set the output line width max. Overrides IRC/Terminal settings or actual widths. If used with -h, put -y option first. Example:^inxi^-y^130"
+	print_lines_basic "1" "-y" "Required extra option: integer, 80 or greater. Set the output line width max. Overrides IRC/Terminal settings or actual widths. If used with -h, put -y option first. Example:^$SELF_NAME^-y^130"
 	print_lines_basic "1" "-z" "Security filters for IP/Mac addresses, location, user home directory name. Default on for irc clients."
 	print_lines_basic "1" "-Z" "Absolute override for output filters. Useful for debugging networking issues in irc for example."
 	print_screen_output " "
@@ -3426,7 +3640,8 @@ show_options()
 	print_lines_basic "4" "-H" "This help menu, plus developer options. Do not use dev options in normal operation!"
 	print_lines_basic "4" "--recommends" "Checks $SELF_NAME application dependencies + recommends, and directories, then shows what package(s) you need to install to add support for that feature. "
 	if [[ $B_ALLOW_UPDATE == 'true' ]];then
-		print_lines_basic "4" "-U" "Auto-update script. Will also install/update man page. Note: if you installed as root, you must be root to update, otherwise user is fine. Man page installs require root user mode."
+		#print_lines_basic "4" "-U" "Auto-update script. Will also install/update man page. Note: if you installed as root, you must be root to update, otherwise user is fine. Man page installs require root user mode."
+		print_lines_basic "4" "-U" "Auto-update $SELF_NAME from inxi-legacy branch server.  Note: if you installed as root, you must be root to update, otherwise user is fine. No man page install supported for legacy branch."
 	fi
 	print_lines_basic "4" "-V --version" "$SELF_NAME version information. Prints information then exits."
 	print_screen_output " "
@@ -3437,8 +3652,8 @@ show_options()
 	print_lines_basic "2" "8" "Basic logging"
 	print_lines_basic "2" "9" "Full file/sys info logging"
 	print_lines_basic "2" "10" "Color logging."
-	print_lines_basic "1" "" "The following create a tar.gz file of system data, plus collecting the inxi output to file. To automatically upload debugger data tar.gz file to ftp.techpatterns.com: inxi^-xx@^<11-14>"
-	print_lines_basic "1" "" "For alternate ftp upload locations: Example:^inxi^-!^ftp.yourserver.com/incoming^-xx@^14"
+	print_lines_basic "1" "" "The following create a tar.gz file of system data, plus collecting the $SELF_NAME output to file. To automatically upload debugger data tar.gz file to ftp.techpatterns.com: $SELF_NAME^-xx@^<11-14>"
+	print_lines_basic "1" "" "For alternate ftp upload locations: Example:^$SELF_NAME^-!^ftp.yourserver.com/incoming^-xx@^14"
 	print_lines_basic "2" "11" "With data file of tree traverse read of /sys."
 	print_lines_basic "2" "12" "With xorg conf and log data, xrandr, xprop, xdpyinfo, glxinfo etc."
 	print_lines_basic "2" "13" "With data from dev, disks, ${partition_string}s, etc., plus /sys tree traverse data file."
@@ -3450,6 +3665,10 @@ show_options()
 	print_lines_basic "1" "-! 33" "Forces use of dmidecode data instead of /sys where relevant (-M)."
 	print_lines_basic "1" "-! 34" "Skips SSL certificate checks for all downloader activies (wget/fetch/curl only). Must go before other options."
 	print_lines_basic "1" "-! 40" "Will try to get display data out of X. Default gets it from display :0. If you use this format: -! 40:1 it would get it from display 1 instead, or any display you specify as long as there is no space between -! 40 and the :[display-number]."
+	print_lines_basic "1" "-! 41" "Bypass curl as a downloader option."
+	print_lines_basic "1" "-! 42" "Bypass fetch as a downloader option."
+	print_lines_basic "1" "-! 43" "Bypass wget as a downloader option."
+	print_lines_basic "1" "-! 44" "Bypass curl, fetch, and wget as a downloader options. Forces Perl if HTTP::Tiny present."
 	
 	if [[ $1 == 'full' ]];then
 		print_screen_output " "
@@ -3459,144 +3678,20 @@ show_options()
 		print_lines_basic "1" "-! 3" "Sets flags B_TESTING_1='true' and B_TESTING_2='true'."
 		if [[ $B_ALLOW_UPDATE == 'true' ]];then
 			print_lines_basic "1" "-! 10" "Triggers an update from the primary dev download server instead of source server."
-			print_lines_basic "1" "-! 11" "Triggers an update from source branch one - if present, of course."
-			print_lines_basic "1" "-! 12" "Triggers an update from source branch two - if present, of course."
-			print_lines_basic "1" "-! 13" "Triggers an update from source branch three - if present, of course."
-			print_lines_basic "1" "-! 14" "Triggers an update from source branch four - if present, of course."
-			print_lines_basic "1" "-! 15" "Triggers an update from source branch BSD - if present, of course."
-			print_lines_basic "1" "-! 16" "Triggers an update from source branch GNUBSD - if present, of course."
+# 			print_lines_basic "1" "-! 11" "Triggers an update from source branch one - if present, of course."
+# 			print_lines_basic "1" "-! 12" "Triggers an update from source branch two - if present, of course."
+# 			print_lines_basic "1" "-! 13" "Triggers an update from source branch three - if present, of course."
 			print_lines_basic "1" "-! " "<http://......> Triggers an update from whatever server you list."
-			print_lines_basic "1" "" "Example: inxi^-!^http://yourserver.com/testing/inxi"
+			print_lines_basic "1" "" "Example: $SELF_NAME^-!^http://yourserver.com/testing/$SELF_NAME"
 		fi
 		print_lines_basic "1" "-! " "<ftp.......> Changes debugging data ftp upload location to whatever you enter here. Only used together with -xx@^11-14, and must be used in front of that."
-		print_lines_basic "1" "" "Example: inxi^-!^ftp.yourserver.com/incoming^-xx@^14"
+		print_lines_basic "1" "" "Example: $SELF_NAME^-!^ftp.yourserver.com/incoming^-xx@^14"
 	fi
 	print_screen_output " "
 }
 
-# uses $TERM_COLUMNS to set width using $COLS_MAX as max width
-# IMPORTANT: minimize use of subshells here or the output is too slow
-# IMPORTANT: each text chunk must be a continuous line, no line breaks. For anyone who uses a 
-# code editor that can't do visual (not hard coded) line wrapping, upgrade to one that can.
-# args: $1 - 0 1 2 3 4 for indentation level; $2 -line starter, like -m; $3 - content of block.
-print_lines_basic()
-{
-	local line_width=$COLS_MAX
-	local print_string='' indent_inner='' indent_full='' indent_x='' 
-	local indent_working='' indent_working_full=''
-	local line_starter='' line_1_starter='' line_x_starter='' 
-	# note: to create a padded string below
-	local fake_string=' ' temp_count='' line_count='' spacer=''
-	local indent_main=6 indent_x='' b_indent_x='true' 
-	
-	case $1 in
-		# for no options, start at left edge
-		0)	indent_full=0
-			line_1_starter=''
-			line_x_starter=''
-			b_indent_x='false'
-			;;
-		1)	indent_full=$indent_main
-			temp_count=${#2}
-			if [[ $temp_count -le $indent_full ]];then
-				indent_working=$indent_full
-			else
-				indent_working=$temp_count #$(( $temp_count + 1 ))
-			fi
-			line_1_starter="$( sed -e :a -e "s/^.\{1,$indent_working\}$/& /;ta" <<< $2 )"
-			;;
-		# first left pad 2 and 3, then right pad them
-		2)	indent_full=$(( $indent_main + 6 ))
-			indent_inner=3
-			temp_count=${#2}
-			if [[ $temp_count -le $indent_inner ]];then
-				indent_working=$indent_inner
-				#indent_working_full=$indent_full
-			else
-				indent_working=$(( $temp_count + 1 ))
-				#indent_working_full=$(( $indent_full - $indent_inner - 1 ))
-			fi
-			line_1_starter="$( sed -e :a -e "s/^.\{1,$indent_working\}$/& /;ta" <<< $2 )"
-			line_1_starter="$( sed -e :a -e "s/^.\{1,$indent_full\}$/ &/;ta" <<< "$line_1_starter" )"
-			;;
-		3)	indent_full=$(( $indent_main + 8 ))
-			indent_inner=3
-			temp_count=${#2}
-			if [[ $temp_count -le $indent_inner ]];then
-				indent_working=$indent_inner
-			else
-				indent_working=$(( $temp_count + 1 ))
-			fi
-			line_1_starter="$( sed -e :a -e "s/^.\{1,$indent_working\}$/& /;ta" <<< $2 )"
-			line_1_starter="$( sed -e :a -e "s/^.\{1,$indent_full\}$/ &/;ta" <<< "$line_1_starter" )"
-			;;
-		# for long options
-		4)	indent_full=$(( $indent_main + 8 ))
-			temp_count=${#2}
-			if [[ $temp_count -lt $indent_full ]];then
-				indent_working=$indent_full
-			else
-				indent_working=$temp_count #$(( $temp_count + 1 ))
-			fi
-			line_1_starter="$( sed -e :a -e "s/^.\{1,$indent_working\}$/& /;ta" <<< $2 )"
-			;;
-	esac
-	
-	if [[ $b_indent_x == 'true' ]];then
-		indent_x=$(( $indent_full + 1 ))
-		line_x_starter="$(printf "%${indent_x}s" '')"
-	fi
-	
-	line_count=$(( $line_width - $indent_full ))
-	
-	# bash loop is slow, only run this if required
-	if [[ ${#3} -gt $line_count ]];then
-		for word in $3
-		do
-			temp_string="$print_string$spacer$word"
-			spacer=' '
-			if [[ ${#temp_string} -lt $line_count ]];then
-				print_string=$temp_string # lose any white space start/end
-				# echo -n $(( $line_width - $indent_full ))
-			else
-				if [[ -n $line_1_starter ]];then
-					line_starter="$line_1_starter"
-					line_1_starter=''
-				else
-					line_starter="$line_x_starter"
-				fi
-				# clean up forced connections, ie, stuff we don't want wrapping
-				print_string=${print_string//\^/ }
-				print_screen_output "$line_starter$print_string"
-				print_string="$word$spacer" # needed to handle second word on new line
-				temp_string=''
-				spacer=''
-			fi
-		done
-	else
-		# echo no loop
-		print_string=$3
-	fi
-	# print anything left over
-	if [[ -n $print_string ]];then
-		if [[ -n $line_1_starter ]];then
-			line_starter="$line_1_starter"
-			line_1_starter=''
-		else
-			line_starter="$line_x_starter"
-		fi
-		print_string=${print_string//\^/ }
-		print_screen_output "$line_starter$print_string"
-	fi
-}
-# print_lines_basic '1' '-m' 'let us teest this string and lots more and stuff and more stuff and x is wy and z is x and fred is dead and gus is alive an yes we have to go now'
-# print_lines_basic '2' '7' 'and its substring this string and lots more and stuff and more stuff and x is wy and z is x and fred is dead and gus is alive an yes we have to go now'
-# print_lines_basic '2' '12' 'and its sss substring'
-# print_lines_basic '3' '12' 'and its sss substring this string and lots more and stuff and more stuff and x is wy and z is x and fred is dead and gus is alive an yes we have to go now'
-# exit
-
 ## print out version information for -V/--version
-print_version_info()
+show_version_info()
 {
 	# if not in PATH could be either . or directory name, no slash starting
 	local script_path=$SELF_PATH script_symbolic_start=''
@@ -3632,12 +3727,50 @@ print_version_info()
 }
 
 ########################################################################
-#### MAIN FUNCTIONS
+#### STARTUP DATA
 ########################################################################
 
-#### -------------------------------------------------------------------
-#### initial startup stuff
-#### -------------------------------------------------------------------
+# This needs some cleanup and comments, not quite understanding what is 
+# happening, although generally output is known. Parse the null 
+# separated commandline under /proc/<pid passed in $1>/cmdline
+# args: $1 - $PPID
+get_cmdline()
+{
+	eval $LOGFS
+	local i=0 ppid=$1
+
+	if [[ ! -e /proc/$ppid/cmdline ]];then
+		echo 0
+		return
+	fi
+	##print_screen_output "Marker"
+	##print_screen_output "\$ppid='$ppid' -=- $(< /proc/$ppid/cmdline)"
+	unset A_CMDL
+	# http://transnum.blogspot.com/2008/11/bashs-read-built-in-supports-0-as.html
+# 	Because BASH internally uses C-style strings, in which '\0' is the terminator, 
+# 	read -d $'\0' is essentially equivalent to read -d ''. This is why I believed 
+# 	read did not accept null-delimited strings. However, it turns out that BASH 
+# 	actually handles this correctly.
+# 	I checked BASH’s source code and found the delimiter was simply determined by 
+# 	delim = *list_optarg; (bash-3.2/builtins/read.def, line 296) where list_optarg 
+# 	points to the argument following -d. Therefore, it makes no difference to the 
+# 	value of delim whether $'\0' or '' is used.
+	## note: need to figure this one out, and ideally clean it up and make it readable
+	while read -d $'\0' L && [[ $i -lt 32 ]]
+	do
+		A_CMDL[i++]="$L" ## note: make sure this is valid - What does L mean? ##
+	done < /proc/$ppid/cmdline
+	##print_screen_output "\$i='$i'"
+	if [[ $i -eq 0 ]];then
+		A_CMDL[0]=$(< /proc/$ppid/cmdline)
+		if [[ -n ${A_CMDL[0]} ]];then
+			i=1
+		fi
+	fi
+	CMDL_MAX=$i
+	log_function_data "CMDL_MAX: $CMDL_MAX"
+	eval $LOGFE
+}
 
 # Determine where inxi was run from, set IRC_CLIENT and IRC_CLIENT_VERSION
 get_start_client()
@@ -3747,6 +3880,7 @@ get_start_client()
 	log_function_data "IRC_CLIENT: $IRC_CLIENT :: IRC_CLIENT_VERSION: $IRC_CLIENT_VERSION :: PPID: $PPID"
 	eval $LOGFE
 }
+
 # note: all variables set in caller so no need to pass
 get_irc_client_version()
 {
@@ -3794,7 +3928,7 @@ get_irc_client_version()
 			# the hexchat author decided to make --version/-v return a gtk dialogue box, lol...
 			# so we need to read the actual config file for hexchat. Note that older hexchats
 			# used xchat config file, so test first for default, then legacy. Because it's possible
-			# for this file to be use edited, doing some extra checks here.
+			# for this file to be user edited, doing some extra checks here.
 			if [[ -f ~/.config/hexchat/hexchat.conf ]];then
 				file_data="$( cat ~/.config/hexchat/hexchat.conf )"
 			elif [[ -f  ~/.config/hexchat/xchat.conf ]];then
@@ -4024,6 +4158,43 @@ get_irc_client_version()
 	fi
 }
 
+## try to infer the use of Konversation >= 1.2, which shows $PPID improperly
+## no known method of finding Konvi >= 1.2 as parent process, so we look to see if it is running,
+## and all other irc clients are not running. As of 2014-03-25 this isn't used in my cases
+is_this_qt4_konvi()
+{
+	local konvi_qt4_client='' konvi_dbus_exist='' konvi_pid='' konvi_home_dir='' 
+	local konvi='' b_is_qt4=''
+	
+	# fringe cases can throw error, always if untested app, use 2>/dev/null after testing if present
+	if [[ $B_QDBUS == 'true' ]];then
+		konvi_dbus_exist=$( qdbus 2>/dev/null | grep "org.kde.konversation" )
+	fi
+	# sabayon uses /usr/share/apps/konversation as path
+	if [[ -n $konvi_dbus_exist ]] && [[ -e /usr/share/kde4/apps/konversation || -e  /usr/share/apps/konversation ]]; then
+		konvi_pid=$( ps -A | gawk 'BEGIN{IGNORECASE=1} /konversation/ { print $1 }' ) 
+		konvi_home_dir=$( readlink /proc/$konvi_pid/exe )
+		konvi=$( echo $konvi_home_dir | sed "s/\// /g" )
+		konvi=($konvi)
+
+		if [[ ${konvi[2]} == 'konversation' ]];then
+			# note: we need to change this back to a single dot number, like 1.3, not 1.3.2
+			konvi_qt4_client=$( konversation -v | grep -i 'konversation' | \
+			gawk '{ print $2 }' | cut -d '.' -f 1,2 )
+			if [[ $konvi_qt4_client > 1.1 ]]; then
+				b_is_qt4='true'
+			fi
+		fi
+	else
+		konvi_qt4="qt3"
+		b_is_qt4='false'
+	fi
+	log_function_data "b_is_qt4: $b_is_qt4"
+	echo $b_is_qt4
+	## for testing this module
+	#qdbus org.kde.konversation /irc say $1 $2 "getpid_dir: $konvi_qt4  qt4_konvi: $konvi_qt4_ver   verNum: $konvi_qt4_ver_num  pid: $konvi_pid ppid: $PPID  konvi_home_dir: ${konvi[2]}"
+}
+
 # args: $1 - App_Working_Name
 set_perl_python_client_data()
 {
@@ -4062,78 +4233,14 @@ set_perl_python_client_data()
 	fi
 }
 
-## try to infer the use of Konversation >= 1.2, which shows $PPID improperly
-## no known method of finding Kovni >= 1.2 as parent process, so we look to see if it is running,
-## and all other irc clients are not running. As of 2014-03-25 this isn't used in my cases
-is_this_qt4_konvi()
-{
-	local konvi_qt4_client='' konvi_dbus_exist='' konvi_pid='' konvi_home_dir='' 
-	local konvi='' b_is_qt4=''
-	
-	# fringe cases can throw error, always if untested app, use 2>/dev/null after testing if present
-	if [[ $B_QDBUS == 'true' ]];then
-		konvi_dbus_exist=$( qdbus 2>/dev/null | grep "org.kde.konversation" )
-	fi
-	# sabayon uses /usr/share/apps/konversation as path
-	if [[ -n $konvi_dbus_exist ]] && [[ -e /usr/share/kde4/apps/konversation || -e  /usr/share/apps/konversation ]]; then
-		konvi_pid=$( ps -A | gawk 'BEGIN{IGNORECASE=1} /konversation/ { print $1 }' ) 
-		konvi_home_dir=$( readlink /proc/$konvi_pid/exe )
-		konvi=$( echo $konvi_home_dir | sed "s/\// /g" )
-		konvi=($konvi)
-
-		if [[ ${konvi[2]} == 'konversation' ]];then
-			# note: we need to change this back to a single dot number, like 1.3, not 1.3.2
-			konvi_qt4_client=$( konversation -v | grep -i 'konversation' | \
-			gawk '{ print $2 }' | cut -d '.' -f 1,2 )
-			if [[ $konvi_qt4_client > 1.1 ]]; then
-				b_is_qt4='true'
-			fi
-		fi
-	else
-		konvi_qt4="qt3"
-		b_is_qt4='false'
-	fi
-	log_function_data "b_is_qt4: $b_is_qt4"
-	echo $b_is_qt4
-	## for testing this module
-	#qdbus org.kde.konversation /irc say $1 $2 "getpid_dir: $konvi_qt4  qt4_konvi: $konvi_qt4_ver   verNum: $konvi_qt4_ver_num  pid: $konvi_pid ppid: $PPID  konvi_home_dir: ${konvi[2]}"
-}
-
-# This needs some cleanup and comments, not quite understanding what is happening, although generally output is known
-# Parse the null separated commandline under /proc/<pid passed in $1>/cmdline
-# args: $1 - $PPID
-get_cmdline()
-{
-	eval $LOGFS
-	local i=0 ppid=$1
-
-	if [[ ! -e /proc/$ppid/cmdline ]];then
-		echo 0
-		return
-	fi
-	##print_screen_output "Marker"
-	##print_screen_output "\$ppid='$ppid' -=- $(< /proc/$ppid/cmdline)"
-	unset A_CMDL
-	## note: need to figure this one out, and ideally clean it up and make it readable
-	while read -d $'\0' L && [[ $i -lt 32 ]]
-	do
-		A_CMDL[i++]="$L" ## note: make sure this is valid - What does L mean? ##
-	done < /proc/$ppid/cmdline
-	##print_screen_output "\$i='$i'"
-	if [[ $i -eq 0 ]];then
-		A_CMDL[0]=$(< /proc/$ppid/cmdline)
-		if [[ -n ${A_CMDL[0]} ]];then
-			i=1
-		fi
-	fi
-	CMDL_MAX=$i
-	log_function_data "CMDL_MAX: $CMDL_MAX"
-	eval $LOGFE
-}
+########################################################################
+#### DATA PROCESSORS
+########################################################################
 
 #### -------------------------------------------------------------------
-#### get data types
+#### GET DATA
 #### -------------------------------------------------------------------
+
 ## create array of sound cards installed on system, and if found, use asound data as well
 get_audio_data()
 {
@@ -4526,7 +4633,7 @@ get_battery_data()
 			fi
 		done
 	elif [[ $B_FORCE_DMIDECODE == 'true'  ]] || [[ ! -d $id_dir && -z $ids ]];then
-		get_dmidecode_data
+		set_dmidecode_data
 		if [[ -n $DMIDECODE_DATA ]];then
 			if [[ $DMIDECODE_DATA == 'dmidecode-error-'* ]];then
 				A_BATTERY_DATA[0]=$DMIDECODE_DATA
@@ -4886,13 +4993,7 @@ get_cpu_core_count_alpha()
 		2) CPU_COUNT_ALPHA='Dual';;
 		3) CPU_COUNT_ALPHA='Triple';;
 		4) CPU_COUNT_ALPHA='Quad';;
-		5) CPU_COUNT_ALPHA='Penta';;
-		6) CPU_COUNT_ALPHA='Hexa';;
-		7) CPU_COUNT_ALPHA='Hepta';;
-		8) CPU_COUNT_ALPHA='Octa';;
-		9) CPU_COUNT_ALPHA='Ennea';;
-		10) CPU_COUNT_ALPHA='Deca';;
-		*) CPU_COUNT_ALPHA='Multi';;
+		*) CPU_COUNT_ALPHA=$1;;
 	esac
 	log_function_data "CPU_COUNT_ALPHA: $CPU_COUNT_ALPHA"
 	
@@ -4977,7 +5078,7 @@ get_cpu_data()
 			gsub(/^ +| +$/, "", $NF)
 			family=toupper( sprintf("%x", $NF) )
 		}
-		/^(stepping|cpu revission)/ && ( rev == "" ){
+		/^(stepping|cpu revision)/ && ( rev == "" ){
 			gsub(/^ +| +$/, "", $NF)
 			rev=$NF
 		}
@@ -5326,6 +5427,7 @@ get_cpu_ht_multicore_smp_data()
 			arm_count = 0
 			nr = 0
 			bArm = "false"
+			bRyzen = "false"
 			bProcInt = "false" # this will avoid certain double counts with processor/Processor lines
 			bXeon = "false"
 		}
@@ -5333,8 +5435,12 @@ get_cpu_ht_multicore_smp_data()
 		/^model name/ && ( $0 ~ /Xeon/ ) {
 			bXeon = "true"
 		}
+		# amd rizen 16/32 core maybe
+		/^cpu_family/ && ($2 == 23) {
+			bRyzen = "true"
+		}
 		# only do this once since sibling count does not change. 
-		/^siblings/ && ( bXeon == "true" ) && ( siblings == 0 ) {
+		/^siblings/ && ( bXeon == "true" || bRyzen == "true" ) && ( siblings == 0 ) {
 			gsub(/[^0-9]/,"",$NF)
 			if ( $NF != "" ) {
 				siblings = $NF
@@ -5377,6 +5483,8 @@ get_cpu_ht_multicore_smp_data()
 		}
 		# array of core ids, again, here we may have HT, so we need to create an array of the
 		# actual core ids. As With physical, we cannot assume this will be here in a vm
+		# also, for xeon/rizen, this can be misleading because there may be two cpus 
+		# inside the single cpu body, which leads to: 0-7 then 0-7 for a rizen 16 core ht
 		/^core id/ {
 			core_iter = $NF
 			a_core_id[core_iter] = $NF
@@ -5404,7 +5512,8 @@ get_cpu_ht_multicore_smp_data()
 				num_of_physical_cpus++
 			}
 			i = 0
-			## count unique cores ##
+			## count unique cores. Fails for 16 core rizen, which appears to be
+			## using 2x8 core internally, core id 0-7 repeats 2 times.
 			for ( i in a_core_id ) {
 				num_of_cores++
 			}
@@ -5412,6 +5521,10 @@ get_cpu_ht_multicore_smp_data()
 			# may show a repeated core id : 0 which gives a fake num_of_cores=1
 			if ( bXeon == "true" && num_of_cores == 1 && siblings > 1 ) {
 				num_of_cores = siblings/2
+			}
+			# 
+			if ( bRyzen == "true"){
+				num_of_cores = cpu_core_count
 			}
 			# final check, override the num of cores value if it clearly is wrong
 			# and use the raw core count and synthesize the total instead of real count
@@ -5433,23 +5546,27 @@ get_cpu_ht_multicore_smp_data()
 # 			print "CpuCoreCount:" cpu_core_count
 			####################################################################
 			# 				algorithm
-			# if > 1 processor && processor id (physical id) == core id then Hyperthreaded (HT)
+			# if > 1 processor && processor id (physical id) == core id then Multi threaded (MT)
+			# if siblings > 1 && siblings ==  2 * num_of_cores (cpu_core_count) then Multi threaded (MT)
 			# if > 1 processor && processor id (physical id) != core id then Multi-Core Processors (MCP)
-			# if > 1 processor && processor ids (physical id) > 1 then Multiple Processors (SMP)
+			# if > 1 processor && processor ids (physical id) > 1 then Symmetric Multi Processing (SMP)
 			# if = 1 processor then single core/processor Uni-Processor (UP)
 			if ( num_of_processors > 1 || ( bXeon == "true" && siblings > 0 ) ) {
-				# non-multicore HT
+				# non-multicore MT
 				if ( num_of_processors == (num_of_cores * 2) ) {
-					cpu_type = cpu_type "HT-"
+					cpu_type = cpu_type "MT-"
 				}
 				else if ( bXeon == "true" && siblings > 1 ) {
-					cpu_type = cpu_type "HT-"
+					cpu_type = cpu_type "MT-"
 				}
-				# non-HT multi-core or HT multi-core
+				else if ( siblings > 1 && siblings == 2 * num_of_cores ){
+					cpu_type = cpu_type "MT-"
+				}
+				# non-MT multi-core or MT multi-core
 				if (( num_of_processors == num_of_cores) || ( num_of_physical_cpus < num_of_cores)) {
 					cpu_type = cpu_type "MCP-"
 				}
-				# >1 cpu sockets active
+				# >1 cpu sockets active: Symetric Multi Processing
 				if ( num_of_physical_cpus > 1 ) {
 					cpu_type = cpu_type "SMP-"
 				}
@@ -5821,59 +5938,6 @@ get_desktop_environment()
 	eval $LOGFE
 }
 
-# note: gawk doesn't support white spaces in search string, gave errors, so use [[:space:]] instead
-# args: $1 - desktop/app command for --version; $2 - search string; $3 - gawk print number
-get_program_version()
-{
-	local version_data='' version='' get_version='--version' 
-	
-	# mate-about -v = MATE Desktop Environment 1.4.0
-	case $1 in
-		# legacy fluxbox had no --version, and current -v works
-		dwm|fluxbox|jwm|mate-about|wmii|wmii2)
-			get_version='-v'
-			;;
-		epoch)
-			get_version='version'
-			;;
-	esac
-	
-	case $1 in
-		# note, some wm/apps send version info to stderr instead of stdout
-		dwm|ksh|scrotwm|spectrwm)
-			version_data="$( $1 $get_version 2>&1 )"
-			;;
-		csh)
-			version_data="$( tcsh $get_version 2>/dev/null )"
-			;;
-		# quick debian/buntu hack until I find a universal way to get version for these
-		dash)
-			if type -p dpkg &>/dev/null;then
-				version_data="$( dpkg -l $1 2>/dev/null )"
-			fi
-			;;
-		*)
-			version_data="$( $1 $get_version 2>/dev/null )"
-			;;
-	esac
-	log_function_data "version data: $version_data"
-	if [[ -n $version_data ]];then
-		version=$( gawk '
-		BEGIN {
-			IGNORECASE=1
-		}
-		/'$2'/ {
-			# sample: dwm-5.8.2, ©.. etc, why no space? who knows. Also get rid of v in number string
-			# xfce, and other, output has , in it, so dump all commas and parentheses
-			gsub(/(,|dwm-|wmii2-|wmii-|v|V|\(|\))/, "",$'$3') 
-			print $'$3'
-			exit # quit after first match prints
-		}' <<< "$version_data" )
-	fi
-	log_function_data "program version: $version"
-	echo $version
-}
-
 get_desktop_extra_data()
 {
 	eval $LOGFS
@@ -6046,7 +6110,7 @@ get_device_data()
 		elif [[ $B_ROOT == 'false' ]];then
 			device='dmidecode-use-root'
 		else 
-			get_dmidecode_data
+			set_dmidecode_data
 			if [[ -n $DMIDECODE_DATA ]];then
 				if [[ $DMIDECODE_DATA == 'dmidecode-error-'* ]];then
 					device='dmidecode-no-info'
@@ -6249,7 +6313,7 @@ get_distro_data()
 	elif [[ ${#a_distro_glob[@]} -gt 1 ]];then
 		for i in $DISTROS_DERIVED $DISTROS_PRIMARY
 		do
-			# Only echo works with ${var[@]}, not print_screen_output() or script_debugger()
+			# Only echo works with ${var[@]}, not print_screen_output() or self_debugger()
 			# This is a known bug, search for the word "strange" inside comments
 			# echo "i='$i' a_distro_glob[@]='${a_distro_glob[@]}'"
 			if [[ " ${a_distro_glob[@]} " == *" $i "* ]];then
@@ -6521,144 +6585,6 @@ get_distro_lsb_os_release_data()
 	esac
 	echo $distro
 	log_function_data "distro: $distro"
-	eval $LOGFE
-}
-
-get_dmidecode_data()
-{
-	eval $LOGFS
-	
-	local dmiData="" b_debugger='false'
-
-	if [[ $B_DMIDECODE_SET != 'true' ]];then
-		dmidecodePath=$( type -p dmidecode 2>/dev/null )
-		if [[ -z $dmidecodePath ]];then
-			DMIDECODE_DATA='dmidecode-error-not-installed'
-		else
-			# note stripping out these lines: Handle 0x0016, DMI type 17, 27 bytes
-			# but NOT deleting them, in case the dmidecode data is missing empty lines which will be
-			# used to separate results. Then we remove the doubled empty lines to keep it clean and
-			# strip out all the stuff we don't want to see in the results. We want the error data in 
-			# stdout for error handling
-			if [[ $b_debugger == 'true' && $HOSTNAME == 'yawn' ]];then
-				dmiData="$( cat ~/bin/scripts/inxi/svn/misc/data/dmidecode/dmidecode-memory-variants-2.txt )"
-			else 
-				dmiData="$( $dmidecodePath 2>&1 )"
-			fi
-			# these tests first, because bsd error messages like this (note how many : are in the string)
-			# inxi: line 4928: /usr/local/sbin/dmidecode: Permission denied
-			if [[ ${#dmiData} -lt 200  ]];then
-				if [[ -z ${dmiData/*Permission denied*/} ]];then
-				# if [[ -n $( grep -i 'Permission denied' <<< "$dmiData" ) ]];then
-					DMIDECODE_DATA='dmidecode-error-requires-root'
-				# this handles very old systems, like Lenny 2.6.26, with dmidecode, but no data
-				elif [[ -n $( grep -i 'no smbios ' <<< "$dmiData" ) ]];then
-					DMIDECODE_DATA='dmidecode-error-no-smbios-dmi-data'
-				else
-					DMIDECODE_DATA='dmidecode-error-unknown-error'
-				fi
-			else
-				DMIDECODE_DATA="$( echo "$dmiData" | gawk -F ':' '
-				BEGIN {
-					IGNORECASE=1
-					cutExtraTab="false"
-					twoData=""
-					oneData=""
-				}
-				{
-					# no idea why, but freebsd gawk does not do this right
-					oneData=$1
-					twoData=$2
-					if ( twoData != "" ) {
-						twoHolder="true"
-					}
-					else {
-						twoHolder="false"
-					}
-					if ( $0 ~ /^\tDMI type/ ) {
-						sub(/^\tDMI type.*/, "", $0)
-						cutExtraTab="true"
-					}
-					gsub(/'"$BAN_LIST_NORMAL"'/, "", twoData)
-					gsub(/'"$BAN_LIST_ARRAY"'/, " ", twoData)
-					# clean out Handle line
-					# sub(/^Handle.*/,"", $0)
-					sub(/^[[:space:]]*Inactive.*/,"",twoData)
-					# yes, there is a typo in a user data set, unknow
-					# Base Board Version|Base Board Serial Number
-					# Chassis Manufacturer|Chassis Version|Chassis Serial Number
-					# System manufacturer|System Product Name|System Version
-					# To Be Filled By O.E.M.
-					# strip out starting white space so that the following stuff will clear properly
-					sub(/^[[:space:]]+/, "", twoData)
-					sub(/^Base Board .*|^Chassis .*|empty|.*O\.E\.M\..*|.*OEM.*|^Not .*|^System .*|.*unknow.*|.*N\/A.*|none|^To be filled.*|^0x[0]+$|\[Empty\]|<Bad Index>|Default string|^\.\.$/, "", twoData) 
-					sub(/.*(AssetTagNum|Manufacturer| Or Motherboard|PartNum.*|SerNum).*/, "", twoData)
-					gsub(/\ybios\y|\yacpi\y/, "", twoData) # note: biostar
-					sub(/http:\/\/www.abit.com.tw\//, "Abit", twoData)
-					
-					# for double indented values replace with ~ so later can test for it, we are trusting that
-					# indentation will be tabbed in this case
-					# special case, dmidecode 2.2 has an extra tab and a DMI type line
-					if ( cutExtraTab == "true" ) {
-						sub(/^\t\t\t+/, "~", oneData)
-					}
-					else {
-						sub(/^\t\t+/, "~", oneData)
-					}
-					gsub(/ [ \t]+/, " ", twoData)
-					gsub(/^[[:space:]]+|[[:space:]]+$/, "", twoData)
-					gsub(/^[[:space:]]+|[[:space:]]+$/, "", oneData)
-					
-					# reconstructing the line for processing so gawk can use -F : again
-					if ( oneData != "" && twoHolder == "true" ) {
-						print oneData ":" twoData
-					}
-					else {
-						# make sure all null lines have no spaces in them!
-						gsub(/^[[:space:]]+|[[:space:]]+$/,"",$0)
-						print $0
-					}
-				}' \
-				| sed '/^$/{
-N
-/^\n$/D
-}' \
-				)"
-			fi
-			# echo ":${DMIDECODE_DATA}:"
-			log_function_data "DMIDECODE_DATA (PRE): $DMIDECODE_DATA"
-			
-		fi
-		B_DMIDECODE_SET='true'
-		log_function_data "DMIDECODE_DATA (POST): $DMIDECODE_DATA"
-	fi
-
-	eval $LOGFE
-}
-# get_dmidecode_data;echo "$DMIDECODE_DATA";exit
-
-# BSD only
-get_dmesg_boot_data()
-{
-	eval $LOGFS
-	
-	local dmsg_boot_data=''
-	
-	if [[ $B_DMESG_BOOT_FILE == 'true' ]];then
-		# replace all indented items with ~ so we can id them easily while processing
-		# note that if user, may get error of read permissions
-		# for some weird reason, real mem and avail mem are use a '=' separator, who knows why, the others are ':'
-		dmsg_boot_data="$( cat $FILE_DMESG_BOOT 2>/dev/null | gawk '
-		{
-			sub(/[[:space:]]*=[[:space:]]*|:[[:space:]]*/,":", $0)
-			gsub(/'"$BAN_LIST_ARRAY"'/," ", $0)
-			gsub(/\"/, "", $0)
-			gsub(/[[:space:]][[:space:]]/, " ", $0)
-			print $0
-		}' )"
-	fi
-	DMESG_BOOT_DATA="$dmsg_boot_data"
-	log_function_data "$dmsg_boot_data"
 	eval $LOGFE
 }
 
@@ -7201,6 +7127,7 @@ get_graphics_display_server_data()
 	log_function_data "A_DISPLAY_SERVER_DATA: $a_temp"
 	eval $LOGFE
 }
+
 get_graphics_display_compositor()
 {
 	eval $LOGFS
@@ -7244,7 +7171,8 @@ get_graphics_display_compositor()
 	echo $compositor
 	eval $LOGFE
 }
-# $1 - compositor
+
+## args: $1 - compositor
 get_graphics_display_wayland_version()
 {
 	eval $LOGFS
@@ -7339,17 +7267,17 @@ get_hdd_data_basic()
 		fi
 		if swapctl -l -k &>/dev/null;then
 			swap_size=$( swapctl -l -k 2>/dev/null | gawk '
-			BEGIN { 
-			swapSize=0
-			total=0
-			}
-			( $1 ~ /^\/dev/ ) && ( $2 ~ /^[0-9]+$/ ) {
-				total += $2
-			}
-			END {
-				# result in blocks already
-				print total
-			}' )
+BEGIN { 
+swapSize=0
+total=0
+}
+( $1 ~ /^\/dev/ ) && ( $2 ~ /^[0-9]+$/ ) {
+	total += $2
+}
+END {
+	# result in blocks already
+	print total
+}' )
 		fi
 	fi
 	# echo ss: $swap_size
@@ -7951,24 +7879,6 @@ get_init_data()
 	eval $LOGFE
 }
 
-# note: useless because this is just absurdly inaccurate, too bad...
-get_install_date()
-{
-	eval $LOGFS
-	
-	local installed=''
-	
-	if ls -al --time-style '+FORMAT %Y-%m-%d' /usr 2>/dev/null;then
-		installed=$(ls -al --time-style '+FORMAT %Y-%m-%d' / | awk '/lost\+found/ {print $7;exit}' )
-# 	elif 
-# 		:
-	fi
-	
-	echo $installed
-	
-	eval $LOGFE
-}
-
 get_kernel_compiler_version()
 {
 	# note that we use gawk to get the last part because beta, alpha, git versions can be non-numeric
@@ -8034,47 +7944,6 @@ get_kernel_version()
 	eval $LOGFE
 }
 
-# args: $1 - v/n 
-get_lspci_data()
-{
-	eval $LOGFS
-	local lspci_data=''
-
-	if [[ $B_LSPCI == 'true' ]];then
-		lspci_data="$( lspci -$1 | gawk '{
-			gsub(/\(prog-if[^)]*\)/,"")
-			sub(/^0000:/, "", $0) # seen case where the 0000: is prepended, rare, but happens
-			print
-		}' )"
-	fi
-	log_function_data 'raw' "lspci_data $1:\n$lspci_data"
-	if [[ $1 == 'v' ]];then
-		LSPCI_V_DATA="$lspci_data"
-	elif [[ $1 == 'n' ]];then
-		LSPCI_N_DATA="$lspci_data"
-	fi
-	eval $LOGFE
-}
-
-# args: $1 - busid
-get_lspci_chip_id()
-{
-	eval $LOGFS
-	
-	local chip_id=''
-	
-	chip_id=$( gawk '
-	/^'$1'/ {
-		if ( $3 != "" ) {
-			print $3
-		}
-	}' <<< "$LSPCI_N_DATA" )
-	
-	echo $chip_id
-	
-	eval $LOGFE
-}
-
 get_machine_data()
 {
 	eval $LOGFS
@@ -8133,7 +8002,7 @@ get_machine_data()
 			array_string="$array_string,$firmware_type"
 		fi
 	else
-		get_dmidecode_data
+		set_dmidecode_data
 		if [[ -n $DMIDECODE_DATA ]];then
 			if [[ $DMIDECODE_DATA == 'dmidecode-error-'* ]];then
 				array_string=$DMIDECODE_DATA
@@ -8376,37 +8245,6 @@ get_memory_data()
 	MEMORY="$memory"
 	eval $LOGFE
 }
-
-# process and return module version data
-get_module_version_number()
-{
-	eval $LOGFS
-	local module_version=''
-	
-	if [[ $B_MODINFO_TESTED != 'true' ]];then
-		B_MODINFO_TESTED='true'
-		MODINFO_PATH=$( type -p modinfo )
-	fi
-
-	if [[ -n $MODINFO_PATH ]];then
-		module_version=$( $MODINFO_PATH $1 2>/dev/null | gawk '
-		BEGIN {
-			IGNORECASE=1
-		}
-		/^version/ {
-			gsub(/'"$BAN_LIST_ARRAY"'/, " ", $2)
-			gsub(/^ +| +$/, "", $2)
-			gsub(/ [ \t]+/, " ", $2)
-			print $2
-		}
-		' )
-	fi
-
-	echo "$module_version"
-	log_function_data "module_version: $module_version"
-	eval $LOGFE
-}
-
 
 ## create array of network cards
 get_networking_data()
@@ -8760,13 +8598,19 @@ get_networking_wan_ip_data()
 				if [[ -n $( grep 'smxi.org' <<< $WAN_IP_URL ) ]];then
 					ua="-A s-tools/inxi-ip"
 				fi
-				ip_data="$( curl $NO_SSL_OPT $ua -y $DL_TIMEOUT -s $WAN_IP_URL )" || downloader_error=$?
+				ip_data="$( curl $NO_SSL_OPT $ua -L -y $DL_TIMEOUT -s $WAN_IP_URL )" || downloader_error=$?
 				;;
 			fetch)
 				ip_data="$( fetch $NO_SSL_OPT -T $DL_TIMEOUT -q -o - $WAN_IP_URL )" || downloader_error=$?
 				;;
 			ftp)
 				ip_data="$( ftp $NO_SSL_OPT -o - $WAN_IP_URL 2>/dev/null )" || downloader_error=$?
+				;;
+			perl)
+				if [[ -n $( grep 'smxi.org' <<< $WAN_IP_URL ) ]];then
+					ua="s-tools/inxi-ip"
+				fi
+				ip_data="$( download_file 'ua-stdout' $WAN_IP_URL $ua )" || downloader_man_error=$?
 				;;
 			wget)
 				if [[ -n $( grep 'smxi.org' <<< $WAN_IP_URL ) ]];then
@@ -9742,138 +9586,6 @@ get_partition_dev_data()
 	eval $LOGFE
 }
 
-# args: $1 - dev item, check for mapper, then get actual dev item if mapped
-# eg: lrwxrwxrwx 1 root root       7 Sep 26 15:10 truecrypt1 -> ../dm-2 
-get_dev_processed_item()
-{
-	eval $LOGFS
-	
-	local dev_item=$1 dev_return=''
-	
-	if [[ -n $DEV_DISK_MAPPER && -n $( grep -is 'mapper/' <<< $dev_item ) ]];then
-		dev_return=$( echo "$DEV_DISK_MAPPER" | gawk '
-		$( NF - 2 ) ~ /^'${dev_item##*/}'$/ {
-			item=gensub( /..\/(.+)/, "\\1", 1, $NF )
-			print item
-		}' )
-	fi
-	if [[ -z $dev_return ]];then
-		dev_return=$dev_item
-	fi
-	
-	echo $dev_return
-
-	eval $LOGFE
-}
-
-get_patch_version_string()
-{
-	SELF_PATCH=${SELF_PATCH##*[0]} # strip leading zero(s)
-	
-	if [[ -n $SELF_PATCH ]];then
-		SELF_PATCH="-$SELF_PATCH"
-		# for cases where it was for example: 00-bsd cleaned to --bsd trim out one -
-		SELF_PATCH="${SELF_PATCH/--/-}"
-	fi
-}
-
-get_pciconf_data()
-{
-	eval $LOGFS
-	
-	local pciconf_data='' a_temp=''
-	
-	if [[ $B_PCICONF == 'true' ]];then
-		pciconf_data="$( pciconf -lv 2>/dev/null )"
-		if [[ -n $pciconf_data ]];then
-			pciconf_data=$( gawk '
-			BEGIN {
-				IGNORECASE=1
-			}
-			{
-					gsub(/'"$BAN_LIST_NORMAL"'/, "", $0)
-					gsub(/[[:space:]]+=[[:space:]]+/, "=",$0)
-					gsub(/^[[:space:]]+|'"'"'|\"|,/, "", $0)
-					gsub(/=0x/,"=",$0)
-					# line=gensub(/.*[[:space:]]+(class=[^[:space:]]*|card=[^[:space:]]*)|chip=[^[:space:]]*|rev=[^[:space:]]*|hdr=[^[:space:]]*).*/,"\n\\1","g",$0)
-					line=gensub(/(.*@.*)/,"\n\\1",$0)
-					print line
-			}' <<< "$pciconf_data" )
-			# create empty last line with this spacing trick
-			pciconf_data="$pciconf_data
-
-EOF"
-			# echo "$pciconf_data"
-			# now insert into arrays
-			IFS=$'\n'
-			A_PCICONF_DATA=( $( gawk '
-			BEGIN {
-				fullLine=""
-				driver=""
-				vendor=""
-				device=""
-				class=""
-				chipId=""
-				pciId=""
-				itemData=""
-				IGNORECASE=1
-			}
-			/^.*@/ {
-				pciId=""
-				vendor=""
-				class=""
-				driver=""
-				device=""
-				chipId=""
-				itemData=$1
-				
-				driver=gensub(/^([^@]+)@.*/, "\\1", itemData )
-				pciId=gensub(/^.*@pci([0-9\.:]+).*/, "\\1", itemData )
-				sub(/:$/, "", pciId)
-				itemData=$4
-				chipId=gensub(/.*chip=([0-9a-f][0-9a-f][0-9a-f][0-9a-f])([0-9a-f][0-9a-f][0-9a-f][0-9a-f]).*/, "\\2:\\1", itemData )
-				if ( $2 ~ /class=020000/ ) {
-					class="network"
-				}
-				else if ( $2 == "class=030000" ) {
-					class="display"
-				}
-				else if ( $2 ~ /class=040300|class=040100/ ) {
-					class="audio"
-				}
-				
-				while ( getline && $1 !~ /^$/ ) {
-					if ( $1 ~ /^vendor/ ) {
-						sub(/^vendor=/, "", $1 )
-						vendor=$0
-					}
-					else if ( $1 ~ /^device/ ) {
-						sub(/^device=/, "", $1 )
-						device=$0
-					}
-					else if ( $1 ~ /^class=/ && class == "" ) {
-						sub(/^class=/, "", $1)
-						class=$0
-					}
-				}
-				if ( device == "" ) {
-					device=vendor
-				}
-				fullLine=class "," device "," vendor "," driver "," pciId "," chipId
-				print fullLine
-			}' <<< "$pciconf_data" ))
-			IFS="$ORIGINAL_IFS"
-		fi
-	else
-		A_PCICONF_DATA='pciconf-not-installed'
-	fi
-	B_PCICONF_SET='true'
-	a_temp=${A_PCICONF_DATA[@]}
-	log_function_data "$a_temp"
-	log_function_data "$pciconf_data"
-	eval $LOGFE
-}
-
 # packs standard card arrays using the pciconf stuff
 # args: $1 - audio/network/display - matches first item in A_PCICONF_DATA arrays
 get_pciconf_card_data()
@@ -10031,7 +9743,7 @@ get_ps_tcm_data()
 		array_length=${#A_PS_DATA[@]}; 
 		while (( $i < $array_length/2 ))
 		do 
-			reorder_temp=${A_PS_DATA[i]}f
+			reorder_temp=${A_PS_DATA[i]}
 			A_PS_DATA[i]=${A_PS_DATA[$array_length-$i-1]}
 			A_PS_DATA[$array_length-$i-1]=$reorder_temp
 			(( i++ ))
@@ -10051,238 +9763,261 @@ get_raid_data()
 {
 	eval $LOGFS
 	
-	local mdstat=''
-		
-	if [[ $B_MDSTAT_FILE == 'true' ]];then
-	 	mdstat="$( cat $FILE_MDSTAT 2>/dev/null )"
-	fi
+	local Mdstat=''
+	local Zpool_Path=$( type -p zpool 2>/dev/null )
 	
-	if [[ -n $mdstat ]];then
-		# need to make sure there's always a newline in front of each record type, and
-		# also correct possible weird formats for the output from older kernels etc.
-		mdstat="$( sed -e 's/^md/\nmd/' -e 's/^unused[[:space:]]/\nunused /' \
-		-e 's/read_ahead/\nread_ahead/' -e 's/^resync=/\nresync=/' -e 's/^Event/\nEvent/' \
-		-e 's/^[[:space:]]*$//' -e 's/[[:space:]]read_ahead/\nread_ahead/' <<< "$mdstat" )"
-		# some fringe cases do not end as expected, so need to add newlines plus EOF to make sure while loop doesn't spin
-		mdstat=$( echo -e "$mdstat\n\nEOF" )
-
-		IFS=$'\n'
-		A_RAID_DATA=( $(
-		gawk '
-		BEGIN {
-			IGNORECASE=1
-			RS="\n"
-		}
-		/^personalities/ {
-			KernelRaidSupport = gensub(/personalities[[:space:]]*:[[:space:]]*(.*)/, "\\1", 1, $0)
-			# clean off the brackets
-			gsub(/[\[\]]/,"",KernelRaidSupport)
-			print "KernelRaidSupport," KernelRaidSupport
-		}
-		/^read_ahead/ {
-			ReadAhead=gensub(/read_ahead (.*)/, "\\1", 1 )
-			print "ReadAhead," ReadAhead
-		}
-		/^Event:/ {
-			print "raidEvent," $NF
-		}
-		# print logic will search for this value and use it to print out the unused devices data
-		/^unused devices/ {
-			unusedDevices = gensub(/^unused devices:[[:space:]][<]?([^>]*)[>]?.*/, "\\1", 1, $0)
-			print "UnusedDevices," unusedDevices
-		}
-		
-		/^md/ {
-			# reset for each record loop through
-			deviceState = ""
-			bitmapValues = ""
-			blocks = ""
-			chunkSize = ""
-			components = ""
-			device = ""
-			deviceReport = ""
-			finishTime = ""
-			recoverSpeed = ""
-			recoveryProgressBar = ""
-			recoveryPercent = ""
-			raidLevel = ""
-			sectorsRecovered = ""
-			separator = ""
-			superBlock = ""
-			uData = ""
-			
-			while ( !/^[[:space:]]*$/  ) {
-				gsub(/'"$BAN_LIST_ARRAY"'/, " ", $0 )
-				gsub(/[[:space:]]+/, " ", $0 )
-				if ( $0 ~ /^md/ ) {
-					device = gensub(/(md.*)[[:space:]]?:/, "\\1", "1", $1 )
-				}
-				if ( $0 ~ /mirror|raid[0-9]+/ ) {
-					raidLevel = gensub(/(.*)raid([0-9]+)(.*)/, "\\2", "g", $0 )
-				}
-				if ( $0 ~ /(active \(auto-read-only\)|active|inactive)/ ) {
-					deviceState = gensub(/(.*) (active \(auto-read-only\)|active|inactive) (.*)/, "\\2", "1", $0 )
-				}
-				# gawk will not return all the components using gensub, only last one
-				separator = ""
-				for ( i=3; i<=NF; i++ ) {
-					if ( $i ~ /[hs]d[a-z][0-9]*(\[[0-9]+\])?(\([SF]\))?/ ) {
-						components = components separator $i
-						separator=" "
-					}
-				}
-				if ( $0 ~ /blocks/ ) {
-					blocks = gensub(/(.*[[:space:]]+)?([0-9]+)[[:space:]]blocks.*/, "\\2", "1", $0)
-				}
-				if ( $0 ~ /super[[:space:]][0-9\.]+/ ) {
-					superBlock = gensub(/.*[[:space:]]super[[:space:]]([0-9\.]+)[[:space:]].*/, "\\1", "1", $0)
-				}
-				if ( $0 ~ /algorithm[[:space:]][0-9\.]+/ ) {
-					algorithm = gensub(/.*[[:space:]]algorithm[[:space:]]([0-9\.]+)[[:space:]].*/, "\\1", "1", $0)
-				}
-				if ( $0 ~ /\[[0-9]+\/[0-9]+\]/ ) {
-					deviceReport = gensub(/.*[[:space:]]\[([0-9]+\/[0-9]+)\][[:space:]].*/, "\\1", "1", $0)
-					uData = gensub(/.*[[:space:]]\[([U_]+)\]/, "\\1", "1", $0)
-				}
-				# need to avoid this:  bitmap: 0/10 pages [0KB], 16384KB chunk
-				# while currently all the normal chunks are marked with k, not kb, this can change in the future
-				if ( $0 ~ /[0-9]+[k] chunk/ && $0 !~ /bitmap/ ) {
-					chunkSize = gensub(/(.*) ([0-9]+[k]) chunk.*/, "\\2", "1", $0)
-				}
-				if ( $0 ~ /^resync=/ ) {
-					sub(/resync=/,"")
-					print "resyncStatus," $0
-				}
-				if ( $0 ~ /\[[=]*>[\.]*\].*(resync|recovery)/ ) {
-					recoveryProgressBar = gensub(/.*(\[[=]*>[\.]*\]).*/, "\\1",1,$0)
-				}
-				if ( $0 ~ / (resync|recovery)[[:space:]]*=/ ) {
-					recoveryPercent = gensub(/.* (resync|recovery)[[:space:]]*=[[:space:]]*([0-9\.]+%).*/, "\\1~\\2", 1 )
-					if ( $0 ~ /[[:space:]]\([0-9]+\/[0-9]+\)/ ) {
-						sectorsRecovered = gensub(/.* \(([0-9]+\/[0-9]+)\).*/, "\\1", 1, $0 )
-					}
-					if ( $0 ~ /finish[[:space:]]*=/ ) {
-						finishTime = gensub(/.* finish[[:space:]]*=[[:space:]]*([[0-9\.]+)([a-z]+) .*/, "\\1 \\2", 1, $0 )
-					}
-					if ( $0 ~ /speed[[:space:]]*=/ ) {
-						recoverSpeed = gensub(/.* speed[[:space:]]*=[[:space:]]*([[0-9\.]+)([a-z]+\/[a-z]+)/, "\\1 \\2", 1, $0 )
-					}
-				}
-				if ( $0 ~ /bitmap/ ) {
-					bitmapValues = gensub(/(.*[[:space:]])?bitmap:(.*)/, "\\2", 1, $0 )
-				}
-				
-				getline
-			}
-			raidString = device "," deviceState "," raidLevel "," components "," deviceReport "," uData 
-			raidString = raidString "," blocks "," superBlock "," algorithm "," chunkSize "," bitmapValues
-			raidString = raidString "," recoveryProgressBar "," recoveryPercent "," sectorsRecovered "," finishTime "," recoverSpeed
-			
-			print raidString
-		}
-		' <<< "$mdstat" ) )
-		IFS="$ORIGINAL_IFS"
-	else
-		if [[ $BSD_TYPE == 'bsd' ]];then
-			get_raid_data_bsd
+	# note: zfs has been available for Linux for a while. BSD systems
+	# will not have mdraid.
+	if [[ -n $Zpool_Path ]];then
+		RAID_TYPE='zfs'
+		get_raid_data_zfs
+	fi
+	# because there's no way for inxi to handle > 1 types of
+	# software raid on one system, we simply have to assume that
+	# if it had zfs, it won't have mdraid. Note that systems with
+	# no actual mdraid but the kernel module running will have always
+	# an array count of at least 2, for the two header lines of mdraid
+	if [[ ${#A_RAID_DATA[@]} -eq 0 ]];then
+		if [[ $B_MDSTAT_FILE == 'true' ]];then
+			Mdstat="$( cat $FILE_MDSTAT 2>/dev/null )"
+		fi
+		if [[ -n $Mdstat ]];then
+			RAID_TYPE='mdraid'
+			get_raid_data_mdraid
 		fi
 	fi
 	B_RAID_SET='true'
 	a_temp=${A_RAID_DATA[@]}
 	log_function_data "A_RAID_DATA: $a_temp"
-# 	echo -e "A_RAID_DATA:\n${a_temp}"
+	# echo ${#A_RAID_DATA[@]}
+	# echo -e "A_RAID_DATA:\n${a_temp}"
 	
 	eval $LOGFE
 }
 
-get_raid_data_bsd()
+get_raid_data_mdraid()
 {
 	eval $LOGFS
-	local zpool_path=$( type -p zpool 2>/dev/null )
-	local zpool_data='' zpool_arg='v'
 	
-	if [[ -n $zpool_path ]];then
-		B_BSD_RAID='true'
-		# bsd sed does not support inserting a true \n so use this trick
-		# some zfs does not have -v
-		if $zpool_path list -v &>/dev/null;then
-			zpool_data="$( $zpool_path list -v 2>/dev/null | sed $SED_RX 's/^([^[:space:]])/\
-\1/' )"
-		else
-			zpool_data="$( $zpool_path list 2>/dev/null | sed $SED_RX 's/^([^[:space:]])/\
-\1/' )"
-			zpool_arg='no-v'
-		fi
-# 		echo "$zpool_data"
-		IFS=$'\n'
-		A_RAID_DATA=( $(
-		gawk '
-		BEGIN {
-			IGNORECASE=1
-			raidString=""
-			separator=""
-			components=""
-			reportSize=""
-			blocksAvailable=""
-			chunkRaidAllocated=""
-		}
-		/SIZE.*ALLOC/ {
-			sub(/.*ALLOC.*/,"", $0)
-		}
-		# gptid/d874c7e7-3f6d-11e4-b7dc-080027ea466c
-		/^[^[:space:]]/ {
-			components=""
-			separator=""
-			raidLevel=""
-			device=$1
-			deviceState=$7
-			reportSize=$2
-			blocksAvailable=$4
-			chunkRaidAllocated=$3
-			
-			getline
-			# raid level is the second item in the output, unless it is not, sometimes it is absent
-			if ( $1 != "" ) {
-				if ( $1 ~ /raid|mirror/ ) {
-					raidLevel="zfs " $1
-				}
-				else {
-					raidLevel="zfs-no-raid"
-					components = $1
+	# need to make sure there's always a newline in front of each record type, and
+	# also correct possible weird formats for the output from older kernels etc.
+	Mdstat="$( sed -e 's/^md/\nmd/' -e 's/^unused[[:space:]]/\nunused /' \
+	-e 's/read_ahead/\nread_ahead/' -e 's/^resync=/\nresync=/' -e 's/^Event/\nEvent/' \
+	-e 's/^[[:space:]]*$//' -e 's/[[:space:]]read_ahead/\nread_ahead/' <<< "$Mdstat" )"
+	# some fringe cases do not end as expected, so need to add newlines plus EOF to make sure while loop doesn't spin
+	Mdstat=$( echo -e "$Mdstat\n\nEOF" )
+	
+	IFS=$'\n'
+	A_RAID_DATA=( $(
+	gawk '
+	BEGIN {
+		IGNORECASE=1
+		RS="\n"
+	}
+	/^personalities/ {
+		KernelRaidSupport = gensub(/personalities[[:space:]]*:[[:space:]]*(.*)/, "\\1", 1, $0)
+		# clean off the brackets
+		gsub(/[\[\]]/,"",KernelRaidSupport)
+		print "KernelRaidSupport," KernelRaidSupport
+	}
+	/^read_ahead/ {
+		ReadAhead=gensub(/read_ahead (.*)/, "\\1", 1 )
+		print "ReadAhead," ReadAhead
+	}
+	/^Event:/ {
+		print "raidEvent," $NF
+	}
+	# print logic will search for this value and use it to print out the unused devices data
+	/^unused devices/ {
+		unusedDevices = gensub(/^unused devices:[[:space:]][<]?([^>]*)[>]?.*/, "\\1", 1, $0)
+		print "UnusedDevices," unusedDevices
+	}
+	
+	/^md/ {
+		# reset for each record loop through
+		deviceState = ""
+		bitmapValues = ""
+		blocks = ""
+		chunkSize = ""
+		components = ""
+		device = ""
+		deviceReport = ""
+		finishTime = ""
+		recoverSpeed = ""
+		recoveryProgressBar = ""
+		recoveryPercent = ""
+		raidLevel = ""
+		sectorsRecovered = ""
+		separator = ""
+		superBlock = ""
+		uData = ""
+		
+		while ( !/^[[:space:]]*$/  ) {
+			gsub(/'"$BAN_LIST_ARRAY"'/, " ", $0 )
+			gsub(/[[:space:]]+/, " ", $0 )
+			if ( $0 ~ /^md/ ) {
+				device = gensub(/(md.*)[[:space:]]?:/, "\\1", "1", $1 )
+			}
+			if ( $0 ~ /mirror|raid[0-9]+/ ) {
+				raidLevel = gensub(/(.*)raid([0-9]+)(.*)/, "\\2", "g", $0 )
+			}
+			if ( $0 ~ /(active \(auto-read-only\)|active|inactive)/ ) {
+				deviceState = gensub(/(.*) (active \(auto-read-only\)|active|inactive) (.*)/, "\\2", "1", $0 )
+			}
+			# gawk will not return all the components using gensub, only last one
+			separator = ""
+			for ( i=3; i<=NF; i++ ) {
+				if ( $i ~ /[hs]d[a-z][0-9]*(\[[0-9]+\])?(\([SF]\))?/ ) {
+					components = components separator $i
 					separator=" "
 				}
 			}
-			
-			while ( getline && $1 !~ /^$/ ) {
-				# https://blogs.oracle.com/eschrock/entry/zfs_hot_spares
-				if ($1 ~ /spares/) {
-					getline
+			if ( $0 ~ /blocks/ ) {
+				blocks = gensub(/(.*[[:space:]]+)?([0-9]+)[[:space:]]blocks.*/, "\\2", "1", $0)
+			}
+			if ( $0 ~ /super[[:space:]][0-9\.]+/ ) {
+				superBlock = gensub(/.*[[:space:]]super[[:space:]]([0-9\.]+)[[:space:]].*/, "\\1", "1", $0)
+			}
+			if ( $0 ~ /algorithm[[:space:]][0-9\.]+/ ) {
+				algorithm = gensub(/.*[[:space:]]algorithm[[:space:]]([0-9\.]+)[[:space:]].*/, "\\1", "1", $0)
+			}
+			if ( $0 ~ /\[[0-9]+\/[0-9]+\]/ ) {
+				deviceReport = gensub(/.*[[:space:]]\[([0-9]+\/[0-9]+)\][[:space:]].*/, "\\1", "1", $0)
+				uData = gensub(/.*[[:space:]]\[([U_]+)\]/, "\\1", "1", $0)
+			}
+			# need to avoid this:  bitmap: 0/10 pages [0KB], 16384KB chunk
+			# while currently all the normal chunks are marked with k, not kb, this can change in the future
+			if ( $0 ~ /[0-9]+[k] chunk/ && $0 !~ /bitmap/ ) {
+				chunkSize = gensub(/(.*) ([0-9]+[k]) chunk.*/, "\\2", "1", $0)
+			}
+			if ( $0 ~ /^resync=/ ) {
+				sub(/resync=/,"")
+				print "resyncStatus," $0
+			}
+			if ( $0 ~ /\[[=]*>[\.]*\].*(resync|recovery)/ ) {
+				recoveryProgressBar = gensub(/.*(\[[=]*>[\.]*\]).*/, "\\1",1,$0)
+			}
+			if ( $0 ~ / (resync|recovery)[[:space:]]*=/ ) {
+				recoveryPercent = gensub(/.* (resync|recovery)[[:space:]]*=[[:space:]]*([0-9\.]+%).*/, "\\1~\\2", 1 )
+				if ( $0 ~ /[[:space:]]\([0-9]+\/[0-9]+\)/ ) {
+					sectorsRecovered = gensub(/.* \(([0-9]+\/[0-9]+)\).*/, "\\1", 1, $0 )
 				}
-				# print $1
-				components = components separator $1
+				if ( $0 ~ /finish[[:space:]]*=/ ) {
+					finishTime = gensub(/.* finish[[:space:]]*=[[:space:]]*([[0-9\.]+)([a-z]+) .*/, "\\1 \\2", 1, $0 )
+				}
+				if ( $0 ~ /speed[[:space:]]*=/ ) {
+					recoverSpeed = gensub(/.* speed[[:space:]]*=[[:space:]]*([[0-9\.]+)([a-z]+\/[a-z]+)/, "\\1 \\2", 1, $0 )
+				}
+			}
+			if ( $0 ~ /bitmap/ ) {
+				bitmapValues = gensub(/(.*[[:space:]])?bitmap:(.*)/, "\\2", 1, $0 )
+			}
+			
+			getline
+		}
+		raidString = device "," deviceState "," raidLevel "," components "," deviceReport "," uData 
+		raidString = raidString "," blocks "," superBlock "," algorithm "," chunkSize "," bitmapValues
+		raidString = raidString "," recoveryProgressBar "," recoveryPercent "," sectorsRecovered "," finishTime "," recoverSpeed
+		
+		print raidString
+	}
+	' <<< "$Mdstat" ) )
+	IFS="$ORIGINAL_IFS"
+	
+	eval $LOGFE
+}
+
+get_raid_data_zfs()
+{
+	eval $LOGFS
+	
+	local zpool_data='' zpool_arg='v'
+	
+	# bsd sed does not support inserting a true \n so use this trick
+	# some zfs does not have -v
+	if $Zpool_Path list -v &>/dev/null;then
+		zpool_data="$( $Zpool_Path list -v 2>/dev/null | sed $SED_RX 's/^([^[:space:]])/\
+\1/' )"
+	else
+		zpool_data="$( $Zpool_Path list 2>/dev/null | sed $SED_RX 's/^([^[:space:]])/\
+\1/' )"
+		zpool_arg='no-v'
+	fi
+# 		echo "$zpool_data"
+	IFS=$'\n'
+	A_RAID_DATA=( $(
+	gawk -v bsdType="$BSD_TYPE" '
+	BEGIN {
+		IGNORECASE=1
+		raidString=""
+		separator=""
+		components=""
+		reportSize=""
+		blocksAvailable=""
+		chunkRaidAllocated=""
+	}
+	/SIZE.*ALLOC/ {
+		sub(/.*ALLOC.*/,"", $0)
+	}
+	# gptid/d874c7e7-3f6d-11e4-b7dc-080027ea466c
+	/^[^[:space:]]/ {
+		components=""
+		separator=""
+		raidLevel=""
+		device=$1
+		reportSize=$2
+		chunkRaidAllocated=$3
+		blocksAvailable=$4
+		if ( bsdType != "" ){
+			deviceState=$7
+		}
+		else {
+			deviceState=$9
+		}
+		
+		getline
+		# raid level is the second item in the output, unless it is not, sometimes it is absent
+		if ( $1 != "" ) {
+			if ( $1 ~ /raid|mirror/ ) {
+				raidLevel="zfs " $1
+			}
+			else {
+				raidLevel="zfs-no-raid"
+				components = $1
 				separator=" "
 			}
-			# some issues if we use ~ here
-			gsub(/\//,"%",components)
+		}
+		
+		while ( getline && $1 !~ /^$/ ) {
+			# https://blogs.oracle.com/eschrock/entry/zfs_hot_spares
+			if ($1 ~ /spares/) {
+				getline
+			}
 			# print $1
-			raidString = device "," deviceState "," raidLevel "," components "," reportSize "," uData 
-			raidString = raidString "," blocksAvailable "," superBlock "," algorithm "," chunkRaidAllocated 
-			# none of these are used currently
-			raidString = raidString "," bitmapValues  "," recoveryProgressBar "," recoveryPercent 
-			raidString = raidString "," sectorsRecovered "," finishTime "," recoverSpeed
-			gsub(/~/,"",raidString)
-			print raidString
-		}' <<< "$zpool_data" ) )
-		IFS="$ORIGINAL_IFS"
-		# pass the zpool type, so we know how to get the components
-		get_raid_component_data_bsd "$zpool_arg"
-	fi
+			components = components separator $1
+			separator=" "
+		}
+		# some issues if we use ~ here
+		gsub(/\//,"%",components)
+		# print $1
+		raidString = device "," deviceState "," raidLevel "," components "," reportSize "," uData 
+		raidString = raidString "," blocksAvailable "," superBlock "," algorithm "," chunkRaidAllocated 
+		# none of these are used currently
+		raidString = raidString "," bitmapValues  "," recoveryProgressBar "," recoveryPercent 
+		raidString = raidString "," sectorsRecovered "," finishTime "," recoverSpeed
+		gsub(/~/,"",raidString)
+		print raidString
+	}' <<< "$zpool_data" ) )
+	IFS="$ORIGINAL_IFS"
+	# pass the zpool type, so we know how to get the components
+	get_raid_component_data_zfs "$zpool_arg"
+
 	eval $LOGFE
 }
 
 # note, we've already tested for zpool so no further tests required
 # args: $1 - zpool type, v will have a single row output, no-v has stacked for components
-get_raid_component_data_bsd()
+get_raid_component_data_zfs()
 {
 	eval $LOGFS
 	local a_raid_data='' array_string='' component='' component_string='' 
@@ -10299,6 +10034,7 @@ get_raid_component_data_bsd()
 		zpool_status=''
 		device=${a_raid_data[0]}
 		zpool_status="$( zpool status $device )"
+		log_function_data "zpool status $device:\n$zpool_status"
 		# we will remove ONLINE for status and only use OFFLINE/DEGRADED as tests
 		# for print output display of issues with components
 		# note: different zfs outputs vary, some have the components listed by line
@@ -10370,7 +10106,7 @@ get_raid_component_data_bsd()
 	
 	eval $LOGFE
 }
-# get_raid_data_bsd;exit
+# get_raid_data_zfs;exit
 
 get_ram_data()
 {
@@ -10378,7 +10114,7 @@ get_ram_data()
 	
 	local a_temp='' array_string=''
 	
-	get_dmidecode_data
+	set_dmidecode_data
 	
 	if [[ -n $DMIDECODE_DATA ]];then
 		if [[ $DMIDECODE_DATA == 'dmidecode-error-'* ]];then
@@ -10500,7 +10236,7 @@ get_ram_data()
 						aArrayData[k,"maxCapacity16"]=calculateSize($2,aArrayData[k,"maxCapacity16"])
 						#print "mc:" aArrayData[k,"maxCapacity16"] ":" $2
 					}
-					# note: these 3 have cleaned data in get_dmidecode_data, so replace stuff manually
+					# note: these 3 have cleaned data in set_dmidecode_data, so replace stuff manually
 					if ( $1 == "Location") {
 						sub(/[[:space:]]Or[[:space:]]Motherboard/,"",$2)
 						location=$2
@@ -11488,7 +11224,7 @@ get_sensors_data()
 		# there are some guesses here, but with more sensors samples it will get closer.
 		# note: using arrays starting at 1 for all fan arrays to make it easier overall
 		# more validation because gensub if fails to get match returns full string, so
-		# we have to be sure we are working with the actual real string before assiging
+		# we have to be sure we are working with the actual real string before assigning
 		# data to real variables and arrays. Extracting C/F degree unit as well to use
 		# when constructing temp items for array. 
 		# note that because of charset issues, no tempUnit="°" tempWorkingUnit degree sign 
@@ -11922,30 +11658,6 @@ get_shell_parent()
 	eval $LOGFE
 }
 
-# this will be used for some bsd data types
-# args: $1 - option type
-get_sysctl_data()
-{
-	eval $LOGFS
-	
-	local sysctl_data=''
-	
-	if [[ $B_SYSCTL ]];then
-		# darwin sysctl has BOTH = and : separators, and repeats data. Why? No bsd discipline, that's for sure
-		if [[ $BSD_VERSION == 'darwin' ]];then
-			sysctl_data="$( sysctl -$1 | sed 's/[[:space:]]*=[[:space:]]*/: /' )"
-		else
-			sysctl_data="$( sysctl -$1 )"
-		fi
-	fi
-	if [[ $1 == 'a' ]];then
-		SYSCTL_A_DATA="$sysctl_data"
-	fi
-	log_function_data "sysctl_data: $sysctl_data"
-	
-	eval $LOGFE
-}
-
 get_tty_console_irc()
 {
 	eval $LOGFS
@@ -12133,13 +11845,16 @@ get_weather_data()
 		if [[ $b_test_loc != 'true' ]];then
 			case $DOWNLOADER in
 				curl)
-					location_data="$( curl $NO_SSL_OPT -y $DL_TIMEOUT -s $location_site )" || downloader_error=$?
+					location_data="$( curl $NO_SSL_OPT -L -y $DL_TIMEOUT -s $location_site )" || downloader_error=$?
 					;;
 				fetch)
 					location_data="$( fetch $NO_SSL_OPT -T $DL_TIMEOUT -q -o - $location_site )" || downloader_error=$?
 					;;
 				ftp)
 					location_data="$( ftp $NO_SSL_OPT -o - $location_site 2>/dev/null )" || downloader_error=$?
+					;;
+				perl)
+					location_data="$( download_file 'stdout' $location_site )" || downloader_error=$?
 					;;
 				wget)
 					location_data="$( wget $NO_SSL_OPT -t 1 -T $DL_TIMEOUT -q -O - $location_site )" || downloader_error=$?
@@ -12270,13 +11985,16 @@ get_weather_data()
 		if [[ $b_test_weather != 'true' ]];then
 			case $DOWNLOADER in
 				curl)
-					weather_data="$( curl $NO_SSL_OPT -y $DL_TIMEOUT -s $weather_feed"$location" )" || downloader_error=$?
+					weather_data="$( curl $NO_SSL_OPT -L -y $DL_TIMEOUT -s $weather_feed"$location" )" || downloader_error=$?
 					;;
 				fetch)
 					weather_data="$( fetch $NO_SSL_OPT -T $DL_TIMEOUT -q -o - $weather_feed"$location" )" || downloader_error=$?
 					;;
 				ftp)
 					weather_data="$( ftp $NO_SSL_OPT -o - $weather_feed"$location" 2>/dev/null )" || downloader_error=$?
+					;;
+				perl)
+					weather_data="$( download_file 'stdout' "$weather_feed$location" )" || downloader_error=$?
 					;;
 				wget)
 					weather_data="$( wget $NO_SSL_OPT -t 1 -T $DL_TIMEOUT -q -O - $weather_feed"$location" )" || downloader_error=$?
@@ -12432,22 +12150,293 @@ get_weather_data()
 # get_weather_data;exit
 
 #### -------------------------------------------------------------------
-#### special data handling for specific options and conditions
+#### SPECIAL DATA HANDLERS - INITIALIZE DATA VALUES
 #### -------------------------------------------------------------------
 
-# args: $1 - string to strip color code characters out of
-# returns count of string length minus colors
-# note; this cleanup may not be working on bsd sed
-calculate_line_length()
+# BSD only
+set_dmesg_boot_data()
 {
-	local string=$1
-	# ansi: [1;34m irc: \x0312
-	# note: using special trick for bsd sed, tr - NOTE irc sed must use " double quote
-	string=$( sed -e 's/'$ESC'\[[0-9]\{1,2\}\(;[0-9]\{1,2\}\)\{0,2\}m//g' -e "s/\\\x0[0-9]\{1,3\}//g" <<< $string )
-	#echo $string
-	LINE_LENGTH=${#string}
-	# echo ${#string}
+	eval $LOGFS
+	
+	local dmsg_boot_data=''
+	
+	if [[ $B_DMESG_BOOT_FILE == 'true' ]];then
+		# replace all indented items with ~ so we can id them easily while processing
+		# note that if user, may get error of read permissions
+		# for some weird reason, real mem and avail mem are use a '=' separator, who knows why, the others are ':'
+		dmsg_boot_data="$( cat $FILE_DMESG_BOOT 2>/dev/null | gawk '
+		{
+			sub(/[[:space:]]*=[[:space:]]*|:[[:space:]]*/,":", $0)
+			gsub(/'"$BAN_LIST_ARRAY"'/," ", $0)
+			gsub(/\"/, "", $0)
+			gsub(/[[:space:]][[:space:]]/, " ", $0)
+			print $0
+		}' )"
+	fi
+	DMESG_BOOT_DATA="$dmsg_boot_data"
+	log_function_data "$dmsg_boot_data"
+	eval $LOGFE
 }
+
+set_dmidecode_data()
+{
+	eval $LOGFS
+	
+	local dmiData="" b_debugger='false'
+
+	if [[ $B_DMIDECODE_SET != 'true' ]];then
+		dmidecodePath=$( type -p dmidecode 2>/dev/null )
+		if [[ -z $dmidecodePath ]];then
+			DMIDECODE_DATA='dmidecode-error-not-installed'
+		else
+			# note stripping out these lines: Handle 0x0016, DMI type 17, 27 bytes
+			# but NOT deleting them, in case the dmidecode data is missing empty lines which will be
+			# used to separate results. Then we remove the doubled empty lines to keep it clean and
+			# strip out all the stuff we don't want to see in the results. We want the error data in 
+			# stdout for error handling
+			if [[ $b_debugger == 'true' && $HOSTNAME == 'yawn' ]];then
+				dmiData="$( cat ~/bin/scripts/inxi/svn/misc/data/dmidecode/dmidecode-memory-variants-2.txt )"
+			else 
+				dmiData="$( $dmidecodePath 2>&1 )"
+			fi
+			# these tests first, because bsd error messages like this (note how many : are in the string)
+			# inxi: line 4928: /usr/local/sbin/dmidecode: Permission denied
+			if [[ ${#dmiData} -lt 200  ]];then
+				if [[ -z ${dmiData/*Permission denied*/} ]];then
+				# if [[ -n $( grep -i 'Permission denied' <<< "$dmiData" ) ]];then
+					DMIDECODE_DATA='dmidecode-error-requires-root'
+				# this handles very old systems, like Lenny 2.6.26, with dmidecode, but no data
+				elif [[ -n $( grep -i 'no smbios ' <<< "$dmiData" ) ]];then
+					DMIDECODE_DATA='dmidecode-error-no-smbios-dmi-data'
+				else
+					DMIDECODE_DATA='dmidecode-error-unknown-error'
+				fi
+			else
+				DMIDECODE_DATA="$( echo "$dmiData" | gawk -F ':' '
+				BEGIN {
+					IGNORECASE=1
+					cutExtraTab="false"
+					twoData=""
+					oneData=""
+				}
+				{
+					# no idea why, but freebsd gawk does not do this right
+					oneData=$1
+					twoData=$2
+					if ( twoData != "" ) {
+						twoHolder="true"
+					}
+					else {
+						twoHolder="false"
+					}
+					if ( $0 ~ /^\tDMI type/ ) {
+						sub(/^\tDMI type.*/, "", $0)
+						cutExtraTab="true"
+					}
+					gsub(/'"$BAN_LIST_NORMAL"'/, "", twoData)
+					gsub(/'"$BAN_LIST_ARRAY"'/, " ", twoData)
+					# clean out Handle line
+					# sub(/^Handle.*/,"", $0)
+					sub(/^[[:space:]]*Inactive.*/,"",twoData)
+					# yes, there is a typo in a user data set, unknow
+					# Base Board Version|Base Board Serial Number
+					# Chassis Manufacturer|Chassis Version|Chassis Serial Number
+					# System manufacturer|System Product Name|System Version
+					# To Be Filled By O.E.M.
+					# strip out starting white space so that the following stuff will clear properly
+					sub(/^[[:space:]]+/, "", twoData)
+					sub(/^Base Board .*|^Chassis .*|empty|.*O\.E\.M\..*|.*OEM.*|^Not .*|^System .*|.*unknow.*|.*N\/A.*|none|^To be filled.*|^0x[0]+$|\[Empty\]|<Bad Index>|Default string|^\.\.$/, "", twoData) 
+					sub(/.*(AssetTagNum|Manufacturer| Or Motherboard|PartNum.*|SerNum).*/, "", twoData)
+					gsub(/\ybios\y|\yacpi\y/, "", twoData) # note: biostar
+					sub(/http:\/\/www.abit.com.tw\//, "Abit", twoData)
+					
+					# for double indented values replace with ~ so later can test for it, we are trusting that
+					# indentation will be tabbed in this case
+					# special case, dmidecode 2.2 has an extra tab and a DMI type line
+					if ( cutExtraTab == "true" ) {
+						sub(/^\t\t\t+/, "~", oneData)
+					}
+					else {
+						sub(/^\t\t+/, "~", oneData)
+					}
+					gsub(/ [ \t]+/, " ", twoData)
+					gsub(/^[[:space:]]+|[[:space:]]+$/, "", twoData)
+					gsub(/^[[:space:]]+|[[:space:]]+$/, "", oneData)
+					
+					# reconstructing the line for processing so gawk can use -F : again
+					if ( oneData != "" && twoHolder == "true" ) {
+						print oneData ":" twoData
+					}
+					else {
+						# make sure all null lines have no spaces in them!
+						gsub(/^[[:space:]]+|[[:space:]]+$/,"",$0)
+						print $0
+					}
+				}' \
+				| sed '/^$/{
+N
+/^\n$/D
+}' \
+				)"
+			fi
+			# echo ":${DMIDECODE_DATA}:"
+			log_function_data "DMIDECODE_DATA (PRE): $DMIDECODE_DATA"
+			
+		fi
+		B_DMIDECODE_SET='true'
+		log_function_data "DMIDECODE_DATA (POST): $DMIDECODE_DATA"
+	fi
+
+	eval $LOGFE
+}
+# set_dmidecode_data;echo "$DMIDECODE_DATA";exit
+
+# args: $1 - v/n 
+set_lspci_data()
+{
+	eval $LOGFS
+	local lspci_data=''
+
+	if [[ $B_LSPCI == 'true' ]];then
+		lspci_data="$( lspci -$1 | gawk '{
+			gsub(/\(prog-if[^)]*\)/,"")
+			sub(/^0000:/, "", $0) # seen case where the 0000: is prepended, rare, but happens
+			print
+		}' )"
+	fi
+	log_function_data 'raw' "lspci_data $1:\n$lspci_data"
+	if [[ $1 == 'v' ]];then
+		LSPCI_V_DATA="$lspci_data"
+	elif [[ $1 == 'n' ]];then
+		LSPCI_N_DATA="$lspci_data"
+	fi
+	eval $LOGFE
+}
+
+set_pciconf_data()
+{
+	eval $LOGFS
+	
+	local pciconf_data='' a_temp=''
+	
+	if [[ $B_PCICONF == 'true' ]];then
+		pciconf_data="$( pciconf -lv 2>/dev/null )"
+		if [[ -n $pciconf_data ]];then
+			pciconf_data=$( gawk '
+			BEGIN {
+				IGNORECASE=1
+			}
+			{
+					gsub(/'"$BAN_LIST_NORMAL"'/, "", $0)
+					gsub(/[[:space:]]+=[[:space:]]+/, "=",$0)
+					gsub(/^[[:space:]]+|'"'"'|\"|,/, "", $0)
+					gsub(/=0x/,"=",$0)
+					# line=gensub(/.*[[:space:]]+(class=[^[:space:]]*|card=[^[:space:]]*)|chip=[^[:space:]]*|rev=[^[:space:]]*|hdr=[^[:space:]]*).*/,"\n\\1","g",$0)
+					line=gensub(/(.*@.*)/,"\n\\1",$0)
+					print line
+			}' <<< "$pciconf_data" )
+			# create empty last line with this spacing trick
+			pciconf_data="$pciconf_data
+
+EOF"
+			# echo "$pciconf_data"
+			# now insert into arrays
+			IFS=$'\n'
+			A_PCICONF_DATA=( $( gawk '
+			BEGIN {
+				fullLine=""
+				driver=""
+				vendor=""
+				device=""
+				class=""
+				chipId=""
+				pciId=""
+				itemData=""
+				IGNORECASE=1
+			}
+			/^.*@/ {
+				pciId=""
+				vendor=""
+				class=""
+				driver=""
+				device=""
+				chipId=""
+				itemData=$1
+				
+				driver=gensub(/^([^@]+)@.*/, "\\1", itemData )
+				pciId=gensub(/^.*@pci([0-9\.:]+).*/, "\\1", itemData )
+				sub(/:$/, "", pciId)
+				itemData=$4
+				chipId=gensub(/.*chip=([0-9a-f][0-9a-f][0-9a-f][0-9a-f])([0-9a-f][0-9a-f][0-9a-f][0-9a-f]).*/, "\\2:\\1", itemData )
+				if ( $2 ~ /class=020000/ ) {
+					class="network"
+				}
+				else if ( $2 == "class=030000" ) {
+					class="display"
+				}
+				else if ( $2 ~ /class=040300|class=040100/ ) {
+					class="audio"
+				}
+				
+				while ( getline && $1 !~ /^$/ ) {
+					if ( $1 ~ /^vendor/ ) {
+						sub(/^vendor=/, "", $1 )
+						vendor=$0
+					}
+					else if ( $1 ~ /^device/ ) {
+						sub(/^device=/, "", $1 )
+						device=$0
+					}
+					else if ( $1 ~ /^class=/ && class == "" ) {
+						sub(/^class=/, "", $1)
+						class=$0
+					}
+				}
+				if ( device == "" ) {
+					device=vendor
+				}
+				fullLine=class "," device "," vendor "," driver "," pciId "," chipId
+				print fullLine
+			}' <<< "$pciconf_data" ))
+			IFS="$ORIGINAL_IFS"
+		fi
+	else
+		A_PCICONF_DATA='pciconf-not-installed'
+	fi
+	B_PCICONF_SET='true'
+	a_temp=${A_PCICONF_DATA[@]}
+	log_function_data "$a_temp"
+	log_function_data "$pciconf_data"
+	eval $LOGFE
+}
+
+# this will be used for some bsd data types
+# args: $1 - option type
+set_sysctl_data()
+{
+	eval $LOGFS
+	
+	local sysctl_data=''
+	
+	if [[ $B_SYSCTL ]];then
+		# darwin sysctl has BOTH = and : separators, and repeats data. Why? No bsd discipline, that's for sure
+		if [[ $BSD_VERSION == 'darwin' ]];then
+			sysctl_data="$( sysctl -$1 | sed 's/[[:space:]]*=[[:space:]]*/: /' )"
+		else
+			sysctl_data="$( sysctl -$1 )"
+		fi
+	fi
+	if [[ $1 == 'a' ]];then
+		SYSCTL_A_DATA="$sysctl_data"
+	fi
+	log_function_data "sysctl_data: $sysctl_data"
+	
+	eval $LOGFE
+}
+
+#### -------------------------------------------------------------------
+#### SPECIAL DATA HANDLERS - UTILITIES FOR GET DATA/PRINT LINES
+#### -------------------------------------------------------------------
 
 ## multiply the core count by the data to be calculated, bmips, cache
 # args: $1 - string to handle; $2 - cpu count
@@ -12475,6 +12464,162 @@ calculate_multicore_data()
 	echo "$string_number$string_data"
 	log_function_data "string_numberstring_data: $string_number$string_data"
 	eval $LOGFE
+}
+
+# used in partitions get and print functions
+# args: $1 - dev item, check for mapper, then get actual dev item if mapped
+# eg: lrwxrwxrwx 1 root root       7 Sep 26 15:10 truecrypt1 -> ../dm-2 
+get_dev_processed_item()
+{
+	eval $LOGFS
+	
+	local dev_item=$1 dev_return=''
+	
+	if [[ -n $DEV_DISK_MAPPER && -n $( grep -is 'mapper/' <<< $dev_item ) ]];then
+		dev_return=$( echo "$DEV_DISK_MAPPER" | gawk '
+		$( NF - 2 ) ~ /^'${dev_item##*/}'$/ {
+			item=gensub( /..\/(.+)/, "\\1", 1, $NF )
+			print item
+		}' )
+	fi
+	if [[ -z $dev_return ]];then
+		dev_return=$dev_item
+	fi
+	
+	echo $dev_return
+
+	eval $LOGFE
+}
+
+# Note: useless because this is just absurdly inaccurate, too bad...
+get_install_date()
+{
+	eval $LOGFS
+	
+	local installed=''
+	
+	if ls -al --time-style '+FORMAT %Y-%m-%d' /usr 2>/dev/null;then
+		installed=$(ls -al --time-style '+FORMAT %Y-%m-%d' / | awk '/lost\+found/ {print $7;exit}' )
+# 	elif 
+# 		:
+	fi
+	
+	echo $installed
+	
+	eval $LOGFE
+}
+
+# args: $1 - busid
+get_lspci_chip_id()
+{
+	eval $LOGFS
+	
+	local chip_id=''
+	
+	chip_id=$( gawk '
+	/^'$1'/ {
+		if ( $3 != "" ) {
+			print $3
+		}
+	}' <<< "$LSPCI_N_DATA" )
+	
+	echo $chip_id
+	
+	eval $LOGFE
+}
+
+# process and return module version data
+get_module_version_number()
+{
+	eval $LOGFS
+	local module_version=''
+	
+	if [[ $B_MODINFO_TESTED != 'true' ]];then
+		B_MODINFO_TESTED='true'
+		MODINFO_PATH=$( type -p modinfo )
+	fi
+
+	if [[ -n $MODINFO_PATH ]];then
+		module_version=$( $MODINFO_PATH $1 2>/dev/null | gawk '
+		BEGIN {
+			IGNORECASE=1
+		}
+		/^version/ {
+			gsub(/'"$BAN_LIST_ARRAY"'/, " ", $2)
+			gsub(/^ +| +$/, "", $2)
+			gsub(/ [ \t]+/, " ", $2)
+			print $2
+		}
+		' )
+	fi
+
+	echo "$module_version"
+	log_function_data "module_version: $module_version"
+	eval $LOGFE
+}
+
+get_patch_version_string()
+{
+	SELF_PATCH=${SELF_PATCH##*[0]} # strip leading zero(s)
+	
+	if [[ -n $SELF_PATCH ]];then
+		SELF_PATCH="-$SELF_PATCH"
+		# for cases where it was for example: 00-bsd cleaned to --bsd trim out one -
+		SELF_PATCH="${SELF_PATCH/--/-}"
+	fi
+}
+
+# note: gawk doesn't support white spaces in search string, gave errors, so use [[:space:]] instead
+# args: $1 - desktop/app command for --version; $2 - search string; $3 - gawk print number
+get_program_version()
+{
+	local version_data='' version='' get_version='--version' 
+	
+	# mate-about -v = MATE Desktop Environment 1.4.0
+	case $1 in
+		# legacy fluxbox had no --version, and current -v works
+		dwm|fluxbox|jwm|mate-about|wmii|wmii2)
+			get_version='-v'
+			;;
+		epoch)
+			get_version='version'
+			;;
+	esac
+	
+	case $1 in
+		# note, some wm/apps send version info to stderr instead of stdout
+		dwm|ksh|scrotwm|spectrwm)
+			version_data="$( $1 $get_version 2>&1 )"
+			;;
+		csh)
+			version_data="$( tcsh $get_version 2>/dev/null )"
+			;;
+		# quick debian/buntu hack until I find a universal way to get version for these
+		dash)
+			if type -p dpkg &>/dev/null;then
+				version_data="$( dpkg -l $1 2>/dev/null )"
+			fi
+			;;
+		*)
+			version_data="$( $1 $get_version 2>/dev/null )"
+			;;
+	esac
+	log_function_data "version data: $version_data"
+	if [[ -n $version_data ]];then
+		version=$( gawk '
+		BEGIN {
+			IGNORECASE=1
+		}
+		/'$2'/ {
+			# sample: dwm-5.8.2, ©.. etc, why no space? who knows. Also get rid of v in number string
+			# xfce, and other, output has , in it, so dump all commas and parentheses
+			gsub(/(,|dwm-|wmii2-|wmii-|v|V|\(|\))/, "",$'$3') 
+			print $'$3'
+			exit # quit after first match prints
+		}' <<< "$version_data" )
+	fi
+	log_function_data "program version: $version"
+	echo $version
 }
 
 # prints out shortened list of flags, the main ones of interest
@@ -12538,8 +12683,12 @@ process_cpu_flags()
 	eval $LOGFE
 }
 
+########################################################################
+#### PRINT DATA
+########################################################################
+
 #### -------------------------------------------------------------------
-#### print and processing of output data
+#### PRINT CONTROLLERS
 #### -------------------------------------------------------------------
 
 #### MASTER PRINT FUNCTION - triggers all line item print functions
@@ -12551,15 +12700,15 @@ print_it_out()
 	# and in some cases, their children, if variable syntax: Xxxx_Yyyy
 	
 	if [[ -n $BSD_TYPE ]];then
-		get_sysctl_data 'a' # set: SYSCTL_A_DATA
-		get_dmesg_boot_data # set: DMESG_BOOT_DATA
+		set_sysctl_data 'a' # set: SYSCTL_A_DATA
+		set_dmesg_boot_data # set: DMESG_BOOT_DATA
 	fi
 	if [[ $B_SHOW_SHORT_OUTPUT == 'true' ]];then
 		print_short_data
 	else
-		get_lspci_data 'v' # set: LSPCI_V_DATA
+		set_lspci_data 'v' # set: LSPCI_V_DATA
 		if [[ $B_EXTRA_EXTRA_DATA == 'true' ]];then
-			get_lspci_data 'n' # set: LSPCI_N_DATA
+			set_lspci_data 'n' # set: LSPCI_N_DATA
 		fi
 		if [[ $B_SHOW_SYSTEM == 'true' ]];then
 			print_system_data
@@ -12750,7 +12899,9 @@ print_short_data()
 	eval $LOGFE
 }
 
-#### LINE ITEM PRINT FUNCTIONS
+#### -------------------------------------------------------------------
+#### PRINT LINES
+#### -------------------------------------------------------------------
 
 # print sound card data
 print_audio_data()
@@ -12764,7 +12915,7 @@ print_audio_data()
 	if [[ $BSD_TYPE == 'bsd' ]];then
 		if [[ $B_PCICONF == 'true' ]];then
 			if [[ $B_PCICONF_SET == 'false' ]];then
-				get_pciconf_data
+				set_pciconf_data
 			fi
 			get_pciconf_card_data 'audio'
 		elif [[ $B_LSPCI == 'true' ]];then
@@ -13201,7 +13352,8 @@ print_cpu_data()
 			if [[ -n ${a_cpu_working[2]} ]];then
 				if [[ -z $BSD_TYPE ]];then
 					# AMD SOS chips appear to report full L2 cache per core
-					if [[ "${a_cpu_info[3]}" == 'amd' ]] && [[ "${a_cpu_info[4]}" == '14' || "${a_cpu_info[4]}" == '16' ]];then
+					if [[ "${a_cpu_info[3]}" == 'amd' ]] && 
+					   [[ "${a_cpu_info[4]}" == '14' || "${a_cpu_info[4]}" == '16' ]];then
 						cpu_cache=$( calculate_multicore_data "${a_cpu_working[2]}" "$cpu_physical_count"  )
 					elif [[ $cpu_vendor != 'intel' ]];then
 						cpu_cache=$( calculate_multicore_data "${a_cpu_working[2]}" "$(( $cpu_core_count * $cpu_physical_count ))"  )
@@ -13415,7 +13567,7 @@ print_cpu_flags_full()
 	eval $LOGFE
 }
 
-# args: $1 - type [sys/bat/default]; $2 - get_dmidecode_data error return
+# args: $1 - type [sys/bat/default]; $2 - set_dmidecode_data error return
 print_dmidecode_error()
 {
 	eval $LOGFS
@@ -13484,7 +13636,7 @@ print_graphics_data()
 	if [[ $BSD_TYPE == 'bsd' ]];then
 		if [[ $B_PCICONF == 'true' ]];then
 			if [[ $B_PCICONF_SET == 'false' ]];then
-				get_pciconf_data
+				set_pciconf_data
 			fi
 			get_pciconf_card_data 'display'
 		elif [[ $B_LSPCI == 'true' ]];then
@@ -14325,7 +14477,7 @@ print_networking_data()
 	if [[ $BSD_TYPE == 'bsd' ]];then
 		if [[ $B_PCICONF == 'true' ]];then
 			if [[ $B_PCICONF_SET == 'false' ]];then
-				get_pciconf_data
+				set_pciconf_data
 			fi
 			get_pciconf_card_data 'network'
 		elif [[ $B_LSPCI == 'true' ]];then
@@ -15093,7 +15245,11 @@ print_raid_data()
 	local no_raid_detected='' dev_string='/dev/'
 	local empty_raid_data='' report_size='report' blocks_avail='blocks' chunk_raid_usage='chunk size'
 	
-	if [[ -n $BSD_TYPE ]];then
+	if [[ $B_RAID_SET != 'true' ]];then
+		get_raid_data
+	fi
+	# note, default first tesat is zfs, if empty, falls back to mdraid
+	if [[ $RAID_TYPE == 'zfs' ]];then
 		no_raid_detected='No zfs software RAID detected-other types not yet supported.'
 		empty_raid_data='No zfs RAID data available-other types not yet supported.'
 		report_size='size'
@@ -15103,14 +15259,9 @@ print_raid_data()
 		no_raid_detected="No RAID data: $FILE_MDSTAT missing-is md_mod kernel module loaded?"
 		empty_raid_data="No RAID devices: $FILE_MDSTAT, md_mod kernel module present"
 	fi
-	
 	if [[ $BSD_TYPE == 'bsd' ]];then
 		dev_string=''
 	fi
-	if [[ $B_RAID_SET != 'true' ]];then
-		get_raid_data
-	fi
-
 	for (( i=0; i < ${#A_RAID_DATA[@]}; i++ ))
 	do
 		IFS=","
@@ -15140,8 +15291,9 @@ print_raid_data()
 		super_blocks=''
 		u_data=''
 		
-		if [[ -n $( grep '^md' <<< ${a_raid_working[0]} ) && -z $BSD_TYPE ]] || \
-		[[ -n $BSD_TYPE && ${a_raid_working[0]} != '' ]];then
+		# we only want to print lines if anything showed up for md or zfs. 
+		if [[ $RAID_TYPE == 'mdraid' && -n $( grep '^md' <<< ${a_raid_working[0]} ) ]] || \
+		   [[ $RAID_TYPE == 'zfs' && ${a_raid_working[0]} != '' ]];then
 			if [[ $B_SHOW_BASIC_RAID == 'true' ]];then
 				if [[ $basic_raid != '' ]];then
 					basic_raid_plural='s'
@@ -15217,13 +15369,25 @@ print_raid_data()
 						if [[ $B_EXTRA_DATA != 'true' ]];then
 							component=$( sed 's/\[[0-9]\+\]//' <<< $component )
 						fi
-						# NOTE: for bsd zfs, states are: ONLINE,DEGRADED,OFFLINE (at least)
-						if [[ -n $( grep -E '(F|DEGRADED)' <<< $component ) ]];then
-							component=$( sed -e 's/(F)//' -e 's/F//' -e 's/DEGRADED//' <<<  $component )
+						# ZFS: states are: ONLINE,DEGRADED,FAULTED,OFFLINE,REMOVED,UNAVAIL (at least)
+						# MDRAID: states are: (F), F, (S), S
+						# F and S trigger false positives with ZFS, needs fixing
+						if [[ $RAID_TYPE == 'mdraid' && -n $( grep 'F' <<< $component ) ]] || \
+						   [[ $RAID_TYPE == 'zfs' && -n $( grep -E '(DEGRADED|FAULTED)' <<< $component ) ]];then
+						   if [[ $RAID_TYPE == 'mdraid' ]];then
+								component=$( sed -e 's/(F)//' -e 's/S//' <<<  $component )
+							else
+								component=$( sed -e 's/DEGRADED//' -e 's/FAULTED//' <<<  $component )
+							fi
 							failed="$failed $component"
 							component=''
-						elif [[ -n $( grep -E '(S|OFFLINE)' <<< $component ) ]];then
-							component=$( sed -e 's/(S)//' -e 's/S//' -e 's/OFFLINE//' <<<  $component )
+						elif [[ $RAID_TYPE == 'mdraid' && -n $( grep -E 'S' <<< $component ) ]] || \
+						     [[ $RAID_TYPE == 'zfs' && -n $( grep -E '(OFFLINE)' <<< $component )  ]];then
+							if [[ $RAID_TYPE == 'mdraid' ]];then
+								component=$( sed -e 's/(S)//' -e 's/S//' <<<  $component )
+							else
+								component=$( sed -e 's/OFFLINE//' <<<  $component )
+							fi
 							spare="$spare $component"
 							component=''
 						else
@@ -15319,9 +15483,8 @@ print_raid_data()
 	if [[ $B_SHOW_BASIC_RAID == 'true' && $basic_raid != '' ]];then
 		a_raid_data[0]="${C1}Device$basic_raid_plural$SEP3${C2} $basic_raid"
 	fi
-	# note bsd temp test hack to make it run
-	if [[ $B_MDSTAT_FILE != 'true' && -z $BSD_TYPE ]] || \
-	[[ -n $BSD_TYPE && $B_BSD_RAID == 'false' ]];then
+	# This means no /proc/mdstat and no zfs_pool found
+	if [[ $RAID_TYPE == '' ]];then
 		if [[ $B_SHOW_RAID_R == 'true' ]];then
 			a_raid_data[0]="$no_raid_detected"
 		else
@@ -15802,7 +15965,7 @@ print_sensors_data()
 						case $j in
 							[0-9]|[1-9][0-9])
 								if [[ -n ${a_sensors_working[$j]} ]];then
-									fan_number=$(( $j + 1 )) # sys fans start on array key 5
+									fan_number=$(( $j + 1 )) # basic fans start on array key 1
 									# wrap after fan 6 total
 									if [[ $fan_count -lt 7 ]];then
 										sys_fans="$sys_fans${C1}fan-$fan_number$SEP3${C2} ${a_sensors_working[$j]} "
@@ -16182,7 +16345,7 @@ print_weather_data()
 }
 
 ########################################################################
-#### SCRIPT EXECUTION
+#### LAUNCH
 ########################################################################
 
 main $@ ## From the End comes the Beginning
