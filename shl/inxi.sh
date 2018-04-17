@@ -1,1 +1,1 @@
-not_mine/inxi.sh
+not_mine/binxi
