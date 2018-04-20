@@ -1,0 +1,9 @@
+rem libreoffice macro
+sub UpdateAllIndexes
+	rem UpdateAllIndexes hint from <a href="http://www.oooforum.org/forum/viewtopic.phtml?t=41113">http://www.oooforum.org/forum/viewtopic.phtml?t=41113</a>
+	dim document   as object
+	dim dispatcher as object
+	document   = ThisComponent.CurrentController.Frame
+	dispatcher = createUnoService("com.sun.star.frame.DispatchHelper")
+	dispatcher.executeDispatch(document, ".uno:UpdateAllIndexes", "", 0, Array())
+end sub
