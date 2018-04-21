@@ -40,7 +40,7 @@ echo isXPHome=%isXPHome%
 echo isAdmin=%isAdmin%
 echo.
 
-for %%t in (msg.exe dcomcnfg.exe qwinsta.exe prnmngr.vbs prncnfg.vbs forfiles.exe con2prt.exe whoami.exe wmic.exe secedit.exe systeminfo.exe devcon.exe mountvol.exe diskpart.exe tasklist.exe taskkill.exe fsutil.exe shutdown.exe xcopy.exe robocopy.exe cacls.exe xcacls.exe gpresult.exe devmgmt.msc diskmgmt.msc dfrg.msc lusrmgr.msc gpedit.msc secpol.msc gpedit.dll nusrmgr.cpl keymgr.cpl tsmmc.msc) do (
+for %%t in (secedit.exe systeminfo.exe mountvol.exe diskpart.exe tasklist.exe taskkill.exe fsutil.exe shutdown.exe xcopy.exe robocopy.exe cacls.exe xcacls.exe gpresult.exe devmgmt.msc diskmgmt.msc dfrg.msc lusrmgr.msc gpedit.msc secpol.msc gpedit.dll nusrmgr.cpl) do (
   echo Tool=%%t
   if %isXPPro%==true (
     if not exist %ToolsDir%\%%t xcopy /d /y %windir%\system32\%%t %ToolsDir%\
