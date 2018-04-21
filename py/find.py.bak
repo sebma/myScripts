@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+#coding: latin1
+import os
+from os import chdir, walk
+import re
+from os.path import basename, isdir, join
+from glob import glob #Filename Globbing patterns
+from argparse import ArgumentParser
+from sys import stderr, exit, argv
+from datetime import datetime
+from pdb import set_trace #To add a breakpoint for PDB debugger
+
+def initArgs() :
+	parser = ArgumentParser()
+	parser.add_argument( "dirList", nargs='*', help = "filename list to check, default is ..", default = '.' )
+	parser.add_argument( "-ls", help="use a long listing format.", action='store_true', default = False )
+	parser.add_argument( "-name", help="Base  of file  name.", default = '*' )
+	parser.add_argument( "-iname", help="Base  of file  name (case insensitive).", default = '*' )
+	parser.add_argument( "-maxdepth", help="use a long listing format.", type = int )
+
+	global args
+	try :    args = parser.parse_args()
+	except :
+		print >> stderr,  "\n" + parser.format_help()
+		exit( -1 )
+
+def ll(file) :
+	if os.name == "posix" :
+		stat = os.stat(file)
+		print stat.st_mode + "\t" + "1" + "\t"
+	else :
+		print file
+
+def main() :
+	initArgs()
+	startTime = datetime.now()
+	nbFiles = 0
+	# regExp = '|'.join( args.name ).replace('?', '.').replace('*', '.*').replace('|', '$|')
+	regExp = args.name.replace('?', '.').replace('*', '.*').replace('|', '$|')
+	regExp += '$'
+	# set_trace()
+	pattern = re.compile(regExp, re.I)
+	if args.maxdepth == 1 :
+		for currentGlobbingPattern in args.name :
+			if isdir( currentGlobbingPattern ) : currentGlobbingPattern += os.sep + '*'
+			for currentFile in glob( currentGlobbingPattern ) :
+				if pattern.search( currentFile ) :
+					if args.ls :
+						ll(currentFile)
+					else :
+						print currentFile
+	else :
+		for currentDir in args.dirList :
+			depth = 0
+			chdir( currentDir )
+			for root, dirs, files in walk('.') :
+				depth = root.count(os.sep)
+				if args.maxdepth is not None and depth > args.maxdepth : continue
+				for file in files :
+					currentFile = join(root, file)
+					if pattern.search( file ) :
+						if args.ls :
+							ll(currentFile)
+						else :
+							print currentFile
+	print "=> regExp = " + regExp
+
+main()
