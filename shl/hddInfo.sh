@@ -43,14 +43,16 @@ mkdir -p $logDir
 	echo "=> Enabling SMART on disk $diskFamily $diskModel on $diskDevice :"
 	$sudo smartctl --smart=on --offlineauto=on --saveauto=on $diskDevice
 	which hddparm >/dev/null 2>&1 && echo "=> hdparm info for disk $diskFamily $diskModel on $diskDevice :" && $sudo hdparm -I $diskDevice
-	echo "=> Printing all SMART and non-SMART information about the disk $diskFamily $diskModel on $diskDevice :"
-	$sudo smartctl $allInformation $diskDevice
+#	echo "=> Printing all SMART and non-SMART information about the disk $diskFamily $diskModel on $diskDevice :"
+#	$sudo smartctl $allInformation $diskDevice
 	#echo "=> Running a short self test for one minute for disk $diskFamily $diskModel on $diskDevice :"
 	#$sudo smartctl -t short $diskDevice && sleep 60
 	echo "=> Disk tests results for disk $diskFamily $diskModel on $diskDevice :"
 	$sudo smartctl -H -l selftest $diskDevice
-	echo "=> Disk Errors for disk $diskFamily $diskModel on $diskDevice :"
+	echo "=> Disk Errors for disk $diskFamily $diskModel on $diskDevice for the SMART Self-Test Log :"
 	$sudo smartctl -q errorsonly -H -l selftest $diskDevice
+	echo "=> Disk Errors for disk $diskFamily $diskModel on $diskDevice for the SMART Error Log :"
+	$sudo smartctl -q errorsonly -H -l error $diskDevice
 	echo "=> Disk temperature using smartctl :"
 	$sudo smartctl $allInformation $diskDevice | grep Temperature | head -5
 	which hddtemp >/dev/null 2>&1 && echo "=> Disk temperature using hddtemp :" && $sudo hddtemp $diskDevice
