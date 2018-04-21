@@ -1,0 +1,158 @@
+#!/usr/bin/env octave-cli
+
+function main()
+    global nbTexts;
+    tic
+    fprintf('=> Importing plaintexts ../../data/plaintexts.txt ...\n');
+    texts = textread('../../data/plaintexts.txt','%s');
+    nbTexts = uint32( length(texts) );
+    toc
+
+    initAES();
+    nbFiles = nbTexts;
+
+    OLDPWD = pwd;
+    fprintf('=> Importing power traces ../../data/data-*.txt ...\n');
+    powerTraces = importAllDataFromFiles('../../data/','data-*.txt');
+    cd(OLDPWD);
+
+    finalKey = [];
+    keySize=128;
+	finalKey = '';
+    k = uint16( 1 );
+    for k=1:2:uint16( keySize/4 ) %On traite le texte en entree octet/octet
+        bytes  = uint8( [] );
+        subKey = uint8(0:255); %valeurs possibles d'un octet de la sous-cle
+        toc
+        fprintf('=> Feeding the bytes vector ...\n');
+        for line=1:nbTexts %remplissage du vecteur de nbTexts colonnes
+%             bytes = [ bytes; hex2dec( texts{line}(k:k+1) ) ];
+             bytes(line,1) = hex2dec( texts{line}(k:k+1) );
+        end
+        toc
+        fprintf('=> Calculating the XOR of both bytes and subKey vectors ...\n');
+        addRoundKeyOutput = bitxor(bytes,subKey);
+        toc
+
+        fprintf('=> Doing the subBytes using the sbox ...\n');
+%        aHexa = dec2hex( subBytes( hex2dec('19') , sbox_NxM ) ) %test unitaire du subBytes
+
+        global sbox sbox_NxM;
+        for i=1:nbTexts
+            for j=1:256
+                subBytesOutput(i,j) = subBytes( addRoundKeyOutput(i,j), sbox_NxM );
+%                subBytesOutput(i,j) = subBytes( addRoundKeyOutput(i,j), sbox );
+            end
+        end
+        toc
+
+        fprintf('=> Calculating the Hamming weigh of the resulting matrix ...\n');
+        hW = hammingWeight(subBytesOutput);
+        toc
+
+%        fprintf('=> Resetting the timer.\n'); , tic
+        fprintf('=> Calculating the correlation ...\n');
+%{
+        powerTracesTransposed = powerTraces';
+        for j=1:256
+%            myCorrelation(j) = correlationSeb( powerTracesTransposed, hW(:,j)  );
+            myCorrelation(j) = corr( double( powerTraces ), double( hW(:,j) ) );
+        end
+%}
+
+%{
+        for i=1:nbTexts
+            for j=1:256
+                r = corrcoef(double( hW(:,j) ), double( powerTraces(:,i) ) );
+                myCorrelation(i,j) = r(1,2);
+                clear r;
+            end
+        end
+%}
+
+        myCorrelation = corr( double( powerTraces ), double( hW ) );
+
+        [maxi, idx] = max( max( abs( myCorrelation) ) );
+        subKeyFound = idx - 1; %car idx varie entre 1 et 256
+        toc
+
+        subKeyFoundHex = sprintf('%02X', subKeyFound);
+        fprintf('=> The subKeyFound is %s\n', subKeyFoundHex);
+        finalKey = strcat(finalKey,subKeyFoundHex);
+    end %boucle sur les 16 sous-cles
+    fprintf('=> The finalKey is %s\n', finalKey);
+	fprintf('=> DONE.\n');
+    toc
+end
+
+function initAES()
+    global sbox sbox_NxM;
+    
+    s = S_box_gen(); %appel au script 'S_box_gen.m'
+    sbox = s.s_box;
+    sbox = uint8(sbox);
+
+    sbox_NxM = reshape(sbox,16,16)';
+end
+
+function correl = correlationSeb(Xmatrix,Yvector)
+    meanxVector = mean(Xmatrix); %la resultante est un vecteur
+    meanyScalar = mean(Yvector); %la resultante est un scalaire
+
+    %{
+    correl = ( mean( mtimes( Xmatrix, Yvector' ) ) - meanxVector*meanyScalar ) ...
+        /sqrt...
+        ( ...
+            ( mean( mtimes( Xmatrix, Xmatrix') )-meanxVector*meanxVector' ) * ( (Yvector*Yvector')-meanyScalar^2 )...
+        )
+    %}
+end
+
+function amplitudes = importAllDataFromFiles(dataDir,filenamePattern)
+    tic
+    cd(dataDir); %Evite les N concatenations de files(i).folder + '/' + files(i).name
+    files = dir(filenamePattern);
+    amplitudes = int32( [] );
+    for i=1:uint32( numel(files) )
+%        file = fullfile( files(i).folder, files(i).name );
+%        file = strcat( files(i).folder, '/', files(i).name );
+        file = files(i).name;
+
+        fid = fopen(file);
+        myCell = textscan(fid,'%u32 %u32 %d32'); %500 textscan ~ 4.5s
+        amplitude1 = myCell{3}';
+
+%        data = load(file); %500 load ~ 12.5s
+%        data = textread(file); %500 textread ~ 12.3s
+%        data = importdata(file); %500 importdata ~ 18s
+%        data = fscanf( fid,'%u %u %d',[3 Inf] ); , data = data'; %500 fscanf ~ 10.5s
+%        amplitude1 = data(:,3);
+
+        amplitudes = [ amplitudes ; amplitude1 ]; %500 affectations ~ 4.2s
+        fclose(fid);
+    end
+    toc
+end
+
+function outByte = subBytes( byte, sbox )
+    lsbMask = uint8( 15  ); %Ox0f
+    msbMask = uint8( 240 ); %0xf0
+
+    l = bitand( byte, lsbMask ); %varie entre 0 et 15
+%    m = bitshift( bitand( byte, msbMask ), -4); %varie entre 0 et 15
+    m = bitand( byte, msbMask ) / 16; % equivalent au decalage de 4 bits vers la gauche
+
+%    outByte = sbox( 16*m+l+1 ); % s-box sous forme de vecteur
+    outByte = sbox( m+1, l+1 ); % s-box sous forme de matrice carree
+end
+
+function w = hammingWeight( matrix )
+    global nbTexts;
+%    w = zeros(nbTexts,256,'uint8');
+    w = zeros(size(matrix),'uint8');
+
+    for i = uint8(1:8)
+        w = w + bitget( matrix, i );
+    end
+end
+main

@@ -1,0 +1,27 @@
+Pour charger un fichier de data d'un coup sur octave/matlab avec 'textread' :
+
+[ time1, trigger1, amplitude1 ] = textread('data-0000.txt');
+
+on peut faire cela avec 'load' en 2 etapes :
+
+data = load('data-0000.txt');
+[ time1, trigger1, amplitude1 ] = deal( data(:,1), data(:,2), data(:,3) );
+
+ou avec 'textscan' :
+
+fid = fopen('data-0000.txt');
+myCell = textscan(fid,'%u32 %u32 %d32');
+[ time1, trigger1, amplitude1 ] = myCell{:};
+fclose(fid);
+
+Pour charger un fichier de data d'un coup sur python :
+
+time1, trigger1, amplitude1 = loadtxt('data-0000.txt', unpack=True)
+
+Les trois valeurs retournees sont des 'numpy.ndarray'
+
+Pour obtenir des listes a la place des 'numpy.ndarray', il faut taper :
+
+time1, trigger1, amplitude1 = loadtxt('data-0000.txt', unpack=True).tolist()
+
+IMPORTANT : Lorsqu'on lit un fichier avec une methode utilisant un pointeur, il faut revenir au debut du fichier pour pouvoir le relire. Pour cela utiliser 'frewind(fid)' ou 'fseek(fid,0,-1)' avec octave/matlab ou 'fid.seek(0)'
