@@ -39,32 +39,43 @@ logDir=$HOME/log
 logFile=$logDir/$(echo smartctl_$diskFamily $diskModel | sed "s/[ .]/_/g").log
 mkdir -p $logDir
 
+blink=$'\E[5m'
+bold=$'\E[1m'
+normal=$'\E[0m'
+red=$'\E[0;31m'
 {
 	echo "=> Disk general info for $diskFamily model $diskModel on $diskDevice :"
 	echo
 	$sudo smartctl -i $diskDevice
-	echo "=> Enabling SMART on disk $diskFamily model $diskModel on $diskDevice ..."
+	echo "=> Enabling SMART on $diskFamily model $diskModel on $diskDevice ..."
 	echo
 	$sudo smartctl --smart=on --offlineauto=on --saveauto=on $diskDevice >/dev/null
-	which hddparm >/dev/null 2>&1 && echo "=> hdparm info for disk $diskFamily model $diskModel on $diskDevice :" && $sudo hdparm -I $diskDevice
-#	echo "=> Printing all SMART and non-SMART information about the disk $diskFamily model $diskModel on $diskDevice :"
+	which hddparm >/dev/null 2>&1 && echo "=> hdparm info for $diskFamily model $diskModel on $diskDevice :" && $sudo hdparm -I $diskDevice
+#	echo "=> Printing all SMART and non-SMART information about the $diskFamily model $diskModel on $diskDevice :"
 #	echo
 #	$sudo smartctl $allInformation $diskDevice
-#	echo "=> Running a short self test for one minute for disk $diskFamily model $diskModel on $diskDevice :"
+#	echo "=> Running a short self test for one minute for $diskFamily model $diskModel on $diskDevice :"
 #	echo
 #	$sudo smartctl -t short $diskDevice && sleep 60
 	echo "=> Disk Self-Test results for $diskFamily model $diskModel on $diskDevice :"
 	echo
 	$sudo smartctl -H -l selftest $diskDevice
-	echo "=> Disk Errors for disk $diskFamily model $diskModel on $diskDevice for the SMART Self-Test Log :"
-	echo
+	echo "=> Disk Errors for $diskFamily model $diskModel on $diskDevice for the SMART Self-Test Log :"
+	echo $red$bold$blink
 	$sudo smartctl -q errorsonly -H -l selftest $diskDevice
-	echo "=> Disk Errors for disk $diskFamily model $diskModel on $diskDevice for the SMART Error Log :"
-	echo
+	printf $normal
+	echo "=> Disk Errors for $diskFamily model $diskModel on $diskDevice for the SMART Error Log :"
+	echo $red$bold$blink
 	$sudo smartctl -q errorsonly -H -l error $diskDevice
+	printf $normal 
 	echo "=> SMART Attributes Data for $diskFamily model $diskModel on $diskDevice :"
 	echo
 	$sudo smartctl -A $diskDevice
+	echo "=> SMART Current_Pending_Sector and Offline_Uncorrectable specific Attributes for $diskFamily model $diskModel on $diskDevice :"
+	echo
+	$sudo smartctl -A $diskDevice | egrep -wq "(Current_Pending_Sector|Offline_Uncorrectable).*[0-9]+$" && printf $red$bold$blink
+	$sudo smartctl -A $diskDevice | egrep -w "Current_Pending_Sector|Offline_Uncorrectable"
+	echo $normal
 	echo "=> Disk temperature using smartctl :"
 	echo
 	$sudo smartctl $allInformation $diskDevice | grep Temperature | head -5
