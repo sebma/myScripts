@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+test $(uname -s) = Darwin && aArg=any && mArg=' \ '
+test "$MATLAB" && exec $(which rlwrap) -a $aArg -c -m $mArg -H "$MATLAB/history.m" matlab -nodesktop -nosplash $@ || exec $(which matlab) -nodesktop -nosplash $@
