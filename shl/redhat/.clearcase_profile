@@ -1,0 +1,53 @@
+#!bash
+echo "=> Debut d'execution de $0"
+
+export newline="$(printf '\n\a')"
+#PS1="$LOGNAME@$(hostname)$dnsSuffix:\$PWD$newline$ "
+export normal="\033[m"
+export bright="\033[1m"
+
+export red="\033[0;31m"
+export green="\033[0;32m"
+export yellow="\033[33m"
+export blue="\033[34m"
+export magenta="\033[35m"
+export cyan="\033[36m"
+export grey="\033[37m"
+
+export BOLD=$(tput smso)
+export BRIGHT=$(tput bold)
+export SURL=$(tput smul)
+export NORMAL=$(tput sgr0)
+
+test $CLEARCASE && {
+  ProjectRoot=$(cleartool lsvob -short | awk '/vob_/&&!/pvob/')/$(cleartool lscomp -short -invob $(cleartool lsvob -short | awk /pvob/))
+  currentView=$(cleartool lsview -cview -short 2>/dev/null)
+  currentActivity=$(cleartool lsact -cact -short 2>/dev/null)
+  currentBaseLine=$(cleartool lsstream -fmt %[found_bls]p 2>/dev/null)
+  currentStream=$(cleartool lsstream -short 2>/dev/null)
+}
+
+#set -x
+type cleartool >/dev/null 2>&1 && {
+  newline="\n"
+  type bash >/dev/null 2>&1 && {
+  test $(id -gn) = cc-$APP && PS1="$blue$LOGNAME@$(hostname)$dnsSuffix:\w$newline\$ $normal" || {
+    test $ENVIRONNEMENT && PS1="$green$LOGNAME/$cyan$ENVIRONNEMENT$green@$(hostname)$dnsSuffix:\w$newline\$ $normal" || PS1="$green$LOGNAME@$(hostname)$dnsSuffix:\w$newline\$ $normal"
+  }
+  test $CLEARCASE_ROOT && {
+    cd $ProjectRoot
+    echo "$currentView" | grep -iq "${USER}_${APPUppercase}_int" && export PS1="[VIEW=$(echo $currentView)@${red}CACT="'$(cleartool lsact -cact -short 2>/dev/null)'"$green] $LOGNAME@$(hostname)$dnsSuffix:\$PWD$newline$ " || export PS1="[VIEW=$currentView@${red}BL="'$(cleartool lsstream -fmt %[found_bls]p 2>/dev/null)'"$green] $LOGNAME@$(hostname)$dnsSuffix:\$PWD$newline$ "
+  }
+  
+  test $(id -gn) = cc-$APP && test -d "$ProjectRoot" && {
+    cd $ProjectRoot
+    echo "$currentView" | grep -iq "${USER}_${APPUppercase}_int" && export PS1="[VIEW=$currentView@${red}CACT="'$(cleartool lsact -cact -short 2>/dev/null)'"$blue] $LOGNAME@$(hostname)$dnsSuffix:\$PWD$newline$ " || export PS1="[VIEW=$currentView}BL="'$(cleartool lsstream -fmt %[found_bls]p 2>/dev/null)'"$blue] $LOGNAME@$(hostname)$dnsSuffix:\$PWD$newline$ "
+  }
+  set +x
+
+  export PS1="$PS1$normal"
+
+  unalias ksh csh bash
+  }
+}
+

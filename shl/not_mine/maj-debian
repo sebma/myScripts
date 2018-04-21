@@ -1,0 +1,121 @@
+#!/bin/zsh
+
+host=`hostname`
+
+
+# bcfg2 a besoin d'un terminal meme si il est pas interactif.
+export TERM=unknown
+
+#Passage en multi-arch
+if [[ ! $(dpkg --print-foreign-architectures) = "i386" ]] ; then
+        dpkg --add-architecture i386
+fi
+
+# mise a jour de la base
+aptitude update
+
+#mise a jour des paquet binnaires
+# avec bretelle et ceintures pour autofs
+cp /cal/debian/debian/pool/main/a/autofs/autofs{,-ldap}_*amd64.deb /var/cache/apt/archives/
+export DEBIAN_FRONTEND=noninteractive
+export DEBIAN_PRIORITY=critical 
+
+aptitude -o Dpkg::Options::=--force-confold -y full-upgrade
+
+# mise a jour des configs
+echo /usr/sbin/bcfg2 -qvkd
+/usr/sbin/bcfg2 -qvkd </dev/null
+
+# supression des kernels
+# Attention la variable si dessous doit etre changer à chaque nouveau kernel 
+# kernel_need=3.12.18-enst.1
+# kernel_debian=3.2.0-4-amd64
+
+# for i in $(ls /boot/config* | cut -c 14-); do
+#         if [ $kernel_need != $i ] && [ $kernel_debian != $i ] && [ $(uname -r) != $i ]; then
+#                 aptitude -o Dpkg::Options::=--force-confold -y purge linux-image-$i linux-headers-$i                         
+#         fi
+# done
+
+chown root:vboxusers /dev/vboxdrvu
+
+
+####################################################################
+##   bloc pour install de softs suite suppression install-update  ##
+##   mais du coup deux passages sont necessaires :                ##
+##   1- descente du script maj-debian                             ##
+##   2- execution du script                                       ##
+#
+#
+#### instalaltion du plugin epubreader dans iceweasel
+#
+wget -O /opt/epubreader-1.5.0.6-sm+fx.xpi http://canada.enst.fr/modeles/epubreader-1.5.0.6-sm+fx.xpi
+cp /opt/epubreader-1.5.0.6-sm+fx.xpi  /usr/lib/iceweasel/browser/extensions
+ID=$(unzip -qc /usr/lib/iceweasel/browser/extensions/epubreader-1.5.0.6-sm+fx.xpi install.rdf | \
+  xmlstarlet sel -N rdf=http://www.w3.org/1999/02/22-rdf-syntax-ns# \
+  -N em=http://www.mozilla.org/2004/em-rdf#  -t -v "//rdf:Description[@about='urn:mozilla:install-manifest']/em:id")
+mkdir /usr/lib/iceweasel/browser/$ID/extensions
+unzip -o /usr/lib/iceweasel/browser/extensions/epubreader-1.5.0.6-sm+fx.xpi -d /usr/lib/iceweasel/browser/extensions/$ID
+#
+#
+#
+####################################################################
+
+# reinstall de pepperflash sinon lien KC apres MAJ chromium
+gpg --keyserver pgp.mit.edu --recv-keys 1397BC53640DB551
+gpg --export --armor 1397BC53640DB551 | sudo apt-key add -
+gpg --export --armor 1397BC53640DB551 | sudo tee -a /usr/lib/pepperflashplugin-nonfree/pubkey-google.txt
+dpkg-reconfigure pepperflashplugin-nonfree
+update-pepperflashplugin-nonfree -s
+rm -rf /tmp/pepperflashplugin-nonfree.*
+# paquet pepper KC contournement
+wget -O /usr/lib/pepperflashplugin-nonfree/libpepflashplayer.so  http://tftp.enst.fr/libpepflashplayer.so
+
+# le temps de supprimer eclipse debian package
+apt-get --purge remove -y eclipse eclipse-rcp eclipse-platform-data eclipse-platform eclipse-pde eclipse-jdt eclipse-egit eclipse-cdt-jni eclipse-cdt
+
+# Génération des wrappers pour PATH NFS
+TMPDIR=$(mktemp -d)
+chmod 755 $TMPDIR
+cd $TMPDIR
+
+case $host in
+tsilinux*|tsicluster*)
+	for f in /cal/softs/bin/*(X^/) /tsi/softs/bin/*(X^/)
+	do
+		echo '#!/bin/dash\nexec '$f' "$@"' > $f:t
+	done
+	chmod +x $TMPDIR/*
+	rsync --delete -apz $TMPDIR/ /usr/local/nfs_bin
+	rm -rf $TMPDIR
+	cd -
+	sed -i 's/\/cal\/softs\/bin\/matlab/\/tsi\/softs\/matlab\/bin\/matlab/' /usr/local/nfs_bin/matlab
+	;;
+celinux*|a40*|a50*|genie*|titan)
+	for f in /comelec/softs/bin/*(X^/) /cal/softs/bin/*(X^/)
+	do
+		echo '#!/bin/dash\nexec '$f' "$@"' > $f:t
+	done
+	chmod +x $TMPDIR/*
+	rsync --delete -apz $TMPDIR/ /usr/local/nfs_bin
+	rm -rf $TMPDIR
+	cd -
+	sed -i 's/\/cal\/softs\/bin\/matlab/\/comelec\/softs\/bin\/matlab/' /usr/local/nfs_bin/matlab
+	;;
+c1*|c45*)
+	for f in /cal/softs/bin/*(X^/)
+	do
+		echo '#!/bin/dash\nexec '$f' "$@"' > $f:t
+	done
+	chmod +x $TMPDIR/*
+	rsync --delete -apz $TMPDIR/ /usr/local/nfs_bin
+	rm -rf $TMPDIR
+	cd -
+	;;
+esac
+
+# force java 7 by default
+update-alternatives --set java /usr/lib/jvm/java-7-openjdk-amd64/jre/bin/java
+
+
+exit $?

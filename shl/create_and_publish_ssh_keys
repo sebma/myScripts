@@ -1,0 +1,184 @@
+#!/usr/bin/env ksh
+
+set -o nounset
+
+clean_exit() {
+  test $1 && rc=$1
+  echo "=> DEBUT de la fonction <clean_exit> d'arret propre du programme."
+  echo "=> FIN de la fonction <clean_exit> d'arret propre du programme."
+  echo
+  echo "=> The log file is <$logDir/$logFile>." >&2
+  exec 1>&- 2>&-
+  wait $stdout_tee_PID
+  wait $stderr_tee_PID
+  rm -f $logDir/$logFile.pipe $logDir/$logFile-err.pipe
+  chmod -w $logDir/$logFile
+
+  exit $rc #Ne pas mettre de "return" dans une fonction appellee par une trappe sinon le "return" envoi un autre SIGINT qui est alors re-trappe et on pars en boucle
+}
+
+interpreter=`ps -o pid,comm | awk /$$/'{print $2}'`
+
+progBaseName=$(basename $0)
+logDir=/var/log/$(echo $progBaseName | sed "s/\..*//")
+mkdir -pvm 775 $logDir
+logDir=$(cd $logDir;pwd)
+logFile=${progBaseName}_${USER}_$(date +%Y%m%d_%HH%M_%S).log
+
+test $# = 0 && {
+  echo "=> Usage: <$progBaseName> <remote ssh server list>" >&2
+  exit 1
+}
+
+type puttygen >/dev/null 2>&1 || {
+  echo "=> <$progBaseName> ERROR: The <puttygen> tool is not installed." >&2
+  exit 2
+}
+
+sshKeysDir=.ssh #Chemin relatif a $HOME
+localPubKeyFilePrefix=id_rsa
+
+#Creation de 2 FIFOs pour la duplication de stdout et de stderr.
+mkfifo $logDir/$logFile.pipe $logDir/$logFile-err.pipe
+tee -a $logDir/$logFile < $logDir/$logFile.pipe &
+stdout_tee_PID=$!
+tee -a $logDir/$logFile < $logDir/$logFile-err.pipe >&2 &
+stderr_tee_PID=$!
+exec 1> $logDir/$logFile.pipe
+exec 2> $logDir/$logFile-err.pipe
+
+echo "=> Lancement du script <$progBaseName> implemente par Sebastien MANSFELD :-)"
+echo
+echo "=> Vous etes <$USER>: $(awk -F":|," /$USER/'{print$5}' /etc/passwd)."
+sourceServerType=$(uname -s)
+if [ $sourceServerType = AIX ] || [ $sourceServerType = SunOS ]
+then
+  localPubKeyFilename=$USER.pub
+else
+  localPubKeyFilename=authorized_keys
+fi
+
+#Le "StrictModes" defini le controle des droits sur les fichiers et repertoires du user avant de presenter la cle publique
+chmod go-w $HOME
+umask 077
+test -d $HOME/$sshKeysDir && chmod 700 $HOME/$sshKeysDir || mkdir $HOME/$sshKeysDir
+
+privateKeyFileName=""
+firstServer=$1
+if [ ! -s $HOME/$sshKeysDir/$localPubKeyFilename ]
+then
+  echo "=> Telechargement de votre cle publique sur le premier serveur: <$firstServer>, si elle existe ..."
+  if scp -p $firstServer:$sshKeysDir/$localPubKeyFilename $HOME/$sshKeysDir/
+  then
+    shift
+  else
+    echo "=> Il n'a pas de cle publique pre-existante sur <$firstServer>. " >&2
+    if type puttygen >/dev/null 2>&1
+    then
+      echo "=> Generation d'une bi-cle RSA au format "ssh.com" (PuTTY) avec l'outil puttygen, cela dure entre 30s et une minute ..."
+      puttygen -q -t rsa -o $HOME/$sshKeysDir/$USER.ppk
+      echo "=> Extraction de la cle publique du fichier $USER.ppk et conversion au format OpenSSH ..."
+      puttygen $HOME/$sshKeysDir/$USER.ppk -L > $HOME/$sshKeysDir/$localPubKeyFilename
+      privateKeyFileName=$HOME/$sshKeysDir/$USER.ppk
+    else
+      echo "=> Creating your ssh-key pair <$HOME/$sshKeysDir/$localPubKeyFilePrefix> and <$HOME/$sshKeysDir/$localPubKeyFilePrefix.pub> on server <$(hostname)> ..."
+      echo
+      echo "=> L'outil puttygen n'est pas installe, generation d'une bi-cle RSA au format OpenSSH, cela dure entre 30s et une minute ..."
+      privateKeyFileName=$HOME/$sshKeysDir/$localPubKeyFilePrefix
+      if ssh-keygen -qf $HOME/$sshKeysDir/$localPubKeyFilePrefix
+      then
+        mv $HOME/$sshKeysDir/$localPubKeyFilePrefix.pub $HOME/$sshKeysDir/$localPubKeyFilename
+      else
+        echo "=> The ssh key pair could not be generated, please re-run <$progBaseName>." >&2
+        clean_exit 3
+      fi
+    fi
+  fi
+else
+  echo "=> La cle publique est deja presente sur <$(hostname)>."
+fi
+
+
+echo "=> Setting the correct rights for your ssh files ..."
+chmod 600 $HOME/$sshKeysDir/$localPubKeyFilename
+
+umask 022
+
+printf "=> What is the remote server type [AIX/Solaris/HP-UX/Linux] ? "
+read remoteServerType
+remoteServerType=$(echo "$remoteServerType" | tr [:upper:] [:lower:])
+case $remoteServerType in
+  aix|solaris|hp-ux) remotePubKeyFilename=$USER.pub;;
+  linux)	     remotePubKeyFilename=authorized_keys;;
+  *) echo "=> ERROR: Unknown OS type." >&2 && clean_exit 4 ;;
+esac
+echo
+
+localPubKeyFingerPrint=$(ssh-keygen -lf $HOME/$sshKeysDir/$localPubKeyFilename | awk '!/is not a public key file/{print$2}')
+for remoteServer
+do
+  echo "=> Testing the ssh route to <$remoteServer> ..."
+  uname -s | grep -q Linux && grepOption="--color"
+  remotePort=ssh
+  connectionTestTool=$(type nc telnet openssl 2>/dev/null | awk 'NR==1{print$1}')
+  case $connectionTestTool in
+    nc) connectionTestCmd="nc -vz $remoteServer $remotePort 2>&1 | grep $grepOption succeeded" ;;
+    telnet) connectionTestCmd="echo | telnet $remoteServer $remotePort | grep $grepOption Connected" ;;
+    openssl) connectionTestCmd="echo quit | openssl s_client -connect $remoteServer:$remotePort | grep $grepOption CONNECTED" ;;
+    *) connectionTestCmd=false;;
+  esac
+
+  if eval $connectionTestCmd
+  then
+    echo "=> Checking your remote public key on <$remoteServer> ..."
+    remotePubKeyFingerPrint=$(ssh -q $remoteServer 2>/dev/null "
+      chmod go-w .
+      test -d $sshKeysDir && chmod 700 $sshKeysDir || mkdir -pm 700 $sshKeysDir
+      if [ -s $sshKeysDir/$remotePubKeyFilename ]
+      then
+        fingerPrint=\$(ssh-keygen -lf $sshKeysDir/$remotePubKeyFilename | awk '!/is not a public key file/{print\$2}')
+        echo \$fingerPrint
+      else
+        touch $sshKeysDir/$remotePubKeyFilename
+      fi
+      chmod 600 $sshKeysDir/$remotePubKeyFilename
+")
+
+    if [ "$localPubKeyFingerPrint" != "$remotePubKeyFingerPrint" ]
+    then
+      echo "=> Updating your remote public key on <$remoteServer> ..."
+      cat $HOME/$sshKeysDir/$localPubKeyFilename | ssh -q $remoteServer "cat >> $sshKeysDir/$remotePubKeyFilename"
+    else
+      echo "=> Your public key is already here on remote server: <$remoteServer>."
+    fi
+    echo
+  else
+    echo "=> WARNING: The ssh route to <$remoteServer> is not opened, switching to next ..." >&2
+  fi
+done
+
+if [ $privateKeyFileName ]
+then
+  if [ -s $privateKeyFileName ]
+  then
+    echo
+    echo "=> Don't forget to download your ssh private key file : $privateKeyFileName to your Desktop for PuTTY to use."
+    test $privateKeyFileName = $HOME/$sshKeysDir/$USER.ppk || {
+      echo "=> This key is a OpenSSH private key, you have to import and convert to SSH.com format using PuTTYGen before using it."
+    }
+  else
+    echo "=> ERROR: Your private key file <$privateKeyFileName> doest not exist or is empty." >&2
+    clean_exit 1
+  fi
+  echo
+fi
+
+#grep -q ssh-agent $HOME/.profile || {
+#  echo echo "=> Loading the SSH authentication agent ..."
+#  echo 'ps -fu $USER | grep -v grep | grep -q ssh-agent || eval $(ssh-agent -s)'
+#} >> $HOME/.profile
+
+#ps -fu $USER | grep -v grep | grep -q ssh-agent || eval $(ssh-agent -s)
+#ssh-add $HOME/$sshKeysDir/$localPubKeyFilePrefix
+
+clean_exit $?

@@ -1,0 +1,22 @@
+#!/usr/bin/env sh
+
+if [ $# = 0 ]
+then
+	echo "=> Usage: $(basename $0) user1 user2 user2 ..." >&2
+	exit 1
+fi
+
+app=xyz
+primaryGroup=soltech
+secondaryGroupList="users me$app fuse"
+sudo -v
+for user
+do
+	id $user >/dev/null 2>&1 || sudo adduser --ingroup $primaryGroup $user
+	id $user >/dev/null 2>&1 && {
+		for group in $secondaryGroupList
+		do
+			groups $user | grep -q $group || sudo adduser $user $group
+		done
+	}
+done

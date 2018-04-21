@@ -1,0 +1,117 @@
+#!sh
+
+httpserver() {
+  pgrep -f SimpleHTTPServer || {
+    logfilePrefix=SimpleHTTPServer_$(date +%Y%m%d)
+    nohup python -m SimpleHTTPServer 1234 >~/log/${logfilePrefix}.log 2>&1 &
+  }
+}
+
+alias pkill >/dev/null 2>&1 && unalias pkill
+pkill() {
+  test "$1" && {
+    echo "=> Before :" && pgrep -lf "$1" && $(which pkill) -f "$1"
+    echo "=> After :" && pgrep -lf "$1"
+  }
+}
+
+find_ip_aliases() {
+  server=$1
+  test $server || {
+    echo "=> Usage: $FUNC_NAME <server name or IP>." >&2
+    return 1
+  }
+
+  case $(uname -s) in
+    AIX)   localIfconfigCmd="/usr/sbin/ifconfig -a";;
+    Linux) localIfconfigCmd="/sbin/ifconfig -a";;
+    SunOS) localIfconfigCmd="/usr/sbin/ifconfig -a";;
+    *)
+  esac
+
+  if [ $server != localhost ] && [ $server != 127.0.0.1 ]
+  then
+    remoteServerType=$($(which ssh) $server "uname -s"  2>/dev/null)
+  fi
+
+  case $remoteServerType in
+    AIX)   remoteIfconfigCmd="/usr/sbin/ifconfig -a";;
+    Linux) remoteIfconfigCmd="/sbin/ifconfig -a";;
+    SunOS) remoteIfconfigCmd="/usr/sbin/ifconfig -a";;
+    *)
+  esac
+
+echo "=> remoteServerType = <$remoteServerType>"
+  case $server in
+  127.0.0.1|localhost)
+    if [ $(uname -s) = Linux ]
+    then
+      ipList=$($localIfconfigCmd | awk -F' *|:' '/inet addr/{print$4}' | egrep -v '^127.0.0.1|^172\.|^10\.')
+    else
+      ipList=$($localIfconfigCmd | awk '/inet /{print$2}' | egrep -v '^127.0.0.1|^172\.|^10\.')
+    fi
+  ;;
+  *)
+    if [ $remoteServerType = Linux ]
+    then
+      ipList=$($(which ssh) $server $remoteIfconfigCmd 2>/dev/null | awk -F' *|:' '/inet addr/{print$4}' | egrep -v '^127.0.0.1|^172\.|^10\.')
+    else
+      ipList=$($(which ssh) $server $remoteIfconfigCmd 2>/dev/null | awk '/inet /{print$2}' | egrep -v '^127.0.0.1|^172\.|^10\.')
+    fi
+  ;;
+
+  esac
+  for ip in $ipList
+  do
+    echo ip=$ip hostname=$(host $ip | awk '{print$NF}')
+  done
+}
+
+type sudo >/dev/null 2>&1 && alias sudo="\sudo "
+
+uname -s | grep -q AIX || alias stat=istat
+alias psu="\ps -fu \$USER"
+alias pgrep="\pgrep -lf"
+alias ll="ls -lF"
+#alias cp="\cp -auv"
+sdiff -v 2>/dev/null | grep -qw GNU && alias sdiff='\sdiff -Ww $(tput cols)' || alias sdiff='\sdiff -w $(tput cols)'
+alias ssh="$(which ssh) -AY"
+alias mv="\mv -v"
+alias rm="\rm -i"
+alias df="\df -h"
+alias od="\od -ctx1"
+alias grep="\grep --color"
+alias less="\less -r"
+alias umask="\umask -S"
+alias topd10="\du -xsm */ .??*/ 2>/dev/null | sort -nr | head -10"
+alias topd5="\du -xsm */ .??*/ 2>/dev/null | sort -nr | head -5"
+alias topd="\du -xsm */ .??*/ 2>/dev/null | sort -nr | head -n"
+alias dos2unix='\perl -pi -e "s/\r//g"'
+alias unix2dos='\perl -pi -e "s/\n/\r\n/g"'
+
+topf5 () { find . -xdev -type f -size +20480 $@ -exec ls -l {} \; 2>/dev/null | sort -nrk5 | head -5 | awk '{size=$5/2^20;sub($5,size"M");print}'; }
+topf10() { find . -xdev -type f -size +20480 $@ -exec ls -l {} \; 2>/dev/null | sort -nrk5 | head | awk '{size=$5/2^20;sub($5,size"M");print}'; }
+topf () {
+  nbLines=$1
+  test $nbLines && {
+    shift
+    find . -xdev -type f -size +20480 $@ -exec ls -l {} \; 2>/dev/null | sort -nrk5 | head -n $nbLines | awk '{size=$5/2^20;sub($5,size"M");print}'
+  }
+}
+
+stelnet() {
+  test $# != 2 && {
+    echo "=> Usage: $FUNC_NAME <server name or IP> <port number>" >&2
+    return 1
+  }
+  if echo $1 | grep -qi [a-z]
+  then
+    host $1 >/dev/null || {
+      echo "Host $1 not found: 3(NXDOMAIN)" >&2
+      return 1
+    }
+  fi
+  echo quit | openssl s_client -connect $1:$2 2>&1 | grep CONNECTED
+}
+
+alias restore_my_stty="\stty erase ^?"
