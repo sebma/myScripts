@@ -1,0 +1,216 @@
+#!sh
+#DEFINITIONS DES FONCTIONS
+function build_in_HOME {
+	test -s configure || {
+		test -x bootstrap.sh && time ./bootstrap.sh
+		test -x autogen.sh && time ./autogen.sh --prefix=$HOME/gnu $@
+	}
+	test -s Makefile || time ./configure --prefix=$HOME/gnu $@
+	test -s Makefile && time make && make install
+}
+function build_in_usr {
+	test -s configure || {
+		test -x bootstrap.sh && time ./bootstrap.sh
+		test -x autogen.sh && time ./autogen.sh --prefix=/usr $@
+	}
+	test -s Makefile || time ./configure --prefix=/usr $@
+	test -s Makefile && time make && sudo make install
+}
+
+function convertPuttyPubKeys {
+	\umask 077
+	test -d $HOME/.ssh && chmod 700 $HOME/.ssh || mkdir $HOME/.ssh
+	for puTTYPubKey
+	do
+		ssh-keygen -i -f $puTTYPubKey >> $HOME/.ssh/authorized_keys
+	done
+}
+
+#alias ssh="$(which ssh) -qAY"
+function ssh { test $1 && server=$(echo $1 | cut -d@ -f2) && $(which bash) -c ": < /dev/tcp/$server/ssh" && $(which ssh) -qAY $@; }
+
+function topf5 { find . -xdev -type f -size +10M $@ -printf "%M %n %u %g %k %AY-%Am-%Ad %AX %p\n" 2>/dev/null | sort -nk5 | tail -5|awk '{size=$5/1024;sub($5,size"M");print}'|column -t;}
+function topf10 { find . -xdev -type f -size +10M $@ -printf "%M %n %u %g %k %AY-%Am-%Ad %AX %p\n" 2>/dev/null | sort -nk5 | tail |	awk '{size=$5/1024;sub($5,size"M");print}'|column -t;}
+function topf {
+	nbLines=$1
+	test $nbLines && {
+		shift
+		find . -xdev -type f -size +10M $@ -printf "%M %n %u %g %k %AY-%Am-%Ad %AX %p\n" 2>/dev/null | sort -nk5 | tail -n $nbLines | awk '{size=$5/1024;sub($5,size"M");print}' | column -t
+	}
+}
+
+function nameof {
+	for user
+	do
+		awk -F":|," /$user/'{print$5}' /etc/passwd
+	done
+}
+
+function httpserver {
+	mkdir -p ~/log
+	fqdn=$(host $(hostname) | awk '/address/{print$1}')
+	test $1 && port=$1 || port=1234
+	test $port -lt 1024 && {
+		echo "=> ERROR: Only root can bind to a tcp port lower than 1024." >&2
+		return 1
+	}
+
+	\ps -fu $USER | grep -v grep | grep -q SimpleHTTPServer && echo "=> SimpleHTTPServer is already running on http://$fqdn:$(\ps -fu $USER | grep -v awk | awk '/SimpleHTTPServer/{print$NF}')/" || {
+		logfilePrefix=SimpleHTTPServer_$(date +%Y%m%d)
+		nohup python -m SimpleHTTPServer $port >~/log/${logfilePrefix}.log 2>&1 &
+		test $? = 0 && {
+			echo "=> SimpleHTTPServer started on http://$fqdn:$port/"
+			echo "=> logFile = ~/log/${logfilePrefix}.log"
+		}
+	}
+}
+
+function scp {
+	lastArg=$(eval echo \${$#})
+	export RSYNC_RSH="$(which ssh) -q"
+	scpCommand="$(which rsync) -v -Pt -l -p"
+	$scpCommand $@
+	test $? = 127 && {
+		$scpCommand --rsync-path=/usr/local/bin/rsync $@ || {
+			echo >&2
+			echo "=> WARNING: The <rsync> tool was not found on <$lastArg>, using scp instead ..." >&2
+			echo >&2
+			$(which scp) -p $@
+		}
+	}
+}
+
+function deployCEAix {
+	CashEuropeAixServerList="dasi01 deur01 heur01 heur02"
+	test $USER = x064304 || CashEuropeAixServerList="$CashEuropeAixServerList peur01 peur02"
+	for file
+	do
+		echo "=> Deploying <$file> on <$CashEuropeAixServerList> ..."
+		for server in $CashEuropeAixServerList
+		do
+			echo
+			echo "==> Copying $file on $server: ..."
+			scp $1 $server:
+		done
+	done
+	echo
+}
+
+function deployCELinux {
+	CashEuropeLinuxServerList="dasilx01 dasilx02 deurlx01 deurlx02 deurlx03 heurlx01 heurlx02 heurlx03 heurlx04"
+	test $USER = x064304 || CashEuropeLinuxServerList="$CashEuropeLinuxServerList peurlx01 peurlx02 peurlx03 peurlx04"
+	for file
+	do
+		echo "=> Deploying <$file> on <$CashEuropeLinuxServerList> ..."
+		for server in $CashEuropeLinuxServerList
+		do
+			echo
+			echo "==> Copying $file on $server: ..."
+			scp $1 $server:
+		done
+	done
+	echo
+}
+
+function deployCE {
+	deployCELinux $@
+	deployCEAix $@
+}
+
+type finger >/dev/null 2>&1 || function finger {
+	test $1 && argList=$* || argList=$(who | awk '{print$1}')
+	for user in $argList
+	do
+		awk -F":|," /$user/'{print$1":"$5}' /etc/passwd
+	done
+}
+
+function lsgroup {
+	for group
+	do
+		awk -F: /^$group/'{gsub(",","\n");print$4}' /etc/group | while read user
+		do
+			awk -F":|," /$user/'{print$1":\""$5"\""}' /etc/passwd
+		done
+	done
+}
+
+function isOwner {
+	test $# = 1 && test -O "$1" && true || false
+}
+
+function getIP { ip -4 addr show $@ | awk '/inet/{print$2}' ; }
+
+function getdebAndInstall {
+	arch=$(uname -m | grep -q x86_64 && echo amd64 || echo i386)
+	for package
+	do
+		echo "=> Treating <$package> ..."
+		dpkg -s $package 2>&1 | grep -q "Status.*ok installed" && echo "==> Package <$package> is already installed." || {
+			curl http://packages.ubuntu.com/$(lsb_release -sc)/$package
+			mv $package $package.dsc
+			packageUrl=$(awk -F'"' '/dsc/{print$2}' $package.dsc | sed "s/archive/fr.archive/;s/.dsc/_$arch.deb/")
+			test $packageUrl || {
+				echo "=> ERROR: The package <$package> was not found." >&2
+				continue
+			}
+			packageBaseUrl=$(dirname $packageUrl)
+			debFileNamePrefix=$(basename $packageUrl | sed "s/_.*//")
+
+			if [ $package = $debFileNamePrefix ]
+			then
+				debFileName=$(basename $packageUrl)
+			else
+				debFileName=$(basename $packageUrl | sed "s/${debFileNamePrefix}_/${package}_/")
+				packageUrl=$packageBaseUrl/$debFileName
+			fi
+
+			#poolName=$(awk -F "<|>" '/Community maintained open source software/{printf$3}' $package.dsc)
+			poolName=$(awk -F/ '/.dsc/{printf$6}' $package.dsc)
+			test $poolName && {
+				packageUrl=$(echo $packageUrl | sed "s/main/$poolName/")
+				echo "==> Downloading package <$debFileName> ..."
+				curl $packageUrl
+				mv $debFileName /tmp
+				sudo gdebi -n /tmp/$debFileName && rm /tmp/$debFileName $package.dsc || return
+			} || {
+				echo "==> ERROR: The pool name could not be determined." >&2
+				continue
+			}
+			echo
+		}
+	done
+}
+
+#DEFINITIONS DES ALIAS
+type sudo >/dev/null 2>&1 && alias sudo="\sudo -E "
+alias dig="\dig +search +short"
+uname -s | grep -q AIX && alias stat=istat
+alias umask="\umask -S"
+alias psu="\pgrep -lfu \$USER"
+alias pgrep="\pgrep -lf"
+#alias ll="ls -lF"
+alias ll="LANG=C ls -lF --color=tty --time-style=+'%Y-%m-%d %H:%M:%S'"
+alias cp="\cp -uv"
+sdiff -v 2>/dev/null | grep -qw GNU && alias sdiff='\sdiff -Ww $(tput cols)' || alias sdiff='\sdiff -w $(tput cols)'
+alias mv="\mv -v"
+alias rm="\rm -iv"
+alias df="\df -h"
+alias hexdump="\od -ctx1"
+alias od="\od -ctx1"
+alias less="\less -r"
+alias topd10="\du -xsm */ .??*/ | sort -n | tail -10"
+alias topd5="\du -xsm */ .??*/ | sort -n | tail -5"
+alias topd="\du -xsm */ .??*/ | sort -n | tail -n"
+alias dos2unix='\perl -pi -e "s/\r//g"'
+alias unix2dos='\perl -pi -e "s/\n/\r\n/g"'
+alias lastfiles="\find . -type f -cmin -5 -ls"
+alias doublons='\fdupes -rd .'
+alias du="LANG=C \du -h"
+alias cdda_info="\icedax -gHJq -vtitles"
+alias cdrdao='\df | grep -q \$CDR_DEVICE && umount -vv \$CDR_DEVICE ; \cdrdao'
+alias checkcertif="\openssl verify -verbose"
+alias checkcer="\openssl x509 -noout -inform PEM -in"
+alias checkcrt="\openssl x509 -noout -inform PEM -in"
+alias checkder="\openssl x509 -noout -inform DER -in"
+
