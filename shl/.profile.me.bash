@@ -68,8 +68,8 @@ finger
 echo
 
 echo "=> Searching for full filesystems on our servers ..."
-linuxServer="pingoin01 pingoin02"
-for linux in $linuxServer
+linuxServers="pingoin01 pingoin02"
+for linux in $linuxServers
 do
   echo "=> Linux server = $linux"
   nc -vz $linux ssh 2>&1 | grep -q succeeded && ssh $linux df 2>/dev/null  | awk /%/'{print$(NF-1)" "$NF}' | grep -v cdrom | egrep --color "100%"
