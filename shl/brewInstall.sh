@@ -7,9 +7,10 @@ case $(uname) in
 		brew=$(which brew) || exit 1
 		set -x
 		$brew update
+#		$brew tap homebrew/versions # deprecated : See https://docs.brew.sh/Versions.html
+		$brew tap caskroom/versions
 		$brew tap caskroom/cask
 		$brew tap caskroom/drivers
-#		$brew tap caskroom/versions # deprecated : See https://docs.brew.sh/Versions.html
 		$brew tap buo/cask-upgrade
 		set +x ;;
 	Linux)
