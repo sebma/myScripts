@@ -137,6 +137,7 @@ plasma-widget-yawp
 pmount
 pulseaudio-module-bluetooth
 pv
+pwgen
 pypy-dev
 python-gnuplot
 python-matplotlib
