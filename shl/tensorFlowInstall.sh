@@ -42,43 +42,27 @@ function main {
 					test $(dpkg -l $consoleTools | grep -c ^ii) == $consoleToolsNumber && echo "==> INFO : The console tools are already installed." || $installCommand $consoleTools
 			
 					echo
-					echo "=> Installing NVIDIA drivers and the lightwight Xfce environment ..."
+					echo "=> Installing the lightwight Xfce environment ..."
 					graphicTools="xclip xsel gsmartcontrol gparted lshw-gtk numlockx smart-notifier xfce4 xfce4-mount-plugin xubuntu-desktop"
-					if test -f /proc/driver/nvidia/version
-					then
-						echo "==> INFO : The NVIDIA drivers are already installed :"
-						echo
-						cat /proc/driver/nvidia/version
-						echo
-						graphicToolsNumber=$(echo $graphicTools | wc -w)
-						test $(dpkg -l $graphicTools | grep -c ^ii) == $graphicToolsNumber && echo "==> INFO : The graphic tools are already installed." || $installCommand $graphicTools
-					else
-						echo
-						if ! test -s /etc/apt/sources.list.d/graphics-drivers-ubuntu-ppa-$distribCodeName.list 
-						then
-							sudo add-apt-repository ppa:graphics-drivers/ppa -y
-							$updateRepo
-						fi
-	
-						nVidiaDriversVersion=390
-						$installCommand nvidia-$nVidiaDriversVersion $graphicTools
-						if ! modinfo nvidia_$nVidiaDriversVersion >/dev/null 2>&1 
-						then
-							$installCommand -y linux-headers-generic
-							sudo dpkg-reconfigure nvidia-$nVidiaDriversVersion
-						fi
-					fi
-			
+					$installCommand $graphicTools
 					echo
-					echo "=> Installing CUDA ..."
+
+					cudaPackageName=cuda-9-0
+					cudaVersion=$(echo $cudaPackageName | cut -d- -f2- | tr "-" .)
+					echo "=> Installing CUDA v$cudaVersion and the nvidia driver version from which it depends ..."
 					if which nvcc >/dev/null 2>&1
 					then
 						echo "==> INFO : cuda is already installed :"
 						echo
 						nvcc -V
 					else
+#						if ! test -s /etc/apt/sources.list.d/graphics-drivers-ubuntu-ppa-$distribCodeName.list 
+#						then
+#							sudo add-apt-repository ppa:graphics-drivers/ppa -y
+#							$updateRepo
+#						fi
+
 						echo
-						cudaPackageName=cuda-9-0
 						cudaRepoURL=http://developer.download.nvidia.com/compute/cuda/repos/ubuntu$(lsb_release -sr | cut -d. -f1)04/$(uname -m)
 	
 						if ! grep $cudaRepoURL /etc/apt/sources.list /etc/apt/sources.list.d/*
@@ -89,7 +73,26 @@ function main {
 							$updateRepo
 						fi
 	
-						$installCommand $cudaPackageName
+						nvidiaDriverDependencies="linux-headers-generic linux-headers-$(uname -r)"
+						$installCommand $nvidiaDriverDependencies $cudaPackageName
+
+						if test -f /proc/driver/nvidia/version
+						then
+							echo "==> INFO : The NVIDIA drivers are already installed :"
+							echo
+							cat /proc/driver/nvidia/version
+							echo
+							graphicToolsNumber=$(echo $graphicTools | wc -w)
+							test $(dpkg -l $graphicTools | grep -c ^ii) == $graphicToolsNumber && echo "==> INFO : The graphic tools are already installed." || $installCommand $graphicTools
+						else
+							nVidiaDriversVersion=390
+							$installCommand $nvidiaDriverDependencies nvidia-$nVidiaDriversVersion
+							if ! modinfo nvidia_$nVidiaDriversVersion >/dev/null 2>&1 
+							then
+								$installCommand -y $nvidiaDriverDependencies
+								sudo dpkg-reconfigure nvidia-$nVidiaDriversVersion
+							fi
+						fi
 					fi
 	
 					CUDA_HOME=$(dirname $(dirname $(which nvcc)))
