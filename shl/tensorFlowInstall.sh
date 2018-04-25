@@ -62,7 +62,11 @@ function main {
 	
 						nVidiaDriversVersion=390
 						$installCommand nvidia-$nVidiaDriversVersion $graphicTools
-#						modinfo nvidia || sudo dpkg-reconfigure nvidia-$nVidiaDriversVersion
+						if ! modinfo nvidia_$nVidiaDriversVersion >/dev/null 2>&1 
+						then
+							$installCommand -y linux-headers-generic
+							sudo dpkg-reconfigure nvidia-$nVidiaDriversVersion
+						fi
 					fi
 			
 					echo
