@@ -42,6 +42,10 @@ exfat-fuse
 expect
 fdupes
 ffmpeg
+firefox-esr
+firefox-esr-globalmenu
+firefox-esr-locale-en
+firefox-esr-locale-fr
 firefox-globalmenu
 flpsed
 fslint
