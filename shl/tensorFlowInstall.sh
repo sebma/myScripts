@@ -93,6 +93,8 @@ function main {
 								sudo dpkg-reconfigure nvidia-$nVidiaDriversVersion
 							fi
 						fi
+
+						dkms status | grep nvidia
 					fi
 	
 					CUDA_HOME=$(dirname $(dirname $(which nvcc)))
