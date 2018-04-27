@@ -7,6 +7,7 @@
 add-apt-key
 android-tools-adb
 apt-file
+apt-rdepends
 aptitude
 aria2
 arp-scan
