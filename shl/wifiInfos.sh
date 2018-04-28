@@ -1,7 +1,19 @@
 #!/usr/bin/env sh
 
-which iwconfig >/dev/null && wiFiDevice="$(iwconfig 2>/dev/null | awk '/^[^ \t]/ { if ($1 ~ /^[0-9]+:/) { interface=$2 } else { interface=$1 } }END{print interface}')"
-which iw >/dev/null && wiFiDevice=$(iw dev | awk '/interface/{interface=$NF}END{print interface}')
+export LANG=C
+if [ $(uname -s) = Darwin ]
+then
+	echo "=> Darwin/macOS operating systems are not supported yet." >&2
+	exit 1
+fi
+
+if which iw >/dev/null 
+then
+	wiFiDevice=$(iw dev | awk '/Interface/{lastInterface=$NF}END{print lastInterface}')
+elif which iwconfig >/dev/null 
+then
+	wiFiDevice="$(iwconfig 2>/dev/null | awk '/^[^ \t]/ { if ($1 ~ /^[0-9]+:/) { lastInterface=$2 } else { lastInterface=$1 } }END{print lastInterface}')"
+fi
 
 [ "$wiFiDevice" ] || {
 	echo "=> ERROR : Could not find any wireless network card." >&2
