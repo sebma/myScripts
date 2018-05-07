@@ -22,7 +22,6 @@ bibledit-gtk
 bibledit-xiphos
 bibletime
 bluez
-bluez-compat
 browser-plugin-vlc
 build-essential
 cairo-dock-core
@@ -44,9 +43,6 @@ expect
 fdupes
 ffmpeg
 firefox-esr
-firefox-esr-globalmenu
-firefox-esr-locale-en
-firefox-esr-locale-fr
 firefox-globalmenu
 flpsed
 fslint
@@ -64,7 +60,6 @@ gparted
 gpm
 gstreamer1.0-libav
 handbrake-cli
-handbrake-gtk
 hddtemp
 html-xml-utils
 htop
@@ -75,8 +70,6 @@ ipython
 ipython3
 kde-touchpad
 kde-window-manager
-kde-window-manager-active
-kde-window-manager-common
 kdeartwork-theme-window
 kdegraphics-thumbnailers
 keepass2
@@ -84,8 +77,6 @@ keepassx
 kpcli
 kscreensaver-xsavers
 kvpm
-kwin-style-crystal
-kwin-style-qtcurve
 lftp
 libmodule-path-perl
 librecad
@@ -105,7 +96,6 @@ marble
 mediainfo
 mediainfo-gui
 mesa-utils
-mesa-vdpau-drivers-lts-xenial
 midori
 minicom
 minitube
@@ -119,8 +109,6 @@ mupdf
 mupdf-tools
 ncdu
 ncftp
-nget
-notepadqq
 ntp
 numlockx
 oggz-tools
@@ -137,8 +125,6 @@ pidgin-sipe
 pidgin-skype
 pkg-config
 plasma-wallpapers-addons
-plasma-widget-lancelot
-plasma-widget-yawp
 pmount
 pulseaudio-module-bluetooth
 pv
@@ -150,7 +136,6 @@ python-pisa
 python-pkg-resources
 python-pyx
 python-scapy
-python-speedtest-cli
 qalculate
 qpdf
 qpdfview
@@ -210,7 +195,6 @@ xiphos
 xournal
 xplanet-images
 xsel
-youtranslate
 zbar-tools
 zenity
 zenmap
