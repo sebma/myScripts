@@ -7,7 +7,7 @@ function upgradeAllBut {
 	packagesToBeUpgraded=$($(which apt-get) upgrade --dry-run | awk '/^Inst/{print$2}' | egrep -v "$packagesNotUpgraded" | grep -v "Listing...")
 	echo "=> packagesToBeUpgraded = <$packagesToBeUpgraded>"
 	set -x
-	sudo apt install -v $packagesToBeUpgraded
+	sudo apt install -V $packagesToBeUpgraded
 	set +x
 }
 
