@@ -63,6 +63,7 @@ handbrake-cli
 hddtemp
 html-xml-utils
 htop
+ifupdown
 ipcalc
 iperf
 iperf3
