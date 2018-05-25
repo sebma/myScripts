@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+function gps {
+	test -e /dev/nvidia0 && $(which ps) $@ -p $(lsof -n -w -t /dev/nvidia*)
+}
+
+gps $@
