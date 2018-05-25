@@ -3,10 +3,10 @@
 function main {
 	set -o errexit
 	set -o nounset
-	
+
 	local os=$(uname -s)
 	local -r isAdmin=$(groups | egrep -wq "sudo|adm|admin|root" && echo true || echo false)
-	
+
 	if [ $os = Linux ]
 	then
 		if [ $(uname -m) != x86_64 ]
@@ -14,7 +14,7 @@ function main {
 			echo "=> ERROR: You must use a 64 bits Linux." >&2
 			exit 1
 		fi
-	
+
 		shellInitFileName=~/.$(basename $SHELL)rc
 		if $isAdmin
 		then
@@ -37,7 +37,7 @@ function main {
 					echo
 					echo "=> Installing $(lsb_release -sd) console tools ..."
 					echo
-					consoleTools="transfig linux-image-generic lsof rename lsb-release bash-completion vim python-argcomplete htop command-not-found gpm conky-all dfc git smartmontools inxi aria2 gdebi-core speedtest-cli"
+					consoleTools="transfig linux-image-generic texlive-xetex lsof rename lsb-release bash-completion vim python-argcomplete htop command-not-found gpm conky-all dfc git smartmontools inxi aria2 gdebi-core speedtest-cli"
 					consoleToolsNumber=$(echo $consoleTools | wc -w)
 					test $(dpkg -l $consoleTools | grep -c ^ii) == $consoleToolsNumber && echo "==> INFO : The console tools are already installed." || $installCommand $consoleTools
 			
@@ -64,7 +64,7 @@ function main {
 
 						echo
 						cudaRepoURL=http://developer.download.nvidia.com/compute/cuda/repos/ubuntu$(lsb_release -sr | cut -d. -f1)04/$(uname -m)
-	
+
 						if ! grep $cudaRepoURL /etc/apt/sources.list /etc/apt/sources.list.d/*
 						then
 							echo deb $cudaRepoURL / | sudo tee /etc/apt/sources.list.d/cuda.list
@@ -72,7 +72,7 @@ function main {
 							test -n "$keyIDsList" && sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $keyIDsList
 							$updateRepo
 						fi
-	
+
 						nvidiaDriverDependencies="linux-headers-generic linux-headers-$(uname -r)"
 						$installCommand $nvidiaDriverDependencies $cudaPackageName
 
@@ -96,7 +96,7 @@ function main {
 
 						dkms status | grep nvidia
 					fi
-	
+
 					CUDA_HOME=$(dirname $(dirname $(which nvcc)))
 				;;
 				Debian)
@@ -147,12 +147,20 @@ function main {
 			echo $PATH | grep -q $CUDA_HOME || echo 'export PATH=$CUDA_HOME/bin${PATH:+:${PATH}}' >> $shellInitFileName
 			echo $LD_LIBRARY_PATH | grep -q $CUDA_HOME || echo 'export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$CUDA_HOME/lib64:$CUDA_HOME/extras/CUPTI/lib64"' >> $shellInitFileName
 		fi
-	
+
 	elif [ $os = Darwin ]
 	then
 		echo "=> TO DO."
 	fi
-	
+}
+
+function installTFCondaEnv {
+	set -o errexit
+	set -o nounset
+
+	local os=$(uname -s)
+	local -r isAdmin=$(groups | egrep -wq "sudo|adm|admin|root" && echo true || echo false)
+
 	if [ $os = Linux ] || [ $os = Darwin ]
 	then
 		echo
@@ -189,9 +197,10 @@ function main {
 		echo
 		echo "=> Installing tensorflow-gpu conda environment ..."
 		echo
-		tensorFlowEnvName=tensorFlow
+		tensorFlowEnvName=$1
+		test $tensorFlowEnvName || tensorFlowEnvName=tensorFlow-GPU
 		condaForgeModulesList="ipdb glances"
-		tensorFlowExtraModulesList="ipython argcomplete matplotlib numpy pandas scikit-learn keras-gpu"
+		tensorFlowExtraModulesList="ipython jupyter argcomplete matplotlib numpy pandas scikit-learn keras-gpu"
 		conda env list | grep -q $tensorFlowEnvName || $sudo $conda create --prefix $CONDA_ENVS/$tensorFlowEnvName python=3 ipython argcomplete --yes
 		conda env list
 		echo "=> BEFORE :"
@@ -217,3 +226,4 @@ function main {
 }
 
 main $@
+installTFCondaEnv $1
