@@ -1,5 +1,6 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
+from __future__ import print_function
 import subprocess as sp
 import xml.etree.ElementTree as ET
 import time
@@ -164,6 +165,6 @@ if __name__ == '__main__':
                 
     except:
                 
-        print 'Something went wrong! Exception handling is pretty basic right now.'
+        print('Something went wrong! Exception handling is pretty basic right now.')
                 
     crs.endwin()
