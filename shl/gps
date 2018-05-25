@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 function gps {
-	test -e /dev/nvidia0 && \ps $@ -p $(\lsof -n -w -t /dev/nvidia*)
+	local pidList
+	test -e /dev/nvidia0 && pidList=$(\lsof -n -w -t /dev/nvidia*)
+	test -n "$pidList" && \ps $@ -p $pidList
 }
 
 gps $@
