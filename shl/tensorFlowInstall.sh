@@ -43,7 +43,7 @@ function main {
 			
 					echo
 					echo "=> Installing the lightwight Xfce environment ..."
-					graphicTools="xclip xsel gsmartcontrol gparted lshw-gtk numlockx smart-notifier xfce4 xfce4-mount-plugin xubuntu-desktop"
+					graphicTools="lxrandr xclip xsel gsmartcontrol gparted lshw-gtk numlockx smart-notifier xfce4 xfce4-mount-plugin xubuntu-desktop"
 					$installCommand $graphicTools
 					echo
 
