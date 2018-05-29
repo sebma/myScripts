@@ -69,6 +69,21 @@ global arguments
 arguments = initArgs()
 
 import keras
+
+def Allow_GPU_Memory_Growth() :
+	from keras import backend as K
+
+	if 'tensorflow' == K.backend():
+		import tensorflow as tf
+		config = tf.ConfigProto()
+		config.gpu_options.allow_growth = True
+		config.gpu_options.visible_device_list = "0"
+		#session = tf.Session(config=config)
+		from keras.backend.tensorflow_backend import set_session
+		set_session(tf.Session(config=config))
+
+Allow_GPU_Memory_Growth()
+
 from keras.models import Sequential
 from keras.layers import Dense, BatchNormalization, Activation
 
