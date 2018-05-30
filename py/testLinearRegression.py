@@ -8,7 +8,36 @@ from ipdb import set_trace
 
 import pandas as pda
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+
+def isnotebook() :
+	try :
+		shell = get_ipython().__class__.__name__
+		if shell == 'ZMQInteractiveShell':
+			return True   # Jupyter notebook or qtconsole
+		elif shell == 'TerminalInteractiveShell':
+			return False  # Terminal running IPython
+		else:
+			return False  # Other type (?)
+	except NameError :
+		return False      # Probably standard Python interpreter
+
+def setJupyterBackend( newBackend = 'nbAgg' ) : # Set the "notebook" backend as default or other when newBackend is given
+	# If the script is not run by python but by jupyter and is using a different backend then "notebook"
+	#if mpl.get_backend() != 'Qt5Agg' and mpl.get_backend() != 'nbAgg' :
+	#	print("=> BEFORE: matplotlib backend = <%s>" % mpl.get_backend() )
+	#	mpl.use('nbAgg',warn=False, force=True) # <=> %matplotlib notebook
+
+	# If the script is not run by python but by jupyter and is using a different backend then "inline"
+	if mpl.get_backend() != 'Qt5Agg' and mpl.get_backend() != newBackend :
+		print("=> BEFORE: matplotlib backend = <%s>" % mpl.get_backend() )
+		mpl.use( newBackend ,warn=False, force=True ) # <=> %matplotlib inline
+	#	import matplotlib.pyplot as plt
+		import matplotlib.pyplot
+		print("=> AFTER: matplotlib backend = <%s>" % mpl.get_backend() )
+	else :
+		print("=> matplotlib backend = <%s>" % mpl.get_backend() )
 
 def Print(*args, **kwargs) :
 	if not arguments.quiet : print(*args, **kwargs)
@@ -27,7 +56,9 @@ def initArgs() :
 
 	parser.add_argument( "-b", "--batch_size", help="batchSize taken from the whole dataSet.", default=-1, type=float )
 	parser.add_argument( "-e", "--epochs", help="Number of epochs to go through the NN.", default=5, type=float )
-	parser.add_argument( "-v", "--validation_split", help="Validation split ration of the whole dataset.", default=0.2, type=float )
+	parser.add_argument( "-E", "--EarlyStopping", help="Number of epochs before stopping once your loss starts to increase (disabled by default).", default=-1, type=int )
+	parser.add_argument( "-P", "--PlotMetrics", help="Enables the live ploting of the trained model metrics.", action='store_true', default = False )
+	parser.add_argument( "-v", "--validation_split", help="Validation split ratio of the whole dataset.", default=0.2, type=float )
 	parser.add_argument( "-a", "--activationFunction", help="NN Layer activation function.", default="linear", choices = ['linear','relu','sigmoid'] )
 	parser.add_argument( "-l", "--lossFunction", help="NN model loss function.", default="mse", choices = ['mse','mae'] )
 	parser.add_argument( "-o", "--optimizer", help="NN model optimizer algo.", default="sgd", choices = ['sgd', 'rmsprop','adam'] )
@@ -70,7 +101,7 @@ arguments = initArgs()
 
 import keras
 
-def Allow_GPU_Memory_Growth() :
+def Allow_GPU_Memory_Growth() : #cf. https://github.com/keras-team/keras/issues/1538
 	from keras import backend as K
 
 	if 'tensorflow' == K.backend():
@@ -120,7 +151,15 @@ if Lr :
 	elif optimizer == 'adam' :
 		optimizer = keras.optimizers.Adam(Lr)
 
-model.compile(loss=lossFunction , optimizer=optimizer)
+from keras import metrics
+if   lossFunction.lower() == 'mae' :
+	myMetrics = [ 'mse' ]
+elif lossFunction.lower() == 'mse' :
+	myMetrics = [ 'mae' ]
+
+#myMetrics += [ 'accuracy' ]
+
+model.compile(loss=lossFunction, optimizer=optimizer, metrics = myMetrics)
 
 if nbSamples < 10 :
 	arguments.batch_size = nbSamples
@@ -134,8 +173,26 @@ epochs = int(arguments.epochs)
 batch_size = int(arguments.batch_size)
 validation_split = arguments.validation_split
 
+if arguments.EarlyStopping == -1 and not arguments.PlotMetrics :
+	callbacks = None
+else :
+	callbacks = []
+
+if arguments.EarlyStopping != -1 :
+	from keras.callbacks import EarlyStopping
+	callbacks = [ EarlyStopping( monitor='loss', patience=arguments.EarlyStopping ) ]
+if isnotebook() and arguments.PlotMetrics : # The metrics can only be plotted in a jupyter notebook
+	from livelossplot import PlotLossesKeras
+	callbacks += [ PlotLossesKeras() ]
+
 print( "\n=> nbSamples = %d \t batch_size = %d \t epochs = %d and validation_split = %d %%" % (nbSamples,batch_size,epochs,int(validation_split*100)) )
-history = model.fit( X_train, y_train, batch_size=batch_size, epochs=epochs, validation_split=validation_split )
+
+if isnotebook() : setJupyterBackend( newBackend = 'module://ipykernel.pylab.backend_inline' )
+#mpl.pyplot.ioff()
+history = model.fit( X_train, y_train, batch_size=batch_size, epochs=epochs, validation_split=validation_split, callbacks = callbacks )
+#mpl.pyplot.ion()
+print( "=> mpl.is_interactive() = %s" % mpl.is_interactive() )
+
 print( "\n=> nbSamples = %d \t batch_size = %d \t epochs = %d and validation_split = %d %%" % (nbSamples,batch_size,epochs,int(validation_split*100)) )
 
 print("\n=> Loss function = <" +lossFunction+"> and optimizer' = <"+optimizerName+">")
