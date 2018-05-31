@@ -60,7 +60,7 @@ def initArgs() :
 	parser.add_argument( "-P", "--PlotMetrics", help="Enables the live ploting of the trained model metrics.", action='store_true', default = False )
 	parser.add_argument( "-v", "--validation_split", help="Validation split ratio of the whole dataset.", default=0.2, type=float )
 	parser.add_argument( "-a", "--activationFunction", help="NN Layer activation function.", default="linear", choices = ['linear','relu','sigmoid'] )
-	parser.add_argument( "-l", "--lossFunction", help="NN model loss function.", default="mse", choices = ['mse','mae'] )
+	parser.add_argument( "-l", "--lossFunction", help="NN model loss function.", default="mse", choices = ['mse','mae','rmse' ] )
 	parser.add_argument( "-o", "--optimizer", help="NN model optimizer algo.", default="sgd", choices = ['sgd', 'rmsprop','adam'] )
 
 	parser.add_argument( "--Lr", help="Set the learning rate of the NN.", default=None, type=float )
@@ -151,11 +151,21 @@ if Lr :
 	elif optimizer == 'adam' :
 		optimizer = keras.optimizers.Adam(Lr)
 
-from keras import metrics
+from keras import backend as K, metrics
+def root_mean_squared_error(y_true, y_pred):
+	return K.sqrt(K.mean(K.square(y_pred - y_true), axis=-1))
+rmse = RMSE = root_mean_squared_error
+
+myMetrics = []
 if   lossFunction.lower() == 'mae' :
-	myMetrics = [ 'mse' ]
+	myMetrics += [ 'mse' ]
+	myMetrics += [ 'rmse' ]
 elif lossFunction.lower() == 'mse' :
-	myMetrics = [ 'mae' ]
+	myMetrics += [ 'rmse' ]
+	myMetrics += [ 'mae' ]
+elif lossFunction.lower() == 'rmse' :
+	myMetrics += [ 'mse' ]
+	myMetrics += [ 'mae' ]
 
 #myMetrics += [ 'accuracy' ]
 
@@ -196,12 +206,14 @@ print( "=> mpl.is_interactive() = %s" % mpl.is_interactive() )
 print( "\n=> nbSamples = %d \t batch_size = %d \t epochs = %d and validation_split = %d %%" % (nbSamples,batch_size,epochs,int(validation_split*100)) )
 
 print("\n=> Loss function = <" +lossFunction+"> and optimizer' = <"+optimizerName+">")
+
+slope = model.layers[-1].get_weights()[0].item()
+y_Intercept = model.layers[-1].get_weights()[1].item()
 if lossFunction.lower() == 'mae' :
-	slope = model.layers[0].get_weights()[0].item()
-	y_Intercept = model.layers[0].get_weights()[1].item()
 	print( "\n=> slope=%.2f y_Intercept=%.2f\n" % (slope, y_Intercept) )
 	df['y_predicted'] = slope * X_train + y_Intercept
 else :
+#	print( "\n=> slope=%.2f y_Intercept=%.2f\n" % (slope, y_Intercept) )
 	df['y_predicted'] = model.predict( X_train )
 
 if Lr : print("\n=> lr = ",Lr)
