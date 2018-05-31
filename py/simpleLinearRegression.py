@@ -184,18 +184,18 @@ elif lossFunction.lower() == 'rmse' :
 
 model.compile(loss=lossFunction, optimizer=optimizer, metrics = myMetrics)
 
-def showModel(model) :
+def showModel(model, rankdir) :
 	if isnotebook() :
 		print("=> DISPLAYING MODEL IN SVG :")
 #		%matplotlib notebook
-		from IPython.display import SVG
+		from IPython.display import SVG, display
 		from keras.utils.vis_utils import model_to_dot
-		return SVG(model_to_dot(model).create(prog='dot', format='svg'))
+		display( SVG( model_to_dot( model, show_shapes=True, show_layer_names=True, rankdir = rankdir ).create( prog='dot', format='svg' ) ) )
 	else :
 		modelFileName = 'model.svg'
 		print("=> DUMPING MODEL TO : " + modelFileName)
 		from keras.utils import plot_model
-		plot_model(model, to_file=modelFileName)
+		plot_model(model, to_file=modelFileName, show_shapes=True, show_layer_names=True, rankdir = rankdir)
 
 batch_size = int(arguments.batch_size)
 validation_split = arguments.validation_split
@@ -239,7 +239,7 @@ else :
 	print("\n=> slope=%.2f\ty_Intercept=%.2f\n" % (slope, y_Intercept))
 	df['y_predicted'] = model.predict( df['X_train'] )
 
-showModel(model)
+showModel(model, rankdir = 'TB')
 
 if Lr : print("\n=> lr = ",Lr)
 
