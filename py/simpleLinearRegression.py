@@ -58,9 +58,10 @@ def initArgs() :
 	parser.add_argument( "-e", "--epochs", help="Number of epochs to go through the NN.", default=5, type=float )
 	parser.add_argument( "-E", "--EarlyStopping", help="Number of epochs before stopping once your loss starts to increase (disabled by default).", default=-1, type=int )
 	parser.add_argument( "-P", "--PlotMetrics", help="Enables the live ploting of the trained model metrics.", action='store_true', default = False )
+	parser.add_argument( "-S", "--Shuffle", help="Shuffle the data along the way.", action='store_true', default = False )
 	parser.add_argument( "-v", "--validation_split", help="Validation split ratio of the whole dataset.", default=0.2, type=float )
 	parser.add_argument( "-a", "--activationFunction", help="NN Layer activation function.", default="linear", choices = ['linear','relu','sigmoid'] )
-	parser.add_argument( "-l", "--lossFunction", help="NN model loss function.", default="mse", choices = ['mse','mae'] )
+	parser.add_argument( "-l", "--lossFunction", help="NN model loss function.", default="mse", choices = ['mse','mae','rmse'] )
 	parser.add_argument( "-o", "--optimizer", help="NN model optimizer algo.", default="sgd", choices = ['sgd', 'rmsprop','adam'] )
 
 	parser.add_argument( "--Lr", help="Set the learning rate of the NN.", default=None, type=float )
@@ -136,14 +137,19 @@ df['y_train'] = -5 * df['X_train'] + 10
 
 model = Sequential()
 #model.add(Dense(units=1, input_dim=1, activation="relu", kernel_initializer="normal"))
-model.add( Dense( units=1, input_dim=1, activation= arguments.activationFunction ) )
+model.add( Dense( units=1, input_dim=1, activation = arguments.activationFunction ) )
 
 #M.A.E. = Mean Absolute Error
 lossFunction = arguments.lossFunction
 optimizer = arguments.optimizer
 
 if lossFunction.lower() == 'mse' :
-	model.add(BatchNormalization()); # MSE needs NORMALIZATION
+#	model.add(BatchNormalization()); # MSE needs NORMALIZATION
+	print( "=> Doing Pandas dataframe normalization ..." )
+#	df['X_train'] = keras.utils.normalize( df.values )[:,0]
+#	df['y_train'] = keras.utils.normalize( df.values )[:,1]
+	df = ( df-df.mean() ) / df.std()
+	print( "=> DONE." )
 
 optimizer = optimizer.lower()
 Lr = arguments.Lr
@@ -156,15 +162,40 @@ if Lr :
 	elif optimizer == 'adam' :
 		optimizer = keras.optimizers.Adam(Lr)
 
-from keras import metrics
+from keras import backend as K, metrics
+def root_mean_squared_error(y_true, y_pred):
+	return K.sqrt(K.mean(K.square(y_pred - y_true), axis=-1))
+rmse = RMSE = root_mean_squared_error
+
+myMetrics = []
+lossFunctionName = lossFunction.lower()
 if   lossFunction.lower() == 'mae' :
-	myMetrics = [ 'mse' ]
+	myMetrics += [ 'mse' ]
+	myMetrics += [ 'rmse' ]
 elif lossFunction.lower() == 'mse' :
-	myMetrics = [ 'mae' ]
+	myMetrics += [ rmse ]
+	myMetrics += [ 'mae' ]
+elif lossFunction.lower() == 'rmse' :
+	lossFunction = rmse
+	myMetrics += [ 'mse' ]
+	myMetrics += [ 'mae' ]
 
 #myMetrics += [ 'accuracy' ]
 
 model.compile(loss=lossFunction, optimizer=optimizer, metrics = myMetrics)
+
+def showModel(model) :
+	if isnotebook() :
+		print("=> DISPLAYING MODEL IN SVG :")
+#		%matplotlib notebook
+		from IPython.display import SVG
+		from keras.utils.vis_utils import model_to_dot
+		return SVG(model_to_dot(model).create(prog='dot', format='svg'))
+	else :
+		modelFileName = 'model.svg'
+		print("=> DUMPING MODEL TO : " + modelFileName)
+		from keras.utils import plot_model
+		plot_model(model, to_file=modelFileName)
 
 batch_size = int(arguments.batch_size)
 validation_split = arguments.validation_split
@@ -182,11 +213,13 @@ if isnotebook() and arguments.PlotMetrics : # The metrics can only be plotted in
 	from livelossplot import PlotLossesKeras
 	callbacks += [ PlotLossesKeras() ]
 
+shuffle = arguments.Shuffle
+
 print( "\n=> nbSamples = %d \t batch_size = %d \t epochs = %d and validation_split = %d %%" % (nbSamples,batch_size,epochs,int(validation_split*100)) )
 
 if isnotebook() : setJupyterBackend( newBackend = 'module://ipykernel.pylab.backend_inline' )
 #mpl.pyplot.ioff()
-history = model.fit( df['X_train'], df['y_train'], batch_size=batch_size, epochs=epochs, validation_split=validation_split, callbacks = callbacks )
+history = model.fit( df['X_train'], df['y_train'], batch_size=batch_size, epochs=epochs, validation_split=validation_split, callbacks = callbacks, shuffle = shuffle )
 #mpl.pyplot.ion()
 print( "=> mpl.is_interactive() = %s" % mpl.is_interactive() )
 
@@ -194,14 +227,19 @@ print("=> matplotlib backend = <%s>" % mpl.get_backend() )
 
 print( "\n=> nbSamples = %d \t batch_size = %d \t epochs = %d and validation_split = %d %%" % (nbSamples,batch_size,epochs,int(validation_split*100)) )
 
-print( "\n=> Loss function = <" +lossFunction+">" + " optimizer = <"+optimizerName+">" )
-if lossFunction.lower() == 'mae' :
-	slope = model.layers[0].get_weights()[0].item()
-	y_Intercept = model.layers[0].get_weights()[1].item()
+print( "\n=> Loss function = <" +lossFunctionName+">" + " optimizer = <"+optimizerName+">" )
+
+slope = model.layers[-1].get_weights()[0].item()
+y_Intercept = model.layers[-1].get_weights()[1].item()
+
+if lossFunctionName.lower() == 'mae' :
 	print("\n=> slope=%.2f\ty_Intercept=%.2f\n" % (slope, y_Intercept))
 	df['y_predicted'] = slope*df['X_train'] + y_Intercept
 else :
+	print("\n=> slope=%.2f\ty_Intercept=%.2f\n" % (slope, y_Intercept))
 	df['y_predicted'] = model.predict( df['X_train'] )
+
+showModel(model)
 
 if Lr : print("\n=> lr = ",Lr)
 
@@ -210,7 +248,7 @@ plt.clf()
 
 #subplot(nrows, ncols, plot_number)
 #plt.subplot(1,2,1)
-plt.title('Linear regression with <'+lossFunction+'> loss and <'+optimizerName+'> optimizer')
+plt.title('Linear regression with <'+lossFunctionName+'> loss and <'+optimizerName+'> optimizer')
 plt.scatter( df['X_train'], df['y_train'], label='Line' )
 plt.plot( df['X_train'], df['y_predicted'], 'r-.', label='Prediction')
 plt.legend(loc='best')
