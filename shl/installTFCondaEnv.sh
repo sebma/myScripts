@@ -37,7 +37,7 @@ function installTFCondaEnv {
 
 		echo $PATH | grep -q $CONDA_HOME || echo 'export PATH=$CONDA_HOME/bin${PATH:+:${PATH}}' >> $shellInitFileName
 		conda=$(which conda)
-		conda list | grep -q argcomplete || $sudo $conda install argcomplete
+		$conda list | grep -q argcomplete || $sudo $conda install argcomplete
 
 		echo
 		echo "=> Installing tensorflow-gpu conda environment ..."
@@ -45,11 +45,11 @@ function installTFCondaEnv {
 		tensorFlowEnvName=$1
 		test $tensorFlowEnvName || tensorFlowEnvName=tensorFlow-GPU
 		condaForgeModulesList="ipdb jupyter_contrib_nbextensions jupyter_nbextensions_configurator glances"
-		tensorFlowExtraModulesList="ipython jupyter argcomplete matplotlib numpy pandas scikit-learn keras-gpu"
-		conda env list | grep -q $tensorFlowEnvName || $sudo $conda create --prefix $CONDA_ENVS/$tensorFlowEnvName python=3 ipython argcomplete --yes
-		conda env list
+		tensorFlowExtraModulesList="ipython jupyter argcomplete matplotlib numpy pandas namedlist scikit-learn keras-gpu"
+		$conda env list | grep -q $tensorFlowEnvName || $sudo $conda create --prefix $CONDA_ENVS/$tensorFlowEnvName python=3 ipython argcomplete --yes
+		$conda env list
 		echo "=> BEFORE :"
-		conda list -n $tensorFlowEnvName | egrep "packages in environment|tensorflow|python|$(echo $tensorFlowExtraModulesList $condaForgeModulesList | tr ' ' '|')"
+		$conda list -n $tensorFlowEnvName | egrep "packages in environment|tensorflow|python|$(echo $tensorFlowExtraModulesList $condaForgeModulesList | tr ' ' '|')"
 		set -x
 		$sudo $conda install -n $tensorFlowEnvName -c aaronzs tensorflow-gpu --yes
 		$sudo $conda install -n $tensorFlowEnvName -c lukepfister scikit.cuda --yes || true
@@ -59,15 +59,14 @@ function installTFCondaEnv {
 		echo "=> AFTER :"
 		conda list -n $tensorFlowEnvName | egrep "packages in environment|tensorflow|python|$(echo $tensorFlowExtraModulesList $condaForgeModulesList | tr ' ' '|')"
 
-		conda list -n $tensorFlowEnvName | grep gpustat || {
-			set -x
-#			pip=$(which pip)
-#			$sudo $pip install --prefix $CONDA_ENVS/$tensorFlowEnvName gpustat
-#			$sudo sed -i '1s|#!.*python|#!'"$CONDA_ENVS/$tensorFlowEnvName/bin/python|" $CONDA_ENVS/$tensorFlowEnvName/bin/gpustat
-			pip=$($conda env list | awk "/$tensorFlowEnvName/"'{print$NF}'/bin/pip)
-			$sudo -H $pip install gpustat livelossplot # TESTER SI CES MODULES SONT INSTALLES AU BON ENDROIT
-			set +x
-		}
+		pip=$($conda env list | awk "/$tensorFlowEnvName/"'{print$NF}'/bin/pip)
+		PyPIPythonModulesList="livelossplot"
+		for PyPIPythonModule in $PyPIPythonModulesList
+		do
+			$conda list -n $tensorFlowEnvName | grep -q $PyPIPythonModule || $sudo -H $pip install $PyPIPythonModule
+		done
+
+		$conda list -n $tensorFlowEnvName | grep gpustat || $sudo -H $pip install gpustat
 
 		which gpustat >/dev/null 2>&1 && echo && gpustat -cpu -P
 	fi
