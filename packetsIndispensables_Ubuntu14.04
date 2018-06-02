@@ -61,6 +61,7 @@ gpm
 gstreamer1.0-libav
 handbrake-cli
 hddtemp
+highlight
 html-xml-utils
 htop
 ifupdown
