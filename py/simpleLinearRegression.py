@@ -3,7 +3,6 @@
 orig_keys = set(globals().keys())
 from seb_ML import *
 
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import pandas as pda
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,21 +11,29 @@ def initArgs() :
 	global arguments, scriptBaseName, parser, __version__
 	__version__ = "0.0.0.1"
 
-	parser = ArgumentParser( description = 'Simple Linear Regresssion with Keras.', formatter_class=ArgumentDefaultsHelpFormatter )
+	import argparse
+	class MyFormatter(argparse.ArgumentDefaultsHelpFormatter, argparse.MetavarTypeHelpFormatter):
+		pass
+
+#	parser = argparse.ArgumentParser( description = 'Simple Linear Regresssion with Keras.', formatter_class = argparse.ArgumentDefaultsHelpFormatter )
+	parser = argparse.ArgumentParser( description = 'Simple Linear Regresssion with Keras.', formatter_class = MyFormatter )
+	parser.add_argument( "dataFileName", help="(Optional) data fileName to read data from.", nargs='?', type=str )
+
 	parser.add_argument( "-n", "--nbSamples", help="Total nbSamples in the dataSet.", default=1e3, type=float )
 	parser.add_argument( "-f", "--firstSample", help="First sample value in the dataSet.", default=0, type=float )
 	parser.add_argument( "-L", "--lastSample", help="Last sample value in the dataSet.", default=1e2, type=float )
 	parser.add_argument( "-b", "--batch_size", help="batchSize taken from the whole dataSet.", default=-1, type=float )
 	parser.add_argument( "-e", "--epochs", help="Number of epochs to go through the NN.", default=5, type=float )
-	parser.add_argument( "-E", "--EarlyStopping", help="Number of epochs before stopping once your loss starts to increase (disabled by default).", default=-1, type=int )
-	parser.add_argument( "-P", "--PlotMetrics", help="Enables the live ploting of the trained model metrics in Jupyter NoteBook.", action='store_true', default = False )
-	parser.add_argument( "-D", "--DumpedModelFileName", help="Dump the model image to fileName", default = None )
-	parser.add_argument( "-S", "--Shuffle", help="Shuffle the data along the way.", action='store_true', default = False )
-	parser.add_argument( "-v", "--validation_split", help="Validation split ratio of the whole dataset.", default=0.2, type=float )
-	parser.add_argument( "-a", "--activationFunction", help="NN Layer activation function.", default="linear", choices = ['linear','relu','sigmoid'] )
-	parser.add_argument( "-l", "--lossFunction", help="NN model loss function.", default="mse", choices = ['mse','mae','rmse'] )
-	parser.add_argument( "-k", "--kernel_initializer", help="NN Model kernel initializer.", default="glorot_uniform", choices = ['glorot_uniform','random_normal','random_uniform'] )
-	parser.add_argument( "-o", "--optimizer", help="NN model optimizer algo.", default="sgd", choices = ['sgd', 'rmsprop','adam'] )
+	parser.add_argument( "-E", "--earlyStoppingPatience", help="Number of epochs before stopping once your loss starts to increase (disabled by default).", default=-1, type=int )
+	parser.add_argument( "-P", "--plotMetrics", help="Enables the live ploting of the trained model metrics in Jupyter NoteBook.", action='store_true', default = False )
+	parser.add_argument( "-D", "--dumpedModelFileName", help="Dump the model image to fileName", default = None, type=str )
+	parser.add_argument( "-S", "--shuffle", help="Shuffle the data along the way.", action='store_true', default = False )
+	parser.add_argument( "-V", "--validation_split", help="Validation split ratio of the whole dataset.", default=0.2, type=float )
+	parser.add_argument( "-v", "--verbosity", help="Increase output verbosity (e.g., -vv is more than -v).", action='count', default = 0 )
+	parser.add_argument( "-a", "--activationFunction", help="NN Layer activation function.", default="linear", choices = ['linear','relu','sigmoid'], type=str )
+	parser.add_argument( "-l", "--lossFunction", help="NN model loss function.", default="mse", choices = ['mse','mae','rmse'], type=str )
+	parser.add_argument( "-k", "--kernel_initializer", help="NN Model kernel initializer.", default="glorot_uniform", choices = ['glorot_uniform','random_normal','random_uniform'], type=str )
+	parser.add_argument( "-o", "--optimizer", help="NN model optimizer algo.", default="sgd", choices = ['sgd', 'rmsprop','adam'], type=str )
 
 	parser.add_argument( "--Lr", help="Set the learning rate of the NN.", default=None, type=float )
 
@@ -45,18 +52,18 @@ def initArgs() :
 
 	q = arguments.quiet
 	if arguments.mdu :
-		Print("<pre><code>")
+		Print("<pre><code>", quiet = q )
 		parser.print_usage()
-		Print("</code></pre>")
+		Print("</code></pre>", quiet = q )
 		exit()
 
 	if arguments.mdh :
-		Print("<pre><code>")
+		Print("<pre><code>", quiet = q )
 		parser.print_help()
-		Print("</code></pre>")
+		Print("</code></pre>", quiet = q )
 		exit()
 
-	if arguments.md : Print("<pre><code>")
+	if arguments.md : Print("<pre><code>", quiet = q )
 
 	return arguments
 
@@ -66,9 +73,11 @@ def plotDataAndPrediction(df, lossFunctionName, optimizerName) :
 	
 	#subplot(nrows, ncols, plot_number)
 	#plt.subplot(1,2,1)
-	plt.title('Linear regression with <'+lossFunctionName+'> loss and <'+optimizerName+'> optimizer')
-	plt.scatter( df['X_train'], df['y_train'], label='Line' )
-	plt.plot( df['X_train'], df['y_predicted'], 'r-.', label='Prediction')
+	plt.title('Regression with <'+lossFunctionName+'> loss and <'+optimizerName+'> optimizer')
+	plt.scatter( df[ columnNames[0] ], df[ columnNames[1] ], label='Real data' )
+	plt.plot( df[ columnNames[0] ], df['y_predicted'], 'r-.', label='Prediction')
+	plt.xlabel( columnNames[0] )
+	plt.ylabel( columnNames[1] )
 	plt.legend(loc='best')
 	
 	#subplot(nrows, ncols, plot_number)
@@ -79,47 +88,39 @@ def plotDataAndPrediction(df, lossFunctionName, optimizerName) :
 def initScript() :
 #	global myArgs, arguments, nbSamples, lastSample, epochs, df, lossFunction, optimizer, activation, Lr, dumpedModelFileName, rmse, batch_size, validation_split, shuffle, earlyStoppingPatience, plotMetrics
 	global myArgs, df
-	global optimizerName, lossFunctionName, myMetrics, modelTrainingCallbacks, dataIsNormalized
+	global optimizerName, lossFunctionName, myMetrics, modelTrainingCallbacks, dataIsNormalized, columnNames
+
+	rmse = root_mean_squared_error
 
 	arguments = initArgs()
 	Allow_GPU_Memory_Growth()
 	pda.options.display.max_rows = 20 #Prints the first max_rows/2 and the last max_rows/2 of each dataframe
 
-#	from collections import namedtuple # namedtuples are not mutable
-	from namedlist import namedlist
-	myStruct = namedlist( "myStruct", "nbSamples lastSample epochs lossFunction optimizer activation Lr dumpedModelFileName batch_size validation_split shuffle earlyStoppingPatience plotMetrics kernel_initializer" )
+	myArgs = copyArgumentsToStructure( arguments )
 
-	rmse = RMSE = root_mean_squared_error
+	myArgs.nbSamples = int( myArgs.nbSamples )
+	myArgs.epochs = int( myArgs.epochs )
+	myArgs.batch_size = int( myArgs.batch_size )
 
-	myArgs = myStruct(
-						nbSamples = int(arguments.nbSamples),
-						lastSample = arguments.lastSample,
-						epochs = int(arguments.epochs),
-						lossFunction = arguments.lossFunction.lower(),
-						optimizer = arguments.optimizer.lower(),
-						activation = arguments.activationFunction,
-						Lr = arguments.Lr,
-						dumpedModelFileName = arguments.DumpedModelFileName,
-						batch_size = int(arguments.batch_size),
-						validation_split = arguments.validation_split,
-						shuffle = arguments.Shuffle,
-						earlyStoppingPatience = arguments.EarlyStopping,
-						plotMetrics = arguments.PlotMetrics,
-						kernel_initializer = arguments.kernel_initializer
-					)
-
-	df = pda.DataFrame()
-	df['X_train'] = np.linspace(0, myArgs.lastSample, myArgs.nbSamples)
-	df['y_train'] = -5 * df['X_train'] + 10
+	if myArgs.dataFileName :
+		nbInputVars = 1
+		columnNames = ['Wavelength','Power']
+		df = pda.read_csv( myArgs.dataFileName , delim_whitespace=True , comment='#' , names = columnNames )
+		myArgs.nbSamples = df[ columnNames[0] ].size
+	else :
+		columnNames = ['X_train','y_train']
+		df = pda.DataFrame()
+		df[ columnNames[0] ] = np.linspace(0, myArgs.lastSample, myArgs.nbSamples)
+		df[ columnNames[1] ] = -5 * df[ columnNames[0] ] + 10
 
 	dataIsNormalized = False
 	if myArgs.lossFunction == 'mse' :
 		# MSE needs NORMALIZATION
-		print( "=> Doing Pandas dataframe normalization ...", file=stderr )
-	#	df['X_train'] = keras.utils.normalize( df.values )[:,0]
-	#	df['y_train'] = keras.utils.normalize( df.values )[:,1]
+		PrintInfo( "=> Doing Pandas dataframe normalization ..." , quiet = myArgs.quiet )
+	#	df[ columnNames[0] ] = keras.utils.normalize( df.values )[:,0]
+	#	df[ columnNames[1] ] = keras.utils.normalize( df.values )[:,1]
 		df = ( df-df.mean() ) / df.std()
-		print( "=> DONE.", file=stderr )
+		PrintInfo( "=> DONE." , quiet = myArgs.quiet )
 		dataIsNormalized = True
 
 	optimizerName = myArgs.optimizer
@@ -146,7 +147,7 @@ def initScript() :
 	myMetrics = []
 	if   myArgs.lossFunction == 'mae' :
 		myMetrics += [ 'mse' ]
-		myMetrics += [ 'rmse' ]
+		myMetrics += [ rmse ]
 	elif myArgs.lossFunction == 'mse' :
 		myMetrics += [ rmse ]
 		myMetrics += [ 'mae' ]
@@ -163,8 +164,15 @@ def initScript() :
 	
 	if myArgs.earlyStoppingPatience != -1 :
 		from keras.callbacks import EarlyStopping
-		modelTrainingCallbacks += [ EarlyStopping( monitor='val_loss', patience = myArgs.earlyStoppingPatience ) ]
-	#	modelTrainingCallbacks += [ EarlyStopping( monitor='loss', patience = myArgs.earlyStoppingPatience ) ]
+		if myArgs.nbSamples < 10 :
+			monitoredData = 'loss'
+			modelTrainingCallbacks += [ EarlyStopping( monitor='loss', patience = myArgs.earlyStoppingPatience ) ]
+		else :
+			monitoredData = 'val_loss'
+			modelTrainingCallbacks += [ EarlyStopping( monitor='val_loss', patience = myArgs.earlyStoppingPatience ) ]
+	
+		PrintInfo( "=> The monitored data for early stopping is : " + monitoredData )
+
 	if isnotebook() and myArgs.plotMetrics : # The metrics can only be plotted in a jupyter notebook
 		from livelossplot import PlotLossesKeras
 		modelTrainingCallbacks += [ PlotLossesKeras() ]
@@ -179,37 +187,37 @@ def main() :
 	
 	# MODEL DEFINITION
 	model = Sequential()
-	model.add( Dense( units=1, input_dim=1, activation = myArgs.activation, kernel_initializer = myArgs.kernel_initializer ) )
+	model.add( Dense( units=1, input_dim=1, activation = myArgs.activationFunction, kernel_initializer = myArgs.kernel_initializer ) )
 
-	model.compile(loss=myArgs.lossFunction, optimizer=myArgs.optimizer, metrics = myMetrics)
+	model.compile( loss=myArgs.lossFunction, optimizer=myArgs.optimizer, metrics = myMetrics )
 
-	print( "\n=> myArgs.nbSamples = %d \t myArgs.batch_size = %d \t myArgs.epochs = %d and myArgs.validation_split = %d %%" % (myArgs.nbSamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) )
+	PrintInfo( "\n=> myArgs.nbSamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%" % (myArgs.nbSamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
 
 	if isnotebook() : setJupyterBackend( newBackend = 'module://ipykernel.pylab.backend_inline' )
 
 	#MODEL TRAINING
-	history = model.fit( df['X_train'], df['y_train'], batch_size=myArgs.batch_size, epochs=myArgs.epochs, validation_split=myArgs.validation_split, callbacks = modelTrainingCallbacks, shuffle = myArgs.shuffle )
+	history = model.fit( df[columnNames[0]], df[ columnNames[1] ], batch_size=myArgs.batch_size, epochs=myArgs.epochs, validation_split=myArgs.validation_split, callbacks = modelTrainingCallbacks, shuffle = myArgs.shuffle, verbose = myArgs.verbosity )
 	
 #	mpl.pyplot.ion()
-#	print( "=> mpl.is_interactive() = %s" % mpl.is_interactive() )
-#	print( "=> matplotlib backend = <%s>" % mpl.get_backend() )
+#	PrintInfo( "=> mpl.is_interactive() = %s" % mpl.is_interactive() , quiet = myArgs.quiet )
+#	PrintInfo( "=> matplotlib backend = <%s>" % mpl.get_backend() , quiet = myArgs.quiet )
 	
-	print( "\n=> myArgs.nbSamples = %d \t myArgs.batch_size = %d \t myArgs.epochs = %d and myArgs.validation_split = %d %%" % (myArgs.nbSamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) )
+	if myArgs.verbosity or isnotebook() : PrintInfo( "\n=> myArgs.nbSamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%" % (myArgs.nbSamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
 	
-	print( "\n=> Loss function = <" +lossFunctionName+">" + " myArgs.optimizer = <"+optimizerName+">" )
+	PrintInfo( "\n=> Loss function = <" +lossFunctionName+">" + " myArgs.optimizer = <"+optimizerName+">" , quiet = myArgs.quiet )
 	
 	slope = model.layers[-1].get_weights()[0].item()
 	y_Intercept = model.layers[-1].get_weights()[1].item()
 	if dataIsNormalized :
-		print("\n=> THE DATA WAS NORMALIZED, hence slope=%.2f\ty_Intercept=%.2f\n" % (slope, y_Intercept))
-		df['y_predicted'] = model.predict( df['X_train'] ) # MODEL PREDICTION
+		PrintInfo("\n=> THE DATA WAS NORMALIZED, hence slope=%.2f\ty_Intercept=%.2f\n" % (slope, y_Intercept), quiet = myArgs.quiet )
+		df['y_predicted'] = model.predict( df[ columnNames[0] ] ) # MODEL PREDICTION
 	else :
-		print("\n=> slope=%.2f\ty_Intercept=%.2f\n" % (slope, y_Intercept))
-		df['y_predicted'] = slope*df['X_train'] + y_Intercept
+		PrintInfo("\n=> slope=%.2f\ty_Intercept=%.2f\n" % (slope, y_Intercept), quiet = myArgs.quiet )
+		df['y_predicted'] = slope*df[ columnNames[0] ] + y_Intercept
 	
 	showModel(model = model, modelFileName = myArgs.dumpedModelFileName, rankdir = 'TB')
 	
-	if myArgs.Lr : print("\n=> lr = ",myArgs.Lr)
+	if myArgs.Lr : PrintInfo("\n=> lr = ",myArgs.Lr, quiet = myArgs.quiet )
 	
 	plotDataAndPrediction(df, lossFunctionName, optimizerName)
 
