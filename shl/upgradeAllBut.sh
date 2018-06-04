@@ -2,13 +2,13 @@
 
 function upgradeAllBut {
 	local packagesNotUpgraded="$@"
-	packagesNotUpgraded=$(echo $packagesNotUpgraded | tr ' ' '|')
 	time sudo apt update
 	if [ -z $packagesNotUpgraded ]
 	then
-		packagesToBeUpgraded=$($(which apt) upgrade --dry-run | awk '/^Inst/{printf$2" "}' | grep -v "Listing...")
+		packagesToBeUpgraded=$($(which apt-get) dist-upgrade --dry-run | awk '/^Inst/{printf$2" "}' | grep -v "Listing...")
 	else
-		packagesToBeUpgraded=$($(which apt) upgrade --dry-run | awk '/^Inst/{print$2" "}' | egrep -v "$packagesNotUpgraded" | grep -v "Listing...")
+		packagesNotUpgraded=$(echo $packagesNotUpgraded | tr ' ' '|')
+		packagesToBeUpgraded=$($(which apt-get) dist-upgrade --dry-run | awk '/^Inst/{print$2" "}' | egrep -v "$packagesNotUpgraded" | grep -v "Listing...")
 	fi
 
 	echo "=> packagesToBeUpgraded = <$packagesToBeUpgraded>"
