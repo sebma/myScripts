@@ -45,7 +45,7 @@ function installTFCondaEnv {
 		tensorFlowEnvName=$1
 		test $tensorFlowEnvName || tensorFlowEnvName=tensorFlow-GPU
 		condaForgeModulesList="ipdb jupyter_contrib_nbextensions jupyter_nbextensions_configurator glances"
-		tensorFlowExtraModulesList="ipython jupyter argcomplete matplotlib numpy pandas namedlist scikit-learn keras-gpu"
+		tensorFlowExtraModulesList="ipython jupyter argcomplete matplotlib numpy pandas pytables namedlist scikit-learn keras-gpu"
 		$conda env list | grep -q $tensorFlowEnvName || $sudo $conda create --prefix $CONDA_ENVS/$tensorFlowEnvName python=3 ipython argcomplete --yes
 		$conda env list
 		echo "=> BEFORE :"
