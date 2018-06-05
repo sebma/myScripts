@@ -44,7 +44,7 @@ OR
 * [Jupyter Kernels](https://github.com/jupyter/jupyter/wiki/Jupyter-kernels) (Programming Languages support for Jupyter)
 * [Jupyter Notebook Widgets](http://jupyter.org/widgets) (Jupyter widgets enable interactive data visualization in the Jupyter notebooks)
 * [Jupyter Notebook Extensions](http://jupyter-contrib-nbextensions.readthedocs.io/en/latest/) (Collection of community-contributed unofficial extensions that add functionality to the Jupyter notebook)
-* [Jupyter Nbextensions Configurator](https://github.com/Jupyter-contrib/jupyter_nbextensions_configurator) (A server extension for jupyter notebook which provides configuration interfaces for notebook extensions (nbextensions))
+* [Jupyter Nbextensions Configurator](https://github.com/Jupyter-contrib/jupyter_nbextensions_configurator) (A server extension for jupyter notebook which provides configuration interfaces for notebook extensions)
 
 <!--
 * [Dask DataFrame](http://dask.pydata.org/en/latest/dataframe-overview.html) (Parallel computing with task scheduling: Dynamic task scheduling + “Big Data” collections: A Dask DataFrame is a large parallel dataframe composed of many smaller Pandas dataframes, split along the index.)
