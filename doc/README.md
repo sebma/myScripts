@@ -1,6 +1,6 @@
-# Python DOC
+# Miscellaneous DOC
 
-Python DOC
+Miscellaneous DOC
 
 ## Requirements to run the scripts
 
