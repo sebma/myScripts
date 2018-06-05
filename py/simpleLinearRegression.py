@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 orig_keys = set(globals().keys())
+
 from seb_ML import *
 
 import pandas as pda
@@ -33,7 +34,8 @@ def initArgs() :
 	parser.add_argument( "-a", "--activationFunction", help="NN Layer activation function.", default="linear", choices = ['linear','relu','sigmoid'], type=str )
 	parser.add_argument( "-l", "--lossFunction", help="NN model loss function.", default="mse", choices = ['mse','mae','rmse'], type=str )
 	parser.add_argument( "-k", "--kernel_initializer", help="NN Model kernel initializer.", default="glorot_uniform", choices = ['glorot_uniform','random_normal','random_uniform'], type=str )
-	parser.add_argument( "-o", "--optimizer", help="NN model optimizer algo.", default="sgd", choices = ['sgd', 'rmsprop','adam'], type=str )
+	parser.add_argument( "-O", "--optimizer", help="NN model optimizer algo.", default="sgd", choices = ['sgd', 'rmsprop','adam'], type=str )
+	parser.add_argument( "-o", "--outputDataframeFileName", help="NN model optimizer algo.", type=str )
 
 	parser.add_argument( "--Lr", help="Set the learning rate of the NN.", default=None, type=float )
 
@@ -88,7 +90,7 @@ def plotDataAndPrediction(df, lossFunctionName, optimizerName) :
 def initScript() :
 #	global myArgs, arguments, nbSamples, lastSample, epochs, df, lossFunction, optimizer, activation, Lr, dumpedModelFileName, rmse, batch_size, validation_split, shuffle, earlyStoppingPatience, plotMetrics
 	global myArgs, df
-	global optimizerName, lossFunctionName, myMetrics, modelTrainingCallbacks, dataIsNormalized, columnNames
+	global optimizerName, lossFunctionName, myMetrics, modelTrainingCallbacks, dataIsNormalized, columnNames, monitoredData
 
 	rmse = root_mean_squared_error
 
@@ -164,14 +166,12 @@ def initScript() :
 	
 	if myArgs.earlyStoppingPatience != -1 :
 		from keras.callbacks import EarlyStopping
-		if myArgs.nbSamples < 10 :
-			monitoredData = 'loss'
-			modelTrainingCallbacks += [ EarlyStopping( monitor='loss', patience = myArgs.earlyStoppingPatience ) ]
-		else :
-			monitoredData = 'val_loss'
-			modelTrainingCallbacks += [ EarlyStopping( monitor='val_loss', patience = myArgs.earlyStoppingPatience ) ]
-	
+		if myArgs.nbSamples < 10 : monitoredData = 'loss'
+		else : monitoredData = 'val_loss'
+
+		modelTrainingCallbacks += [ EarlyStopping( monitor= monitoredData, patience = myArgs.earlyStoppingPatience ) ]
 		PrintInfo( "=> The monitored data for early stopping is : " + monitoredData )
+		PrintInfo( "=> modelTrainingCallbacks = " + str(modelTrainingCallbacks) )
 
 	if isnotebook() and myArgs.plotMetrics : # The metrics can only be plotted in a jupyter notebook
 		from livelossplot import PlotLossesKeras
@@ -196,13 +196,16 @@ def main() :
 	if isnotebook() : setJupyterBackend( newBackend = 'module://ipykernel.pylab.backend_inline' )
 
 	#MODEL TRAINING
-	history = model.fit( df[columnNames[0]], df[ columnNames[1] ], batch_size=myArgs.batch_size, epochs=myArgs.epochs, validation_split=myArgs.validation_split, callbacks = modelTrainingCallbacks, shuffle = myArgs.shuffle, verbose = myArgs.verbosity )
-	
-#	mpl.pyplot.ion()
-#	PrintInfo( "=> mpl.is_interactive() = %s" % mpl.is_interactive() , quiet = myArgs.quiet )
-#	PrintInfo( "=> matplotlib backend = <%s>" % mpl.get_backend() , quiet = myArgs.quiet )
-	
-	if myArgs.verbosity or isnotebook() : PrintInfo( "\n=> myArgs.nbSamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%" % (myArgs.nbSamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
+	history = model.fit( df[ columnNames[0] ], df[ columnNames[1] ], batch_size=myArgs.batch_size, epochs=myArgs.epochs, validation_split=myArgs.validation_split, callbacks = modelTrainingCallbacks, shuffle = myArgs.shuffle, verbose = myArgs.verbosity )
+
+	if myArgs.earlyStoppingPatience != -1 :
+		nbEpochsDone = len( history.history[ monitoredData ] )
+		PrintInfo( "=> nbEpochsDone = %d" % nbEpochsDone )
+
+	PrintInfo( "=> kernel_initializer = " + myArgs.kernel_initializer )
+
+	if myArgs.verbosity or isnotebook() :
+		PrintInfo( "\n=> myArgs.nbSamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%" % (myArgs.nbSamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
 	
 	PrintInfo( "\n=> Loss function = <" +lossFunctionName+">" + " myArgs.optimizer = <"+optimizerName+">" , quiet = myArgs.quiet )
 	
@@ -215,6 +218,9 @@ def main() :
 		PrintInfo("\n=> slope=%.2f\ty_Intercept=%.2f\n" % (slope, y_Intercept), quiet = myArgs.quiet )
 		df['y_predicted'] = slope*df[ columnNames[0] ] + y_Intercept
 	
+	if myArgs.outputDataframeFileName :
+		saveDateframe( df = df, filename = myArgs.outputDataframeFileName, format = "hdf5")
+
 	showModel(model = model, modelFileName = myArgs.dumpedModelFileName, rankdir = 'TB')
 	
 	if myArgs.Lr : PrintInfo("\n=> lr = ",myArgs.Lr, quiet = myArgs.quiet )
