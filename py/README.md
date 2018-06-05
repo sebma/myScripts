@@ -1,6 +1,6 @@
-# AES Correlation Analysis Side Channel Attack
+# Python DOC
 
-AES Side Channel Attack based on the correlation between a side channel source (power or electromagnetic leak) and a prediction model
+Python DOC
 
 ## Requirements to run the scripts
 
