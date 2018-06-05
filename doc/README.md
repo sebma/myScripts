@@ -1,8 +1,3 @@
----
-title: Test
-numbersections: true
----
-
 # Miscellaneous DOC
 
 ##  Python DOC
@@ -61,11 +56,15 @@ OR
 * [Linuxbrew](http://linuxbrew.sh)
 -->
 
-### Documentation
+## MarkDown language
+
+* [GitHub MarkDown language](https://help.github.com/articles/basic-writing-and-formatting-syntax/) (MarkDown Basic writing and formatting syntax for GitHub)
+
+## PicoScope Documentation
 
 * [Linux Software & Drivers for Oscilloscopes and Data Loggers](https://www.picotech.com/linux) (PicoScope 6 for Linux brings many of the features of our powerful oscilloscope software to a large number of platforms.)
 
-### Binary data formats
+## Binary data formats
 
 * [Matlab MAT-File Formats](https://www.mathworks.com/help/pdf_doc/matlab/matfile_format.pdf) (Matlab Level 5 and Level 4 MAT-file formats specifications, they can be imported with Python [scipy.io](https://docs.scipy.org/doc/scipy/reference/io.html) module for MAT-File Formats < 7.3)
 * [European data format (EDF)](http://www.edfplus.info/specs/) (Being an open and non-proprietary format, EDF(+) is commonly used to archive, exchange and analyse data from commercial devices in a format that is independent of the acquisition system. [Gnuplot compatible](http://gnuplot.sourceforge.net/docs_5.0/gnuplot.pdf#section*.136). [Python module to read/write EDF+](https://pypi.python.org/pypi/pyEDFlib) )
