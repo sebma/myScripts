@@ -14,8 +14,7 @@ AES Side Channel Attack based on the correlation between a side channel source (
 
 * [NumPy](http://numpy.org) (NumPy is the fundamental package for scientific computing with Python : I use it for matrix calculations and for data with [NumPy Input and output routines](https://docs.scipy.org/doc/numpy/reference/routines.io.html))
 * [Scipy](http://scipy.org/about.html) (Facultatif : SciPy is open-source software for mathematics, science, and engineering: I use it for their [Scipy.io](https://docs.scipy.org/doc/scipy/reference/io.html) to import/export MatLab format data files)
-* [Matplotlib](https://matplotlib.org) (2D plotting library for Python that produces high quality figures that can be used in various hardcopy and interactive environments: I use it for my "seb_CPA_tests.py" script)
-<!-- * [Pandas](http://pandas.pydata.org) (Data structures & analysis : I use it for their [IO Tools](http://pandas.pydata.org/pandas-docs/stable/io.html)) -->
+* [Matplotlib](https://matplotlib.org) (2D plotting library for Python that produces high quality figures that can be used in various hardcopy and interactive environments)
 * [Pandas](http://pandas.pydata.org) (High-performance, easy-to-use data structures and data analysis tools for Python : I use it for their [IO Tools](http://pandas.pydata.org/pandas-docs/stable/io.html))
 
 ## Programming Environment
