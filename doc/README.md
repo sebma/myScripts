@@ -1,8 +1,12 @@
+---
+title: Test
+numbersections: true
+---
+
 # Miscellaneous DOC
 
-Miscellaneous DOC
-
 ##  Python DOC
+
 ### Requirements to run Python scripts
 
 * [Python](https://python.org) (Python is powerful and fast; plays well with others; runs everywhere; is friendly & easy to learn; is Open.)
