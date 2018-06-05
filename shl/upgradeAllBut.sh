@@ -2,7 +2,6 @@
 
 function upgradeAllBut {
 	local packagesNotUpgraded="$@"
-	time sudo apt update
 	if [ -z $packagesNotUpgraded ]
 	then
 		packagesToBeUpgraded=$($(which apt-get) dist-upgrade --dry-run | awk '/^Inst/{printf$2" "}' | grep -v "Listing...")
