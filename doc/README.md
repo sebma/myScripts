@@ -2,20 +2,35 @@
 
 Miscellaneous DOC
 
-## Requirements to run the scripts
+## Requirements to run Python scripts
 
-* [Python](https://python.org/) (Python is powerful and fast; plays well with others; runs everywhere; is friendly & easy to learn; is Open.)
+* [Python](https://python.org) (Python is powerful and fast; plays well with others; runs everywhere; is friendly & easy to learn; is Open.)
+
+## Requirements to create isolated environments
+
+* [conda](https://conda.io) (Package, dependency and environment management for any language—Python, R, Ruby, Lua, Scala, Java, JavaScript, C/ C++, FORTRAN)
+or
+* [virtualenv](https://virtualenv.pypa.io) (virtualenv is a tool to create isolated Python environments)
 
 ## Requirements to install Python modules
 
-* [Miniconda](https://conda.io/miniconda.html) (Conda is a cross-platform package and environment manager)
+* [Miniconda](https://conda.io/miniconda.html) (The miniconda distribution of python, which contains conda)
+or
+* [PIP](https://pip.pypa.io) (The PyPA recommended tool for installing Python packages)
 
-## Python modules
+## Python modules Repositories
+
+* [Anaconda Cloud](https://anaconda.org/search) (Web-based repository hosting service in the cloud. Packages created locally can be published to the cloud to be shared with others)
+and
+* [PyPI](https://pypi.org) (The Python Package Index (PyPI) is a repository of software for the Python programming language)
+
+## Python modules I use
 
 * [NumPy](http://numpy.org) (NumPy is the fundamental package for scientific computing with Python : I use it for matrix calculations and for data with [NumPy Input and output routines](https://docs.scipy.org/doc/numpy/reference/routines.io.html))
 * [Scipy](http://scipy.org/about.html) (Facultatif : SciPy is open-source software for mathematics, science, and engineering: I use it for their [Scipy.io](https://docs.scipy.org/doc/scipy/reference/io.html) to import/export MatLab format data files)
 * [Matplotlib](https://matplotlib.org) (2D plotting library for Python that produces high quality figures that can be used in various hardcopy and interactive environments)
 * [Pandas](http://pandas.pydata.org) (High-performance, easy-to-use data structures and data analysis tools for Python : I use it for their [IO Tools](http://pandas.pydata.org/pandas-docs/stable/io.html))
+* [Termcolor](https://pypi.python.org/pypi/termcolor) (ANSII Color formatting for output in terminal.)
 
 ## Programming Environment
 
@@ -32,7 +47,6 @@ Miscellaneous DOC
 * [Jupyter Nbextensions Configurator](https://github.com/Jupyter-contrib/jupyter_nbextensions_configurator) (A server extension for jupyter notebook which provides configuration interfaces for notebook extensions (nbextensions))
 
 <!--
-* [Termcolor](https://pypi.python.org/pypi/termcolor) (ANSII Color formatting for output in terminal.)
 * [Dask DataFrame](http://dask.pydata.org/en/latest/dataframe-overview.html) (Parallel computing with task scheduling: Dynamic task scheduling + “Big Data” collections: A Dask DataFrame is a large parallel dataframe composed of many smaller Pandas dataframes, split along the index.)
 * [pyarrow](https://arrow.apache.org/docs/python/parquet.html) (The Apache Parquet project provides a standardized open-source columnar storage format for use in data analysis systems, adopting it as a shared standard for high performance data IO.)
 * [Paratext](https://github.com/wiseio/paratext) (Facultif pour l'instant: library to read text files in parallel on multi-core machines)
