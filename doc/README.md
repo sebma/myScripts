@@ -72,5 +72,3 @@ OR
 
 ## License
 
-[LICENSE in MarkDown](LICENSE.md)
-  
