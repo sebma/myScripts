@@ -8,14 +8,14 @@ Miscellaneous DOC
 
 ## Requirements to create isolated environments
 
-* [conda](https://conda.io) (Package, dependency and environment management for any language—Python, R, Ruby, Lua, Scala, Java, JavaScript, C/ C++, FORTRAN)
-or
+* [conda](https://conda.io) (Package, dependency and environment management for any language—Python, R, Ruby, Lua, Scala, Java, JavaScript, C/ C++, FORTRAN)  
+OR  
 * [virtualenv](https://virtualenv.pypa.io) (virtualenv is a tool to create isolated Python environments)
 
 ## Requirements to install Python modules
 
 * [Miniconda](https://conda.io/miniconda.html) (The miniconda distribution of python, which contains conda)  
-or  
+OR  
 * [PIP](https://pip.pypa.io) (The PyPA recommended tool for installing Python packages)
 
 ## Python modules Repositories
