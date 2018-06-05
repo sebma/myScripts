@@ -35,6 +35,7 @@ $LICENSE
 EOF
 	test $? = 0 && echo "=> INFO : README.md has been successfully updated."
 	git ls-files README.md | grep -qx README.md || git add README.md
+	retCode=$?
 	[ $retCode = 0 ] && git commit README.md -m "Updated README.md"
 else
 	echo "=> README.template is not newer than README.md : Nothing to do" >&2
