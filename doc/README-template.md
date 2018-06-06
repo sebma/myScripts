@@ -66,7 +66,7 @@ OR
 
 ## MarkDown language
 
-* [GitHub MarkDown language](https://help.github.com/articles/basic-writing-and-formatting-syntax/) (MarkDown Basic writing and formatting syntax for GitHub)
+* [Github-Flavored Markdown(GFM)](https://help.github.com/articles/basic-writing-and-formatting-syntax/) (MarkDown Basic writing and formatting syntax for GitHub)
 
 ## C language
 
