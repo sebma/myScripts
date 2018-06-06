@@ -45,7 +45,9 @@ OR
 #### Pandas specific links
 
 * [10 Minutes to pandas](http://pandas.pydata.org/pandas-docs/stable/10min.html) (This is a short introduction to pandas, geared mainly for new users. You can see more complex recipes in the [Cookbook](http://pandas.pydata.org/pandas-docs/stable/cookbook.html#cookbook))
-* [Learn pandas](https://bitbucket.org/hrojas/learn-pandas) (An 11-lesson tutorial on Pandas)
+* [pandas cheat sheet](http://pandas.pydata.org/Pandas_Cheat_Sheet.pdf) (pandas cheat sheet)
+* [pandas visualization](http://pandas.pydata.org/pandas-docs/stable/visualization.html) (pandas data visualization)
+* [pandas tutorials in Jupyter Notebooks](http://pandas.pydata.org/pandas-docs/stable/tutorials.html) (This is a guide to many pandas tutorials, geared mainly for new users)
 * [Pandas Performance Considerations](http://pandas.pydata.org/pandas-docs/stable/io.html#io-perf) (Pandas Performance Considerations)
 * [pandas Ecosystem](http://pandas.pydata.org/pandas-docs/stable/ecosystem.html) (pandas Ecosystem)
 
