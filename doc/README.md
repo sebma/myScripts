@@ -1,26 +1,34 @@
 # Table of Contents
 
 1. [Miscellaneous DOC](#miscellaneous-doc)
-    1. [Python DOC](#python-doc)
+    1. [Linux Shells](#linux-shells)
+    2. [Python Scripting Language](#python-scripting-language)
         1. [Requirements to run Python scripts](#requirements-to-run-python-scripts)
         2. [Requirements to create isolated environments](#requirements-to-create-isolated-environments)
         3. [Requirements to install Python modules](#requirements-to-install-python-modules)
-        4. [Python modules Repositories](#python-modules-repositories)
-        5. [Python modules I use](#python-modules-i-use)
+        4. [Package Managers](#package-managers)
+        5. [Python modules Repositories](#python-modules-repositories)
+        6. [Python modules I use](#python-modules-i-use)
+            1. [Pandas specific links](#pandas-specific-links)
         6. [Python Tutorials in Jupyter NoteBooks format](#python-tutorials-in-jupyter-notebooks-format)
         7. [Programming Environment](#programming-environment)
         8. [Jupyter Environment](#jupyter-environment)
-    1. [MarkDown language](#markdown-language)
-    2. [C language](#c-language)
+    2. [MarkDown language](#markdown-language)
+    3. [C language](#c-language)
         1. [Outils](#outils)
-    2. [Embbeded Hardware](#embbeded-hardware)
-    3. [PicoScope Documentation](#picoscope-documentation)
-    4. [Binary data formats](#binary-data-formats)
-    5. [License](#license)
+    3. [Embbeded Hardware](#embbeded-hardware)
+    4. [PicoScope Documentation](#picoscope-documentation)
+    5. [Binary data formats](#binary-data-formats)
+    6. [License](#license)
 
 # Miscellaneous DOC
 
-##  Python DOC
+## Linux Shells
+
+* [bash](https://gnu.org/software/bash/)
+* [zsh](http://zsh.sf.net)
+
+##  Python Scripting Language
 
 ### Requirements to run Python scripts
 
@@ -38,6 +46,11 @@ OR
 OR  
 * [PIP](https://pip.pypa.io) (The PyPA recommended tool for installing Python packages)
 
+### Package Managers
+
+* [Homebrew](https://brew.sh)
+* [Linuxbrew](http://linuxbrew.sh)
+
 ### Python modules Repositories
 
 * [Anaconda Cloud](https://anaconda.org/search) (Web-based repository hosting service in the cloud. Packages created locally can be published to the cloud to be shared with others)
@@ -51,6 +64,11 @@ OR
 * [Pandas](http://pandas.pydata.org) (High-performance, easy-to-use data structures and data analysis tools for Python : I use it for their [IO Tools](http://pandas.pydata.org/pandas-docs/stable/io.html))
 * [PyTables](http://www.pytables.org/usersguide/installation.html) (PyTables is built on top of the [HDF5](http://www.pytables.org/FAQ.html#why-hdf5) library, the Python language and the NumPy package)
 * [Termcolor](https://pypi.python.org/pypi/termcolor) (ANSII Color formatting for output in terminal.)
+
+#### Pandas specific links
+
+* [Learn pandas](https://bitbucket.org/hrojas/learn-pandas) (An 11-lesson tutorial on Pandas)
+* [pandas Ecosystem](http://pandas.pydata.org/pandas-docs/stable/ecosystem.html) (pandas Ecosystem)
 
 ### Python Tutorials in Jupyter NoteBooks format
 
@@ -79,10 +97,6 @@ OR
 * [pyarrow](https://arrow.apache.org/docs/python/parquet.html) (The Apache Parquet project provides a standardized open-source columnar storage format for use in data analysis systems, adopting it as a shared standard for high performance data IO.)
 * [Paratext](https://github.com/wiseio/paratext) (Facultif pour l'instant: library to read text files in parallel on multi-core machines)
 * [PyPy](https://pypy.org/) (**Speed:** thanks to its Just-in-Time compiler, Python programs often run [faster](http://speed.pypy.org/) on PyPy.)
-
-* [Bash](https://gnu.org/software/bash/)
-* [Homebrew](https://brew.sh)
-* [Linuxbrew](http://linuxbrew.sh)
 -->
 
 ## MarkDown language
