@@ -87,7 +87,7 @@ OR
 ## MarkDown language
 
 * [Github-Flavored Markdown(GFM)](https://help.github.com/articles/basic-writing-and-formatting-syntax/) (MarkDown Basic writing and formatting syntax for GitHub)
-* [Generates Github-Flavored Markdown Toc](https://pypi.org/project/gfmtoc) (Generates Github-Flavored Markdown Tables of Contents from `readme.md`s)
+* [Python module to generate Github-Flavored Markdown Toc](https://pypi.org/project/gfmtoc) (Python module to generate Github-Flavored Markdown Tables of Contents from `README.md`s)
 
 ## C language
 
