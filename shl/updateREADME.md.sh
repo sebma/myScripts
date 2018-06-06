@@ -10,9 +10,9 @@ then
 	exit -1
 fi
 
-if [ README.template -nt README.md ] || [ $0 -nt README.md ]
+if [ README-template.md -nt README.md ] || [ $0 -nt README.md ]
 then
-	cat README.template > README.md
+	cat README-template.md > README.md
 	lastArg="$(eval echo \$$#)"
 	if [ $# -ge 1 ] && [ -x "$lastArg" ]
 	then
@@ -39,6 +39,6 @@ EOF
 	retCode=$?
 	[ $retCode = 0 ] && git commit README.md -m "Updated README.md"
 else
-	echo "=> README.template is not newer than README.md : Nothing to do" >&2
+	echo "=> README-template.md is not newer than README.md : Nothing to do" >&2
 	exit 3
 fi
