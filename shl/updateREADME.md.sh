@@ -30,8 +30,9 @@ then
 
 ## License
 
+EOF
+	test -f LICENSE.md && cat <<-EOF >> README.md
 [LICENSE in MarkDown](LICENSE.md)
-$LICENSE  
 EOF
 	test $? = 0 && echo "=> INFO : README.md has been successfully updated."
 	git ls-files README.md | grep -qx README.md || git add README.md
