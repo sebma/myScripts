@@ -16,6 +16,7 @@
     2. [Embbeded Hardware](#embbeded-hardware)
     3. [PicoScope Documentation](#picoscope-documentation)
     4. [Binary data formats](#binary-data-formats)
+    5. [License](#license)
 
 # Miscellaneous DOC
 
@@ -86,6 +87,7 @@ OR
 ## MarkDown language
 
 * [Github-Flavored Markdown(GFM)](https://help.github.com/articles/basic-writing-and-formatting-syntax/) (MarkDown Basic writing and formatting syntax for GitHub)
+* [Generates Github-Flavored Markdown Toc](https://pypi.org/project/gfmtoc) (Generates Github-Flavored Markdown Tables of Contents from `readme.md`s)
 
 ## C language
 
