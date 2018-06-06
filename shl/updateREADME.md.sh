@@ -12,7 +12,8 @@ fi
 
 if [ README-template.md -nt README.md ] || [ $0 -nt README.md ]
 then
-	cat README-template.md > README.md
+	gfmtoc -n README-template.md > README.md
+	cat README-template.md >> README.md
 	lastArg="$(eval echo \$$#)"
 	if [ $# -ge 1 ] && [ -x "$lastArg" ]
 	then
