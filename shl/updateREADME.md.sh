@@ -12,29 +12,31 @@ fi
 
 if [ README-template.md -nt README.md ] || [ $0 -nt README.md ]
 then
-	gfmtoc -n README-template.md > README.md
-	cat README-template.md >> README.md
+	cat README-template.md > README.tmp.md
 	lastArg="$(eval echo \$$#)"
 	if [ $# -ge 1 ] && [ -x "$lastArg" ]
 	then
-		echo "## Usage of \"$lastArg\" :" >> README.md
-		echo "<pre><code>" >> README.md
+		echo "## Usage of \"$lastArg\" :" >> README.tmp.md
+		echo "<pre><code>" >> README.tmp.md
 		[ $# = 1 ] && args=./$1 || args=$(sed "s|\(.*\) |\1 ./|;" <<< $@) #On remplace le dernier " " par " ./"
-		$args -h >> README.md 2>&1
+		$args -h >> README.tmp.md 2>&1
 		retCode=$?
-		echo "</code></pre>" >> README.md
+		echo "</code></pre>" >> README.tmp.md
 	fi
 
-	cat <<-EOF >> README.md
+	cat <<-EOF >> README.tmp.md
 
 [Parent directory](..)
 
 ## License
 
 EOF
-	test -f LICENSE.md && cat <<-EOF >> README.md
+	test -f LICENSE.md && cat <<-EOF >> README.tmp.md
 [LICENSE in MarkDown](LICENSE.md)
 EOF
+	gfmtoc -n README.tmp.md > README.md
+	cat README.tmp.md >> README.md
+	\rm README.tmp.md
 	test $? = 0 && echo "=> INFO : README.md has been successfully updated."
 	git ls-files README.md | grep -qx README.md || git add README.md
 	retCode=$?
