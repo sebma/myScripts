@@ -31,6 +31,10 @@ OR
 * [Pandas](http://pandas.pydata.org) (High-performance, easy-to-use data structures and data analysis tools for Python : I use it for their [IO Tools](http://pandas.pydata.org/pandas-docs/stable/io.html))
 * [Termcolor](https://pypi.python.org/pypi/termcolor) (ANSII Color formatting for output in terminal.)
 
+### Python Tutorials in Jupyter NoteBooks format
+
+* [Learn pandas](https://bitbucket.org/hrojas/learn-pandas) (An 11-lesson tutorial on Pandas)
+
 ### Programming Environment
 
 * [Spyder](https://pypi.python.org/pypi/spyder) (Scientific PYthon Development EnviRonment)
