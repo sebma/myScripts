@@ -60,6 +60,20 @@ OR
 
 * [GitHub MarkDown language](https://help.github.com/articles/basic-writing-and-formatting-syntax/) (MarkDown Basic writing and formatting syntax for GitHub)
 
+## C language
+
+### Outils
+
+* [GNU make](https://www.gnu.org/software/make/manual/html_node/) (GNU make Documentation.)
+* [Remake](https://github.com/rocky/remake/wiki) (GNU Make with comprehensible tracing and a debugger)
+* [cgdb](https://cgdb.github.io/) (cgdb is a lightweight curses (terminal-based) interface to the GNU Debugger (GDB).)
+
+## Embbeded Hardware
+
+* [Raspberry Pi](https://en.wikipedia.org/wiki/Raspberry_Pi#Specifications) (Raspberry Pi Specs.)
+* [Arduino Duemilanove](https://www.arduino.cc/en/Main/ArduinoBoardDuemilanove) (Arduino Duemilanove Specs., [M.C.U. = Atmel ATmega168](http://www.microchip.com/wwwproducts/en/ATmega168))
+* [STM32 Micro-Controllers](http://www.st.com/en/microcontrollers/stm32-mainstream-mcus.html?querycriteria=productId=SC2155) (STM32 Mainstream Micro-Controller Units)
+
 ## PicoScope Documentation
 
 * [Linux Software & Drivers for Oscilloscopes and Data Loggers](https://www.picotech.com/linux) (PicoScope 6 for Linux brings many of the features of our powerful oscilloscope software to a large number of platforms.)
