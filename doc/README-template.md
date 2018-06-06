@@ -1,6 +1,11 @@
 # Miscellaneous DOC
 
-##  Python DOC
+## Linux Shells
+
+* [bash](https://gnu.org/software/bash/)
+* [zsh](http://zsh.sf.net)
+
+##  Python Scripting Language
 
 ### Requirements to run Python scripts
 
@@ -18,6 +23,11 @@ OR
 OR  
 * [PIP](https://pip.pypa.io) (The PyPA recommended tool for installing Python packages)
 
+### Package Managers
+
+* [Homebrew](https://brew.sh)
+* [Linuxbrew](http://linuxbrew.sh)
+
 ### Python modules Repositories
 
 * [Anaconda Cloud](https://anaconda.org/search) (Web-based repository hosting service in the cloud. Packages created locally can be published to the cloud to be shared with others)
@@ -28,9 +38,14 @@ OR
 * [NumPy](http://numpy.org) (NumPy is the fundamental package for scientific computing with Python : I use it for matrix calculations and for data with [NumPy Input and output routines](https://docs.scipy.org/doc/numpy/reference/routines.io.html))
 * [Scipy](http://scipy.org/about.html) (Facultatif : SciPy is open-source software for mathematics, science, and engineering: I use it for their [Scipy.io](https://docs.scipy.org/doc/scipy/reference/io.html) to import/export MatLab format data files)
 * [Matplotlib](https://matplotlib.org) (2D plotting library for Python that produces high quality figures that can be used in various hardcopy and interactive environments)
-* [Pandas](http://pandas.pydata.org) (High-performance, easy-to-use data structures and data analysis tools for Python : I use it for their [IO Tools](http://pandas.pydata.org/pandas-docs/stable/io.html))
+* [Pandas](http://pandas.pydata.org) (High-performance, easy-to-use data structures and data analysis tools for Python : I use it for their [IO Tools](http://pandas.pydata.org/pandas-docs/stable/io.html) and particularly their [HDF5](http://pandas.pydata.org/pandas-docs/stable/io.html#io-hdf5) API)
 * [PyTables](http://www.pytables.org/usersguide/installation.html) (PyTables is built on top of the [HDF5](http://www.pytables.org/FAQ.html#why-hdf5) library, the Python language and the NumPy package)
 * [Termcolor](https://pypi.python.org/pypi/termcolor) (ANSII Color formatting for output in terminal.)
+
+#### Pandas specific links
+
+* [Learn pandas](https://bitbucket.org/hrojas/learn-pandas) (An 11-lesson tutorial on Pandas)
+* [pandas Ecosystem](http://pandas.pydata.org/pandas-docs/stable/ecosystem.html) (pandas Ecosystem)
 
 ### Python Tutorials in Jupyter NoteBooks format
 
@@ -59,10 +74,6 @@ OR
 * [pyarrow](https://arrow.apache.org/docs/python/parquet.html) (The Apache Parquet project provides a standardized open-source columnar storage format for use in data analysis systems, adopting it as a shared standard for high performance data IO.)
 * [Paratext](https://github.com/wiseio/paratext) (Facultif pour l'instant: library to read text files in parallel on multi-core machines)
 * [PyPy](https://pypy.org/) (**Speed:** thanks to its Just-in-Time compiler, Python programs often run [faster](http://speed.pypy.org/) on PyPy.)
-
-* [Bash](https://gnu.org/software/bash/)
-* [Homebrew](https://brew.sh)
-* [Linuxbrew](http://linuxbrew.sh)
 -->
 
 ## MarkDown language
