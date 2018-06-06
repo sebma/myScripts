@@ -68,6 +68,7 @@ OR
 #### Pandas specific links
 
 * [Learn pandas](https://bitbucket.org/hrojas/learn-pandas) (An 11-lesson tutorial on Pandas)
+* [Pandas Performance Considerations](http://pandas.pydata.org/pandas-docs/stable/io.html#io-perf) (Pandas Performance Considerations)
 * [pandas Ecosystem](http://pandas.pydata.org/pandas-docs/stable/ecosystem.html) (pandas Ecosystem)
 
 ### Python Tutorials in Jupyter NoteBooks format
