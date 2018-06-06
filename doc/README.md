@@ -1,3 +1,22 @@
+# Table of Contents
+
+1. [Miscellaneous DOC](#miscellaneous-doc)
+    1. [Python DOC](#python-doc)
+        1. [Requirements to run Python scripts](#requirements-to-run-python-scripts)
+        2. [Requirements to create isolated environments](#requirements-to-create-isolated-environments)
+        3. [Requirements to install Python modules](#requirements-to-install-python-modules)
+        4. [Python modules Repositories](#python-modules-repositories)
+        5. [Python modules I use](#python-modules-i-use)
+        6. [Python Tutorials in Jupyter NoteBooks format](#python-tutorials-in-jupyter-notebooks-format)
+        7. [Programming Environment](#programming-environment)
+        8. [Jupyter Environment](#jupyter-environment)
+    1. [MarkDown language](#markdown-language)
+    2. [C language](#c-language)
+        1. [Outils](#outils)
+    2. [Embbeded Hardware](#embbeded-hardware)
+    3. [PicoScope Documentation](#picoscope-documentation)
+    4. [Binary data formats](#binary-data-formats)
+
 # Miscellaneous DOC
 
 ##  Python DOC
