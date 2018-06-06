@@ -4,8 +4,8 @@ from sys import stdout, stderr, exit
 from os import environ
 
 def insideCondaEnv() :
-	if environ.get('CONDA_DEFAULT_ENV') is None :
-		print("=> ERROR: CONDA_DEFAULT_ENV is not defined: You must be in a conda environment.", file=stderr)
+	if environ.get('CONDA_DEFAULT_ENV') is None and environ.get('VIRTUAL_ENV') is None :
+		print("=> ERROR: Neither the CONDA_DEFAULT_ENV or VIRTUAL_ENV environment variable is defined: You must be inside a virtual environment to continue.", file=stderr)
 		return False
 	else : return True
 
