@@ -101,8 +101,16 @@ def copyArgumentsToStructure(args) :
 
 	return myArgs
 
-def saveDateframe( df, filename, key = 'df', format = "hdf5" ) :
+def saveDataframe( df, filename, key = 'df', format = "hdf5" ) :
 	if format == "hdf5" :
 		PrintInfo( "=> dumping dataframe to %s ..." % filename )
-		df.to_hdf( filename, key=key )
+		with pda.HDFStore(filename) as store : store[key] = df
 	else : PrintError( "=> ERROR : The output %s file format is not supported yet." % format )
+
+def loadDataframe( df, filename, key = 'df', format = "hdf5" ) :
+	if format == "hdf5" :
+		PrintInfo( "=> dumping dataframe to %s ..." % filename )
+		with pda.HDFStore(filename, 'r') as store : df = store[key]
+		return df
+	else : PrintError( "=> ERROR : The output %s file format is not supported yet." % format )
+
