@@ -106,8 +106,9 @@ def initScript() :
 
 	if myArgs.dataFileName :
 		nbInputVars = 1
-		columnNames = ['Wavelength','Power']
-		df = pda.read_csv( myArgs.dataFileName , delim_whitespace=True , comment='#' , names = columnNames )
+#		columnNames = ['Wavelength','Power']
+		df = pda.read_table( myArgs.dataFileName , delim_whitespace=True , comment='#' )
+#		df = pda.read_table('dataset10-nCh10.txt', delim_whitespace=True, comment='#', skiprows=[1,2] ) # To read the data from 'dataset*-nCh*.txt' 		
 		myArgs.nbSamples = df[ columnNames[0] ].size
 	else :
 		columnNames = ['X_train','y_train']
@@ -219,7 +220,7 @@ def main() :
 		df['y_predicted'] = slope*df[ columnNames[0] ] + y_Intercept
 	
 	if myArgs.outputDataframeFileName :
-		saveDateframe( df = df, filename = myArgs.outputDataframeFileName, format = "hdf5")
+		saveDataframe( df = df, filename = myArgs.outputDataframeFileName )
 
 	showModel(model = model, modelFileName = myArgs.dumpedModelFileName, rankdir = 'TB')
 	
