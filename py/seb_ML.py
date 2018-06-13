@@ -14,6 +14,7 @@ if not insideCondaEnv() : exit(-1)
 from ipdb import set_trace
 
 import matplotlib as mpl
+import pandas as pda
 from keras import backend as K
 
 def isnotebook() :
@@ -103,13 +104,13 @@ def copyArgumentsToStructure(args) :
 
 def saveDataframe( df, filename, key = 'df', format = "hdf5" ) :
 	if format == "hdf5" :
-		PrintInfo( "=> dumping dataframe to %s ..." % filename )
+		PrintInfo( "=> Dumping <%s> dataframe to <%s> ..." % (key,filename) )
 		with pda.HDFStore(filename) as store : store[key] = df
 	else : PrintError( "=> ERROR : The output %s file format is not supported yet." % format )
 
 def loadDataframe( df, filename, key = 'df', format = "hdf5" ) :
 	if format == "hdf5" :
-		PrintInfo( "=> dumping dataframe to %s ..." % filename )
+		PrintInfo( "=> Loading dataframe from <%s> ..." % filename )
 		with pda.HDFStore(filename, 'r') as store : df = store[key]
 		return df
 	else : PrintError( "=> ERROR : The output %s file format is not supported yet." % format )
