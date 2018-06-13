@@ -7,6 +7,7 @@ from seb_ML import *
 import pandas as pda
 import numpy as np
 import matplotlib.pyplot as plt
+from ipdb import set_trace
 
 def initArgs() :
 	global arguments, scriptBaseName, parser, __version__
@@ -76,10 +77,10 @@ def plotDataAndPrediction(df, lossFunctionName, optimizerName) :
 	#subplot(nrows, ncols, plot_number)
 	#plt.subplot(1,2,1)
 	plt.title('Regression with <'+lossFunctionName+'> loss and <'+optimizerName+'> optimizer')
-	plt.scatter( df[ columnNames[0] ], df[ columnNames[1] ], label='Real data' )
-	plt.plot( df[ columnNames[0] ], df['y_predicted'], 'r-.', label='Prediction')
-	plt.xlabel( columnNames[0] )
-	plt.ylabel( columnNames[1] )
+	plt.scatter( df[ df.columns[0] ], df[ df.columns[1] ], label='Real data' )
+	plt.plot( df[ df.columns[0] ], df['y_predicted'], 'r-.', label='Prediction')
+	plt.xlabel( df.columns[0] )
+	plt.ylabel( df.columns[1] )
 	plt.legend(loc='best')
 	
 	#subplot(nrows, ncols, plot_number)
@@ -90,7 +91,7 @@ def plotDataAndPrediction(df, lossFunctionName, optimizerName) :
 def initScript() :
 #	global myArgs, arguments, nbSamples, lastSample, epochs, df, lossFunction, optimizer, activation, Lr, dumpedModelFileName, rmse, batch_size, validation_split, shuffle, earlyStoppingPatience, plotMetrics
 	global myArgs, df
-	global optimizerName, lossFunctionName, myMetrics, modelTrainingCallbacks, dataIsNormalized, columnNames, monitoredData
+	global optimizerName, lossFunctionName, myMetrics, modelTrainingCallbacks, dataIsNormalized, monitoredData
 
 	rmse = root_mean_squared_error
 
@@ -106,22 +107,21 @@ def initScript() :
 
 	if myArgs.dataFileName :
 		nbInputVars = 1
-#		columnNames = ['Wavelength','Power']
-		df = pda.read_table( myArgs.dataFileName , delim_whitespace=True , comment='#' )
+		df = pda.read_table( myArgs.dataFileName , delim_whitespace=True , comment='#' ) # The column names are infered from the datafile
 #		df = pda.read_table('dataset10-nCh10.txt', delim_whitespace=True, comment='#', skiprows=[1,2] ) # To read the data from 'dataset*-nCh*.txt' 		
-		myArgs.nbSamples = df[ columnNames[0] ].size
+		myArgs.nbSamples = df.shape[0]
 	else :
-		columnNames = ['X_train','y_train']
-		df = pda.DataFrame()
-		df[ columnNames[0] ] = np.linspace(0, myArgs.lastSample, myArgs.nbSamples)
-		df[ columnNames[1] ] = -5 * df[ columnNames[0] ] + 10
+		X = np.linspace(0, myArgs.lastSample, myArgs.nbSamples)
+		df = pda.DataFrame( columns = ['X_train','y_train'] )
+		df[ df.columns[0] ] = X
+		df[ df.columns[1] ] = -5*X + 10
 
 	dataIsNormalized = False
 	if myArgs.lossFunction == 'mse' :
 		# MSE needs NORMALIZATION
 		PrintInfo( "=> Doing Pandas dataframe normalization ..." , quiet = myArgs.quiet )
-	#	df[ columnNames[0] ] = keras.utils.normalize( df.values )[:,0]
-	#	df[ columnNames[1] ] = keras.utils.normalize( df.values )[:,1]
+	#	df[ df.columns[0] ] = keras.utils.normalize( df.values )[:,0]
+	#	df[ df.columns[1] ] = keras.utils.normalize( df.values )[:,1]
 		df = ( df-df.mean() ) / df.std()
 		PrintInfo( "=> DONE." , quiet = myArgs.quiet )
 		dataIsNormalized = True
@@ -197,7 +197,9 @@ def main() :
 	if isnotebook() : setJupyterBackend( newBackend = 'module://ipykernel.pylab.backend_inline' )
 
 	#MODEL TRAINING
-	history = model.fit( df[ columnNames[0] ], df[ columnNames[1] ], batch_size=myArgs.batch_size, epochs=myArgs.epochs, validation_split=myArgs.validation_split, callbacks = modelTrainingCallbacks, shuffle = myArgs.shuffle, verbose = myArgs.verbosity )
+	history = model.fit( df[ df.columns[0] ], df[ df.columns[1] ], batch_size=myArgs.batch_size, epochs=myArgs.epochs, validation_split=myArgs.validation_split, callbacks = modelTrainingCallbacks, shuffle = myArgs.shuffle, verbose = myArgs.verbosity )
+
+	historyDF = pda.DataFrame.from_dict( history.history )
 
 	if myArgs.earlyStoppingPatience != -1 :
 		nbEpochsDone = len( history.history[ monitoredData ] )
@@ -214,13 +216,14 @@ def main() :
 	y_Intercept = model.layers[-1].get_weights()[1].item()
 	if dataIsNormalized :
 		PrintInfo("\n=> THE DATA WAS NORMALIZED, hence slope=%.2f\ty_Intercept=%.2f\n" % (slope, y_Intercept), quiet = myArgs.quiet )
-		df['y_predicted'] = model.predict( df[ columnNames[0] ] ) # MODEL PREDICTION
+		df['y_predicted'] = model.predict( df[ df.columns[0] ] ) # MODEL PREDICTION
 	else :
 		PrintInfo("\n=> slope=%.2f\ty_Intercept=%.2f\n" % (slope, y_Intercept), quiet = myArgs.quiet )
-		df['y_predicted'] = slope*df[ columnNames[0] ] + y_Intercept
+		df['y_predicted'] = slope*df[ df.columns[0] ] + y_Intercept
 	
 	if myArgs.outputDataframeFileName :
 		saveDataframe( df = df, filename = myArgs.outputDataframeFileName )
+		saveDataframe( df = historyDF, filename = myArgs.outputDataframeFileName, key = 'history' )
 
 	showModel(model = model, modelFileName = myArgs.dumpedModelFileName, rankdir = 'TB')
 	
