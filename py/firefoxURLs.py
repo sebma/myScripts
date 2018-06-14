@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from __future__ import print_function
-import json, lz4
+import json
 import platform, os
 from os.path import exists
 from sys import argv
@@ -22,6 +22,7 @@ else :
 	firefoxOpenedTabsFile = firefoxProfilesDIR + os.sep + firefoxProfileName + os.sep + "sessionstore-backups" + os.sep + "recovery.jsonlz4"	
 	if exists( firefoxOpenedTabsFile ) :
 		f = open( firefoxOpenedTabsFile, "r" )
+		import lz4
 		jdata = json.loads(lz4.block.decompress(f.read()).decode("utf-8"))
 
 f.close()
