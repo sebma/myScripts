@@ -14,12 +14,15 @@ if   platform.system() == 'Darwin' :
 elif platform.system() == 'Linux' :
 	firefoxProfilesDIR = HOME + "/.mozilla/firefox"
 
-firefoxOpenedTabsFile = firefoxProfilesDIR + os.sep + firefoxProfileName + os.sep + "sessionstore-backups" + os.sep + "recovery.js"
+chosenFirefoxProfileDIR = firefoxProfilesDIR + os.sep + firefoxProfileName
+sessionstoreBackupsDIR = chosenFirefoxProfileDIR + os.sep + "sessionstore-backups"
+
+firefoxOpenedTabsFile = sessionstoreBackupsDIR + os.sep + "recovery.js"
 if exists( firefoxOpenedTabsFile ) :
 	f = open( firefoxOpenedTabsFile, "r" )
 	jdata = json.loads(f.read())
 else :
-	firefoxOpenedTabsFile = firefoxProfilesDIR + os.sep + firefoxProfileName + os.sep + "sessionstore-backups" + os.sep + "recovery.jsonlz4"	
+	firefoxOpenedTabsFile = sessionstoreBackupsDIR + os.sep + "recovery.jsonlz4"
 	if exists( firefoxOpenedTabsFile ) :
 		f = open( firefoxOpenedTabsFile, "r" )
 		import lz4
