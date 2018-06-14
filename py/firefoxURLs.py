@@ -26,6 +26,7 @@ else :
 	if exists( firefoxOpenedTabsFile ) :
 		f = open( firefoxOpenedTabsFile, "r" )
 		import lz4
+		from lz4 import block
 		jdata = json.loads(lz4.block.decompress(f.read()).decode("utf-8"))
 
 f.close()
