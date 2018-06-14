@@ -7,12 +7,7 @@ import platform, os, datetime, dateutil
 print( "\n=> hostname = <%s>" % platform.node() )
 print( "\n=> uname data = <%s>" % str(platform.uname() ) )
 print( "\n=> pwd = <%s>" % os.getcwd() )
-
-try :
-	import pylab # workaround for bug: https://github.com/dateutil/dateutil/issues/770
-except ModuleNotFoundError :
-	from seb_ML import insideCondaEnv
-
+from dateutil import tz # workaround for dateutil bug #770
 print( "\n=> date/time = " + datetime.datetime.now( tz=dateutil.tz.tzlocal() ).strftime('%d/%m/%Y %H:%M:%S %Z %z') )
 
 if   os.environ.get('CONDA_DEFAULT_ENV') :  print( "\n=> CONDA_DEFAULT_ENV = <%s>" % os.environ['CONDA_DEFAULT_ENV'] )
