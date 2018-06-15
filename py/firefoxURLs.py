@@ -13,6 +13,9 @@ if   platform.system() == 'Darwin' :
 	firefoxProfilesDIR = HOME + "/Library/Application Support/Firefox/Profiles"
 elif platform.system() == 'Linux' :
 	firefoxProfilesDIR = HOME + "/.mozilla/firefox"
+elif platform.system() == 'Windows' :
+	APPDATA = os.environ["APPDATA"]
+	firefoxProfilesDIR = APPDATA + os.sep + "Mozilla" + os.sep +"Firefox" + os.sep + "Profiles"
 
 chosenFirefoxProfileDIR = firefoxProfilesDIR + os.sep + firefoxProfileName
 sessionstoreBackupsDIR = chosenFirefoxProfileDIR + os.sep + "sessionstore-backups"
