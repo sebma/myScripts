@@ -71,8 +71,9 @@ def initArgs() :
 	return arguments
 
 def plotDataAndPrediction(df, lossFunctionName, optimizerName) :
-	plt.figure()
-	plt.clf()
+	pictureFileResolution = 600
+	fig = plt.figure( dpi = plotResolution )
+#	plt.clf()
 	
 	#subplot(nrows, ncols, plot_number)
 	#plt.subplot(1,2,1)
@@ -90,8 +91,9 @@ def plotDataAndPrediction(df, lossFunctionName, optimizerName) :
 
 def initScript() :
 #	global myArgs, arguments, nbSamples, lastSample, epochs, df, lossFunction, optimizer, activation, Lr, dumpedModelFileName, rmse, batch_size, validation_split, shuffle, earlyStoppingPatience, plotMetrics
-	global myArgs, df
+	global myArgs, df, plotResolution
 	global optimizerName, lossFunctionName, myMetrics, modelTrainingCallbacks, dataIsNormalized, monitoredData
+	plotResolution = 150
 
 	rmse = root_mean_squared_error
 
@@ -200,6 +202,16 @@ def main() :
 	history = model.fit( df[ df.columns[0] ], df[ df.columns[1] ], batch_size=myArgs.batch_size, epochs=myArgs.epochs, validation_split=myArgs.validation_split, callbacks = modelTrainingCallbacks, shuffle = myArgs.shuffle, verbose = myArgs.verbosity )
 
 	historyDF = pda.DataFrame.from_dict( history.history )
+	if not isnotebook() :
+#		plt.rcParams["figure.dpi"]  = plotResolution
+#		plt.rcParams['savefig.dpi'] = pictureFileResolution
+#		fig = plt.figure( dpi = plotResolution )
+		plt.rc( 'figure' , dpi = plotResolution )
+		plt.rc( 'savefig', dpi = pictureFileResolution )
+		ax = historyDF.plot( ax = plt.gca() )
+		ax.set_title('Metrics computed during training')
+		ax.set_xlabel('epochs')
+		ax.set_ylabel('metrics')
 
 	if myArgs.earlyStoppingPatience != -1 :
 		nbEpochsDone = len( history.history[ monitoredData ] )
