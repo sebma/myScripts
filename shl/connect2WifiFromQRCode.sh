@@ -20,7 +20,7 @@ fi
 
 if   [ $os = Linux ]
 then
-	hiddenStr=$($qrdecode "$qrPictureFile" | awk '/;H:true;/{printf"hidden yes"}')
+	hiddenStr="name $ssid $($qrdecode "$qrPictureFile" | awk '/;H:true;/{printf"hidden yes"}')"
 	nmcli dev wifi connect "$ssid" password "$pass" $hiddenStr
 elif [ $os = Darwin ]
 then
