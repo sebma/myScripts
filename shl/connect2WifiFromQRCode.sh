@@ -20,7 +20,8 @@ fi
 
 if   [ $os = Linux ]
 then
-	nmcli dev wifi connect "$ssid" password "$pass"
+	hiddenStr=$($qrdecode "$qrPictureFile" | awk '/;H:true;/{printf"hidden yes"}')
+	nmcli dev wifi connect "$ssid" password "$pass" $hiddenStr
 elif [ $os = Darwin ]
 then
 	interFace=$(networksetup -listallhardwareports | awk '/Wi-Fi/{found=1}/Device/&&found{print$NF;exit}')
