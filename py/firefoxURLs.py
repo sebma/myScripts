@@ -18,9 +18,10 @@ elif platform.system() == 'Windows' :
 	firefoxProfilesDIR = APPDATA + os.sep + "Mozilla" + os.sep +"Firefox" + os.sep + "Profiles"
 
 chosenFirefoxProfileDIR = firefoxProfilesDIR + os.sep + firefoxProfileName
-sessionstoreBackupsDIR = chosenFirefoxProfileDIR + os.sep + "sessionstore-backups"
+sessionstoreBackupsDIR  = chosenFirefoxProfileDIR + os.sep + "sessionstore-backups"
+firefoxOpenedTabsFile   = sessionstoreBackupsDIR + os.sep + "recovery.js"
 
-firefoxOpenedTabsFile = sessionstoreBackupsDIR + os.sep + "recovery.js"
+# Thanks to : https://unix.stackexchange.com/questions/385023/firefox-reading-out-urls-of-opened-tabs-from-the-command-line/389360#389360
 if exists( firefoxOpenedTabsFile ) :
 	f = open( firefoxOpenedTabsFile, "r" )
 	jdata = json.loads(f.read())
