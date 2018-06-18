@@ -28,8 +28,7 @@ else :
 	firefoxOpenedTabsFile = sessionstoreBackupsDIR + os.sep + "recovery.jsonlz4"
 	if exists( firefoxOpenedTabsFile ) :
 		f = open( firefoxOpenedTabsFile, "r" )
-		import lz4
-		from lz4 import block
+		import lz4.block
 		jdata = json.loads(lz4.block.decompress(f.read()).decode("utf-8"))
 
 f.close()
