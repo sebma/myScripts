@@ -10,6 +10,11 @@ then
 	exit -1
 fi
 
+if ! ls README-template.md >/dev/null
+then
+	exit 1
+fi
+
 if [ README-template.md -nt README.md ] || [ $0 -nt README.md ]
 then
 	cat README-template.md > README.tmp.md
