@@ -10,6 +10,11 @@ then
 	exit -1
 fi
 
+if ! ls README-template.md >/dev/null
+then
+	exit 1
+fi
+
 if [ README-template.md -nt README.md ] || [ $0 -nt README.md ]
 then
 	cat README-template.md > README.tmp.md
@@ -40,7 +45,7 @@ EOF
 	test $? = 0 && echo "=> INFO : README.md has been successfully updated."
 	git ls-files README.md | grep -qx README.md || git add README.md
 	retCode=$?
-	[ $retCode = 0 ] && git commit README.md -m "Updated README.md"
+	[ $retCode = 0 ] && git commit README-template.md README.md -m "Updated both README-template.md and README.md"
 else
 	echo "=> README-template.md is not newer than README.md : Nothing to do" >&2
 	exit 3

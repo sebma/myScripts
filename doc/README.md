@@ -13,6 +13,7 @@
         6. [Python Tutorials in Jupyter NoteBooks format](#python-tutorials-in-jupyter-notebooks-format)
         7. [Programming Environment](#programming-environment)
         8. [Jupyter Environment](#jupyter-environment)
+            1. [Jupyter and LaTeX](#jupyter-and-latex)
     2. [MarkDown language](#markdown-language)
     3. [C language](#c-language)
         1. [Outils](#outils)
@@ -88,8 +89,10 @@ OR
 
 * [Jupyter Notebook](https://jupyter.org) (Web-based interactive computational environment for creating, executing, and visualizing Jupyter/IPython notebooks)
 * [Jupyter Documentation](https://jupyter.readthedocs.io/) (Jupyter Documentation)
-* [Jupyter What To Do First](https://jupyter.readthedocs.io/en/latest/projects/content-projects.html) (Jupyter : What to do first ?)
+* [Jupyter: What To Do First](https://jupyter.readthedocs.io/en/latest/projects/content-projects.html) (Jupyter : What to do first ?)
 * [Jupyter Notebook Documentation](https://jupyter-notebook.readthedocs.io/) (Jupyter Notebook Documentation)
+* [Jupyter Notebook: Markdown Cells](https://jupyter-notebook.readthedocs.io/en/stable/examples/Notebook/Working%20With%20Markdown%20Cells.html) (Jupyter : Working With Markdown Cells)
+* [Jupyter Notebook: IPython's Rich Display System](https://nbviewer.jupyter.org/github/ipython/ipython/blob/2.x/examples/Notebook/Display System.ipynb) (Jupyter Notebook : IPython's Rich Display System)
 * [Try Jupyter](https://jupyter.org/try) (Try Jupyter with Python, Julia and R, you can also try JupyterLab)
 * [Jupyter Kernels](https://github.com/jupyter/jupyter/wiki/Jupyter-kernels) (Programming Languages support for Jupyter)
 * [Jupyter Notebook Widgets](https://jupyter.org/widgets) (Jupyter widgets enable interactive data visualization in the Jupyter notebooks)
@@ -99,6 +102,14 @@ OR
 * [JupyterHub](http://jupyterhub.readthedocs.io) (JupyterHub, a multi-user Hub, spawns, manages, and proxies multiple instances of the single-user Jupyter notebook server)  
 * [A gallery of interesting Jupyter Notebooks](https://github.com/jupyter/jupyter/wiki/A-gallery-of-interesting-Jupyter-Notebooks) (This page is a curated collection of Jupyter/IPython notebooks that are notable)
 * [nbviewer](https://nbviewer.jupyter.org) (A simple way to share Jupyter Notebooks)
+
+#### Jupyter and LaTeX
+
+* [Jupyter Notebook: LaTex Equations in Markdown Cells](https://jupyter-notebook.readthedocs.io/en/stable/examples/Notebook/Working%20With%20Markdown%20Cells.html#LaTeX-equations) (Jupyter: LaTex Equations in Markdown Cells)
+* [Jupyter Notebook: LaTex Equations Examples](https://jupyter-notebook.readthedocs.io/en/stable/examples/Notebook/Typesetting%20Equations.html) (Jupyter: LaTex Equations Examples)
+* [Jupyter Notebook: MathJax Equation Numbering](https://github.com/ipython-contrib/jupyter_contrib_nbextensions/tree/master/src/jupyter_contrib_nbextensions/nbextensions/equation-numbering) (MathJax Equation Numbering in Jupyter Notebooks, see also [Equation numbering in Jupyter notebooks - Stack Overflow](https://stackoverflow.com/questions/41241984/equation-numbering-in-jupyter-notebooks/42940005#42940005) and [this](https://github.com/ipython-contrib/jupyter_contrib_nbextensions/issues/1312) )
+* [Jupyter Notebook: (some) LaTeX environments for Jupyter notebook](https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/nbextensions/latex_envs/) (Jupyter: This extension for Jupyter notebook enables the use of some LaTeX commands and environments markdown cells.)
+* [Jupyter Notebook: Generate TikZ figures](https://github.com/mkrphys/ipython-tikzmagic) (IPython magics for generating figures with TikZ.)
 
 <!--
 * [Dask DataFrame](http://dask.pydata.org/en/latest/dataframe-overview.html) (Parallel computing with task scheduling: Dynamic task scheduling + “Big Data” collections: A Dask DataFrame is a large parallel dataframe composed of many smaller Pandas dataframes, split along the index.)
