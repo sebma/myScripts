@@ -16,7 +16,7 @@
     2. [MarkDown language](#markdown-language)
     3. [C language](#c-language)
         1. [Outils](#outils)
-    3. [Embbeded Hardware](#embbeded-hardware)
+    3. [Embedded Hardware](#embedded-hardware)
     4. [PicoScope Documentation](#picoscope-documentation)
     5. [Binary data formats](#binary-data-formats)
     6. [License](#license)
@@ -119,7 +119,7 @@ OR
 * [Remake](https://github.com/rocky/remake/wiki) (GNU Make with comprehensible tracing and a debugger)
 * [cgdb](https://cgdb.github.io/) (cgdb is a lightweight curses (terminal-based) interface to the GNU Debugger (GDB).)
 
-## Embbeded Hardware
+## Embedded Hardware
 
 * [Raspberry Pi](https://en.wikipedia.org/wiki/Raspberry_Pi#Specifications) (Raspberry Pi Specs.)
 * [Arduino Duemilanove](https://www.arduino.cc/en/Main/ArduinoBoardDuemilanove) (Arduino Duemilanove Specs., [M.C.U. = Atmel ATmega168](http://www.microchip.com/wwwproducts/en/ATmega168))
