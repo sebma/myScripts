@@ -87,6 +87,9 @@ OR
 ### Jupyter Environment
 
 * [Jupyter Notebook](https://jupyter.org) (Web-based interactive computational environment for creating, executing, and visualizing Jupyter/IPython notebooks)
+* [Jupyter Documentation](http://jupyter.readthedocs.io/) (Jupyter Documentation)
+* [Jupyter Notebook Documentation](http://jupyter-notebook.readthedocs.io/) (Jupyter Notebook Documentation)
+* [Try Jupyter](http://jupyter.org/try) (Try Jupyter with Python, Julia and R, you can also try JupyterLab)
 * [Jupyter Kernels](https://github.com/jupyter/jupyter/wiki/Jupyter-kernels) (Programming Languages support for Jupyter)
 * [Jupyter Notebook Widgets](http://jupyter.org/widgets) (Jupyter widgets enable interactive data visualization in the Jupyter notebooks)
 * [Jupyter Notebook Extensions](http://jupyter-contrib-nbextensions.readthedocs.io) (Collection of community-contributed unofficial extensions that add functionality to the Jupyter notebook)
