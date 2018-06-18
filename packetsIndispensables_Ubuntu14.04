@@ -120,6 +120,7 @@ openssh-server
 opus-tools
 pandoc
 pavucontrol
+pdf2svg
 pdftk
 perl-doc
 perlconsole
@@ -172,6 +173,7 @@ system-config-lvm
 sysvbanner
 terminator
 testdisk
+texlive-luatex
 texlive-xetex
 thunderbird
 thunderbird-globalmenu
