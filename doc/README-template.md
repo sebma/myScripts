@@ -96,7 +96,7 @@ OR
 * [Remake](https://github.com/rocky/remake/wiki) (GNU Make with comprehensible tracing and a debugger)
 * [cgdb](https://cgdb.github.io/) (cgdb is a lightweight curses (terminal-based) interface to the GNU Debugger (GDB).)
 
-## Embbeded Hardware
+## Embedded Hardware
 
 * [Raspberry Pi](https://en.wikipedia.org/wiki/Raspberry_Pi#Specifications) (Raspberry Pi Specs.)
 * [Arduino Duemilanove](https://www.arduino.cc/en/Main/ArduinoBoardDuemilanove) (Arduino Duemilanove Specs., [M.C.U. = Atmel ATmega168](http://www.microchip.com/wwwproducts/en/ATmega168))
