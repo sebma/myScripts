@@ -1,6 +1,10 @@
 #!/usr/bin/env ipython
 
 from __future__ import print_function
+
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+
 #Test if the script is run from the jupyter-console, ipython or python interpreter
 def isnotebook() :
 	try :
