@@ -11,6 +11,7 @@ apt-rdepends
 aptitude
 aria2
 arp-scan
+asciinema
 atomicparsley
 audacious
 audacity
