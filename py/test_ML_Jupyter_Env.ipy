@@ -2,9 +2,6 @@
 
 from __future__ import print_function
 
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-
 #Test if the script is run from the jupyter-console, ipython or python interpreter
 def isnotebook() :
 	try :
@@ -27,6 +24,9 @@ print( "=> nvidia-smi :\n" )
 !nvidia-smi
 
 try :
+	import matplotlib.pyplot as plt
+	import matplotlib as mpl
+
 	print( "\n=> utils/gpustat -cpu :\n" )
 	%run utils/gpustat -cpu
 #	%run -p test_ML_Jupyter_Env.py IPython Profiler
