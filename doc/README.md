@@ -87,12 +87,13 @@ OR
 ### Jupyter Environment
 
 * [Jupyter Notebook](https://jupyter.org) (Web-based interactive computational environment for creating, executing, and visualizing Jupyter/IPython notebooks)
-* [Jupyter Documentation](http://jupyter.readthedocs.io/) (Jupyter Documentation)
-* [Jupyter Notebook Documentation](http://jupyter-notebook.readthedocs.io/) (Jupyter Notebook Documentation)
-* [Try Jupyter](http://jupyter.org/try) (Try Jupyter with Python, Julia and R, you can also try JupyterLab)
+* [Jupyter Documentation](https://jupyter.readthedocs.io/) (Jupyter Documentation)
+* [Jupyter What To Do First](https://jupyter.readthedocs.io/en/latest/projects/content-projects.html) (Jupyter : What to do first ?)
+* [Jupyter Notebook Documentation](https://jupyter-notebook.readthedocs.io/) (Jupyter Notebook Documentation)
+* [Try Jupyter](https://jupyter.org/try) (Try Jupyter with Python, Julia and R, you can also try JupyterLab)
 * [Jupyter Kernels](https://github.com/jupyter/jupyter/wiki/Jupyter-kernels) (Programming Languages support for Jupyter)
-* [Jupyter Notebook Widgets](http://jupyter.org/widgets) (Jupyter widgets enable interactive data visualization in the Jupyter notebooks)
-* [Jupyter Notebook Extensions](http://jupyter-contrib-nbextensions.readthedocs.io) (Collection of community-contributed unofficial extensions that add functionality to the Jupyter notebook)
+* [Jupyter Notebook Widgets](https://jupyter.org/widgets) (Jupyter widgets enable interactive data visualization in the Jupyter notebooks)
+* [Jupyter Notebook Extensions](https://jupyter-contrib-nbextensions.readthedocs.io) (Collection of community-contributed unofficial extensions that add functionality to the Jupyter notebook)
 * [Jupyter Nbextensions Configurator](https://github.com/Jupyter-contrib/jupyter_nbextensions_configurator) (A server extension for jupyter notebook which provides configuration interfaces for notebook extensions)
 * [JupyterLab](http://jupyterlab.readthedocs.io) (JupyterLab is the next-generation web-based user interface for Project Jupyter)
 * [JupyterHub](http://jupyterhub.readthedocs.io) (JupyterHub, a multi-user Hub, spawns, manages, and proxies multiple instances of the single-user Jupyter notebook server)  
