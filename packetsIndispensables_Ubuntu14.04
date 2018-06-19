@@ -173,6 +173,7 @@ system-config-lvm
 sysvbanner
 terminator
 testdisk
+texlive-extra-utils
 texlive-luatex
 texlive-xetex
 thunderbird
