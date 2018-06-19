@@ -37,7 +37,7 @@ function main {
 					echo
 					echo "=> Installing $(lsb_release -sd) console tools ..."
 					echo
-					consoleTools="transfig linux-image-generic texlive-xetex texlive-luatex pdf2svg perl-doc lsof rename lsb-release bash-completion vim python-argcomplete htop command-not-found gpm conky-all dfc git smartmontools inxi aria2 gdebi-core speedtest-cli"
+					consoleTools="transfig linux-image-generic texlive-xetex texlive-luatex texlive-extra-utils pdf2svg perl-doc lsof rename lsb-release bash-completion vim python-argcomplete htop command-not-found gpm conky-all dfc git smartmontools inxi aria2 gdebi-core speedtest-cli"
 					consoleToolsNumber=$(echo $consoleTools | wc -w)
 					test $(dpkg -l $consoleTools | grep -c ^ii) == $consoleToolsNumber && echo "==> INFO : The console tools are already installed." || $installCommand $consoleTools
 			
