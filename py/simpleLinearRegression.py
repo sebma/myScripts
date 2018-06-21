@@ -71,7 +71,6 @@ def initArgs() :
 	return arguments
 
 def plotDataAndPrediction(df, lossFunctionName, optimizerName) :
-	pictureFileResolution = 600
 	fig = plt.figure( dpi = plotResolution )
 #	plt.clf()
 	
@@ -91,9 +90,10 @@ def plotDataAndPrediction(df, lossFunctionName, optimizerName) :
 
 def initScript() :
 #	global myArgs, arguments, nbSamples, lastSample, epochs, df, lossFunction, optimizer, activation, Lr, dumpedModelFileName, rmse, batch_size, validation_split, shuffle, earlyStoppingPatience, plotMetrics
-	global myArgs, df, plotResolution
+	global myArgs, df, plotResolution, pictureFileResolution
 	global optimizerName, lossFunctionName, myMetrics, modelTrainingCallbacks, dataIsNormalized, monitoredData
 	plotResolution = 150
+	pictureFileResolution = 600
 
 	rmse = root_mean_squared_error
 
@@ -180,19 +180,24 @@ def initScript() :
 		from livelossplot import PlotLossesKeras
 		modelTrainingCallbacks += [ PlotLossesKeras() ]
 
+def modelDefinition( units = 1, input_dim = 1, hiddenLayerUnits = 0 ) :
+    from keras.models import Sequential
+    from keras.layers import Dense
+    import keras.utils, keras.optimizers, keras.initializers
+    model = Sequential()
+    model.add( Dense( units=units, input_dim=input_dim, activation = myArgs.activationFunction, kernel_initializer = myArgs.kernel_initializer ) )
+    if hiddenLayerUnits :
+        model.add( Dense( units=hiddenLayerUnits, activation = myArgs.activationFunction, kernel_initializer = myArgs.kernel_initializer ) )
+
+    model.compile( loss=myArgs.lossFunction, optimizer=myArgs.optimizer, metrics = myMetrics )
+
+    return model
+
 def main() :
 	global df
 	initScript()
 
-	from keras.models import Sequential
-	from keras.layers import Dense
-	import keras.utils, keras.optimizers, keras.initializers
-	
-	# MODEL DEFINITION
-	model = Sequential()
-	model.add( Dense( units=1, input_dim=1, activation = myArgs.activationFunction, kernel_initializer = myArgs.kernel_initializer ) )
-
-	model.compile( loss=myArgs.lossFunction, optimizer=myArgs.optimizer, metrics = myMetrics )
+	model = modelDefinition()
 
 	PrintInfo( "\n=> myArgs.nbSamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%" % (myArgs.nbSamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
 
