@@ -14,6 +14,7 @@ if not insideCondaEnv() : exit(-1)
 from ipdb import set_trace
 
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 import pandas as pda
 from keras import backend as K
 
@@ -39,6 +40,7 @@ def setJupyterBackend( newBackend = 'nbAgg' ) : # Set the "notebook" backend as 
 	if mpl.get_backend() != 'Qt5Agg' and mpl.get_backend() != newBackend :
 		print("=> BEFORE: matplotlib backend = <%s>" % mpl.get_backend() )
 		mpl.use( newBackend ,warn=False, force=True ) # <=> %matplotlib inline
+#		plt.switch_backend( newBackend ) #Provokes a "AttributeError" in "IPython/core/pylabtools.py#L177"
 		import matplotlib.pyplot
 		print("=> AFTER: matplotlib backend = <%s>" % mpl.get_backend() )
 	else :
