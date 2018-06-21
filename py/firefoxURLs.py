@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
 from __future__ import print_function
-import json
+import json, lz4.block
 import platform, os
 from os.path import exists
 from sys import argv
-from os.path import exists
 
 firefoxProfileName = argv[1]
 HOME = os.environ["HOME"]
@@ -19,20 +18,19 @@ elif platform.system() == 'Windows' :
 
 chosenFirefoxProfileDIR = firefoxProfilesDIR + os.sep + firefoxProfileName
 sessionstoreBackupsDIR  = chosenFirefoxProfileDIR + os.sep + "sessionstore-backups"
-firefoxOpenedTabsFile   = sessionstoreBackupsDIR + os.sep + "recovery.js"
 
 # Thanks to : https://unix.stackexchange.com/questions/385023/firefox-reading-out-urls-of-opened-tabs-from-the-command-line/389360#389360
-if exists( firefoxOpenedTabsFile ) :
-	f = open( firefoxOpenedTabsFile, "r" )
-	jdata = json.loads(f.read())
+
+if exists( sessionstoreBackupsDIR + os.sep + "recovery.js" ) :
+	firefoxOpenedTabsFile = sessionstoreBackupsDIR + os.sep + "recovery.js"
 else :
 	firefoxOpenedTabsFile = sessionstoreBackupsDIR + os.sep + "recovery.jsonlz4"
-	if exists( firefoxOpenedTabsFile ) :
-		f = open( firefoxOpenedTabsFile, "r" )
-		import lz4.block
-		jdata = json.loads(lz4.block.decompress(f.read()).decode("utf-8"))
 
-f.close()
+with open( firefoxOpenedTabsFile, "r" ) as f :
+	if "jsonlz4" in firefoxOpenedTabsFile :
+		jdata = json.loads(lz4.block.decompress(f.read()).decode("utf-8"))
+	else :
+		jdata = json.loads(f.read())
 
 for win in jdata.get("windows"):
 	for tab in win.get("tabs"):
