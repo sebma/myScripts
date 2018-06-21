@@ -7,7 +7,7 @@ pip=$(which pip)
 
 tensorFlowEnvName=$1
 test $tensorFlowEnvName || tensorFlowEnvName=tensorFlow-GPU
-condaForgeModulesList="jupyter ipython ipdb jupyter_contrib_nbextensions jupyter_nbextensions_configurator jupyter_latex_envs"
+condaForgeModulesList="jupyter ipython ipdb jupyter_contrib_nbextensions jupyter_nbextensions_configurator jupyter_latex_envs jupyterlab"
 $sudo $conda install -n $tensorFlowEnvName -c conda-forge $condaForgeModulesList
 jupyter-contrib nbextension install --user
 jupyter-nbextension list
