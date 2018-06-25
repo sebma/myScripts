@@ -21,16 +21,17 @@ def initArgs() :
 	parser = argparse.ArgumentParser( description = 'Simple Linear Regresssion with Keras.', formatter_class = MyFormatter )
 	parser.add_argument( "dataFileName", help="(Optional) data fileName to read data from.", nargs='?', type=str )
 
-	parser.add_argument( "-n", "--nbSamples", help="Total nbSamples in the dataSet.", default=1e3, type=float )
+	parser.add_argument( "-n", "--nbSamples", help="Total nbSamples in the generated dataSet.", default=1e3, type=float )
 	parser.add_argument( "-f", "--firstSample", help="First sample value in the dataSet.", default=0, type=float )
 	parser.add_argument( "-L", "--lastSample", help="Last sample value in the dataSet.", default=1e2, type=float )
 	parser.add_argument( "-b", "--batch_size", help="batchSize taken from the whole dataSet.", default=-1, type=float )
 	parser.add_argument( "-e", "--epochs", help="Number of epochs to go through the NN.", default=5, type=float )
 	parser.add_argument( "-E", "--earlyStoppingPatience", help="Number of epochs before stopping once your loss starts to increase (disabled by default).", default=-1, type=int )
 	parser.add_argument( "-P", "--plotMetrics", help="Enables the live ploting of the trained model metrics in Jupyter NoteBook.", action='store_true', default = False )
-	parser.add_argument( "-D", "--dumpedModelFileName", help="Dump the model image to fileName", default = None, type=str )
+	parser.add_argument( "-d", "--dumpedModelFileName", help="Dump the model image to fileName", default = None, type=str )
 	parser.add_argument( "-S", "--shuffle", help="Shuffle the data along the way.", action='store_true', default = False )
 	parser.add_argument( "-V", "--validation_split", help="Validation split ratio of the whole dataset.", default=0.2, type=float )
+	parser.add_argument( "-D", "--debug", help="Debug.", action='store_true', default = False )
 	parser.add_argument( "-v", "--verbosity", help="Increase output verbosity (e.g., -vv is more than -v).", action='count', default = 0 )
 	parser.add_argument( "-a", "--activationFunction", help="NN Layer activation function.", default="linear", choices = ['linear','relu','sigmoid'], type=str )
 	parser.add_argument( "-l", "--lossFunction", help="NN model loss function.", default="mse", choices = ['mse','mae','rmse'], type=str )
@@ -100,6 +101,7 @@ def initScript() :
 	arguments = initArgs()
 	Allow_GPU_Memory_Growth()
 	pda.options.display.max_rows = 20 #Prints the first max_rows/2 and the last max_rows/2 of each dataframe
+	pda.options.display.width = None #Automatically adjust the display width of the terminal
 
 	myArgs = copyArgumentsToStructure( arguments )
 
@@ -108,7 +110,6 @@ def initScript() :
 	myArgs.batch_size = int( myArgs.batch_size )
 
 	if myArgs.dataFileName :
-		nbInputVars = 1
 		df = pda.read_table( myArgs.dataFileName , delim_whitespace=True , comment='#' ) # The column names are infered from the datafile
 #		df = pda.read_table('dataset10-nCh10.txt', delim_whitespace=True, comment='#', skiprows=[1,2] ) # To read the data from 'dataset*-nCh*.txt' 		
 		myArgs.nbSamples = df.shape[0]
@@ -180,18 +181,19 @@ def initScript() :
 		from livelossplot import PlotLossesKeras
 		modelTrainingCallbacks += [ PlotLossesKeras() ]
 
-def modelDefinition( units = 1, input_dim = 1, hiddenLayerUnits = 0 ) :
-    from keras.models import Sequential
-    from keras.layers import Dense
-    import keras.utils, keras.optimizers, keras.initializers
-    model = Sequential()
-    model.add( Dense( units=units, input_dim=input_dim, activation = myArgs.activationFunction, kernel_initializer = myArgs.kernel_initializer ) )
-    if hiddenLayerUnits :
-        model.add( Dense( units=hiddenLayerUnits, activation = myArgs.activationFunction, kernel_initializer = myArgs.kernel_initializer ) )
+def modelDefinition( inputLayerUnits = 1, hiddenLayerUnits = 1, outputLayerUnits = 1 ) :
+	from keras.models import Sequential
+	from keras.layers import Dense
+	import keras.utils, keras.optimizers, keras.initializers
+	model = Sequential()
+	#First hidden layer
+	model.add( Dense( units = hiddenLayerUnits, input_dim = inputLayerUnits, activation = myArgs.activationFunction, kernel_initializer = myArgs.kernel_initializer ) )
+	#Last layer
+#	model.add( Dense( units = outputLayerUnits ) )
 
-    model.compile( loss=myArgs.lossFunction, optimizer=myArgs.optimizer, metrics = myMetrics )
+	model.compile( loss=myArgs.lossFunction, optimizer=myArgs.optimizer, metrics = myMetrics )
 
-    return model
+	return model
 
 def main() :
 	global df
@@ -217,9 +219,13 @@ def main() :
 		ax.set_title('Metrics computed during training')
 		ax.set_xlabel('epochs')
 		ax.set_ylabel('metrics')
+		if myArgs.debug :
+			print( historyDF )
+			set_trace()
+		plt.show()
 
+	nbEpochsDone = historyDF.index.size
 	if myArgs.earlyStoppingPatience != -1 :
-		nbEpochsDone = len( history.history[ monitoredData ] )
 		PrintInfo( "=> nbEpochsDone = %d" % nbEpochsDone )
 
 	PrintInfo( "=> kernel_initializer = " + myArgs.kernel_initializer )
