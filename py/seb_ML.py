@@ -125,14 +125,29 @@ def copyArgumentsToStructure(args) :
 
 def saveDataframe( df, filename, key = 'df', format = "hdf5" ) :
 	if format == "hdf5" :
-		PrintInfo( "=> Dumping <%s> dataframe to <%s> ..." % (key,filename) )
+		PrintInfo( "=> Dumping <%s> dataframe to <%s> ...\n" % (key,filename) )
 		with pda.HDFStore(filename) as store : store[key] = df
 	else : PrintError( "=> ERROR : The output %s file format is not supported yet." % format )
 
 def loadDataframe( df, filename, key = 'df', format = "hdf5" ) :
 	if format == "hdf5" :
-		PrintInfo( "=> Loading dataframe from <%s> ..." % filename )
+		PrintInfo( "=> Loading dataframe from <%s> ...\n" % filename )
 		with pda.HDFStore(filename, 'r') as store : df = store[key]
 		return df
 	else : PrintError( "=> ERROR : The output %s file format is not supported yet." % format )
 
+def plotExperments( dfX, dfY, fmin, fmax ) :
+	nbExperiments = dfY.index.size
+	fig = plt.figure()
+	for experiment in range(nbExperiments) :
+		y = dfY.loc[experiment][ dfX.loc[experiment] == 1 ]
+		f = fmin+(fmax-fmin)*y.index/dfY.columns.size
+		nb = y.index.size
+		plt.plot( f, y, marker='x', label='%d Ch' % nb, mew=1.5, ms=6 )
+	plt.xlabel( 'Frequency (THz)' )
+	plt.ylabel( 'Power (dBm)' )
+	plt.title( 'Output optical power' )
+#	plt.legend( loc='best' )
+	leg = fig.legend( loc='center right' )
+	leg.get_frame().set_edgecolor('black')
+	plt.grid()
