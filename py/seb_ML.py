@@ -2,6 +2,7 @@
 
 from sys import stdout, stderr, exit
 from os import environ
+from ipdb import set_trace #Charge le IPython avec ses startup => shell = TerminalInteractiveShell
 
 def insideCondaEnv() :
 	if environ.get('CONDA_DEFAULT_ENV') is None and environ.get('VIRTUAL_ENV') is None :
@@ -10,8 +11,6 @@ def insideCondaEnv() :
 	else : return True
 
 if not insideCondaEnv() : exit(-1)
-
-from ipdb import set_trace
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -23,13 +22,21 @@ def isnotebook() :
 		from IPython import get_ipython
 		shell = get_ipython().__class__.__name__
 		if shell == 'ZMQInteractiveShell':
-			return True   # Jupyter notebook or qtconsole
+			isNB = True   # Jupyter notebook or qtconsole
+			interpreter = "Jupyter"
 		elif shell == 'TerminalInteractiveShell':
-			return False  # Terminal running IPython
-		else:
-			return False  # Other type (?)
-	except NameError :
-		return False      # Probably standard Python interpreter
+			isNB = False  # Terminal running IPython
+			interpreter = "IPython"
+		else :
+			isNB = False  # Terminal running Python
+			interpreter = "Python"
+	except NameError as why :
+		print( "=> ERROR: %s" % why, file = stderr )
+		isNB = False      # Probably standard Python interpreter
+		interpreter = "UNKNOWN"
+
+#	print( "=> interpreter = <%s>\n" % interpreter )
+	return isNB
 
 def setJupyterBackend( newBackend = 'nbAgg' ) : # Set the "notebook" backend as default or other when newBackend is given
 	# If the script is not run by python but by jupyter and is using a different backend then "notebook"
@@ -50,10 +57,19 @@ def Print(*args, quiet = False, **kwargs) :
 	if not quiet : print(*args, **kwargs)
 
 def PrintError(*args, quiet = False, **kwargs) :
-	if not quiet : print(*args, **kwargs, file = stderr)
+	if not quiet :
+		print( "=> ERROR: ", end="", file = stderr )
+		print(*args, **kwargs, file = stderr)
+
+def PrintWarning(*args, quiet = False, **kwargs) :
+	if not quiet :
+		print( "=> WARNING: ", end="", file = stderr )
+		print(*args, **kwargs, file = stderr)
 
 def PrintInfo(*args, quiet = False, **kwargs) :
-	if not quiet : print(*args, **kwargs, file = stderr)
+	if not quiet :
+		print( "=> INFO: ", end="", file = stderr )
+		print(*args, **kwargs, file = stderr)
 
 def Exit(retCode=0, markdown=False) :
 	if markdown : Print("</code></pre>")
@@ -67,7 +83,9 @@ def Allow_GPU_Memory_Growth() : #cf. https://github.com/keras-team/keras/issues/
 		config.gpu_options.visible_device_list = "0"
 		#session = tf.Session(config=config)
 		from keras.backend.tensorflow_backend import set_session
+		PrintInfo( "=> Allowing GPU Memory Growth in tensorflow session config parameters ...\n" )
 		set_session(tf.Session(config=config))
+		PrintInfo( "=> DONE.\n" )
 
 def root_mean_squared_error(y_true, y_pred):
 	return K.sqrt(K.mean(K.square(y_pred - y_true), axis=-1))
@@ -107,14 +125,29 @@ def copyArgumentsToStructure(args) :
 
 def saveDataframe( df, filename, key = 'df', format = "hdf5" ) :
 	if format == "hdf5" :
-		PrintInfo( "=> Dumping <%s> dataframe to <%s> ..." % (key,filename) )
+		PrintInfo( "=> Dumping <%s> dataframe to <%s> ...\n" % (key,filename) )
 		with pda.HDFStore(filename) as store : store[key] = df
 	else : PrintError( "=> ERROR : The output %s file format is not supported yet." % format )
 
 def loadDataframe( df, filename, key = 'df', format = "hdf5" ) :
 	if format == "hdf5" :
-		PrintInfo( "=> Loading dataframe from <%s> ..." % filename )
+		PrintInfo( "=> Loading dataframe from <%s> ...\n" % filename )
 		with pda.HDFStore(filename, 'r') as store : df = store[key]
 		return df
 	else : PrintError( "=> ERROR : The output %s file format is not supported yet." % format )
 
+def plotExperments( dfX, dfY, fmin, fmax ) :
+	nbExperiments = dfY.index.size
+	fig = plt.figure()
+	for experiment in range(nbExperiments) :
+		y = dfY.loc[experiment][ dfX.loc[experiment] == 1 ]
+		f = fmin+(fmax-fmin)*y.index/dfY.columns.size
+		nb = y.index.size
+		plt.plot( f, y, marker='x', label='%d Ch' % nb, mew=1.5, ms=6 )
+	plt.xlabel( 'Frequency (THz)' )
+	plt.ylabel( 'Power (dBm)' )
+	plt.title( 'Output optical power' )
+#	plt.legend( loc='best' )
+	leg = fig.legend( loc='center right' )
+	leg.get_frame().set_edgecolor('black')
+	plt.grid()

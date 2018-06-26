@@ -3,11 +3,15 @@
 orig_keys = set(globals().keys())
 
 from seb_ML import *
+print("")
 
+from ipdb import set_trace
 import pandas as pda
 import numpy as np
 import matplotlib.pyplot as plt
-from ipdb import set_trace
+import os
+from glob import glob
+from datetime import datetime
 
 def initArgs() :
 	global arguments, scriptBaseName, parser, __version__
@@ -17,27 +21,27 @@ def initArgs() :
 	class MyFormatter(argparse.ArgumentDefaultsHelpFormatter, argparse.MetavarTypeHelpFormatter):
 		pass
 
-#	parser = argparse.ArgumentParser( description = 'Simple Linear Regresssion with Keras.', formatter_class = argparse.ArgumentDefaultsHelpFormatter )
-	parser = argparse.ArgumentParser( description = 'Simple Linear Regresssion with Keras.', formatter_class = MyFormatter )
-	parser.add_argument( "dataFileName", help="(Optional) data fileName to read data from.", nargs='?', type=str )
+#	parser = argparse.ArgumentParser( description = 'Regresssion with Keras.', formatter_class = argparse.ArgumentDefaultsHelpFormatter )
+	parser = argparse.ArgumentParser( description = 'Regresssion with Keras.', formatter_class = MyFormatter )
 
-	parser.add_argument( "-n", "--nbSamples", help="Total nbSamples in the generated dataSet.", default=1e3, type=float )
 	parser.add_argument( "-f", "--firstSample", help="First sample value in the dataSet.", default=0, type=float )
-	parser.add_argument( "-L", "--lastSample", help="Last sample value in the dataSet.", default=1e2, type=float )
+	parser.add_argument( "-L", "--lastSample" , help="Last sample value in the dataSet.",default=1e2, type=float )
 	parser.add_argument( "-b", "--batch_size", help="batchSize taken from the whole dataSet.", default=-1, type=float )
 	parser.add_argument( "-e", "--epochs", help="Number of epochs to go through the NN.", default=5, type=float )
 	parser.add_argument( "-E", "--earlyStoppingPatience", help="Number of epochs before stopping once your loss starts to increase (disabled by default).", default=-1, type=int )
 	parser.add_argument( "-P", "--plotMetrics", help="Enables the live ploting of the trained model metrics in Jupyter NoteBook.", action='store_true', default = False )
-	parser.add_argument( "-d", "--dumpedModelFileName", help="Dump the model image to fileName", default = None, type=str )
+	parser.add_argument( "-d", "--dataDIR", help="Datasets directory", default = "../../data", type=str )
+	parser.add_argument( "-p", "--pattern", help="Data file name pattern.", default="data*.txt", type=str )
+#	parser.add_argument( "-D", "--dumpedModelFileName", help="Dump the model image to fileName", default = None, type=str )
 	parser.add_argument( "-S", "--shuffle", help="Shuffle the data along the way.", action='store_true', default = False )
 	parser.add_argument( "-V", "--validation_split", help="Validation split ratio of the whole dataset.", default=0.2, type=float )
-	parser.add_argument( "-D", "--debug", help="Debug.", action='store_true', default = False )
 	parser.add_argument( "-v", "--verbosity", help="Increase output verbosity (e.g., -vv is more than -v).", action='count', default = 0 )
-	parser.add_argument( "-a", "--activationFunction", help="NN Layer activation function.", default="linear", choices = ['linear','relu','sigmoid'], type=str )
+	parser.add_argument( "-D", "--debug", help="Debug.", action='store_true', default = False )
+	parser.add_argument( "-a", "--activationFunction", help="NN Layer activation function.", default="relu", choices = ['linear','relu','sigmoid'], type=str )
 	parser.add_argument( "-l", "--lossFunction", help="NN model loss function.", default="mse", choices = ['mse','mae','rmse'], type=str )
 	parser.add_argument( "-k", "--kernel_initializer", help="NN Model kernel initializer.", default="glorot_uniform", choices = ['glorot_uniform','random_normal','random_uniform'], type=str )
 	parser.add_argument( "-O", "--optimizer", help="NN model optimizer algo.", default="sgd", choices = ['sgd', 'rmsprop','adam'], type=str )
-	parser.add_argument( "-o", "--outputDataframeFileName", help="NN model optimizer algo.", type=str )
+	parser.add_argument( "-o", "--outputDataframeFileName", help="Datafilename prefix so save the input/output dataframes.", type=str, default = "myData.hdf5" )
 
 	parser.add_argument( "--Lr", help="Set the learning rate of the NN.", default=None, type=float )
 
@@ -87,14 +91,14 @@ def plotDataAndPrediction(df, lossFunctionName, optimizerName) :
 	#subplot(nrows, ncols, plot_number)
 	#plt.subplot(1,2,2)
 	
-	plt.show()
+#	plt.show()
 
 def initScript() :
-#	global myArgs, arguments, nbSamples, lastSample, epochs, df, lossFunction, optimizer, activation, Lr, dumpedModelFileName, rmse, batch_size, validation_split, shuffle, earlyStoppingPatience, plotMetrics
-	global myArgs, df, plotResolution, pictureFileResolution
-	global optimizerName, lossFunctionName, myMetrics, modelTrainingCallbacks, dataIsNormalized, monitoredData
+	global myArgs, dfX, dfY, plotResolution, pictureFileResolution, nbInputVariables, nbOutputVariables, nbSamples
+	global optimizerName, lossFunctionName, myMetrics, modelTrainingCallbacks, dataIsNormalized, monitoredData, fileFormat
 	plotResolution = 150
 	pictureFileResolution = 600
+	yearMonthDay = datetime.today().strftime('%Y%m%d')
 
 	rmse = root_mean_squared_error
 
@@ -104,30 +108,31 @@ def initScript() :
 	pda.options.display.width = None #Automatically adjust the display width of the terminal
 
 	myArgs = copyArgumentsToStructure( arguments )
+	
+	prefix =    os.path.splitext( myArgs.outputDataframeFileName )[0]
+	extension = os.path.splitext( myArgs.outputDataframeFileName )[1]
+	myArgs.outputDataframeFileName = prefix + "_" + yearMonthDay + extension
+	fileFormat = extension.strip('.')
 
-	myArgs.nbSamples = int( myArgs.nbSamples )
 	myArgs.epochs = int( myArgs.epochs )
 	myArgs.batch_size = int( myArgs.batch_size )
 
-	if myArgs.dataFileName :
-		df = pda.read_table( myArgs.dataFileName , delim_whitespace=True , comment='#' ) # The column names are infered from the datafile
-#		df = pda.read_table('dataset10-nCh10.txt', delim_whitespace=True, comment='#', skiprows=[1,2] ) # To read the data from 'dataset*-nCh*.txt' 		
-		myArgs.nbSamples = df.shape[0]
-	else :
-		X = np.linspace(0, myArgs.lastSample, myArgs.nbSamples)
-		df = pda.DataFrame( columns = ['X_train','y_train'] )
-		df[ df.columns[0] ] = X
-		df[ df.columns[1] ] = -5*X + 10
+	dfX, dfY = importDataSets()
+	nbInputVariables = dfX.columns.size
+	nbOutputVariables= dfY.columns.size
+	nbSamples = dfX.index.size
 
 	dataIsNormalized = False
+	"""
 	if myArgs.lossFunction == 'mse' :
 		# MSE needs NORMALIZATION
 		PrintInfo( "=> Doing Pandas dataframe normalization ..." , quiet = myArgs.quiet )
 	#	df[ df.columns[0] ] = keras.utils.normalize( df.values )[:,0]
 	#	df[ df.columns[1] ] = keras.utils.normalize( df.values )[:,1]
-		df = ( df-df.mean() ) / df.std()
-		PrintInfo( "=> DONE." , quiet = myArgs.quiet )
+		dfX = ( dfX-dfX.mean() ) / dfX.std()
+		PrintInfo( "=> DONE.\n" , quiet = myArgs.quiet )
 		dataIsNormalized = True
+"""
 
 	optimizerName = myArgs.optimizer
 	lossFunctionName = myArgs.lossFunction.lower()
@@ -135,11 +140,11 @@ def initScript() :
 	if myArgs.lossFunction == 'mse' and myArgs.epochs < 10 : myArgs.epochs = 15
 
 	if myArgs.batch_size == -1 :
-		if myArgs.nbSamples > 1e2 :
-			myArgs.batch_size = int(myArgs.nbSamples / myArgs.epochs)
+		if nbSamples > 1e2 :
+			myArgs.batch_size = int(nbSamples / myArgs.epochs)
 		else :
-			myArgs.batch_size = myArgs.nbSamples
-#			myArgs.epochs = int(myArgs.nbSamples / 4)
+			myArgs.batch_size = nbSamples
+#			myArgs.epochs = int(nbSamples / 4)
 
 	import keras.optimizers
 	if myArgs.Lr :
@@ -170,7 +175,7 @@ def initScript() :
 	
 	if myArgs.earlyStoppingPatience != -1 :
 		from keras.callbacks import EarlyStopping
-		if myArgs.nbSamples < 10 : monitoredData = 'loss'
+		if nbSamples < 10 : monitoredData = 'loss'
 		else : monitoredData = 'val_loss'
 
 		modelTrainingCallbacks += [ EarlyStopping( monitor= monitoredData, patience = myArgs.earlyStoppingPatience ) ]
@@ -181,7 +186,47 @@ def initScript() :
 		from livelossplot import PlotLossesKeras
 		modelTrainingCallbacks += [ PlotLossesKeras() ]
 
-def modelDefinition( inputLayerUnits = 1, hiddenLayerUnits = 1, outputLayerUnits = 1 ) :
+def importDataSets() :
+	PrintInfo("=> Reading : <%s>\n" %( arguments.dataDIR + os.sep  + arguments.pattern ) )
+	cwd = os.getcwd()
+	try :
+		os.chdir( arguments.dataDIR )
+
+		dataFileList = sorted( glob( arguments.pattern ) )
+		nbDataFiles = len(dataFileList)
+		nbDataFilesRead = len(dataFileList)
+
+		if not nbDataFilesRead :
+			PrintError( "Could not find any "+arguments.pattern+" files, please double check and give the correct data filename pattern." )
+			exit( 5 )
+
+		dfX = pda.DataFrame()
+		dfY = pda.DataFrame()
+		i = 0
+		for dataFileName in dataFileList :
+			if arguments.verbosity >= 3 : Print( "=> dataFileName = %s" % dataFileName )
+
+			df = pda.read_table( dataFileName, delim_whitespace=True, comment='#' )
+			df = df.T
+			dfX[i] = df.loc[ df.index[0] ]
+			dfY[i] = df.loc[ df.index[1] ]
+			i += 1
+
+		dfX = dfX.T
+		dfY = dfY.T
+	except (Exception,KeyboardInterrupt) as why :
+		os.chdir( cwd )
+		if isinstance(why, KeyboardInterrupt) :
+			PrintError( "KeyboardInterrupt." )
+		else :
+			PrintError( "Quitting the debugger: %s." % why )
+		exit(4)
+
+	os.chdir( cwd )
+
+	return dfX, dfY
+
+def modelDefinition( inputLayerUnits = 1, hiddenLayerUnits = 0, outputLayerUnits = 1 ) :
 	from keras.models import Sequential
 	from keras.layers import Dense
 	import keras.utils, keras.optimizers, keras.initializers
@@ -189,26 +234,35 @@ def modelDefinition( inputLayerUnits = 1, hiddenLayerUnits = 1, outputLayerUnits
 	#First hidden layer
 	model.add( Dense( units = hiddenLayerUnits, input_dim = inputLayerUnits, activation = myArgs.activationFunction, kernel_initializer = myArgs.kernel_initializer ) )
 	#Last layer
-#	model.add( Dense( units = outputLayerUnits ) )
+	model.add( Dense( units = outputLayerUnits ) )
 
 	model.compile( loss=myArgs.lossFunction, optimizer=myArgs.optimizer, metrics = myMetrics )
 
 	return model
-
+	
 def main() :
-	global df
+	global nbInputVariables
 	initScript()
+	if myArgs.outputDataframeFileName :
+		saveDataframe( df = dfX, filename = myArgs.outputDataframeFileName, key = 'X', format = fileFormat )
+		saveDataframe( df = dfY, filename = myArgs.outputDataframeFileName, key = 'Y', format = fileFormat )
 
-	model = modelDefinition()
 
-	PrintInfo( "\n=> myArgs.nbSamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%" % (myArgs.nbSamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
+	PrintInfo( "=> nbSamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%\n" % (nbSamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
 
 	if isnotebook() : setJupyterBackend( newBackend = 'module://ipykernel.pylab.backend_inline' )
 
+	# MODEL DEFINITION
+	if not nbInputVariables : nbInputVariables = 5
+	model = modelDefinition( inputLayerUnits = nbInputVariables, hiddenLayerUnits = nbInputVariables * 2, outputLayerUnits = nbOutputVariables )
+
 	#MODEL TRAINING
-	history = model.fit( df[ df.columns[0] ], df[ df.columns[1] ], batch_size=myArgs.batch_size, epochs=myArgs.epochs, validation_split=myArgs.validation_split, callbacks = modelTrainingCallbacks, shuffle = myArgs.shuffle, verbose = myArgs.verbosity )
+	history = model.fit( dfX, dfY, batch_size=myArgs.batch_size, epochs=myArgs.epochs, validation_split=myArgs.validation_split, callbacks = modelTrainingCallbacks, shuffle = myArgs.shuffle, verbose = myArgs.verbosity )
 
 	historyDF = pda.DataFrame.from_dict( history.history )
+	if myArgs.outputDataframeFileName :
+		saveDataframe( df = historyDF,   filename = myArgs.outputDataframeFileName, key = 'history', format = fileFormat )
+
 	if not isnotebook() :
 #		plt.rcParams["figure.dpi"]  = plotResolution
 #		plt.rcParams['savefig.dpi'] = pictureFileResolution
@@ -221,38 +275,38 @@ def main() :
 		ax.set_ylabel('metrics')
 		if myArgs.debug :
 			print( historyDF )
-			set_trace()
+#			set_trace()
+		plt.grid()
 		plt.show()
 
 	nbEpochsDone = historyDF.index.size
 	if myArgs.earlyStoppingPatience != -1 :
-		PrintInfo( "=> nbEpochsDone = %d" % nbEpochsDone )
+		PrintInfo( "=> nbEpochsDone = %d\n" % nbEpochsDone )
 
-	PrintInfo( "=> kernel_initializer = " + myArgs.kernel_initializer )
+	PrintInfo( "=> kernel_initializer = <%s>\n" % myArgs.kernel_initializer )
 
 	if myArgs.verbosity or isnotebook() :
-		PrintInfo( "\n=> myArgs.nbSamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%" % (myArgs.nbSamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
+		PrintInfo( "=> nbSamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%\n" % (nbSamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
 	
-	PrintInfo( "\n=> Loss function = <" +lossFunctionName+">" + " myArgs.optimizer = <"+optimizerName+">" , quiet = myArgs.quiet )
+	PrintInfo( "=> Loss function = <" +lossFunctionName+">" + " myArgs.optimizer = <"+optimizerName+">\n" , quiet = myArgs.quiet )
 	
-	slope = model.layers[-1].get_weights()[0].item()
-	y_Intercept = model.layers[-1].get_weights()[1].item()
-	if dataIsNormalized :
-		PrintInfo("\n=> THE DATA WAS NORMALIZED, hence slope=%.2f\ty_Intercept=%.2f\n" % (slope, y_Intercept), quiet = myArgs.quiet )
-		df['y_predicted'] = model.predict( df[ df.columns[0] ] ) # MODEL PREDICTION
-	else :
-		PrintInfo("\n=> slope=%.2f\ty_Intercept=%.2f\n" % (slope, y_Intercept), quiet = myArgs.quiet )
-		df['y_predicted'] = slope*df[ df.columns[0] ] + y_Intercept
-	
-	if myArgs.outputDataframeFileName :
-		saveDataframe( df = df, filename = myArgs.outputDataframeFileName )
-		saveDataframe( df = historyDF, filename = myArgs.outputDataframeFileName, key = 'history' )
+	dfPredicted = pda.DataFrame( model.predict( dfX ) ) # MODEL PREDICTION
 
-	showModel(model = model, modelFileName = myArgs.dumpedModelFileName, rankdir = 'TB')
+	if myArgs.outputDataframeFileName :
+		if myArgs.debug : set_trace()
+		saveDataframe( df = dfPredicted, filename = myArgs.outputDataframeFileName, key = 'predictions', format = fileFormat )
+
+#	showModel(model = model, modelFileName = myArgs.dumpedModelFileName, rankdir = 'TB')
 	
 	if myArgs.Lr : PrintInfo("\n=> lr = ",myArgs.Lr, quiet = myArgs.quiet )
 	
-	plotDataAndPrediction(df, lossFunctionName, optimizerName)
+	f0 = 191.7
+	fStep = 0.05
+	fMax= 196
+#	plotDataAndPrediction(df, lossFunctionName, optimizerName)
+	plt.figure()
+	plotExperments( dfX, dfY, fmin = f0, fmax = fMax )
+	plt.show( block=True )
 
 	my_keys = sorted( set( globals().keys() ) - orig_keys )
 	#print(my_keys)
