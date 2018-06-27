@@ -103,11 +103,12 @@ def initScript() :
 	rmse = root_mean_squared_error
 
 	arguments = initArgs()
+	myArgs = copyArgumentsToStructure( arguments )
+
 	Allow_GPU_Memory_Growth()
+
 	pda.options.display.max_rows = 20 #Prints the first max_rows/2 and the last max_rows/2 of each dataframe
 	pda.options.display.width = None #Automatically adjust the display width of the terminal
-
-	myArgs = copyArgumentsToStructure( arguments )
 	
 	prefix =    os.path.splitext( myArgs.outputDataframeFileName )[0]
 	extension = os.path.splitext( myArgs.outputDataframeFileName )[1]
@@ -117,7 +118,7 @@ def initScript() :
 	myArgs.epochs = int( myArgs.epochs )
 	myArgs.batch_size = int( myArgs.batch_size )
 
-	dfX, dfY = importDataSets()
+	dfX, dfY = importDataSetsFromDIR( dataDIR = myArgs.dataDIR, fileNamePattern = myArgs.pattern )
 	nbInputVariables = dfX.columns.size
 	nbOutputVariables= dfY.columns.size
 	nbSamples = dfX.index.size
@@ -186,25 +187,24 @@ def initScript() :
 		from livelossplot import PlotLossesKeras
 		modelTrainingCallbacks += [ PlotLossesKeras() ]
 
-def importDataSets() :
-	PrintInfo("=> Reading : <%s>\n" %( arguments.dataDIR + os.sep  + arguments.pattern ) )
-	cwd = os.getcwd()
+def importDataSetsFromDIR( dataDIR, fileNamePattern ) :
+	PrintInfo("=> Reading : <%s>\n" %( dataDIR + os.sep  + fileNamePattern ) )
+	previousDIR = os.getcwd()
 	try :
-		os.chdir( arguments.dataDIR )
+		os.chdir( dataDIR )
 
-		dataFileList = sorted( glob( arguments.pattern ) )
-		nbDataFiles = len(dataFileList)
+		dataFileList = sorted( glob( fileNamePattern ) )
 		nbDataFilesRead = len(dataFileList)
 
 		if not nbDataFilesRead :
-			PrintError( "Could not find any "+arguments.pattern+" files, please double check and give the correct data filename pattern." )
+			PrintError( "Could not find any "+ fileNamePattern +" files, please double check and give the correct data filename pattern." )
 			exit( 5 )
 
 		dfX = pda.DataFrame()
 		dfY = pda.DataFrame()
 		i = 0
 		for dataFileName in dataFileList :
-			if arguments.verbosity >= 3 : Print( "=> dataFileName = %s" % dataFileName )
+			if myArgs.verbosity >= 3 : Print( "=> dataFileName = %s" % dataFileName )
 
 			df = pda.read_table( dataFileName, delim_whitespace=True, comment='#' )
 			df = df.T
@@ -215,14 +215,14 @@ def importDataSets() :
 		dfX = dfX.T
 		dfY = dfY.T
 	except (Exception,KeyboardInterrupt) as why :
-		os.chdir( cwd )
+		os.chdir( previousDIR )
 		if isinstance(why, KeyboardInterrupt) :
 			PrintError( "KeyboardInterrupt." )
 		else :
 			PrintError( "Quitting the debugger: %s." % why )
 		exit(4)
 
-	os.chdir( cwd )
+	os.chdir( previousDIR )
 
 	return dfX, dfY
 
