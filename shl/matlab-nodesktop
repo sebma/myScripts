@@ -1,4 +1,9 @@
 #!/usr/bin/env sh
 
+which rlwrap >/dev/null || {
+	echo "=> [ $(basename $0) ] : ERROR: rlwrap is not installed." >&2
+	exit 1
+}
+
 test $(uname -s) = Darwin && aArg=any && mArg=' \ '
 test "$MATLAB" && exec $(which rlwrap) -a $aArg -c -m $mArg -H "$MATLAB/history.m" matlab -nodesktop -nosplash $@ || exec $(which matlab) -nodesktop -nosplash $@
