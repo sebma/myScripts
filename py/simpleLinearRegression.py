@@ -35,7 +35,7 @@ def initArgs() :
 	parser.add_argument( "-v", "--verbosity", help="Increase output verbosity (e.g., -vv is more than -v).", action='count', default = 0 )
 	parser.add_argument( "-a", "--activationFunction", help="NN Layer activation function.", default="linear", choices = ['linear','relu','sigmoid'], type=str )
 	parser.add_argument( "-l", "--lossFunction", help="NN model loss function.", default="mse", choices = ['mse','mae','rmse'], type=str )
-	parser.add_argument( "-k", "--kernel_initializer", help="NN Model kernel initializer.", default="glorot_uniform", choices = ['glorot_uniform','random_normal','random_uniform'], type=str )
+	parser.add_argument( "-k", "--kernel_initializer", help="NN Model kernel initializer.", default="glorot_uniform", choices = ['glorot_uniform','random_normal','random_uniform','normal'], type=str )
 	parser.add_argument( "-O", "--optimizer", help="NN model optimizer algo.", default="sgd", choices = ['sgd', 'rmsprop','adam'], type=str )
 	parser.add_argument( "-o", "--outputDataframeFileName", help="NN model optimizer algo.", type=str )
 
@@ -86,8 +86,8 @@ def plotDataAndPrediction(df, lossFunctionName, optimizerName) :
 	
 	#subplot(nrows, ncols, plot_number)
 	#plt.subplot(1,2,2)
-	
-	plt.show()
+
+#	plt.show()
 
 def initScript() :
 #	global myArgs, arguments, nbSamples, lastSample, epochs, df, lossFunction, optimizer, activation, Lr, dumpedModelFileName, rmse, batch_size, validation_split, shuffle, earlyStoppingPatience, plotMetrics
@@ -253,6 +253,7 @@ def main() :
 	if myArgs.Lr : PrintInfo("\n=> lr = ",myArgs.Lr, quiet = myArgs.quiet )
 	
 	plotDataAndPrediction(df, lossFunctionName, optimizerName)
+	plt.show( block=True )
 
 	my_keys = sorted( set( globals().keys() ) - orig_keys )
 	#print(my_keys)
