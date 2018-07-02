@@ -2,7 +2,6 @@
 
 from sys import stdout, stderr, exit
 from os import environ
-from ipdb import set_trace #Charge le IPython avec ses startup => shell = TerminalInteractiveShell
 
 def insideCondaEnv() :
 	if environ.get('CONDA_DEFAULT_ENV') is None and environ.get('VIRTUAL_ENV') is None :
@@ -12,31 +11,39 @@ def insideCondaEnv() :
 
 if not insideCondaEnv() : exit(-1)
 
+from pdb import set_trace
+#from ipdb import set_trace #Charge le IPython avec ses startup => shell = TerminalInteractiveShell
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pandas as pda
 from keras import backend as K
 
 def isnotebook() :
+	if notebookInterpreter() == "Jupyter" :
+		return True
+	else :
+		return False
+
+def notebookInterpreter() :
 	try :
 		from IPython import get_ipython
 		shell = get_ipython().__class__.__name__
 		if shell == 'ZMQInteractiveShell':
-			isNB = True   # Jupyter notebook or qtconsole
+			# Jupyter notebook or qtconsole
 			interpreter = "Jupyter"
 		elif shell == 'TerminalInteractiveShell':
-			isNB = False  # Terminal running IPython
+			# Terminal running IPython
 			interpreter = "IPython"
 		else :
-			isNB = False  # Terminal running Python
+			# Terminal running Python
 			interpreter = "Python"
 	except NameError as why :
 		print( "=> ERROR: %s" % why, file = stderr )
-		isNB = False      # Probably standard Python interpreter
+		# Probably standard Python interpreter
 		interpreter = "UNKNOWN"
 
 #	print( "=> interpreter = <%s>\n" % interpreter )
-	return isNB
+	return interpreter
 
 def setJupyterBackend( newBackend = 'nbAgg' ) : # Set the "notebook" backend as default or other when newBackend is given
 	# If the script is not run by python but by jupyter and is using a different backend then "notebook"
@@ -129,21 +136,26 @@ def saveDataframe( df, filename, key = 'df', format = "hdf5" ) :
 		with pda.HDFStore(filename) as store : store[key] = df
 	else : PrintError( "=> ERROR : The output %s file format is not supported yet." % format )
 
-def loadDataframe( df, filename, key = 'df', format = "hdf5" ) :
+def loadDataframe( filename, key = 'df', format = "hdf5" ) :
 	if format == "hdf5" :
 		PrintInfo( "=> Loading dataframe from <%s> ...\n" % filename )
 		with pda.HDFStore(filename, 'r') as store : df = store[key]
 		return df
 	else : PrintError( "=> ERROR : The output %s file format is not supported yet." % format )
 
+def channelsStates2Frequencies( activeChannelsIndex, fmin, fmax, totalNumberOfChannels ) :
+	return ( fmin+(fmax-fmin)*activeChannelsIndex/totalNumberOfChannels )
+
 def plotExperments( dfX, dfY, fmin, fmax ) :
-	nbExperiments = dfY.index.size
 	fig = plt.figure()
-	for experiment in range(nbExperiments) :
-		y = dfY.loc[experiment][ dfX.loc[experiment] == 1 ]
-		f = fmin+(fmax-fmin)*y.index/dfY.columns.size
-		nb = y.index.size
-		plt.plot( f, y, marker='x', label='%d Ch' % nb, mew=1.5, ms=6 )
+	experimentsRange = dfY.index
+	for experiment in experimentsRange :
+		sChannelsStates = dfX.loc[experiment] # Current expirement channel states serie
+		activeChannelsIndex = sChannelsStates[ sChannelsStates == 1 ].index # index of active channels
+		y = dfY.loc[experiment][ activeChannelsIndex ] # Power of active channels
+		frequencies = channelsStates2Frequencies( activeChannelsIndex, fmin, fmax, sChannelsStates.size )
+		nbActiveChannels = activeChannelsIndex.size
+		plt.plot( frequencies, y, marker='x', label='%d Ch' % nbActiveChannels, mew=1.5, ms=6 )
 	plt.xlabel( 'Frequency (THz)' )
 	plt.ylabel( 'Power (dBm)' )
 	plt.title( 'Output optical power' )
