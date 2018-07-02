@@ -5,7 +5,6 @@ orig_keys = set(globals().keys())
 from seb_ML import *
 print("")
 
-from ipdb import set_trace
 import pandas as pda
 import numpy as np
 import matplotlib.pyplot as plt
@@ -24,8 +23,6 @@ def initArgs() :
 #	parser = argparse.ArgumentParser( description = 'Regresssion with Keras.', formatter_class = argparse.ArgumentDefaultsHelpFormatter )
 	parser = argparse.ArgumentParser( description = 'Regresssion with Keras.', formatter_class = MyFormatter )
 
-	parser.add_argument( "-f", "--firstSample", help="First sample value in the dataSet.", default=0, type=float )
-	parser.add_argument( "-L", "--lastSample" , help="Last sample value in the dataSet.",default=1e2, type=float )
 	parser.add_argument( "-b", "--batch_size", help="batchSize taken from the whole dataSet.", default=-1, type=float )
 	parser.add_argument( "-e", "--epochs", help="Number of epochs to go through the NN.", default=5, type=float )
 	parser.add_argument( "-E", "--earlyStoppingPatience", help="Number of epochs before stopping once your loss starts to increase (disabled by default).", default=-1, type=int )
@@ -39,9 +36,11 @@ def initArgs() :
 	parser.add_argument( "-D", "--debug", help="Debug.", action='store_true', default = False )
 	parser.add_argument( "-a", "--activationFunction", help="NN Layer activation function.", default="relu", choices = ['linear','relu','sigmoid'], type=str )
 	parser.add_argument( "-l", "--lossFunction", help="NN model loss function.", default="mse", choices = ['mse','mae','rmse'], type=str )
-	parser.add_argument( "-k", "--kernel_initializer", help="NN Model kernel initializer.", default="glorot_uniform", choices = ['glorot_uniform','random_normal','random_uniform'], type=str )
+	parser.add_argument( "-k", "--kernel_initializer", help="NN Model kernel initializer.", default="glorot_uniform", choices = ['glorot_uniform','random_normal','random_uniform','normal'], type=str )
 	parser.add_argument( "-O", "--optimizer", help="NN model optimizer algo.", default="sgd", choices = ['sgd', 'rmsprop','adam'], type=str )
 	parser.add_argument( "-o", "--outputDataframeFileName", help="Datafilename prefix so save the input/output dataframes.", type=str, default = "myData.hdf5" )
+	parser.add_argument( "-i", "--experimentsInterval", help="Take an experiments interval subset from the full dataframe, example: 3:8.", type=str )
+	parser.add_argument( "-W", "--variablesInterval", help="Take an variables interval subset from the full dataframe, example: 3:8.", type=str )
 
 	parser.add_argument( "--Lr", help="Set the learning rate of the NN.", default=None, type=float )
 
@@ -76,9 +75,8 @@ def initArgs() :
 	return arguments
 
 def plotDataAndPrediction(df, lossFunctionName, optimizerName) :
-	fig = plt.figure( dpi = plotResolution )
 #	plt.clf()
-	
+
 	#subplot(nrows, ncols, plot_number)
 	#plt.subplot(1,2,1)
 	plt.title('Regression with <'+lossFunctionName+'> loss and <'+optimizerName+'> optimizer')
@@ -87,18 +85,24 @@ def plotDataAndPrediction(df, lossFunctionName, optimizerName) :
 	plt.xlabel( df.columns[0] )
 	plt.ylabel( df.columns[1] )
 	plt.legend(loc='best')
-	
+
 	#subplot(nrows, ncols, plot_number)
 	#plt.subplot(1,2,2)
-	
-#	plt.show()
 
 def initScript() :
-	global myArgs, dfX, dfY, plotResolution, pictureFileResolution, nbInputVariables, nbOutputVariables, nbSamples
+	global myArgs, dfChannelsStates, dfPower, plotResolution, pictureFileResolution, nbInputVariables, nbOutputVariables, nbSamples
 	global optimizerName, lossFunctionName, myMetrics, modelTrainingCallbacks, dataIsNormalized, monitoredData, fileFormat
+	global f0, fStep, fMax
 	plotResolution = 150
 	pictureFileResolution = 600
 	yearMonthDay = datetime.today().strftime('%Y%m%d')
+
+	if not isnotebook() :
+#		plt.rcParams["figure.dpi"]  = plotResolution
+#		plt.rcParams['savefig.dpi'] = pictureFileResolution
+#		fig = plt.figure( dpi = plotResolution )
+		plt.rc( 'figure' , dpi = plotResolution )
+		plt.rc( 'savefig', dpi = pictureFileResolution )
 
 	rmse = root_mean_squared_error
 
@@ -118,11 +122,32 @@ def initScript() :
 	myArgs.epochs = int( myArgs.epochs )
 	myArgs.batch_size = int( myArgs.batch_size )
 
-	dfX, dfY = importDataSetsFromDIR( dataDIR = myArgs.dataDIR, fileNamePattern = myArgs.pattern )
-	nbInputVariables = dfX.columns.size
-	nbOutputVariables= dfY.columns.size
-	nbSamples = dfX.index.size
+	dfChannelsStates, dfPower = importDataSetsFromDIR( dataDIR = myArgs.dataDIR, fileNamePattern = myArgs.pattern )
+	nbInputVariables = dfChannelsStates.columns.size
+	nbChannels = dfChannelsStates.columns.size
+	nbOutputVariables= dfPower.columns.size
+	nbSamples = dfChannelsStates.index.size
+	f0 = 191.7
+	fStep = 0.05
+	fMax = f0 + fStep * (nbChannels - 1)
 
+	dfActiveChannels = dfChannelsStates == 1
+	dfPowerOfActiveChannels = dfPower[ dfActiveChannels ].T
+	frequencyRange = np.arange(f0, fMax+fStep, fStep)
+	dfPowerOfActiveChannels.index = frequencyRange
+	if myArgs.outputDataframeFileName :
+		saveDataframe( df = dfPowerOfActiveChannels, filename = myArgs.outputDataframeFileName, key = 'dfPowerOfActiveChannels', format = fileFormat )
+
+	if myArgs.debug :
+		from ipdb import set_trace
+		set_trace()
+
+	"""
+	ax = dfPowerOfActiveChannels.plot.line( marker='x', title = 'Output optical power' )
+	ax.set_xlabel('Frequency (THz)')
+	ax.set_ylabel('Power (dBm)')
+	plt.grid()
+"""
 	dataIsNormalized = False
 	"""
 	if myArgs.lossFunction == 'mse' :
@@ -194,7 +219,7 @@ def importDataSetsFromDIR( dataDIR, fileNamePattern ) :
 		os.chdir( dataDIR )
 
 		dataFileList = sorted( glob( fileNamePattern ) )
-		nbDataFilesRead = len(dataFileList)
+		nbDataFilesRead = len( dataFileList )
 
 		if not nbDataFilesRead :
 			PrintError( "Could not find any "+ fileNamePattern +" files, please double check and give the correct data filename pattern." )
@@ -214,6 +239,19 @@ def importDataSetsFromDIR( dataDIR, fileNamePattern ) :
 
 		dfX = dfX.T
 		dfY = dfY.T
+
+		if myArgs.debug :
+			from ipdb import set_trace
+#			set_trace()
+
+		if myArgs.experimentsInterval :
+			experimentsIntervalSlice = slice( *map(int, myArgs.experimentsInterval.split(':') ) )
+			dfX = dfX[ experimentsIntervalSlice ]
+			dfY = dfY[ experimentsIntervalSlice ]
+		if myArgs.variablesInterval :
+			variablesIntervalSlice =   slice( *map(int, myArgs.variablesInterval.split(':') ) )
+			dfX = dfX[ dfX.columns[ variablesIntervalSlice ] ]
+			dfY = dfY[ dfY.columns[ variablesIntervalSlice ] ]
 	except (Exception,KeyboardInterrupt) as why :
 		os.chdir( previousDIR )
 		if isinstance(why, KeyboardInterrupt) :
@@ -239,45 +277,42 @@ def modelDefinition( inputLayerUnits = 1, hiddenLayerUnits = 0, outputLayerUnits
 	model.compile( loss=myArgs.lossFunction, optimizer=myArgs.optimizer, metrics = myMetrics )
 
 	return model
-	
+
 def main() :
 	global nbInputVariables
 	initScript()
 	if myArgs.outputDataframeFileName :
-		saveDataframe( df = dfX, filename = myArgs.outputDataframeFileName, key = 'X', format = fileFormat )
-		saveDataframe( df = dfY, filename = myArgs.outputDataframeFileName, key = 'Y', format = fileFormat )
+		saveDataframe( df = dfChannelsStates, filename = myArgs.outputDataframeFileName, key = 'ChannelsStates', format = fileFormat )
+		saveDataframe( df = dfPower, filename = myArgs.outputDataframeFileName, key = 'Power', format = fileFormat )
 
+	plotExperments( dfChannelsStates, dfPower, fmin = f0, fmax = fMax )
+	plt.show()
 
 	PrintInfo( "=> nbSamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%\n" % (nbSamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
 
 	if isnotebook() : setJupyterBackend( newBackend = 'module://ipykernel.pylab.backend_inline' )
 
 	# MODEL DEFINITION
-	if not nbInputVariables : nbInputVariables = 5
+	PrintInfo( "=> nbInputVariables = %d\n" % nbInputVariables )
 	model = modelDefinition( inputLayerUnits = nbInputVariables, hiddenLayerUnits = nbInputVariables * 2, outputLayerUnits = nbOutputVariables )
 
 	#MODEL TRAINING
-	history = model.fit( dfX, dfY, batch_size=myArgs.batch_size, epochs=myArgs.epochs, validation_split=myArgs.validation_split, callbacks = modelTrainingCallbacks, shuffle = myArgs.shuffle, verbose = myArgs.verbosity )
+	history = model.fit( dfChannelsStates, dfPower, batch_size=myArgs.batch_size, epochs=myArgs.epochs, validation_split=myArgs.validation_split, callbacks = modelTrainingCallbacks, shuffle = myArgs.shuffle, verbose = myArgs.verbosity )
 
 	historyDF = pda.DataFrame.from_dict( history.history )
 	if myArgs.outputDataframeFileName :
-		saveDataframe( df = historyDF,   filename = myArgs.outputDataframeFileName, key = 'history', format = fileFormat )
+		saveDataframe( df = historyDF,   filename = myArgs.outputDataframeFileName, key = 'Training history', format = fileFormat )
 
 	if not isnotebook() :
-#		plt.rcParams["figure.dpi"]  = plotResolution
-#		plt.rcParams['savefig.dpi'] = pictureFileResolution
-#		fig = plt.figure( dpi = plotResolution )
-		plt.rc( 'figure' , dpi = plotResolution )
-		plt.rc( 'savefig', dpi = pictureFileResolution )
-		ax = historyDF.plot( ax = plt.gca() )
-		ax.set_title('Metrics computed during training')
+#		ax = plt.gca()
+		ax = historyDF.plot( title = 'Metrics computed during training' )
 		ax.set_xlabel('epochs')
 		ax.set_ylabel('metrics')
 		if myArgs.debug :
 			print( historyDF )
+#			from ipdb import set_trace
 #			set_trace()
 		plt.grid()
-		plt.show()
 
 	nbEpochsDone = historyDF.index.size
 	if myArgs.earlyStoppingPatience != -1 :
@@ -290,23 +325,27 @@ def main() :
 	
 	PrintInfo( "=> Loss function = <" +lossFunctionName+">" + " myArgs.optimizer = <"+optimizerName+">\n" , quiet = myArgs.quiet )
 	
-	dfPredicted = pda.DataFrame( model.predict( dfX ) ) # MODEL PREDICTION
-
+	dfChannelsStatesTest = dfChannelsStates[1:3]
+	dfChannelsStatesTest = dfChannelsStatesTest.reset_index( drop=True )
+	dfPredicted = pda.DataFrame( model.predict( dfChannelsStatesTest ) ) # MODEL PREDICTION
 	if myArgs.outputDataframeFileName :
-		if myArgs.debug : set_trace()
+		if myArgs.debug :
+			from ipdb import set_trace
+			set_trace()
 		saveDataframe( df = dfPredicted, filename = myArgs.outputDataframeFileName, key = 'predictions', format = fileFormat )
 
-#	showModel(model = model, modelFileName = myArgs.dumpedModelFileName, rankdir = 'TB')
+	plotExperments( dfChannelsStatesTest, dfPredicted, fmin = f0, fmax = fMax )
+
+	if myArgs.Lr : PrintInfo("\n=> lr = ", myArgs.Lr, quiet = myArgs.quiet )
 	
-	if myArgs.Lr : PrintInfo("\n=> lr = ",myArgs.Lr, quiet = myArgs.quiet )
-	
-	f0 = 191.7
-	fStep = 0.05
-	fMax= 196
-#	plotDataAndPrediction(df, lossFunctionName, optimizerName)
-	plt.figure()
-	plotExperments( dfX, dfY, fmin = f0, fmax = fMax )
-	plt.show( block=True )
+	from ipdb import set_trace
+	interpreter = notebookInterpreter()
+	print( "=> interpreter : %s\n" % interpreter )
+	print( "=> matplotlib backend = <%s>\n" % mpl.get_backend() )
+	if interpreter != "Python" :
+		plt.show( block=True )
+	else :
+		plt.show()
 
 	my_keys = sorted( set( globals().keys() ) - orig_keys )
 	#print(my_keys)
