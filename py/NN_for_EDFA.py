@@ -301,7 +301,7 @@ def main() :
 
 	historyDF = pda.DataFrame.from_dict( history.history )
 	if myArgs.outputDataframeFileName :
-		saveDataframe( df = historyDF,   filename = myArgs.outputDataframeFileName, key = 'Training history', format = fileFormat )
+		saveDataframe( df = historyDF,   filename = myArgs.outputDataframeFileName, key = 'Training_history', format = fileFormat )
 
 	if not isnotebook() :
 #		ax = plt.gca()
