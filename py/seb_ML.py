@@ -5,7 +5,7 @@ from os import environ
 
 def insideCondaEnv() :
 	if environ.get('CONDA_DEFAULT_ENV') is None and environ.get('VIRTUAL_ENV') is None :
-		print("=> ERROR: Neither the CONDA_DEFAULT_ENV or VIRTUAL_ENV environment variable is defined: You must be inside a virtual environment to continue.", file=stderr)
+		print("=> ERROR: Neither the CONDA_DEFAULT_ENV or VIRTUAL_ENV environment variable is defined: You must be inside a virtual environment to continue.", file = stderr)
 		return False
 	else : return True
 
@@ -16,6 +16,7 @@ from pdb import set_trace
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pandas as pda
+import h5py
 from keras import backend as K
 
 def isnotebook() :
@@ -130,18 +131,38 @@ def copyArgumentsToStructure(args) :
 
 	return myArgs
 
-def saveDataframe( df, filename, key = 'df', format = "hdf5" ) :
+def saveDataFrameToFile( df, filename, key = 'df', format = "hdf5" ) :
 	if format == "hdf5" :
 		PrintInfo( "=> Dumping <%s> dataframe to <%s> ...\n" % (key,filename) )
 		with pda.HDFStore(filename) as store : store[key] = df
 	else : PrintError( "=> ERROR : The output %s file format is not supported yet." % format )
 
-def loadDataframe( filename, key = 'df', format = "hdf5" ) :
+def loadDataFrameFromFile( filename, key = 'df', format = "hdf5" ) :
 	if format == "hdf5" :
-		PrintInfo( "=> Loading dataframe from <%s> ...\n" % filename )
-		with pda.HDFStore(filename, 'r') as store : df = store[key]
-		return df
-	else : PrintError( "=> ERROR : The output %s file format is not supported yet." % format )
+		try :
+			if isPandasHDF5GeneratedFile( filename ) :
+				PrintInfo( "=> Loading dataframe %s from <%s> ...\n" % (key,filename) )
+				with pda.HDFStore(filename, 'r') as store : df = store[key]
+			else :
+				PrintInfo( "=> Loading numpy array %s from <%s> and converting to a pandas' DataFrame ...\n" % (key,filename) )
+				pathToDataSet = key
+				with h5py.File(filename, 'r') as f : df = pda.DataFrame( f[pathToDataSet][:] )
+			return df
+		except Exception as why :
+			print( "=> ERROR: %s" % why, file = stderr )
+			return None
+	else :
+		PrintError( "=> ERROR : The output %s file format is not supported yet." % format )
+		return None
+
+def isPandasHDF5GeneratedFile( filename ) :
+	isItAPandasHDF5 = False
+	try :
+		with pda.HDFStore(filename, 'r') as store : isItAPandasHDF5 = 'block0_values' in store.groups()[0]
+	except Exception as why :
+#		print( "=> ERROR: %s" % why, file = stderr )
+		isItAPandasHDF5 = False
+	return isItAPandasHDF5
 
 def channelsStates2Frequencies( activeChannelsIndex, fmin, fmax, totalNumberOfChannels ) :
 	return ( fmin+(fmax-fmin)*activeChannelsIndex/totalNumberOfChannels )
