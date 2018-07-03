@@ -61,7 +61,7 @@ OR
 
 * [NumPy](http://numpy.org) (NumPy is the fundamental package for scientific computing with Python : I use it for matrix calculations and for data with [NumPy Input and output routines](https://docs.scipy.org/doc/numpy/reference/routines.io.html))
 * [Scipy](http://scipy.org/about.html) (SciPy is open-source software for mathematics, science, and engineering: I use it for their [Scipy.io](https://docs.scipy.org/doc/scipy/reference/io.html) to import/export MatLab (v<7.3) format data files)
-* [h5py](http://docs.h5py.org/) (The h5py package is a Pythonic interface to the HDF5 binary data format : I use it to import/export data to HDF5 format MatLab (7.3+) files)
+* [h5py](http://docs.h5py.org/) (The h5py package is a Pythonic interface to the HDF5 binary data format : I use it to import/export data to HDF5 / MatLab (7.3+) files)
 * [Matplotlib](https://matplotlib.org) (2D plotting library for Python that produces high quality figures that can be used in various hardcopy and interactive environments)
 * [Pandas](http://pandas.pydata.org) (High-performance, easy-to-use data structures and data analysis tools for Python : I use it for their [IO Tools](http://pandas.pydata.org/pandas-docs/stable/io.html) and particularly their [HDF5](http://pandas.pydata.org/pandas-docs/stable/io.html#io-hdf5) API)
 * [PyTables](http://www.pytables.org/usersguide/installation.html) (PyTables is built on top of the [HDF5](http://www.pytables.org/FAQ.html#why-hdf5) library, the Python language and the NumPy package)
