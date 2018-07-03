@@ -23,11 +23,14 @@ def initArgs() :
 #	parser = argparse.ArgumentParser( description = 'Regresssion with Keras.', formatter_class = argparse.ArgumentDefaultsHelpFormatter )
 	parser = argparse.ArgumentParser( description = 'Regresssion with Keras.', formatter_class = MyFormatter )
 
+	group = parser.add_mutually_exclusive_group()
+	group.add_argument( "dataFileName", help="(Optional) data fileName to read data from.", nargs='?', type=str )
+
 	parser.add_argument( "-b", "--batch_size", help="batchSize taken from the whole dataSet.", default=-1, type=float )
 	parser.add_argument( "-e", "--epochs", help="Number of epochs to go through the NN.", default=5, type=float )
 	parser.add_argument( "-E", "--earlyStoppingPatience", help="Number of epochs before stopping once your loss starts to increase (disabled by default).", default=-1, type=int )
 	parser.add_argument( "-P", "--plotMetrics", help="Enables the live ploting of the trained model metrics in Jupyter NoteBook.", action='store_true', default = False )
-	parser.add_argument( "-d", "--dataDIR", help="Datasets directory", default = "../../data", type=str )
+	group.add_argument( "-d", "--dataDIR", help="Datasets directory", type=str )
 	parser.add_argument( "-p", "--pattern", help="Data file name pattern.", default="data*.txt", type=str )
 #	parser.add_argument( "-D", "--dumpedModelFileName", help="Dump the model image to fileName", default = None, type=str )
 	parser.add_argument( "-S", "--shuffle", help="Shuffle the data along the way.", action='store_true', default = False )
@@ -58,10 +61,16 @@ def initArgs() :
 		exit()
 
 	q = arguments.quiet
+
 	if arguments.mdu :
 		Print("<pre><code>", quiet = q )
 		parser.print_usage()
 		Print("</code></pre>", quiet = q )
+		exit()
+
+	if not arguments.dataDIR and not arguments.dataFileName :
+		PrintError("You must either provide a dataDIR or a dataFileName.")
+		parser.print_help()
 		exit()
 
 	if arguments.mdh :
@@ -122,7 +131,26 @@ def initScript() :
 	myArgs.epochs = int( myArgs.epochs )
 	myArgs.batch_size = int( myArgs.batch_size )
 
-	dfChannelsStates, dfPower = importDataSetsFromDIR( dataDIR = myArgs.dataDIR, fileNamePattern = myArgs.pattern )
+	if myArgs.dataDIR :
+		dfChannelsStates, dfPower = importDataSetsFromDIR( dataDIR = myArgs.dataDIR, fileNamePattern = myArgs.pattern )
+	elif myArgs.dataFileName :
+		dfChannelsStates = loadDataFrameFromFile(filename = myArgs.dataFileName, key = 'X', format = fileFormat )
+		dfPower = loadDataFrameFromFile(filename = myArgs.dataFileName, key = 'Y', format = fileFormat )
+
+		"""
+		if dfChannelsStates.columns.size > dfChannelsStates.index.size
+			dfChannelsStates = dfChannelsStates.T
+			dfPower = dfPower.T
+"""
+
+	if myArgs.outputDataframeFileName :
+		saveDataFrameToFile( df = dfChannelsStates, filename = myArgs.outputDataframeFileName, key = 'ChannelsStates', format = fileFormat )
+		saveDataFrameToFile( df = dfPower, filename = myArgs.outputDataframeFileName, key = 'Power', format = fileFormat )
+
+	if myArgs.debug :
+		from ipdb import set_trace
+		set_trace()
+
 	nbInputVariables = dfChannelsStates.columns.size
 	nbChannels = dfChannelsStates.columns.size
 	nbOutputVariables= dfPower.columns.size
@@ -136,7 +164,7 @@ def initScript() :
 	frequencyRange = np.arange(f0, fMax+fStep, fStep)
 	dfPowerOfActiveChannels.index = frequencyRange
 	if myArgs.outputDataframeFileName :
-		saveDataframe( df = dfPowerOfActiveChannels, filename = myArgs.outputDataframeFileName, key = 'dfPowerOfActiveChannels', format = fileFormat )
+		saveDataFrameToFile( df = dfPowerOfActiveChannels, filename = myArgs.outputDataframeFileName, key = 'dfPowerOfActiveChannels', format = fileFormat )
 
 	if myArgs.debug :
 		from ipdb import set_trace
@@ -281,9 +309,6 @@ def modelDefinition( inputLayerUnits = 1, hiddenLayerUnits = 0, outputLayerUnits
 def main() :
 	global nbInputVariables
 	initScript()
-	if myArgs.outputDataframeFileName :
-		saveDataframe( df = dfChannelsStates, filename = myArgs.outputDataframeFileName, key = 'ChannelsStates', format = fileFormat )
-		saveDataframe( df = dfPower, filename = myArgs.outputDataframeFileName, key = 'Power', format = fileFormat )
 
 	plotExperments( dfChannelsStates, dfPower, fmin = f0, fmax = fMax )
 	plt.show()
@@ -301,7 +326,7 @@ def main() :
 
 	historyDF = pda.DataFrame.from_dict( history.history )
 	if myArgs.outputDataframeFileName :
-		saveDataframe( df = historyDF,   filename = myArgs.outputDataframeFileName, key = 'Training_history', format = fileFormat )
+		saveDataFrameToFile( df = historyDF,   filename = myArgs.outputDataframeFileName, key = 'Training_history', format = fileFormat )
 
 	if not isnotebook() :
 #		ax = plt.gca()
@@ -332,7 +357,7 @@ def main() :
 		if myArgs.debug :
 			from ipdb import set_trace
 			set_trace()
-		saveDataframe( df = dfPredicted, filename = myArgs.outputDataframeFileName, key = 'predictions', format = fileFormat )
+		saveDataFrameToFile( df = dfPredicted, filename = myArgs.outputDataframeFileName, key = 'predictions', format = fileFormat )
 
 	plotExperments( dfChannelsStatesTest, dfPredicted, fmin = f0, fmax = fMax )
 
