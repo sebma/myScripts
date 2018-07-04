@@ -21,7 +21,7 @@ def initArgs() :
 	parser = argparse.ArgumentParser( description = 'Simple Linear Regresssion with Keras.', formatter_class = MyFormatter )
 	parser.add_argument( "dataFileName", help="(Optional) data fileName to read data from.", nargs='?', type=str )
 
-	parser.add_argument( "-n", "--nbSamples", help="Total nbSamples in the generated dataSet.", default=1e3, type=float )
+	parser.add_argument( "-n", "--nbExamples", help="Total nbExamples in the generated dataSet.", default=1e3, type=float )
 	parser.add_argument( "-f", "--firstSample", help="First sample value in the dataSet.", default=0, type=float )
 	parser.add_argument( "-L", "--lastSample", help="Last sample value in the dataSet.", default=1e2, type=float )
 	parser.add_argument( "-b", "--batch_size", help="batchSize taken from the whole dataSet.", default=-1, type=float )
@@ -90,11 +90,15 @@ def plotDataAndPrediction(df, lossFunctionName, optimizerName) :
 #	plt.show()
 
 def initScript() :
-#	global myArgs, arguments, nbSamples, lastSample, epochs, df, lossFunction, optimizer, activation, Lr, dumpedModelFileName, rmse, batch_size, validation_split, shuffle, earlyStoppingPatience, plotMetrics
+#	global myArgs, arguments, nbExamples, lastSample, epochs, df, lossFunction, optimizer, activation, Lr, dumpedModelFileName, rmse, batch_size, validation_split, shuffle, earlyStoppingPatience, plotMetrics
 	global myArgs, df, plotResolution, pictureFileResolution
 	global optimizerName, lossFunctionName, myMetrics, modelTrainingCallbacks, dataIsNormalized, monitoredData
 	plotResolution = 150
 	pictureFileResolution = 600
+
+	# fix random seed for reproducibility
+	seed = 7
+	np.random.seed(seed)
 
 	rmse = root_mean_squared_error
 
@@ -105,16 +109,16 @@ def initScript() :
 
 	myArgs = copyArgumentsToStructure( arguments )
 
-	myArgs.nbSamples = int( myArgs.nbSamples )
+	myArgs.nbExamples = int( myArgs.nbExamples )
 	myArgs.epochs = int( myArgs.epochs )
 	myArgs.batch_size = int( myArgs.batch_size )
 
 	if myArgs.dataFileName :
 		df = pda.read_table( myArgs.dataFileName , delim_whitespace=True , comment='#' ) # The column names are infered from the datafile
 #		df = pda.read_table('dataset10-nCh10.txt', delim_whitespace=True, comment='#', skiprows=[1,2] ) # To read the data from 'dataset*-nCh*.txt' 		
-		myArgs.nbSamples = df.shape[0]
+		myArgs.nbExamples = df.shape[0]
 	else :
-		X = np.linspace(0, myArgs.lastSample, myArgs.nbSamples)
+		X = np.linspace(0, myArgs.lastSample, myArgs.nbExamples)
 		df = pda.DataFrame( columns = ['X_train','y_train'] )
 		df[ df.columns[0] ] = X
 		df[ df.columns[1] ] = -5*X + 10
@@ -122,11 +126,11 @@ def initScript() :
 	dataIsNormalized = False
 	if myArgs.lossFunction == 'mse' :
 		# MSE needs NORMALIZATION
-		PrintInfo( "=> Doing Pandas dataframe normalization ..." , quiet = myArgs.quiet )
+		PrintInfo( "Doing Pandas dataframe normalization ..." , quiet = myArgs.quiet )
 	#	df[ df.columns[0] ] = keras.utils.normalize( df.values )[:,0]
 	#	df[ df.columns[1] ] = keras.utils.normalize( df.values )[:,1]
 		df = ( df-df.mean() ) / df.std()
-		PrintInfo( "=> DONE." , quiet = myArgs.quiet )
+		PrintInfo( "DONE." , quiet = myArgs.quiet )
 		dataIsNormalized = True
 
 	optimizerName = myArgs.optimizer
@@ -135,11 +139,11 @@ def initScript() :
 	if myArgs.lossFunction == 'mse' and myArgs.epochs < 10 : myArgs.epochs = 15
 
 	if myArgs.batch_size == -1 :
-		if myArgs.nbSamples > 1e2 :
-			myArgs.batch_size = int(myArgs.nbSamples / myArgs.epochs)
+		if myArgs.nbExamples > 1e2 :
+			myArgs.batch_size = int(myArgs.nbExamples / myArgs.epochs)
 		else :
-			myArgs.batch_size = myArgs.nbSamples
-#			myArgs.epochs = int(myArgs.nbSamples / 4)
+			myArgs.batch_size = myArgs.nbExamples
+#			myArgs.epochs = int(myArgs.nbExamples / 4)
 
 	import keras.optimizers
 	if myArgs.Lr :
@@ -170,12 +174,12 @@ def initScript() :
 	
 	if myArgs.earlyStoppingPatience != -1 :
 		from keras.callbacks import EarlyStopping
-		if myArgs.nbSamples < 10 : monitoredData = 'loss'
+		if myArgs.nbExamples < 10 : monitoredData = 'loss'
 		else : monitoredData = 'val_loss'
 
 		modelTrainingCallbacks += [ EarlyStopping( monitor= monitoredData, patience = myArgs.earlyStoppingPatience ) ]
-		PrintInfo( "=> The monitored data for early stopping is : " + monitoredData )
-		PrintInfo( "=> modelTrainingCallbacks = " + str(modelTrainingCallbacks) )
+		PrintInfo( "The monitored data for early stopping is : " + monitoredData )
+		PrintInfo( "modelTrainingCallbacks = " + str(modelTrainingCallbacks) )
 
 	if isnotebook() and myArgs.plotMetrics : # The metrics can only be plotted in a jupyter notebook
 		from livelossplot import PlotLossesKeras
@@ -201,9 +205,9 @@ def main() :
 
 	model = modelDefinition()
 
-	PrintInfo( "\n=> myArgs.nbSamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%" % (myArgs.nbSamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
+	PrintInfo( "\nmyArgs.nbExamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%" % (myArgs.nbExamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
 
-	if isnotebook() : setJupyterBackend( newBackend = 'module://ipykernel.pylab.backend_inline' )
+	if isnotebook() or myArgs.verbosity : setJupyterBackend( newBackend = 'module://ipykernel.pylab.backend_inline' )
 
 	#MODEL TRAINING
 	history = model.fit( df[ df.columns[0] ], df[ df.columns[1] ], batch_size=myArgs.batch_size, epochs=myArgs.epochs, validation_split=myArgs.validation_split, callbacks = modelTrainingCallbacks, shuffle = myArgs.shuffle, verbose = myArgs.verbosity )
@@ -226,22 +230,22 @@ def main() :
 
 	nbEpochsDone = historyDF.index.size
 	if myArgs.earlyStoppingPatience != -1 :
-		PrintInfo( "=> nbEpochsDone = %d" % nbEpochsDone )
+		PrintInfo( "nbEpochsDone = %d" % nbEpochsDone )
 
-	PrintInfo( "=> kernel_initializer = " + myArgs.kernel_initializer )
+	PrintInfo( "kernel_initializer = " + myArgs.kernel_initializer )
 
 	if myArgs.verbosity or isnotebook() :
-		PrintInfo( "\n=> myArgs.nbSamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%" % (myArgs.nbSamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
+		PrintInfo( "\nmyArgs.nbExamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%" % (myArgs.nbExamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
 	
-	PrintInfo( "\n=> Loss function = <" +lossFunctionName+">" + " myArgs.optimizer = <"+optimizerName+">" , quiet = myArgs.quiet )
+	PrintInfo( "\nLoss function = <" +lossFunctionName+">" + " myArgs.optimizer = <"+optimizerName+">" , quiet = myArgs.quiet )
 	
 	slope = model.layers[-1].get_weights()[0].item()
 	y_Intercept = model.layers[-1].get_weights()[1].item()
 	if dataIsNormalized :
-		PrintInfo("\n=> THE DATA WAS NORMALIZED, hence slope=%.2f\ty_Intercept=%.2f\n" % (slope, y_Intercept), quiet = myArgs.quiet )
+		PrintInfo("\nTHE DATA WAS NORMALIZED, hence slope=%.2f\ty_Intercept=%.2f\n" % (slope, y_Intercept), quiet = myArgs.quiet )
 		df['y_predicted'] = model.predict( df[ df.columns[0] ] ) # MODEL PREDICTION
 	else :
-		PrintInfo("\n=> slope=%.2f\ty_Intercept=%.2f\n" % (slope, y_Intercept), quiet = myArgs.quiet )
+		PrintInfo("\nslope=%.2f\ty_Intercept=%.2f\n" % (slope, y_Intercept), quiet = myArgs.quiet )
 		df['y_predicted'] = slope*df[ df.columns[0] ] + y_Intercept
 	
 	if myArgs.outputDataframeFileName :
@@ -250,7 +254,7 @@ def main() :
 
 	showModel(model = model, modelFileName = myArgs.dumpedModelFileName, rankdir = 'TB')
 	
-	if myArgs.Lr : PrintInfo("\n=> lr = ",myArgs.Lr, quiet = myArgs.quiet )
+	if myArgs.Lr : PrintInfo("\nlr = ",myArgs.Lr, quiet = myArgs.quiet )
 	
 	plotDataAndPrediction(df, lossFunctionName, optimizerName)
 	plt.show( block=True )
