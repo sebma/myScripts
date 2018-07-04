@@ -19,6 +19,28 @@ import pandas as pda
 import h5py
 from keras import backend as K
 
+def Print(*args, quiet = False, **kwargs) :
+	if not quiet : print(*args, **kwargs)
+
+def PrintError(*args, quiet = False, **kwargs) :
+	if not quiet :
+		print( "=> ERROR: ", end="", file = stderr )
+		print(*args, **kwargs, file = stderr)
+
+def PrintWarning(*args, quiet = False, **kwargs) :
+	if not quiet :
+		print( "=> WARNING: ", end="", file = stderr )
+		print(*args, **kwargs, file = stderr)
+
+def PrintInfo(*args, quiet = False, **kwargs) :
+	if not quiet :
+		print( "=> INFO: ", end="", file = stderr )
+		print(*args, **kwargs, file = stderr)
+
+def Exit(retCode=0, markdown=False) :
+	if markdown : Print("</code></pre>")
+	exit(retCode)
+
 def isnotebook() :
 	if notebookInterpreter() == "Jupyter" :
 		return True
@@ -47,41 +69,21 @@ def notebookInterpreter() :
 	return interpreter
 
 def setJupyterBackend( newBackend = 'nbAgg' ) : # Set the "notebook" backend as default or other when newBackend is given
+	"""
 	# If the script is not run by python but by jupyter and is using a different backend then "notebook"
-	#if mpl.get_backend() != 'Qt5Agg' and mpl.get_backend() != 'nbAgg' :
-	#	print("=> BEFORE: matplotlib backend = <%s>" % mpl.get_backend() )
-	#	mpl.use('nbAgg',warn=False, force=True) # <=> %matplotlib notebook
+	if mpl.get_backend() != 'Qt5Agg' and mpl.get_backend() != 'nbAgg' :
+		print("=> BEFORE: matplotlib backend = <%s>" % mpl.get_backend() )
+		mpl.use('nbAgg',warn=False, force=True) # <=> %matplotlib notebook
+"""	
 	# If the script is not run by python but by jupyter and is using a different backend then "inline"
 	if mpl.get_backend() != 'Qt5Agg' and mpl.get_backend() != newBackend :
-		print("=> BEFORE: matplotlib backend = <%s>" % mpl.get_backend() )
+#		PrintInfo("BEFORE: matplotlib backend = <%s>" % mpl.get_backend() )
 		mpl.use( newBackend ,warn=False, force=True ) # <=> %matplotlib inline
 #		plt.switch_backend( newBackend ) #Provokes a "AttributeError" in "IPython/core/pylabtools.py#L177"
 		import matplotlib.pyplot
-		print("=> AFTER: matplotlib backend = <%s>" % mpl.get_backend() )
+#		PrintInfo("AFTER: matplotlib backend = <%s>" % mpl.get_backend() )
 	else :
 		print("=> matplotlib backend = <%s>" % mpl.get_backend() )
-
-def Print(*args, quiet = False, **kwargs) :
-	if not quiet : print(*args, **kwargs)
-
-def PrintError(*args, quiet = False, **kwargs) :
-	if not quiet :
-		print( "=> ERROR: ", end="", file = stderr )
-		print(*args, **kwargs, file = stderr)
-
-def PrintWarning(*args, quiet = False, **kwargs) :
-	if not quiet :
-		print( "=> WARNING: ", end="", file = stderr )
-		print(*args, **kwargs, file = stderr)
-
-def PrintInfo(*args, quiet = False, **kwargs) :
-	if not quiet :
-		print( "=> INFO: ", end="", file = stderr )
-		print(*args, **kwargs, file = stderr)
-
-def Exit(retCode=0, markdown=False) :
-	if markdown : Print("</code></pre>")
-	exit(retCode)
 
 def Allow_GPU_Memory_Growth() : #cf. https://github.com/keras-team/keras/issues/1538
 	if 'tensorflow' == K.backend():
@@ -91,22 +93,22 @@ def Allow_GPU_Memory_Growth() : #cf. https://github.com/keras-team/keras/issues/
 		config.gpu_options.visible_device_list = "0"
 		#session = tf.Session(config=config)
 		from keras.backend.tensorflow_backend import set_session
-		PrintInfo( "=> Allowing GPU Memory Growth in tensorflow session config parameters ...\n" )
+		PrintInfo( "Allowing GPU Memory Growth in tensorflow session config parameters ...\n" )
 		set_session(tf.Session(config=config))
-		PrintInfo( "=> DONE.\n" )
+		PrintInfo( "DONE.\n" )
 
 def root_mean_squared_error(y_true, y_pred):
 	return K.sqrt(K.mean(K.square(y_pred - y_true), axis=-1))
 
 def showModel(model, modelFileName = "model.png", rankdir = 'TB') :
 	if isnotebook() :
-		PrintInfo("=> DISPLAYING MODEL IN SVG :")
+		PrintInfo("DISPLAYING MODEL IN SVG :")
 		from IPython.display import SVG, display
 		from keras.utils.vis_utils import model_to_dot
 		display( SVG( model_to_dot( model, show_shapes=True, show_layer_names=True, rankdir = rankdir ).create( prog='dot', format='svg' ) ) )
 	else :
 		if not modelFileName : modelFileName = "model.svg"
-		PrintInfo("=> DUMPING MODEL TO : " + modelFileName)
+		PrintInfo("DUMPING MODEL TO : " + modelFileName)
 		from keras.utils import plot_model
 		plot_model(model, to_file=modelFileName, show_shapes=True, show_layer_names=True, rankdir = rankdir)
 
@@ -133,7 +135,7 @@ def copyArgumentsToStructure(args) :
 
 def saveDataFrameToFile( df, filename, key = 'df', format = "hdf5" ) :
 	if format == "hdf5" :
-		PrintInfo( "=> Dumping <%s> dataframe to <%s> ...\n" % (key,filename) )
+		PrintInfo( "Dumping <%s> dataframe to <%s> ...\n" % (key,filename) )
 		with pda.HDFStore(filename) as store : store[key] = df
 	else : PrintError( "=> ERROR : The output %s file format is not supported yet." % format )
 
@@ -141,11 +143,11 @@ def loadDataFrameFromFile( filename, key = 'df', format = "hdf5" ) :
 	if format == "hdf5" :
 		try :
 			if isPandasHDF5GeneratedFile( filename ) :
-				PrintInfo( "=> Loading dataframe %s from <%s> ...\n" % (key,filename) )
+				PrintInfo( "Loading dataframe %s from <%s> ...\n" % (key,filename) )
 				with pda.HDFStore(filename, 'r') as store : df = store[key]
 			else :
-				PrintInfo( "=> Loading numpy array %s from <%s> and converting to a pandas' DataFrame ...\n" % (key,filename) )
 				pathToDataSet = key
+				PrintInfo( "Loading HDF5 dataset %s from <%s> and converting it to a pandas' DataFrame ...\n" % (pathToDataSet,filename) )
 				with h5py.File(filename, 'r') as f : df = pda.DataFrame( f[pathToDataSet][:] )
 			return df
 		except Exception as why :
@@ -167,7 +169,7 @@ def isPandasHDF5GeneratedFile( filename ) :
 def channelsStates2Frequencies( activeChannelsIndex, fmin, fmax, totalNumberOfChannels ) :
 	return ( fmin+(fmax-fmin)*activeChannelsIndex/totalNumberOfChannels )
 
-def plotExperments( dfX, dfY, fmin, fmax ) :
+def plotExperments( dfX, dfY, fmin, fmax, **kwargs ) :
 	fig = plt.figure()
 	experimentsRange = dfY.index
 	for experiment in experimentsRange :
@@ -179,7 +181,9 @@ def plotExperments( dfX, dfY, fmin, fmax ) :
 		plt.plot( frequencies, y, marker='x', label='%d Ch' % nbActiveChannels, mew=1.5, ms=6 )
 	plt.xlabel( 'Frequency (THz)' )
 	plt.ylabel( 'Power (dBm)' )
-	plt.title( 'Output optical power' )
+	if 'title' in kwargs.keys() :
+#		plt.title( 'Output optical power' )
+		plt.title( kwargs['title'] )
 #	plt.legend( loc='best' )
 	leg = fig.legend( loc='center right' )
 	leg.get_frame().set_edgecolor('black')
