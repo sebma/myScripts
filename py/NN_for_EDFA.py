@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import os
 from glob import glob
 from datetime import datetime
+from ipdb import set_trace #Charge le IPython avec ses startup => shell = TerminalInteractiveShell
 
 def initArgs() :
 	global arguments, scriptBaseName, parser, __version__
@@ -27,7 +28,9 @@ def initArgs() :
 	group.add_argument( "dataFileName", help="(Optional) data fileName to read data from.", nargs='?', type=str )
 
 	parser.add_argument( "-b", "--batch_size", help="batchSize taken from the whole dataSet.", default=-1, type=float )
-	parser.add_argument( "-e", "--epochs", help="Number of epochs to go through the NN.", default=5, type=float )
+	parser.add_argument( "-e", "--epochs", help="Number of epochs to go through the NN.", default=500, type=float )
+	parser.add_argument( "--f0", help="Starting frequency.", default=191.7, type=float )
+	parser.add_argument( "--fStep", help="Frequency step.",  default=0.05, type=float )
 	parser.add_argument( "-E", "--earlyStoppingPatience", help="Number of epochs before stopping once your loss starts to increase (disabled by default).", default=-1, type=int )
 	parser.add_argument( "-P", "--plotMetrics", help="Enables the live ploting of the trained model metrics in Jupyter NoteBook.", action='store_true', default = False )
 	group.add_argument( "-d", "--dataDIR", help="Datasets directory", type=str )
@@ -40,7 +43,7 @@ def initArgs() :
 	parser.add_argument( "-a", "--activationFunction", help="NN Layer activation function.", default="relu", choices = ['linear','relu','sigmoid'], type=str )
 	parser.add_argument( "-l", "--lossFunction", help="NN model loss function.", default="mse", choices = ['mse','mae','rmse'], type=str )
 	parser.add_argument( "-k", "--kernel_initializer", help="NN Model kernel initializer.", default="glorot_uniform", choices = ['glorot_uniform','random_normal','random_uniform','normal'], type=str )
-	parser.add_argument( "-O", "--optimizer", help="NN model optimizer algo.", default="sgd", choices = ['sgd', 'rmsprop','adam'], type=str )
+	parser.add_argument( "-O", "--optimizer", help="NN model optimizer algo.", default="sgd", choices = ['sgd', 'rmsprop','adam','adadelta'], type=str )
 	parser.add_argument( "-o", "--outputDataframeFileName", help="Datafilename prefix so save the input/output dataframes.", type=str, default = "myData.hdf5" )
 	parser.add_argument( "-i", "--experimentsInterval", help="Take an experiments interval subset from the full dataframe, example: 3:8.", type=str )
 	parser.add_argument( "-W", "--variablesInterval", help="Take an variables interval subset from the full dataframe, example: 3:8.", type=str )
@@ -99,9 +102,8 @@ def plotDataAndPrediction(df, lossFunctionName, optimizerName) :
 	#plt.subplot(1,2,2)
 
 def initScript() :
-	global myArgs, dfChannelsStates, dfPower, plotResolution, pictureFileResolution, nbInputVariables, nbOutputVariables, nbSamples
-	global optimizerName, lossFunctionName, myMetrics, modelTrainingCallbacks, dataIsNormalized, monitoredData, fileFormat
-	global f0, fStep, fMax
+	global myArgs, dfChannelsStates, dfPower, plotResolution, pictureFileResolution, nbInputVariables, nbOutputVariables, nbExamples
+	global optimizerName, lossFunctionName, myMetrics, modelTrainingCallbacks, dataIsNormalized, monitoredData, fileFormat, fMax
 	plotResolution = 150
 	pictureFileResolution = 600
 	yearMonthDay = datetime.today().strftime('%Y%m%d')
@@ -112,6 +114,10 @@ def initScript() :
 #		fig = plt.figure( dpi = plotResolution )
 		plt.rc( 'figure' , dpi = plotResolution )
 		plt.rc( 'savefig', dpi = pictureFileResolution )
+
+	# fix random seed for reproducibility
+#	seed = 7
+#	np.random.seed(seed)
 
 	rmse = root_mean_squared_error
 
@@ -147,28 +153,29 @@ def initScript() :
 		saveDataFrameToFile( df = dfChannelsStates, filename = myArgs.outputDataframeFileName, key = 'ChannelsStates', format = fileFormat )
 		saveDataFrameToFile( df = dfPower, filename = myArgs.outputDataframeFileName, key = 'Power', format = fileFormat )
 
-	if myArgs.debug :
-		from ipdb import set_trace
-		set_trace()
+	if myArgs.experimentsInterval :
+		experimentsIntervalSlice = slice( *map(int, myArgs.experimentsInterval.split(':') ) )
+		dfChannelsStates = dfChannelsStates[ experimentsIntervalSlice ]
+		dfPower = dfPower[ experimentsIntervalSlice ]
+	if myArgs.variablesInterval :
+		variablesIntervalSlice =   slice( *map(int, myArgs.variablesInterval.split(':') ) )
+		dfChannelsStates = dfChannelsStates[ dfChannelsStates.columns[ variablesIntervalSlice ] ]
+		dfPower = dfPower[ dfPower.columns[ variablesIntervalSlice ] ]
+
+#	if myArgs.debug : set_trace()
 
 	nbInputVariables = dfChannelsStates.columns.size
 	nbChannels = dfChannelsStates.columns.size
 	nbOutputVariables= dfPower.columns.size
-	nbSamples = dfChannelsStates.index.size
-	f0 = 191.7
-	fStep = 0.05
-	fMax = f0 + fStep * (nbChannels - 1)
+	nbExamples = dfChannelsStates.index.size
+	fMax = myArgs.f0 + myArgs.fStep * (nbChannels - 1)
 
 	dfActiveChannels = dfChannelsStates == 1
 	dfPowerOfActiveChannels = dfPower[ dfActiveChannels ].T
-	frequencyRange = np.arange(f0, fMax+fStep, fStep)
+	frequencyRange = np.arange( myArgs.f0, fMax + myArgs.fStep, myArgs.fStep )
 	dfPowerOfActiveChannels.index = frequencyRange
 	if myArgs.outputDataframeFileName :
 		saveDataFrameToFile( df = dfPowerOfActiveChannels, filename = myArgs.outputDataframeFileName, key = 'dfPowerOfActiveChannels', format = fileFormat )
-
-	if myArgs.debug :
-		from ipdb import set_trace
-		set_trace()
 
 	"""
 	ax = dfPowerOfActiveChannels.plot.line( marker='x', title = 'Output optical power' )
@@ -176,15 +183,17 @@ def initScript() :
 	ax.set_ylabel('Power (dBm)')
 	plt.grid()
 """
+
 	dataIsNormalized = False
+
 	"""
 	if myArgs.lossFunction == 'mse' :
 		# MSE needs NORMALIZATION
-		PrintInfo( "=> Doing Pandas dataframe normalization ..." , quiet = myArgs.quiet )
+		PrintInfo( "Doing Pandas dataframe normalization ..." , quiet = myArgs.quiet )
 	#	df[ df.columns[0] ] = keras.utils.normalize( df.values )[:,0]
 	#	df[ df.columns[1] ] = keras.utils.normalize( df.values )[:,1]
 		dfX = ( dfX-dfX.mean() ) / dfX.std()
-		PrintInfo( "=> DONE.\n" , quiet = myArgs.quiet )
+		PrintInfo( "DONE.\n" , quiet = myArgs.quiet )
 		dataIsNormalized = True
 """
 
@@ -194,11 +203,11 @@ def initScript() :
 	if myArgs.lossFunction == 'mse' and myArgs.epochs < 10 : myArgs.epochs = 15
 
 	if myArgs.batch_size == -1 :
-		if nbSamples > 1e2 :
-			myArgs.batch_size = int(nbSamples / myArgs.epochs)
+		if nbExamples > 1e2 :
+			myArgs.batch_size = int(nbExamples / myArgs.epochs)
 		else :
-			myArgs.batch_size = nbSamples
-#			myArgs.epochs = int(nbSamples / 4)
+			myArgs.batch_size = nbExamples
+#			myArgs.epochs = int(nbExamples / 4)
 
 	import keras.optimizers
 	if myArgs.Lr :
@@ -229,19 +238,19 @@ def initScript() :
 	
 	if myArgs.earlyStoppingPatience != -1 :
 		from keras.callbacks import EarlyStopping
-		if nbSamples < 10 : monitoredData = 'loss'
+		if nbExamples < 10 : monitoredData = 'loss'
 		else : monitoredData = 'val_loss'
 
 		modelTrainingCallbacks += [ EarlyStopping( monitor= monitoredData, patience = myArgs.earlyStoppingPatience ) ]
-		PrintInfo( "=> The monitored data for early stopping is : " + monitoredData )
-		PrintInfo( "=> modelTrainingCallbacks = " + str(modelTrainingCallbacks) )
+		PrintInfo( "The monitored data for early stopping is : " + monitoredData )
+		PrintInfo( "modelTrainingCallbacks = " + str(modelTrainingCallbacks) )
 
 	if isnotebook() and myArgs.plotMetrics : # The metrics can only be plotted in a jupyter notebook
 		from livelossplot import PlotLossesKeras
 		modelTrainingCallbacks += [ PlotLossesKeras() ]
 
 def importDataSetsFromDIR( dataDIR, fileNamePattern ) :
-	PrintInfo("=> Reading : <%s>\n" %( dataDIR + os.sep  + fileNamePattern ) )
+	PrintInfo("Reading : <%s>\n" %( dataDIR + os.sep  + fileNamePattern ) )
 	previousDIR = os.getcwd()
 	try :
 		os.chdir( dataDIR )
@@ -267,19 +276,6 @@ def importDataSetsFromDIR( dataDIR, fileNamePattern ) :
 
 		dfX = dfX.T
 		dfY = dfY.T
-
-		if myArgs.debug :
-			from ipdb import set_trace
-#			set_trace()
-
-		if myArgs.experimentsInterval :
-			experimentsIntervalSlice = slice( *map(int, myArgs.experimentsInterval.split(':') ) )
-			dfX = dfX[ experimentsIntervalSlice ]
-			dfY = dfY[ experimentsIntervalSlice ]
-		if myArgs.variablesInterval :
-			variablesIntervalSlice =   slice( *map(int, myArgs.variablesInterval.split(':') ) )
-			dfX = dfX[ dfX.columns[ variablesIntervalSlice ] ]
-			dfY = dfY[ dfY.columns[ variablesIntervalSlice ] ]
 	except (Exception,KeyboardInterrupt) as why :
 		os.chdir( previousDIR )
 		if isinstance(why, KeyboardInterrupt) :
@@ -310,63 +306,80 @@ def main() :
 	global nbInputVariables
 	initScript()
 
-	plotExperments( dfChannelsStates, dfPower, fmin = f0, fmax = fMax )
+	plotExperments( dfChannelsStates, dfPower, fmin = myArgs.f0, fmax = fMax, title = 'Output optical power' )
 	plt.show()
 
-	PrintInfo( "=> nbSamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%\n" % (nbSamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
+	PrintInfo( "nbExamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%\n" % (nbExamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
 
-	if isnotebook() : setJupyterBackend( newBackend = 'module://ipykernel.pylab.backend_inline' )
+	if isnotebook() or myArgs.verbosity : setJupyterBackend( newBackend = 'module://ipykernel.pylab.backend_inline' )
 
 	# MODEL DEFINITION
-	PrintInfo( "=> nbInputVariables = %d\n" % nbInputVariables )
+	PrintInfo( "nbInputVariables = %d\n" % nbInputVariables )
 	model = modelDefinition( inputLayerUnits = nbInputVariables, hiddenLayerUnits = nbInputVariables * 2, outputLayerUnits = nbOutputVariables )
 
+	# summarize layers
+	PrintInfo( "model.summary: " )
+	model.summary()
+
+	Print()
+	PrintInfo("Model training ...")
 	#MODEL TRAINING
 	history = model.fit( dfChannelsStates, dfPower, batch_size=myArgs.batch_size, epochs=myArgs.epochs, validation_split=myArgs.validation_split, callbacks = modelTrainingCallbacks, shuffle = myArgs.shuffle, verbose = myArgs.verbosity )
+	PrintInfo("Done.\n")
 
 	historyDF = pda.DataFrame.from_dict( history.history )
 	if myArgs.outputDataframeFileName :
 		saveDataFrameToFile( df = historyDF,   filename = myArgs.outputDataframeFileName, key = 'Training_history', format = fileFormat )
 
-	if not isnotebook() :
+#	if not isnotebook() :
+	if True :
 #		ax = plt.gca()
 		ax = historyDF.plot( title = 'Metrics computed during training' )
 		ax.set_xlabel('epochs')
 		ax.set_ylabel('metrics')
 		if myArgs.debug :
 			print( historyDF )
-#			from ipdb import set_trace
 #			set_trace()
 		plt.grid()
 
 	nbEpochsDone = historyDF.index.size
 	if myArgs.earlyStoppingPatience != -1 :
-		PrintInfo( "=> nbEpochsDone = %d\n" % nbEpochsDone )
+		PrintInfo( "nbEpochsDone = %d\n" % nbEpochsDone )
 
-	PrintInfo( "=> kernel_initializer = <%s>\n" % myArgs.kernel_initializer )
+	#MODEL EVALUATE
+#	loss, accuracy = model.evaluate(dfChannelsStates, dfPower)
+	scores = model.evaluate(dfChannelsStates, dfPower)
+	i = 0
+	if myArgs.verbosity > 1 :
+		Print()
+		for metricName, score in zip( model.metrics_names, scores ) :
+			if i : PrintInfo( "%s: %.2f%%" % (metricName, score*100) )
+			else : PrintInfo( "%s: %.2f%%" % (metricName, score) )
+			i += 1
 
-	if myArgs.verbosity or isnotebook() :
-		PrintInfo( "=> nbSamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%\n" % (nbSamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
+	Print()
+	PrintInfo( "kernel_initializer = <%s>\n" % myArgs.kernel_initializer )
+
+	PrintInfo( "nbExamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%\n" % (nbExamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
 	
-	PrintInfo( "=> Loss function = <" +lossFunctionName+">" + " myArgs.optimizer = <"+optimizerName+">\n" , quiet = myArgs.quiet )
+	PrintInfo( "Loss function = <" +lossFunctionName+">" + " myArgs.optimizer = <"+optimizerName+">\n" , quiet = myArgs.quiet )
 	
-	dfChannelsStatesTest = dfChannelsStates[1:3]
+	dfChannelsStatesTest = dfChannelsStates[1:2+1]
 	dfChannelsStatesTest = dfChannelsStatesTest.reset_index( drop=True )
+#	dfChannelsStatesTest = pda.DataFrame( np.random.randint( 2, size = (2, nbInputVariables) ) )
+	if myArgs.debug : set_trace()
 	dfPredicted = pda.DataFrame( model.predict( dfChannelsStatesTest ) ) # MODEL PREDICTION
 	if myArgs.outputDataframeFileName :
-		if myArgs.debug :
-			from ipdb import set_trace
-			set_trace()
 		saveDataFrameToFile( df = dfPredicted, filename = myArgs.outputDataframeFileName, key = 'predictions', format = fileFormat )
 
-	plotExperments( dfChannelsStatesTest, dfPredicted, fmin = f0, fmax = fMax )
+	plotExperments( dfChannelsStatesTest, dfPredicted, fmin = myArgs.f0, fmax = fMax, title = 'Output optical power predictions' )
 
-	if myArgs.Lr : PrintInfo("\n=> lr = ", myArgs.Lr, quiet = myArgs.quiet )
+	if myArgs.Lr : Print("\n=> lr = ", myArgs.Lr, quiet = myArgs.quiet )
 	
-	from ipdb import set_trace
 	interpreter = notebookInterpreter()
-	print( "=> interpreter : %s\n" % interpreter )
-	print( "=> matplotlib backend = <%s>\n" % mpl.get_backend() )
+	if myArgs.verbosity :
+		PrintInfo( "=> interpreter : %s\n" % interpreter )
+		PrintInfo( "=> matplotlib backend = <%s>\n" % mpl.get_backend() )
 	if interpreter != "Python" :
 		plt.show( block=True )
 	else :
