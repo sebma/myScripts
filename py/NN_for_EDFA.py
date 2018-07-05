@@ -124,6 +124,13 @@ def initScript() :
 	arguments = initArgs()
 	myArgs = copyArgumentsToStructure( arguments )
 
+	import importlib
+	for moduleName in ['tensorflow', 'keras'] :
+		module = importlib.import_module( moduleName )
+		PrintInfo( "Using %s version %s at %s" % ( module.__name__, module.__version__, module.__path__[0] ) )
+
+	Print()
+
 	Allow_GPU_Memory_Growth()
 
 	pda.options.display.max_rows = 20 #Prints the first max_rows/2 and the last max_rows/2 of each dataframe
@@ -309,7 +316,8 @@ def main() :
 	plotExperments( dfChannelsStates, dfPower, fmin = myArgs.f0, fmax = fMax, title = 'Output optical power' )
 	plt.show()
 
-	PrintInfo( "nbExamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%\n" % (nbExamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
+	import engfmt
+	PrintInfo( "nbExamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %s and myArgs.validation_split = %d %%\n" % (nbExamples,myArgs.batch_size,engfmt.quant_to_eng(myArgs.epochs),int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
 
 	if isnotebook() or myArgs.verbosity : setJupyterBackend( newBackend = 'module://ipykernel.pylab.backend_inline' )
 
@@ -323,9 +331,10 @@ def main() :
 
 	Print()
 	PrintInfo("Model training ...")
+	startTime = datetime.now()
 	#MODEL TRAINING
 	history = model.fit( dfChannelsStates, dfPower, batch_size=myArgs.batch_size, epochs=myArgs.epochs, validation_split=myArgs.validation_split, callbacks = modelTrainingCallbacks, shuffle = myArgs.shuffle, verbose = myArgs.verbosity )
-	PrintInfo("Done.\n")
+	Print( "\n=> It took : " + str( datetime.now()-startTime ).split('.')[0] + " to train the model.\n" )
 
 	historyDF = pda.DataFrame.from_dict( history.history )
 	if myArgs.outputDataframeFileName :
@@ -360,8 +369,8 @@ def main() :
 	Print()
 	PrintInfo( "kernel_initializer = <%s>\n" % myArgs.kernel_initializer )
 
-	PrintInfo( "nbExamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %d and myArgs.validation_split = %d %%\n" % (nbExamples,myArgs.batch_size,myArgs.epochs,int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
-	
+	PrintInfo( "nbExamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %s and myArgs.validation_split = %d %%\n" % (nbExamples,myArgs.batch_size,engfmt.quant_to_eng(myArgs.epochs),int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
+
 	PrintInfo( "Loss function = <" +lossFunctionName+">" + " myArgs.optimizer = <"+optimizerName+">\n" , quiet = myArgs.quiet )
 	
 	dfChannelsStatesTest = dfChannelsStates[1:2+1]
