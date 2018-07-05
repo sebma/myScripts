@@ -41,6 +41,22 @@ def Exit(retCode=0, markdown=False) :
 	if markdown : Print("</code></pre>")
 	exit(retCode)
 
+from string import Template
+class DeltaTemplate(Template): # Thanks to https://stackoverflow.com/a/17847006/5649639
+	delimiter = '%'
+
+def strfdelta(tdelta, fmt):
+	d = {}
+	l = {'D': 86400, 'H': 3600, 'M': 60, 'S': 1}
+	rem = int(tdelta.total_seconds())
+
+	for k in ( 'D', 'H', 'M', 'S' ):
+		if '%'+k in fmt:
+			d[k], rem = divmod(rem, l[k])
+
+	t = DeltaTemplate(fmt)
+	return t.substitute(**d)
+
 def isnotebook() :
 	if notebookInterpreter() == "Jupyter" :
 		return True
