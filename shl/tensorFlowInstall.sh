@@ -15,7 +15,6 @@ function main {
 			exit 1
 		fi
 
-		shellInitFileName=~/.$(basename $SHELL)rc
 		if $isAdmin
 		then
 			sudo=sudo
@@ -94,7 +93,7 @@ function main {
 							fi
 						fi
 
-						dkms status | grep nvidia
+						dkms status | grep nvidia.*$(uname -r)
 					fi
 
 					CUDA_HOME=$(dirname $(dirname $(which nvcc)))
@@ -176,7 +175,7 @@ function installTFCondaEnv {
 			CONDA_ENVS=$HOME/.conda/envs
 		fi
 
-		if ! which conda
+		if ! $CONDA_HOME/bin/conda -h >/dev/null 2>&1
 		then
 			if [ $(uname -m) = x86_64 ]
 			then
@@ -186,15 +185,26 @@ function installTFCondaEnv {
 				chmod -v +x $minicondaInstallerScript
 				$sudo ./$minicondaInstallerScript -p $CONDA_HOME -b
 				test $? = 0 && rm -vi $minicondaInstallerScript
+				if ! $CONDA_HOME/bin/conda -h >/dev/null 2>&1
+				then
+					echo "=> ERROR : miniconda was not successfully installed" >&2
+					exit 2
+				fi
 			fi
 		fi
 
-		echo $PATH | grep -q $CONDA_HOME || echo 'export PATH=$CONDA_HOME/bin${PATH:+:${PATH}}' >> $shellInitFileName
+		if ! echo $PATH | grep -q $CONDA_HOME
+		then
+			echo export CONDA_HOME=$CONDA_HOME
+			echo 'export PATH=$CONDA_HOME/bin:$PATH'
+		fi >> $shellInitFileName
+		export PATH=$CONDA_HOME/bin:$PATH
 
-		if ! conda -h >/dev/null
+		CONDA_HOME=$(conda info --root)
+		if [ -z $CONDA_HOME ]
 		then
 			echo "=> ERROR: conda is not in the path." >&2
-			exit 2
+			exit 3
 		fi	
 
 		if env | grep CONDA_DEFAULT_ENV
@@ -247,5 +257,6 @@ function installTFCondaEnv {
 	fi
 }
 
+shellInitFileName=$HOME/.profile
 main $@
 installTFCondaEnv $1
