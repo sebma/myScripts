@@ -28,7 +28,7 @@ def initArgs() :
 	group.add_argument( "dataFileName", help="(Optional) data fileName to read data from.", nargs='?', type=str )
 
 	parser.add_argument( "-b", "--batch_size", help="batchSize taken from the whole dataSet.", default=-1, type=float )
-	parser.add_argument( "-e", "--epochs", help="Number of epochs to go through the NN.", default=500, type=float )
+	parser.add_argument( "-e", "--epochs", help="Number of epochs to go through the NN.", default=5e3, type=float )
 	parser.add_argument( "--f0", help="Starting frequency.", default=191.7, type=float )
 	parser.add_argument( "--fStep", help="Frequency step.",  default=0.05, type=float )
 	parser.add_argument( "-E", "--earlyStoppingPatience", help="Number of epochs before stopping once your loss starts to increase (disabled by default).", default=-1, type=int )
@@ -102,7 +102,7 @@ def plotDataAndPrediction(df, lossFunctionName, optimizerName) :
 	#plt.subplot(1,2,2)
 
 def initScript() :
-	global myArgs, dfChannelsStates, dfPower, plotResolution, pictureFileResolution, nbInputVariables, nbOutputVariables, nbExamples
+	global myArgs, dfChannelsStates, dfPower, plotResolution, pictureFileResolution, nbInputVariables, nbOutputVariables, nbExperiments
 	global optimizerName, lossFunctionName, myMetrics, modelTrainingCallbacks, dataIsNormalized, monitoredData, fileFormat, fMax
 	plotResolution = 150
 	pictureFileResolution = 600
@@ -174,7 +174,7 @@ def initScript() :
 	nbInputVariables = dfChannelsStates.columns.size
 	nbChannels = dfChannelsStates.columns.size
 	nbOutputVariables= dfPower.columns.size
-	nbExamples = dfChannelsStates.index.size
+	nbExperiments = dfChannelsStates.index.size
 	fMax = myArgs.f0 + myArgs.fStep * (nbChannels - 1)
 
 	dfActiveChannels = dfChannelsStates == 1
@@ -210,11 +210,17 @@ def initScript() :
 	if myArgs.lossFunction == 'mse' and myArgs.epochs < 10 : myArgs.epochs = 15
 
 	if myArgs.batch_size == -1 :
-		if nbExamples > 1e2 :
-			myArgs.batch_size = int(nbExamples / myArgs.epochs)
+		if nbExperiments / myArgs.epochs < 1 :
+			if nbExperiments > 1e2 :
+				myArgs.batch_size = int(nbExperiments / 10)
+			else:
+				myArgs.batch_size = nbExperiments
 		else :
-			myArgs.batch_size = nbExamples
-#			myArgs.epochs = int(nbExamples / 4)
+			myArgs.batch_size = int(nbExperiments / myArgs.epochs)
+
+	if not myArgs.batch_size :
+		PrintError( "The chosen batch_size is %f, too small compared to %d" %(nbExperiments/myArgs.epochs, myArgs.epochs) )
+		Exit(1, myArgs.markdown)
 
 	import keras.optimizers
 	if myArgs.Lr :
@@ -245,7 +251,7 @@ def initScript() :
 	
 	if myArgs.earlyStoppingPatience != -1 :
 		from keras.callbacks import EarlyStopping
-		if nbExamples < 10 : monitoredData = 'loss'
+		if nbExperiments < 10 : monitoredData = 'loss'
 		else : monitoredData = 'val_loss'
 
 		modelTrainingCallbacks += [ EarlyStopping( monitor= monitoredData, patience = myArgs.earlyStoppingPatience ) ]
@@ -267,7 +273,7 @@ def importDataSetsFromDIR( dataDIR, fileNamePattern ) :
 
 		if not nbDataFilesRead :
 			PrintError( "Could not find any "+ fileNamePattern +" files, please double check and give the correct data filename pattern." )
-			exit( 5 )
+			Exit( 5, myArgs.markdown )
 
 		dfX = pda.DataFrame()
 		dfY = pda.DataFrame()
@@ -289,7 +295,7 @@ def importDataSetsFromDIR( dataDIR, fileNamePattern ) :
 			PrintError( "KeyboardInterrupt." )
 		else :
 			PrintError( "Quitting the debugger: %s." % why )
-		exit(4)
+		Exit( 4, myArgs.markdown )
 
 	os.chdir( previousDIR )
 
@@ -317,7 +323,7 @@ def main() :
 	plt.show()
 
 	import engfmt
-	PrintInfo( "nbExamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %s and myArgs.validation_split = %d %%\n" % (nbExamples,myArgs.batch_size,engfmt.quant_to_eng(myArgs.epochs),int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
+	PrintInfo( "nbExperiments = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %s and myArgs.validation_split = %d %%\n" % (nbExperiments,myArgs.batch_size,engfmt.quant_to_eng(myArgs.epochs),int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
 
 	if isnotebook() or myArgs.verbosity : setJupyterBackend( newBackend = 'module://ipykernel.pylab.backend_inline' )
 
@@ -328,12 +334,29 @@ def main() :
 	# summarize layers
 	PrintInfo( "model.summary: " )
 	model.summary()
-
 	Print()
+
+	if myArgs.verbosity :
+		PrintInfo( "dfChannelsStates :\n%s" % dfChannelsStates )
+		PrintInfo( "dfPower :\n%s" % dfPower )
+
+	set_trace()
+	firstRow = dfChannelsStates.loc[0]
+	nbActiveChannels = firstRow[ firstRow == 1 ].size # nbActiveChannels in first row
+	totalNumberOfActiveChannels = ( dfChannelsStates == 1 ).sum().sum()
+	PrintInfo("The number of active channel is : %d" % nbActiveChannels )
+	if totalNumberOfActiveChannels != nbActiveChannels * nbExperiments :
+		PrintError("The number of active channels varies throughout this dataset.")
+		Exit( 2, myArgs.markdown )
+
+	#MODEL TRAINING
 	PrintInfo("Model training ...")
 	startTime = datetime.now()
-	#MODEL TRAINING
-	history = model.fit( dfChannelsStates, dfPower, batch_size=myArgs.batch_size, epochs=myArgs.epochs, validation_split=myArgs.validation_split, callbacks = modelTrainingCallbacks, shuffle = myArgs.shuffle, verbose = myArgs.verbosity )
+	if myArgs.verbosity :
+		history = model.fit( dfChannelsStates, dfPower, batch_size=myArgs.batch_size, epochs=myArgs.epochs, validation_split=myArgs.validation_split, callbacks = modelTrainingCallbacks, shuffle = myArgs.shuffle, verbose = myArgs.verbosity - 1 )
+	else :
+		history = model.fit( dfChannelsStates, dfPower, batch_size=myArgs.batch_size, epochs=myArgs.epochs, validation_split=myArgs.validation_split, callbacks = modelTrainingCallbacks, shuffle = myArgs.shuffle, verbose = 0 )
+
 	Print( "\n=> It took : " + str( datetime.now()-startTime ).split('.')[0] + " to train the model.\n" )
 
 	historyDF = pda.DataFrame.from_dict( history.history )
@@ -369,13 +392,13 @@ def main() :
 	Print()
 	PrintInfo( "kernel_initializer = <%s>\n" % myArgs.kernel_initializer )
 
-	PrintInfo( "nbExamples = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %s and myArgs.validation_split = %d %%\n" % (nbExamples,myArgs.batch_size,engfmt.quant_to_eng(myArgs.epochs),int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
+	PrintInfo( "nbExperiments = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %s and myArgs.validation_split = %d %%\n" % (nbExperiments,myArgs.batch_size,engfmt.quant_to_eng(myArgs.epochs),int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
 
 	PrintInfo( "Loss function = <" +lossFunctionName+">" + " myArgs.optimizer = <"+optimizerName+">\n" , quiet = myArgs.quiet )
 	
-	dfChannelsStatesTest = dfChannelsStates[1:2+1]
-	dfChannelsStatesTest = dfChannelsStatesTest.reset_index( drop=True )
-#	dfChannelsStatesTest = pda.DataFrame( np.random.randint( 2, size = (2, nbInputVariables) ) )
+#	dfChannelsStatesTest = dfChannelsStates[1:2+1]
+#	dfChannelsStatesTest = dfChannelsStatesTest.reset_index( drop=True )
+	dfChannelsStatesTest = pda.DataFrame( np.random.randint( 2, size = (2, nbInputVariables) ) )
 	if myArgs.debug : set_trace()
 	dfPredicted = pda.DataFrame( model.predict( dfChannelsStatesTest ) ) # MODEL PREDICTION
 	if myArgs.outputDataframeFileName :
@@ -396,7 +419,7 @@ def main() :
 
 	my_keys = sorted( set( globals().keys() ) - orig_keys )
 	#print(my_keys)
-	Exit(0)
+	Exit(0, myArgs.markdown)
 
 if __name__ == '__main__' : # Calls the main function if (and only if) this script is not imported
 	main()
