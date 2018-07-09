@@ -4,6 +4,7 @@
 #google-android-build-tools-installer
 #snort
 #virtualbox
+a2ps
 add-apt-key
 android-tools-adb
 apt-file
