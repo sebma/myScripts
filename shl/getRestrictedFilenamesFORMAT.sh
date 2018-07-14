@@ -22,43 +22,48 @@ getRestrictedFilenamesFORMAT ()
 		let i++
 		echo "=> Downloading url # $i/$# ..."
 		echo "=> url = $url"
-		fileName=$($youtube_dl -f $format --get-filename "$url" --restrict-filenames || $youtube_dl -f $fallback --get-filename "$url" --restrict-filenames)
-		test -z "$fileName" && continue
-		if ! echo $url | \egrep -wq "www"; then
-			streamID=$url
-			fileName=$(basename $( $locate -er "$streamID.*__${format}__" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null)
-			if test -s "$fileName"; then
-				echo "${colors[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" 1>&2
-				echo
-				continue
-			else
-				if $youtube_dl -f "$format" -qs $youtubeURLPrefix$url 2> /dev/null; then
-					url=$youtubeURLPrefix$url
+		fileNames=$($youtube_dl -f $format --get-filename "$url" --restrict-filenames || $youtube_dl -f $fallback --get-filename "$url" --restrict-filenames)
+		for fileName in $fileNames
+		do
+			if ! echo $url | \egrep -wq "www"; then
+				streamID=$url
+				fileName=$(basename $( $locate -er "$streamID.*__${format}__" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null)
+				if test -s "$fileName"; then
+					echo "${colors[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" 1>&2
+					echo
+					continue
 				else
-					if $youtube_dl -f "$format" -qs $dailymotionURLPrefix$url 2> /dev/null; then
-						url=$dailymotionURLPrefix$url
+					if $youtube_dl -f "$format" -qs $youtubeURLPrefix$url 2> /dev/null; then
+						url=$youtubeURLPrefix$url
+					else
+						if $youtube_dl -f "$format" -qs $dailymotionURLPrefix$url 2> /dev/null; then
+							url=$dailymotionURLPrefix$url
+						fi
 					fi
 				fi
+			else
+				echo $url | grep --color=auto -q youtube.com/ && urlSuffix="$(echo $url | cut -d= -f2 | sed 's/^-/\\&/')"
+				if test "$urlSuffix" && fileName=$(basename $( $locate -er "$urlSuffix.*__${format}__" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null) && test -s "$fileName"; then
+					echo "${colors[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" 1>&2
+					echo
+					continue
+				fi
 			fi
-		else
-			echo $url | grep --color=auto -q youtube.com/ && urlSuffix="$(echo $url | cut -d= -f2 | sed 's/^-/\\&/')"
-			if test "$urlSuffix" && fileName=$(basename $( $locate -er "$urlSuffix.*__${format}__" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null) && test -s "$fileName"; then
-				echo "${colors[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" 1>&2
-				echo
-				continue
-			fi
-		fi
-		echo
-		fileName=$($youtube_dl -f $format --get-filename "$url" --restrict-filenames || $youtube_dl -f $fallback --get-filename "$url" --restrict-filenames)
-		echo "=> fileName = <$fileName>"
-		echo
-		if [ -f "$fileName" ] && [ ! -w "$fileName" ]; then
-			echo "${colors[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" 1>&2
 			echo
-			continue
-		fi
-		$youtube_dl -f $format "$url" --restrict-filenames && mp4tags -m "$url" "$fileName" && chmod -w "$fileName" && echo && $(which ffprobe) -hide_banner "$fileName"
-		echo
+			fileNames=$($youtube_dl -f $format --get-filename "$url" --restrict-filenames || $youtube_dl -f $fallback --get-filename "$url" --restrict-filenames)
+			for fileName in $fileNames
+			do
+				echo "=> fileName = <$fileName>"
+				echo
+				if [ -f "$fileName" ] && [ ! -w "$fileName" ]; then
+					echo "${colors[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" 1>&2
+					echo
+					continue
+				fi
+				$youtube_dl -f $format "$url" --restrict-filenames && mp4tags -m "$url" "$fileName" && chmod -w "$fileName" && echo && $(which ffprobe) -hide_banner "$fileName"
+				echo
+			done
+		done
 	done
 	sync
 	trap - INT
