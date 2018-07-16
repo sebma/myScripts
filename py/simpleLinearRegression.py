@@ -35,7 +35,7 @@ def initArgs() :
 	parser.add_argument( "-v", "--verbosity", help="Increase output verbosity (e.g., -vv is more than -v).", action='count', default = 0 )
 	parser.add_argument( "-a", "--activationFunction", help="NN Layer activation function.", default="linear", choices = ['linear','relu','sigmoid'], type=str )
 	parser.add_argument( "-l", "--lossFunction", help="NN model loss function.", default="mse", choices = ['mse','mae','rmse'], type=str )
-	parser.add_argument( "-k", "--kernel_initializer", help="NN Model kernel initializer.", default="glorot_uniform", choices = ['glorot_uniform','random_normal','random_uniform','normal'], type=str )
+	parser.add_argument( "-k", "--kernel_initializer", help="Initializer for the kernel weights matrix.", default="glorot_uniform", choices = ['glorot_uniform','random_normal','random_uniform','normal'], type=str )
 	parser.add_argument( "-O", "--optimizer", help="NN model optimizer algo.", default="sgd", choices = ['sgd', 'rmsprop','adam'], type=str )
 	parser.add_argument( "-o", "--outputDataframeFileName", help="NN model optimizer algo.", type=str )
 
@@ -153,6 +153,8 @@ def initScript() :
 			myArgs.optimizer = keras.optimizers.RMSProp(myArgs.Lr)
 		elif myArgs.optimizer == 'adam' :
 			myArgs.optimizer = keras.optimizers.Adam(myArgs.Lr)
+		elif myArgs.optimizer == 'adadelta' :
+			myArgs.optimizer = keras.optimizers.Adadelta( lr = myArgs.Lr )
 	
 	myMetrics = []
 	if   myArgs.lossFunction == 'mae' :
@@ -192,8 +194,7 @@ def modelDefinition( inputLayerUnits = 1, hiddenLayerUnits = 1, outputLayerUnits
 	model = Sequential()
 	#First hidden layer
 	model.add( Dense( units = hiddenLayerUnits, input_dim = inputLayerUnits, activation = myArgs.activationFunction, kernel_initializer = myArgs.kernel_initializer ) )
-	#Last layer
-#	model.add( Dense( units = outputLayerUnits ) )
+#	model.add( Dense( units = outputLayerUnits ) ) #Last layer
 
 	model.compile( loss=myArgs.lossFunction, optimizer=myArgs.optimizer, metrics = myMetrics )
 
