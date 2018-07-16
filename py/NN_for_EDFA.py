@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 import os
 from glob import glob
 from datetime import datetime
-from ipdb import set_trace #Charge le IPython avec ses startup => shell = TerminalInteractiveShell
 
 def initArgs() :
 	global arguments, scriptBaseName, parser, __version__
@@ -27,11 +26,12 @@ def initArgs() :
 	group = parser.add_mutually_exclusive_group()
 	group.add_argument( "dataFileName", help="(Optional) data fileName to read data from.", nargs='?', type=str )
 
-	parser.add_argument( "-b", "--batch_size", help="batchSize taken from the whole dataSet.", default=-1, type=float )
+	parser.add_argument( "-b", "--batch_size", help="batchSize subset taken from the whole dataSet.", default=-1, type=float )
 	parser.add_argument( "-e", "--epochs", help="Number of epochs to go through the NN.", default=5e3, type=float )
 	parser.add_argument( "--f0", help="Starting frequency.", default=191.7, type=float )
 	parser.add_argument( "--fStep", help="Frequency step.",  default=0.05, type=float )
 	parser.add_argument( "-E", "--earlyStoppingPatience", help="Number of epochs before stopping once your loss starts to increase (disabled by default).", default=-1, type=int )
+	parser.add_argument( "-I", "--showInputDS", help="Show Input datasets information.", action='store_true', default = False )
 	parser.add_argument( "-P", "--plotMetrics", help="Enables the live ploting of the trained model metrics in Jupyter NoteBook.", action='store_true', default = False )
 	group.add_argument( "-d", "--dataDIR", help="Datasets directory", type=str )
 	parser.add_argument( "-p", "--pattern", help="Data file name pattern.", default="data*.txt", type=str )
@@ -42,6 +42,8 @@ def initArgs() :
 	parser.add_argument( "-D", "--debug", help="Debug.", action='store_true', default = False )
 	parser.add_argument( "-a", "--activationFunction", help="NN Layer activation function.", default="relu", choices = ['linear','relu','sigmoid'], type=str )
 	parser.add_argument( "-l", "--lossFunction", help="NN model loss function.", default="mse", choices = ['mse','mae','rmse'], type=str )
+	parser.add_argument( "-L", "--hiddenLayers", help="Number of hidden layers in the model.", default=1, type=int )
+	parser.add_argument( "-N", "--hiddenLayersUnits", help="Number of units in the hidden layers of the model.", default=-1, type=int )
 	parser.add_argument( "-k", "--kernel_initializer", help="NN Model kernel initializer.", default="glorot_uniform", choices = ['glorot_uniform','random_normal','random_uniform','normal'], type=str )
 	parser.add_argument( "-O", "--optimizer", help="NN model optimizer algo.", default="sgd", choices = ['sgd', 'rmsprop','adam','adadelta'], type=str )
 	parser.add_argument( "-o", "--outputDataframeFileName", help="Datafilename prefix so save the input/output dataframes.", type=str, default = "myData.hdf5" )
@@ -102,7 +104,7 @@ def plotDataAndPrediction(df, lossFunctionName, optimizerName) :
 	#plt.subplot(1,2,2)
 
 def initScript() :
-	global myArgs, dfChannelsStates, dfPower, plotResolution, pictureFileResolution, nbInputVariables, nbOutputVariables, nbExperiments
+	global myArgs, dfChannelsStates, dfPower, plotResolution, pictureFileResolution, nbInputVariables, nbOutputVariables, nbExperiments, nbChannels
 	global optimizerName, lossFunctionName, myMetrics, modelTrainingCallbacks, dataIsNormalized, monitoredData, fileFormat, fMax
 	plotResolution = 150
 	pictureFileResolution = 600
@@ -132,9 +134,6 @@ def initScript() :
 	Print()
 
 	Allow_GPU_Memory_Growth()
-
-	pda.options.display.max_rows = 20 #Prints the first max_rows/2 and the last max_rows/2 of each dataframe
-	pda.options.display.width = None #Automatically adjust the display width of the terminal
 	
 	prefix =    os.path.splitext( myArgs.outputDataframeFileName )[0]
 	extension = os.path.splitext( myArgs.outputDataframeFileName )[1]
@@ -163,13 +162,29 @@ def initScript() :
 	if myArgs.experimentsInterval :
 		experimentsIntervalSlice = slice( *map(int, myArgs.experimentsInterval.split(':') ) )
 		dfChannelsStates = dfChannelsStates[ experimentsIntervalSlice ]
+		dfChannelsStates = dfChannelsStates.reset_index( drop=True )
 		dfPower = dfPower[ experimentsIntervalSlice ]
+		dfPower = dfPower.reset_index( drop=True )
 	if myArgs.variablesInterval :
 		variablesIntervalSlice =   slice( *map(int, myArgs.variablesInterval.split(':') ) )
 		dfChannelsStates = dfChannelsStates[ dfChannelsStates.columns[ variablesIntervalSlice ] ]
+		dfChannelsStates = dfChannelsStates.reset_index( drop=True )
 		dfPower = dfPower[ dfPower.columns[ variablesIntervalSlice ] ]
+		dfPower = dfPower.reset_index( drop=True )
 
-#	if myArgs.debug : set_trace()
+	try :
+		pda.options.display.width = pda.util.terminal.get_terminal_size()[0] #Automatically adjust the display width of the terminal
+	except Exception as why :
+#		pda.options.display.width = None #Automatically adjust the display width of the terminal
+		pass
+
+	pda.options.display.max_rows = 20 #Prints the first max_rows/2 and the last max_rows/2 of each dataframe
+
+	if myArgs.showInputDS :
+		mySet_trace( myArgs.debug )
+		print( dfChannelsStates )
+		print( dfPower )
+		Exit(0, myArgs.md)
 
 	nbInputVariables = dfChannelsStates.columns.size
 	nbChannels = dfChannelsStates.columns.size
@@ -181,8 +196,15 @@ def initScript() :
 	dfPowerOfActiveChannels = dfPower[ dfActiveChannels ].T
 	frequencyRange = np.arange( myArgs.f0, fMax + myArgs.fStep, myArgs.fStep )
 	dfPowerOfActiveChannels.index = frequencyRange
+
+	dfPowerOfActiveChannels.name = 'Output optical power'
+	dfPowerOfActiveChannels.index.name = 'Frequency (THz)'
+	dfPowerOfActiveChannels.columns.name = 'Power (dBm)'
+
 	if myArgs.outputDataframeFileName :
 		saveDataFrameToFile( df = dfPowerOfActiveChannels, filename = myArgs.outputDataframeFileName, key = 'dfPowerOfActiveChannels', format = fileFormat )
+
+#	mySet_trace( myArgs.debug )
 
 	"""
 	ax = dfPowerOfActiveChannels.plot.line( marker='x', title = 'Output optical power' )
@@ -204,6 +226,8 @@ def initScript() :
 		dataIsNormalized = True
 """
 
+	if myArgs.hiddenLayersUnits == -1 : myArgs.hiddenLayersUnits = nbInputVariables * 2
+
 	optimizerName = myArgs.optimizer
 	lossFunctionName = myArgs.lossFunction.lower()
 
@@ -220,7 +244,7 @@ def initScript() :
 
 	if not myArgs.batch_size :
 		PrintError( "The chosen batch_size is %f, too small compared to %d" %(nbExperiments/myArgs.epochs, myArgs.epochs) )
-		Exit(1, myArgs.markdown)
+		Exit(1, myArgs.md)
 
 	import keras.optimizers
 	if myArgs.Lr :
@@ -273,7 +297,7 @@ def importDataSetsFromDIR( dataDIR, fileNamePattern ) :
 
 		if not nbDataFilesRead :
 			PrintError( "Could not find any "+ fileNamePattern +" files, please double check and give the correct data filename pattern." )
-			Exit( 5, myArgs.markdown )
+			Exit( 5, myArgs.md )
 
 		dfX = pda.DataFrame()
 		dfY = pda.DataFrame()
@@ -295,19 +319,23 @@ def importDataSetsFromDIR( dataDIR, fileNamePattern ) :
 			PrintError( "KeyboardInterrupt." )
 		else :
 			PrintError( "Quitting the debugger: %s." % why )
-		Exit( 4, myArgs.markdown )
+		Exit( 4, myArgs.md )
 
 	os.chdir( previousDIR )
 
 	return dfX, dfY
 
-def modelDefinition( inputLayerUnits = 1, hiddenLayerUnits = 0, outputLayerUnits = 1 ) :
+def modelDefinition( inputLayerUnits = 1, hiddenLayersUnits = 0, outputLayerUnits = 1, hiddenLayers = 1 ) :
 	from keras.models import Sequential
 	from keras.layers import Dense
 	import keras.utils, keras.optimizers, keras.initializers
 	model = Sequential()
 	#First hidden layer
-	model.add( Dense( units = hiddenLayerUnits, input_dim = inputLayerUnits, activation = myArgs.activationFunction, kernel_initializer = myArgs.kernel_initializer ) )
+	model.add( Dense( units = hiddenLayersUnits, input_dim = inputLayerUnits, activation = myArgs.activationFunction, kernel_initializer = myArgs.kernel_initializer ) )
+	for i in range( hiddenLayers - 1 ) :
+		#Next hidden layer
+		model.add( Dense( units = hiddenLayersUnits, activation = myArgs.activationFunction, kernel_initializer = myArgs.kernel_initializer ) )
+
 	#Last layer
 	model.add( Dense( units = outputLayerUnits ) )
 
@@ -320,16 +348,25 @@ def main() :
 	initScript()
 
 	plotExperments( dfChannelsStates, dfPower, fmin = myArgs.f0, fmax = fMax, title = 'Output optical power' )
-	plt.show()
+#	plt.show()
 
 	import engfmt
 	PrintInfo( "nbExperiments = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %s and myArgs.validation_split = %d %%\n" % (nbExperiments,myArgs.batch_size,engfmt.quant_to_eng(myArgs.epochs),int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
 
 	if isnotebook() or myArgs.verbosity : setJupyterBackend( newBackend = 'module://ipykernel.pylab.backend_inline' )
 
+	firstRow = dfChannelsStates.loc[0]
+	nbActiveChannels = firstRow[ firstRow == 1 ].size # nbActiveChannels in first row
+	totalNumberOfActiveChannels = ( dfChannelsStates == 1 ).sum().sum()
+	PrintInfo("The number of active channels is : %d\n" % nbActiveChannels )
+	if totalNumberOfActiveChannels != nbActiveChannels * nbExperiments :
+		PrintError("The number of active channels varies throughout this dataset.")
+		Exit( 2, myArgs.md )
+
 	# MODEL DEFINITION
-	PrintInfo( "nbInputVariables = %d\n" % nbInputVariables )
-	model = modelDefinition( inputLayerUnits = nbInputVariables, hiddenLayerUnits = nbInputVariables * 2, outputLayerUnits = nbOutputVariables )
+	PrintInfo( "nbInputVariables = %d, myArgs.hiddenLayersUnits = %d, nbOutputVariables = %d\n" % (nbInputVariables,myArgs.hiddenLayersUnits,nbOutputVariables) )
+	model = modelDefinition( inputLayerUnits = nbInputVariables, hiddenLayersUnits = myArgs.hiddenLayersUnits, outputLayerUnits = nbOutputVariables, hiddenLayers = myArgs.hiddenLayers )
+#	model = modelDefinition( inputLayerUnits = nbInputVariables, hiddenLayersUnits = myArgs.hiddenLayersUnits, outputLayerUnits = nbActiveChannels, hiddenLayers = myArgs.hiddenLayers )
 
 	# summarize layers
 	PrintInfo( "model.summary: " )
@@ -339,15 +376,6 @@ def main() :
 	if myArgs.verbosity :
 		PrintInfo( "dfChannelsStates :\n%s" % dfChannelsStates )
 		PrintInfo( "dfPower :\n%s" % dfPower )
-
-	set_trace()
-	firstRow = dfChannelsStates.loc[0]
-	nbActiveChannels = firstRow[ firstRow == 1 ].size # nbActiveChannels in first row
-	totalNumberOfActiveChannels = ( dfChannelsStates == 1 ).sum().sum()
-	PrintInfo("The number of active channel is : %d" % nbActiveChannels )
-	if totalNumberOfActiveChannels != nbActiveChannels * nbExperiments :
-		PrintError("The number of active channels varies throughout this dataset.")
-		Exit( 2, myArgs.markdown )
 
 	#MODEL TRAINING
 	PrintInfo("Model training ...")
@@ -359,6 +387,8 @@ def main() :
 
 	Print( "\n=> It took : " + str( datetime.now()-startTime ).split('.')[0] + " to train the model.\n" )
 
+	PrintInfo( "nbInputVariables = %d, myArgs.hiddenLayersUnits = %d, nbOutputVariables = %d\n" % (nbInputVariables,myArgs.hiddenLayersUnits,nbOutputVariables) )
+
 	historyDF = pda.DataFrame.from_dict( history.history )
 	if myArgs.outputDataframeFileName :
 		saveDataFrameToFile( df = historyDF,   filename = myArgs.outputDataframeFileName, key = 'Training_history', format = fileFormat )
@@ -369,9 +399,8 @@ def main() :
 		ax = historyDF.plot( title = 'Metrics computed during training' )
 		ax.set_xlabel('epochs')
 		ax.set_ylabel('metrics')
-		if myArgs.debug :
+		if myArgs.verbosity > 1 :
 			print( historyDF )
-#			set_trace()
 		plt.grid()
 
 	nbEpochsDone = historyDF.index.size
@@ -395,14 +424,22 @@ def main() :
 	PrintInfo( "nbExperiments = %d \tmyArgs.batch_size = %d \tmyArgs.epochs = %s and myArgs.validation_split = %d %%\n" % (nbExperiments,myArgs.batch_size,engfmt.quant_to_eng(myArgs.epochs),int(myArgs.validation_split*100)) , quiet = myArgs.quiet )
 
 	PrintInfo( "Loss function = <" +lossFunctionName+">" + " myArgs.optimizer = <"+optimizerName+">\n" , quiet = myArgs.quiet )
-	
+
 #	dfChannelsStatesTest = dfChannelsStates[1:2+1]
 #	dfChannelsStatesTest = dfChannelsStatesTest.reset_index( drop=True )
-	dfChannelsStatesTest = pda.DataFrame( np.random.randint( 2, size = (2, nbInputVariables) ) )
-	if myArgs.debug : set_trace()
+#	dfChannelsStatesTest = pda.DataFrame( np.random.randint( 2, size = (2, nbInputVariables) ) )
+	
+	dfChannelsStatesTest = pda.DataFrame( 0, index = range(1), columns = range(nbChannels) )
+#	randomIndexOfNbActiveChannels = np.random.randint( nbChannels, size = nbActiveChannels )
+	randomIndexOfNbActiveChannels = np.random.choice( nbChannels, nbActiveChannels, replace=False )
+	dfChannelsStatesTest[ randomIndexOfNbActiveChannels ] = 1
+	PrintInfo( "Number of randomly generated number of channels = %d\n" % (dfChannelsStatesTest.loc[0] == 1).sum() )
+
 	dfPredicted = pda.DataFrame( model.predict( dfChannelsStatesTest ) ) # MODEL PREDICTION
 	if myArgs.outputDataframeFileName :
 		saveDataFrameToFile( df = dfPredicted, filename = myArgs.outputDataframeFileName, key = 'predictions', format = fileFormat )
+
+#	mySet_trace( myArgs.debug )
 
 	plotExperments( dfChannelsStatesTest, dfPredicted, fmin = myArgs.f0, fmax = fMax, title = 'Output optical power predictions' )
 
@@ -419,7 +456,7 @@ def main() :
 
 	my_keys = sorted( set( globals().keys() ) - orig_keys )
 	#print(my_keys)
-	Exit(0, myArgs.markdown)
+	Exit(0, myArgs.md)
 
 if __name__ == '__main__' : # Calls the main function if (and only if) this script is not imported
 	main()
