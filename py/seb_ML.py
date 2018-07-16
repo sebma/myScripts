@@ -11,10 +11,22 @@ def insideCondaEnv() :
 
 if not insideCondaEnv() : exit(-1)
 
-from pdb import set_trace
-#from ipdb import set_trace #Charge le IPython avec ses startup => shell = TerminalInteractiveShell
+def mySet_trace(debug = True) :
+	if debug :
+		try :
+			set_trace()
+		except Exception as why :
+			print("=> WARNING: %s, Importing pdb or ipdb if installed.\n" % why, file= stderr)
+			try :
+				from ipdb import set_trace #Charge le IPython avec ses startup => shell = TerminalInteractiveShell
+			except Exception as why :
+				print("=> WARNING: %s, using pdb instead.\n" % why, file= stderr)
+				from pdb import set_trace
+			set_trace()
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pda
 import h5py
 from keras import backend as K
@@ -88,7 +100,7 @@ def setJupyterBackend( newBackend = 'nbAgg' ) : # Set the "notebook" backend as 
 	"""
 	# If the script is not run by python but by jupyter and is using a different backend then "notebook"
 	if mpl.get_backend() != 'Qt5Agg' and mpl.get_backend() != 'nbAgg' :
-		print("=> BEFORE: matplotlib backend = <%s>" % mpl.get_backend() )
+		PrintInfo("BEFORE: matplotlib backend = <%s>" % mpl.get_backend() )
 		mpl.use('nbAgg',warn=False, force=True) # <=> %matplotlib notebook
 """	
 	# If the script is not run by python but by jupyter and is using a different backend then "inline"
@@ -99,7 +111,7 @@ def setJupyterBackend( newBackend = 'nbAgg' ) : # Set the "notebook" backend as 
 		import matplotlib.pyplot
 #		PrintInfo("AFTER: matplotlib backend = <%s>" % mpl.get_backend() )
 	else :
-		print("=> matplotlib backend = <%s>" % mpl.get_backend() )
+		PrintInfo("matplotlib backend = <%s>" % mpl.get_backend() )
 
 def Allow_GPU_Memory_Growth() : #cf. https://github.com/keras-team/keras/issues/1538
 	if 'tensorflow' == K.backend():
@@ -131,7 +143,7 @@ def showModel(model, modelFileName = "model.png", rankdir = 'TB') :
 def copyArgumentsToStructure(args) :
 	import argparse
 	if not isinstance( args, argparse.Namespace ) :
-		PrintError( "=> ERROR: args must be of <argparse.Namespace> class type." )
+		PrintError( "args must be of <argparse.Namespace> class type." )
 		Exit(5)
 
 #	from collections import namedtuple # namedtuples are not mutable
@@ -150,13 +162,13 @@ def copyArgumentsToStructure(args) :
 	return myArgs
 
 def saveDataFrameToFile( df, filename, key = 'df', format = "hdf5" ) :
-	if format == "hdf5" :
+	if format.lower() == "hdf5" or format.lower() == "h5" :
 		PrintInfo( "Dumping <%s> dataframe to <%s> ...\n" % (key,filename) )
 		with pda.HDFStore(filename) as store : store[key] = df
-	else : PrintError( "=> ERROR : The output %s file format is not supported yet." % format )
+	else : PrintError( "The output %s file format is not supported yet." % format )
 
 def loadDataFrameFromFile( filename, key = 'df', format = "hdf5" ) :
-	if format == "hdf5" :
+	if format.lower() == "hdf5" or format.lower() == "h5" :
 		try :
 			if isPandasHDF5GeneratedFile( filename ) :
 				PrintInfo( "Loading dataframe %s from <%s> ...\n" % (key,filename) )
@@ -167,10 +179,10 @@ def loadDataFrameFromFile( filename, key = 'df', format = "hdf5" ) :
 				with h5py.File(filename, 'r') as f : df = pda.DataFrame( f[pathToDataSet][:] )
 			return df
 		except Exception as why :
-			print( "=> ERROR: %s" % why, file = stderr )
+			PrintError( "%s" % why, file = stderr )
 			return None
 	else :
-		PrintError( "=> ERROR : The output %s file format is not supported yet." % format )
+		PrintError( "The output %s file format is not supported yet." % format )
 		return None
 
 def isPandasHDF5GeneratedFile( filename ) :
@@ -178,29 +190,82 @@ def isPandasHDF5GeneratedFile( filename ) :
 	try :
 		with pda.HDFStore(filename, 'r') as store : isItAPandasHDF5 = 'block0_values' in store.groups()[0]
 	except Exception as why :
-#		print( "=> ERROR: %s" % why, file = stderr )
+#		PrintError( "%s" % why, file = stderr )
 		isItAPandasHDF5 = False
 	return isItAPandasHDF5
 
 def channelsStates2Frequencies( activeChannelsIndex, fmin, fmax, totalNumberOfChannels ) :
 	return ( fmin+(fmax-fmin)*activeChannelsIndex/totalNumberOfChannels )
 
-def plotExperments( dfX, dfY, fmin, fmax, **kwargs ) :
+def plotActiveChannels( dfX, dfY, fmin, fmax, activeChannelValue = 1, **kwargs ) :
+	if 'marker' in kwargs.keys() :
+		marker = kwargs['marker']
+	else :
+		marker = ''
+
 	fig = plt.figure()
 	experimentsRange = dfY.index
 	for experiment in experimentsRange :
 		sChannelsStates = dfX.loc[experiment] # Current expirement channel states serie
-		activeChannelsIndex = sChannelsStates[ sChannelsStates == 1 ].index # index of active channels
+		activeChannelsIndex = sChannelsStates[ sChannelsStates == activeChannelValue ].index # index of active channels
 		y = dfY.loc[experiment][ activeChannelsIndex ] # Power of active channels
 		frequencies = channelsStates2Frequencies( activeChannelsIndex, fmin, fmax, sChannelsStates.size )
 		nbActiveChannels = activeChannelsIndex.size
-		plt.plot( frequencies, y, marker='x', label='%d Ch' % nbActiveChannels, mew=1.5, ms=6 )
-	plt.xlabel( 'Frequency (THz)' )
-	plt.ylabel( 'Power (dBm)' )
+		plt.plot( frequencies, y, marker = marker, label='%d Ch' % nbActiveChannels, mew=1.5, ms=6 )
+	if 'xlabel' in kwargs.keys() :
+		plt.xlabel( kwargs['xlabel'] )
+	if 'ylabel' in kwargs.keys() :
+		plt.ylabel( kwargs['ylabel'] )
 	if 'title' in kwargs.keys() :
-#		plt.title( 'Output optical power' )
 		plt.title( kwargs['title'] )
-#	plt.legend( loc='best' )
-	leg = fig.legend( loc='center right' )
-	leg.get_frame().set_edgecolor('black')
+	if 'legend_title' in kwargs.keys() :
+		legend_title = kwargs['legend_title']
+	else :
+		legend_title = ""
+	if experimentsRange.size <= 20 :
+		leg = fig.legend( loc = 'center right', title = legend_title )
+		leg.get_frame().set_edgecolor('black')
 	plt.grid()
+
+	return fig
+
+def powerOfChannels2PowerInFunctionOfFrequencyOfActiveChannels( dfX, dfY, fMin, fStep, activeChannelValue = 1 ) :
+	#Other way to plot the Output power of active channels in function of their frequencies
+	nbChannels = dfX.columns.size
+
+	dfActiveChannels = dfX == activeChannelValue
+	dfPowerOfActiveChannels = dfY[ dfActiveChannels ].T
+	fMax = fMin + fStep * (nbChannels - 1)
+	frequencyRange = np.arange( fMin, fMax + fStep, fStep )
+	dfPowerOfActiveChannels.index = frequencyRange
+
+	return dfPowerOfActiveChannels
+
+def plotDataFrame( df, **kwargs ) :
+	if 'title' in kwargs.keys() :
+		df.title = kwargs['title']
+	else :
+		df.name = ""
+	if 'xlabel' in kwargs.keys() :
+		df.index.name = kwargs['xlabel']
+	if 'legend_title' in kwargs.keys() :
+		df.columns.name = kwargs['legend_title']
+	else :
+		df.columns.name = ""
+	if 'marker' in kwargs.keys() :
+		marker = kwargs['marker']
+	else :
+		marker = ''
+
+	ax = df.plot( marker = marker, title = df.title )
+	if 'ylabel' in kwargs.keys() :
+		ax.set_ylabel( kwargs['ylabel'] )
+	nbExperiments = df.columns.size
+	if nbExperiments <= 20 :
+		leg = ax.legend( loc = 'center right', title = df.columns.name )
+		leg.get_frame().set_edgecolor('black')
+	else :
+		ax.legend_.remove()
+	ax.grid()
+
+	return ax, df
