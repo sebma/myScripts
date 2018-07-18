@@ -3,8 +3,8 @@
 function getURLTitle() {
 	for URL
 	do
-		youtube-dl -e $URL
-#		\cURL -Ls $url | awk -F'"' /og:title/'{print$4}'
+#		youtube-dl -e $URL
+		\curl -Ls $URL | awk -F'"' /og:title/'{print$4}'
 	done
 }
 
