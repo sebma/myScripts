@@ -15,12 +15,13 @@
         8. [Jupyter Environment](#jupyter-environment)
             1. [Jupyter and LaTeX](#jupyter-and-latex)
     2. [MarkDown language](#markdown-language)
-    3. [C language](#c-language)
+        1. [MarkDown Cheetsheats](#markdown-cheetsheats)
+    2. [C language](#c-language)
         1. [Outils](#outils)
-    3. [Embedded Hardware](#embedded-hardware)
-    4. [PicoScope Documentation](#picoscope-documentation)
-    5. [Binary data formats](#binary-data-formats)
-    6. [License](#license)
+    2. [Embedded Hardware](#embedded-hardware)
+    3. [PicoScope Documentation](#picoscope-documentation)
+    4. [Binary data formats](#binary-data-formats)
+    5. [License](#license)
 
 # Miscellaneous DOC
 
@@ -123,6 +124,11 @@ OR
 
 * [Github-Flavored Markdown(GFM)](https://help.github.com/articles/basic-writing-and-formatting-syntax/) (MarkDown Basic writing and formatting syntax for GitHub)
 * [gfmtoc](https://pypi.org/project/gfmtoc) (Python module to generate Github-Flavored Markdown Tables of Contents from `README.md`s)
+
+### MarkDown Cheetsheats
+
+* [Markdown Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet) (Markdown Cheatsheet from Adam Pritchard)
+* [Markdown Here Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Here-Cheatsheet) (Markdown Here which is implemented by Adam Pritchard)
 
 ## C language
 
