@@ -125,7 +125,7 @@ OR
 * [Github-Flavored Markdown(GFM)](https://help.github.com/articles/basic-writing-and-formatting-syntax/) (MarkDown Basic writing and formatting syntax for GitHub)
 * [Awesome Markdown](https://github.com/mundimark/awesome-markdown) (A collection of awesome markdown goodies (libraries, services, editors, tools, cheatsheets, etc.))
 * [Markdown Here](https://github.com/adam-p/markdown-here) (Google Chrome, Firefox, and Thunderbird extension that lets you write email in Markdown and render it before sending.)
-* [gfmtoc](https://pypi.org/project/gfmtoc) (Python module to generate Github-Flavored Markdown Tables of Contents from `README.md`s)
+* [gfmtoc](https://pypi.org/project/gfmtoc) (Python module to generate Github-Flavored Markdown Tables of Contents from `readme.md`s)
 
 ### MarkDown Cheetsheats
 
