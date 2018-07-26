@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # coding: utf-8
 
 #MODULES STANDARDS
@@ -13,6 +13,7 @@ from datetime import datetime #pour chronometrer
 import types
 import time
 import inspect
+from collections import OrderedDict
 
 #MODULES A INSTALLER
 import numpy as np #Pour le calcul matriciel
@@ -36,6 +37,27 @@ def resetNumpyPrintOptions() :
 	np.set_printoptions(edgeitems=3,infstr='inf',
 	 linewidth=75, nanstr='nan', precision=8,
 	 suppress=False, threshold=1000, formatter=None)
+
+def isVector(array) :
+	if array.ndim == 1 or array.shape[0] == 1 or array.shape[1] == 1 :
+		return True
+	else :
+		return False
+
+def numpyArrayInfo(array, arrayNAME) :
+	Print("=> INFO: %s.shape = %s of %s" % ( arrayNAME, str(array.shape), array.dtype.name ) )
+	if array.ndim == 1 or array.shape[0] == 1 or array.shape[1] == 1 :
+		Print("=> INFO: %s[0] = %s, %s[end] = %s, (%s[1]-%s[0]) = %s" % ( arrayNAME, array[0], arrayNAME, array[-1], arrayNAME, arrayNAME, (array[1]-array[0]) ) )
+
+	if   arguments.verbosity >= 2 :
+		Print( "=> array :" )
+		np.set_printoptions(edgeitems=9,linewidth=9*16 )
+		for k in np.arange(array.shape[0]) : Print( array[k] )
+	elif arguments.verbosity >= 3 :
+		Print( "=> array :" )
+		np.set_printoptions(threshold=np.nan,edgeitems=9,linewidth=9*16 )
+		for k in np.arange(array.shape[0]) : Print( array[k] )
+	resetNumpyPrintOptions()
 
 def printNLogErrorString(string) :
 	if not arguments.quiet : Print( string, file = sys.stderr)
@@ -63,19 +85,20 @@ def listPythonModulesImported():
 	modulesList = []
 	for name, val in globals().items():
 		if   isinstance(val, types.ModuleType):
-			modulesList.append(val.__name__)
+			modulesList += [ val.__name__ ]
 		elif isinstance(val, types.FunctionType):
-			modulesList.append(sys.modules[val.__module__].__name__)
-	return modulesList
+			modulesList += [ sys.modules[val.__module__].__name__ ]
+	return list(OrderedDict.fromkeys( modulesList ) )
 
 def printExternalModulesVersions() :
-	import pip
-	installed_packages = pip.get_installed_distributions()
+#	import pip
+#	installed_packages = pip.get_installed_distributions() # get_installed_distributions() has moved to pip.get_installed_distributions in pip v10
+	import pkg_resources
+	installed_packages = [d for d in pkg_resources.working_set]
 
 	packageVersions  = {package.key: package.version  for package in installed_packages}
 	packageLocations = {package.key: package.location for package in installed_packages}
 
-	Print()
 #	modules = list(set(sys.modules) & set(globals()))
 	modules = sorted(listPythonModulesImported())
 	for module in modules:
@@ -102,11 +125,11 @@ def totalTime() :
 	Print( "\n=> Total time until now = " + str(datetime.now()-startTime) + "s." )
 
 def initArgs() :
-	global arguments, scriptBaseName, parser, __version__
+	global __version__
 	__version__ = "0.0.0.1"
 
 	parser = ArgumentParser( description = 'AES Correlation Analysis Side Channel Attack.', formatter_class=ArgumentDefaultsHelpFormatter )
-	parser.add_argument( "-d", "--dataDir", help="Directory to read the data from.", default="../data" )
+	parser.add_argument( "-d", "--dataDir", help="Directory to read the data from.", default="../../data" )
 	parser.add_argument( "-D", "--debug", help="Debug the model with ipdb.", action='store_true', default = False )
 	parser.add_argument( "-p", "--pattern", help="Data file name pattern.", default="data-*.txt" )
 	parser.add_argument( "-c", "--cipherTexts", help="Ciphertexts file name.", default="ciphertexts.txt" )
@@ -139,9 +162,13 @@ def initArgs() :
 
 	parser.add_argument( "-q", "--quiet", help="Be quiet.", action='store_true', default = False )
 
+	return parser
+
+def parseMyArguments(parser) :
+	global scriptBaseName, arguments
+
 	scriptBaseName = parser.prog
 	arguments = parser.parse_args()
-
 	if arguments.mdh :
 		Print("<pre><code>")
 		parser.print_help()
@@ -156,6 +183,8 @@ def initArgs() :
 		exit(1)
 
 	if arguments.md : Print("<pre><code>")
+
+	if arguments.verbosity : print("=> INFO: arguments = %s" % arguments)
 
 	return arguments
 
@@ -250,7 +279,8 @@ def initAES() :
 				Print("Python  : " + sys.executable)
 			else :
 				Print("\nUsing Python version %s" % pythonVersion )
-		if arguments.version : exit()
+
+	if arguments.version : exit()
 
 	wordSizeInBytes = 4 # Number of bytes in a word : mots de 4 octets
 	wordSizeInBits =  8 * wordSizeInBytes # Number of bits in a word
@@ -956,7 +986,8 @@ def compareKeys(foundKey,expectedKey) :
 
 def main() :
 	global arguments
-	arguments = initArgs()
+	parser = initArgs()
+	parseMyArguments(parser)
 	initAES()
 
 	texts = importTexts()
