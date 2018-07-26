@@ -6,7 +6,7 @@ case $(uname) in
 		brewName=Homebrew
 		if ! which brew > /dev/null 2>&1; then
 			if groups | grep --color -E -wq "adm|admin|sudo"; then
-				$(which ruby) -e "$(\curl -fsSL https://raw.githubusercontent.com/$brewName/install/master/install)" ||  return
+				$(which ruby) -e "$(\curl -fsSL https://raw.githubusercontent.com/$brewName/install/master/install)" || return
 				brew=/usr/local/bin/brew
 			else
 				brewPrefix=$HOME/homebrew
@@ -21,6 +21,7 @@ case $(uname) in
 		$brew tap caskroom/versions
 		$brew tap buo/cask-upgrade
 		set +x
+		;;
 	Linux)
 		brewName=Linuxbrew
 		test -z $brew && $(which ruby) -e "$(\curl -fsSL https://raw.githubusercontent.com/$brewName/install/master/install)"
