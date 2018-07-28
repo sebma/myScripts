@@ -92,7 +92,7 @@ def listPythonModulesImported():
 
 def printExternalModulesVersions() :
 #	import pip
-#	installed_packages = pip.get_installed_distributions() # get_installed_distributions() has moved to pip.get_installed_distributions in pip v10
+#	installed_packages = pip.get_installed_distributions() # get_installed_distributions() has moved to pip.get_installed_distributions in pip v10+
 	import pkg_resources
 	installed_packages = [d for d in pkg_resources.working_set]
 
