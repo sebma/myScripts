@@ -1,6 +1,8 @@
+#!/usr/bin/env bash
+
 function mv {
   local codeRet=0
-  local lastArg="$(eval echo \$$#)"
+  local lastArg="$(eval echo \${$#})"
   local isDirectory=$(file "$lastArg" | grep -q directory && echo true || echo false)
   alias cp="rsync -Pt"
 
