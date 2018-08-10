@@ -18,7 +18,7 @@ fi
 if [ README-template.md -nt README.md ] || [ $0 -nt README.md ]
 then
 	cat README-template.md > README.tmp.md
-	lastArg="$(eval echo \$$#)"
+	lastArg="$(eval echo \${$#})"
 	if [ $# -ge 1 ] && [ -x "$lastArg" ]
 	then
 		echo "## Usage of \"$lastArg\" :" >> README.tmp.md
