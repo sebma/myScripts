@@ -16,11 +16,11 @@ def mySet_trace(debug = True) :
 		try :
 			set_trace()
 		except Exception as why :
-			print("=> WARNING: %s, Importing pdb or ipdb if installed.\n" % why, file= stderr)
+			print("=> WARNING: %s, Importing pdb or ipdb if installed." % why, file= stderr)
 			try :
 				from ipdb import set_trace #Charge le IPython avec ses startup => shell = TerminalInteractiveShell
 			except Exception as why :
-				print("=> WARNING: %s, using pdb instead.\n" % why, file= stderr)
+				print("=> WARNING: %s, using pdb instead." % why, file= stderr)
 				from pdb import set_trace
 			set_trace()
 
@@ -111,7 +111,7 @@ def setJupyterBackend( newBackend = 'nbAgg' ) : # Set the "notebook" backend as 
 		import matplotlib.pyplot
 #		PrintInfo("AFTER: matplotlib backend = <%s>" % mpl.get_backend() )
 	else :
-		PrintInfo("matplotlib backend = <%s>" % mpl.get_backend() )
+		PrintInfo("matplotlib backend = <%s>\n" % mpl.get_backend() )
 
 def Allow_GPU_Memory_Growth() : #cf. https://github.com/keras-team/keras/issues/1538
 	if 'tensorflow' == K.backend():
@@ -123,6 +123,7 @@ def Allow_GPU_Memory_Growth() : #cf. https://github.com/keras-team/keras/issues/
 		from keras.backend.tensorflow_backend import set_session
 		PrintInfo( "Allowing GPU Memory Growth in tensorflow session config parameters ...\n" )
 		set_session(tf.Session(config=config))
+		print()
 		PrintInfo( "DONE.\n" )
 
 def root_mean_squared_error(y_true, y_pred):
@@ -205,13 +206,15 @@ def plotActiveChannels( dfX, dfY, fmin, fmax, activeChannelValue = 1, **kwargs )
 
 	fig = plt.figure()
 	experimentsRange = dfY.index
+	i = 0
 	for experiment in experimentsRange :
 		sChannelsStates = dfX.loc[experiment] # Current expirement channel states serie
 		activeChannelsIndex = sChannelsStates[ sChannelsStates == activeChannelValue ].index # index of active channels
 		y = dfY.loc[experiment][ activeChannelsIndex ] # Power of active channels
 		frequencies = channelsStates2Frequencies( activeChannelsIndex, fmin, fmax, sChannelsStates.size )
 		nbActiveChannels = activeChannelsIndex.size
-		plt.plot( frequencies, y, marker = marker, label='%d Ch' % nbActiveChannels, mew=1.5, ms=6 )
+		plt.plot( frequencies, y, marker = marker, label = dfY.index[i], mew=1.5, ms=6 )
+		i += 1
 	if 'xlabel' in kwargs.keys() :
 		plt.xlabel( kwargs['xlabel'] )
 	if 'ylabel' in kwargs.keys() :
@@ -222,8 +225,10 @@ def plotActiveChannels( dfX, dfY, fmin, fmax, activeChannelValue = 1, **kwargs )
 		legend_title = kwargs['legend_title']
 	else :
 		legend_title = ""
+
 	if experimentsRange.size <= 20 :
-		leg = fig.legend( loc = 'center right', title = legend_title )
+		leg = plt.legend( loc = 'best', title = legend_title )
+#		leg = fig.legend( loc = 'center right', title = legend_title ) #Place the legend outside
 		leg.get_frame().set_edgecolor('black')
 	plt.grid()
 
@@ -262,7 +267,8 @@ def plotDataFrame( df, **kwargs ) :
 		ax.set_ylabel( kwargs['ylabel'] )
 	nbExperiments = df.columns.size
 	if nbExperiments <= 20 :
-		leg = ax.legend( loc = 'center right', title = df.columns.name )
+		leg = ax.legend( loc = 'best', title = df.columns.name )
+#		leg = ax.legend( loc = 'center right', title = df.columns.name )
 		leg.get_frame().set_edgecolor('black')
 	else :
 		ax.legend_.remove()
