@@ -43,11 +43,12 @@ else :
 	exit(1)
 
 print("=> firefoxOpenedTabsFile = %s" % firefoxOpenedTabsFile)
-with open( firefoxOpenedTabsFile, "r" ) as f :
+with open( firefoxOpenedTabsFile, "r", encoding="utf-8" ) as f :
 # Thanks to : https://unix.stackexchange.com/questions/385023/firefox-reading-out-urls-of-opened-tabs-from-the-command-line/389360#389360
 	if "jsonlz4" in firefoxOpenedTabsFile :
 		import lz4.block
-		jdata = json.loads(lz4.block.decompress(f.read()).decode("utf-8"))
+#		jdata = json.loads(lz4.block.decompress(f.read()).decode("utf-8"))
+		jdata = json.loads(lz4.block.decompress(f.read()))
 	else :
 		jdata = json.loads(f.read())
 
