@@ -48,7 +48,7 @@ with open( firefoxOpenedTabsFile, "r" ) as f :
 	if "jsonlz4" in firefoxOpenedTabsFile :
 		import lz4.block
 #		jdata = json.loads(lz4.block.decompress(f.read()).decode("utf-8"))
-		jdata = json.loads(lz4.block.decompress(f.read()))
+		jdata = json.loads(lz4.block.decompress(f.read()).decode("latin-1"))
 	else :
 		jdata = json.loads(f.read())
 
