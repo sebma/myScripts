@@ -4,7 +4,7 @@ from __future__ import print_function
 import json
 import platform, os
 from os.path import exists, basename
-from sys import argv
+from sys import argv, stderr
 
 firefoxProfileName = argv[1]
 scriptBaseName = basename( argv[0] )
@@ -32,8 +32,11 @@ sessionstoreBackupsDIR  = chosenFirefoxProfileDIR + os.sep + "sessionstore-backu
 
 if exists( sessionstoreBackupsDIR + os.sep + "recovery.js" ) :
 	firefoxOpenedTabsFile = sessionstoreBackupsDIR + os.sep + "recovery.js"
-else :
+elif exists( sessionstoreBackupsDIR + os.sep + "recovery.jsonlz4" ) :
 	firefoxOpenedTabsFile = sessionstoreBackupsDIR + os.sep + "recovery.jsonlz4"
+else :
+	print("=> ERROR : Cannot find the %s directory." % sessionstoreBackupsDIR,file=stderr)
+	exit(1)
 
 with open( firefoxOpenedTabsFile, "r" ) as f :
 	if "jsonlz4" in firefoxOpenedTabsFile :
