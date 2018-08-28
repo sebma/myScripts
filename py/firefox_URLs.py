@@ -34,8 +34,6 @@ else :
 chosenFirefoxProfileDIR = firefoxProfilesDIR + os.sep + firefoxProfileName
 sessionstoreBackupsDIR  = chosenFirefoxProfileDIR + os.sep + "sessionstore-backups"
 
-# Thanks to : https://unix.stackexchange.com/questions/385023/firefox-reading-out-urls-of-opened-tabs-from-the-command-line/389360#389360
-
 if exists( sessionstoreBackupsDIR + os.sep + "recovery.js" ) :
 	firefoxOpenedTabsFile = sessionstoreBackupsDIR + os.sep + "recovery.js"
 elif exists( sessionstoreBackupsDIR + os.sep + "recovery.jsonlz4" ) :
@@ -46,9 +44,11 @@ else :
 
 print("=> firefoxOpenedTabsFile = %s" % firefoxOpenedTabsFile)
 with open( firefoxOpenedTabsFile, "r" ) as f :
+# Thanks to : https://unix.stackexchange.com/questions/385023/firefox-reading-out-urls-of-opened-tabs-from-the-command-line/389360#389360
 	if "jsonlz4" in firefoxOpenedTabsFile :
 		import lz4.block
-		jdata = json.loads(lz4.block.decompress(f.read()).decode("utf-8"))
+#		jdata = json.loads(lz4.block.decompress(f.read()).decode("utf-8"))
+		jdata = json.loads(lz4.block.decompress(f.read()))
 	else :
 		jdata = json.loads(f.read())
 
