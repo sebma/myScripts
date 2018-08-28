@@ -44,7 +44,7 @@ else :
 	print("=> ERROR : Cannot find the %s directory." % sessionstoreBackupsDIR,file=stderr)
 	exit(1)
 
-print("=> firefoxOpenedTabsFile = " % firefoxOpenedTabsFile)
+print("=> firefoxOpenedTabsFile = %s" % firefoxOpenedTabsFile)
 with open( firefoxOpenedTabsFile, "r" ) as f :
 	if "jsonlz4" in firefoxOpenedTabsFile :
 		import lz4.block
