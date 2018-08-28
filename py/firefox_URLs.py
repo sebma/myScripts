@@ -5,6 +5,7 @@ import json
 import platform, os
 from os.path import exists, basename
 from sys import argv, stderr
+from pdb import set_trace
 
 scriptBaseName = basename( argv[0] )
 HOME = os.environ["HOME"]
@@ -42,19 +43,15 @@ else :
 	print("=> ERROR : Cannot find the %s directory." % sessionstoreBackupsDIR,file=stderr)
 	exit(1)
 
-print("=> firefoxOpenedTabsFile = %s" % firefoxOpenedTabsFile)
+print("=> firefoxOpenedTabsFile = %s" % firefoxOpenedTabsFile,file=stderr)
 
-if 'lz4' in firefoxOpenedTabsFile :
-	openMode = 'rb'
-else :
-	openMode = 'r'
-
+openMode = 'rb'
 with open( firefoxOpenedTabsFile, openMode ) as f :
 # Thanks to : https://unix.stackexchange.com/questions/385023/firefox-reading-out-urls-of-opened-tabs-from-the-command-line/389360#389360
 	if "jsonlz4" in firefoxOpenedTabsFile :
 		import lz4.block
-		if f.read(8) != b"mozLz40\0": raise InvalidHeader("Invalid magic number")
-		jdata = json.loads(lz4.block.decompress(f.read()).decode("utf-8"))
+		if f.read(8) != b"mozLz40\0": raise InvalidHeader("Invalid magic number") #Mozilla specific magic number
+		jdata = json.loads(lz4.block.decompress(f.read()))
 	else :
 		jdata = json.loads(f.read())
 
