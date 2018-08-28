@@ -47,6 +47,7 @@ with open( firefoxOpenedTabsFile, "r", encoding="utf-8" ) as f :
 # Thanks to : https://unix.stackexchange.com/questions/385023/firefox-reading-out-urls-of-opened-tabs-from-the-command-line/389360#389360
 	if "jsonlz4" in firefoxOpenedTabsFile :
 		import lz4.block
+		if f.read(8) != b"mozLz40\0": raise InvalidHeader("Invalid magic number")
 		jdata = json.loads(lz4.block.decompress(f.read()).decode("utf-8"))
 	else :
 		jdata = json.loads(f.read())
