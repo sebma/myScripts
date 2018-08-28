@@ -3,15 +3,24 @@
 from __future__ import print_function
 import json
 import platform, os
-from os.path import exists
+from os.path import exists, basename
 from sys import argv
 
 firefoxProfileName = argv[1]
+scriptBaseName = basename( argv[0] )
 HOME = os.environ["HOME"]
 if   platform.system() == 'Darwin' :
-	firefoxProfilesDIR = HOME + "/Library/Application Support/Firefox/Profiles"
+	if 'firefox' in scriptBaseName.lower() :
+		firefoxProfilesDIR = HOME + "/Library/Application Support/Firefox/Profiles"
+	elif 'palemoon' in scriptBaseName.lower() :	
+		firefoxProfilesDIR = HOME + "/Library/Application Support/Pale Moon/Profiles"
 elif platform.system() == 'Linux' :
-	firefoxProfilesDIR = HOME + "/.mozilla/firefox"
+	if 'firefox-esr' in scriptBaseName.lower() :
+		firefoxProfilesDIR = HOME + "/.mozilla/firefox-esr"
+	elif 'palemoon' in scriptBaseName.lower() :
+		firefoxProfilesDIR = HOME + "/.moonchild productions/pale moon"
+	elif 'firefox' in scriptBaseName.lower() :	
+		firefoxProfilesDIR = HOME + "/.mozilla/firefox"
 elif platform.system() == 'Windows' :
 	APPDATA = os.environ["APPDATA"]
 	firefoxProfilesDIR = APPDATA + os.sep + "Mozilla" + os.sep +"Firefox" + os.sep + "Profiles"
