@@ -22,7 +22,7 @@ getRestrictedFilenamesFORMAT ()
 		let i++
 		echo "=> Downloading url # $i/$# ..."
 		echo "=> url = $url"
-		fileNames=$($youtube_dl -f $format --get-filename "$url" --restrict-filenames || $youtube_dl -f $fallback --get-filename "$url" --restrict-filenames)
+		fileNames=$(LANG=C.UTF-8 $youtube_dl -f $format --get-filename "$url" --restrict-filenames || LANG=C.UTF-8 $youtube_dl -f $fallback --get-filename "$url" --restrict-filenames)
 		for fileName in $fileNames
 		do
 			if ! echo $url | \egrep -wq "www"; then
@@ -33,10 +33,10 @@ getRestrictedFilenamesFORMAT ()
 					echo
 					continue
 				else
-					if $youtube_dl -f "$format" -qs $youtubeURLPrefix$url 2> /dev/null; then
+					if LANG=C.UTF-8 $youtube_dl -f "$format" -qs $youtubeURLPrefix$url 2> /dev/null; then
 						url=$youtubeURLPrefix$url
 					else
-						if $youtube_dl -f "$format" -qs $dailymotionURLPrefix$url 2> /dev/null; then
+						if LANG=C.UTF-8 $youtube_dl -f "$format" -qs $dailymotionURLPrefix$url 2> /dev/null; then
 							url=$dailymotionURLPrefix$url
 						fi
 					fi
@@ -50,7 +50,7 @@ getRestrictedFilenamesFORMAT ()
 				fi
 			fi
 			echo
-			fileNames=$($youtube_dl -f $format --get-filename "$url" --restrict-filenames || $youtube_dl -f $fallback --get-filename "$url" --restrict-filenames)
+			fileNames=$(LANG=C.UTF-8 $youtube_dl -f $format --get-filename "$url" --restrict-filenames || LANG=C.UTF-8 $youtube_dl -f $fallback --get-filename "$url" --restrict-filenames)
 			for fileName in $fileNames
 			do
 				echo "=> fileName = <$fileName>"
@@ -60,7 +60,7 @@ getRestrictedFilenamesFORMAT ()
 					echo
 					continue
 				fi
-				$youtube_dl -f $format "$url" --restrict-filenames && mp4tags -m "$url" "$fileName" && chmod -w "$fileName" && echo && $(which ffprobe) -hide_banner "$fileName"
+				LANG=C.UTF-8 $youtube_dl -f $format "$url" --restrict-filenames && mp4tags -m "$url" "$fileName" && chmod -w "$fileName" && echo && $(which ffprobe) -hide_banner "$fileName"
 				echo
 			done
 		done
