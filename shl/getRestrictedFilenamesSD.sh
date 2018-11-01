@@ -15,23 +15,23 @@ getRestrictedFilenamesSD ()
 		let i++
 		echo "=> Downloading url #$i/$# ..."
 		if echo $url | \egrep -vq "www"; then
-			if $youtube_dl -qs $url 2> /dev/null; then
+			if LANG=C.UTF-8 $youtube_dl -qs $url 2> /dev/null; then
 				:
 			else
-				if $youtube_dl -qs $youtubeURLPrefix$url 2> /dev/null; then
+				if LANG=C.UTF-8 $youtube_dl -qs $youtubeURLPrefix$url 2> /dev/null; then
 					url=$youtubeURLPrefix$url
 				else
-					if $youtube_dl -qs $dailymotionURLPrefix$url 2> /dev/null; then
+					if LANG=C.UTF-8 $youtube_dl -qs $dailymotionURLPrefix$url 2> /dev/null; then
 						url=$dailymotionURLPrefix$url
 					fi
 				fi
 			fi
 		fi
-		$youtube_dl -qs $url 2>&1 | grep --color ^ERROR: && continue
-		format=$($youtube_dl -F $url | egrep -vw "only|hls-[0-9]+"  | egrep '(webm|mp4|flv) .*([0-9]+x[0-9]+)|(unknown)' | egrep -wv "22|hd|http-720" | sort -k 2,2 -k 3,3rn | awk '{printf$1"/"}')
+		LANG=C.UTF-8 $youtube_dl -qs $url 2>&1 | grep --color ^ERROR: && continue
+		format=$(LANG=C.UTF-8 $youtube_dl -F $url | egrep -vw "only|hls-[0-9]+"  | egrep '(webm|mp4|flv) .*([0-9]+x[0-9]+)|(unknown)' | egrep -wv "22|hd|http-720" | sort -k 2,2 -k 3,3rn | awk '{printf$1"/"}')
 		echo "=> url = $url"
 		echo
-		fileName=$($youtube_dl -f $format --get-filename "$url" --restrict-filenames || $youtube_dl -f $fallback --get-filename "$url" --restrict-filenames)
+		fileName=$(LANG=C.UTF-8 $youtube_dl -f $format --get-filename "$url" --restrict-filenames || LANG=C.UTF-8 $youtube_dl -f $fallback --get-filename "$url" --restrict-filenames)
 		echo "=> fileName = <$fileName>"
 		echo
 		if [ -f "$fileName" ] && [ ! -w "$fileName" ]; then
@@ -39,7 +39,7 @@ getRestrictedFilenamesSD ()
 			echo
 			continue
 		fi
-		$youtube_dl -f $format "$url" --restrict-filenames && mp4tags -m "$url" "$fileName" && chmod -w "$fileName" && echo && $(which ffprobe) -hide_banner "$fileName"
+		LANG=C.UTF-8 $youtube_dl -f $format "$url" --restrict-filenames && mp4tags -m "$url" "$fileName" && chmod -w "$fileName" && echo && $(which ffprobe) -hide_banner "$fileName"
 		echo
 	done
 	sync
