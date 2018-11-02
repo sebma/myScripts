@@ -27,7 +27,7 @@ elif platform.system() == 'Windows' :
 
 argc = len(argv)
 if argc == 1 :
-	print( "\n".join( os.listdir( firefoxProfilesDIR ) ) )
+	print( "\n".join( os.listdir( firefoxProfilesDIR ) ), file = stderr )
 	exit(0)
 else :
 	firefoxProfileName = argv[1]
