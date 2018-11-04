@@ -19,10 +19,10 @@ function getRestrictedFilenamesSD {
 		time LANG=C.UTF-8 $youtube_dl -f "$format" -qs -- "$url" 2>&1 | \grep --color=auto --color -A1 ^ERROR: && continue
 		if ! echo $url | \egrep -wq "www"; then
 			fileName=$($locate -er "$url.*mp4$" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null
-			fileBaseName="$(basename $fileName)"
-			fileDirName="$(dirname $fileName)"
-			if ! test -w "$fileName"; then
-				echo "${colors[yellowOnBlue]}=> The file <$fileBaseName> is already downloaded, skipping ...$normal" 1>&2
+			if test -z "$fileName"; then
+				echo "=> The file is not in the updatedb table" >&2
+			elif ! test -w "$fileName"; then
+				echo "${colors[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" 1>&2
 				echo
 				continue
 			else
@@ -34,6 +34,7 @@ function getRestrictedFilenamesSD {
 					fi
 				fi
 			fi
+			test -n "$fileName" && fileBaseName="$(basename $fileName)" && fileDirName="$(dirname $fileName)"
 		else
 			echo $url | \grep --color=auto -q youtube.com/ && urlSuffix="$(echo $url | cut -d= -f2 | sed 's/^-/\\&/')"
 			if test "$urlSuffix" && fileName=$($locate -er "$urlSuffix.*mp4$" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null && test -s "$fileName"; then
