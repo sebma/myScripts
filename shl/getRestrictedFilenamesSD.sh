@@ -15,7 +15,7 @@ function getRestrictedFilenamesSD {
 		echo "=> Downloading url # $i/$# ..."
 		echo "=> url = $url"
 		echo "=> Testing if $url still exists ..."
-		time LANG=C.UTF-8 $youtube_dl -f "$format" -qs "$url" 2>&1 | grep --color=auto --color -A1 ^ERROR: && continue
+		time LANG=C.UTF-8 $youtube_dl -f "$format" -qs -- "$url" 2>&1 | \grep --color=auto --color -A1 ^ERROR: && continue
 		if ! echo $url | \egrep -wq "www"; then
 			fileName=$(basename $( $locate -er "$url.*mp4$" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null)
 			if ! test -w "$fileName"; then
@@ -39,10 +39,10 @@ function getRestrictedFilenamesSD {
 				continue
 			fi
 		fi
-		set +x
+#		set +x
 		format="mp4[height<=?480]"
 		echo
-		fileName=$(LANG=C.UTF-8 $youtube_dl -f $format --get-filename "$url" --restrict-filenames || LANG=C.UTF-8 $youtube_dl -f $fallback --get-filename "$url" --restrict-filenames)
+		fileName=$(LANG=C.UTF-8 $youtube_dl -f $format --get-filename --restrict-filenames -- "$url" || LANG=C.UTF-8 $youtube_dl -f $fallback --get-filename --restrict-filenames -- "$url")
 		echo "=> fileName = <$fileName>"
 		echo
 		if [ -f "$fileName" ] && [ ! -w "$fileName" ]; then
