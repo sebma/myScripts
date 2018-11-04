@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-declare -A | grep -wq colors || source $initDir/.colors
+set -o | grep -q ^xtrace.*off && { declare -A | grep -wq colors || source $initDir/.colors; }
 function getRestrictedFilenamesSD {
 	trap 'rc=$?;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;return $rc' INT
 	youtube_dl=$(which youtube-dl)
@@ -17,8 +17,8 @@ function getRestrictedFilenamesSD {
 		echo "=> Testing if $url still exists ..."
 		time LANG=C.UTF-8 $youtube_dl -f "$format" -qs "$url" 2>&1 | grep --color=auto --color -A1 ^ERROR: && continue
 		if ! echo $url | \egrep -wq "www"; then
-			fileName=$(basename $( $locate -er "$url" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null)
-			if test -s "$fileName"; then
+			fileName=$(basename $( $locate -er "$url.*mp4$" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null)
+			if ! test -w "$fileName"; then
 				echo "${colors[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" 1>&2
 				echo
 				continue
