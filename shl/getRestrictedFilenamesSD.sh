@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -o | grep -q ^xtrace.*off && { declare -A | grep -wq colors || source $initDir/.colors; }
+set -o | \grep -q ^xtrace.*off && { declare -A | \grep -wq colors || source $initDir/.colors; }
 function getRestrictedFilenamesSD {
 	trap 'rc=$?;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;return $rc' INT
 	youtube_dl=$(which youtube-dl)
@@ -15,11 +15,14 @@ function getRestrictedFilenamesSD {
 		echo "=> Downloading url # $i/$# ..."
 		echo "=> url = $url"
 		echo "=> Testing if $url still exists ..."
+		fileDirName="."
 		time LANG=C.UTF-8 $youtube_dl -f "$format" -qs -- "$url" 2>&1 | \grep --color=auto --color -A1 ^ERROR: && continue
 		if ! echo $url | \egrep -wq "www"; then
-			fileName=$(basename $( $locate -er "$url.*mp4$" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null)
+			fileName=$($locate -er "$url.*mp4$" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null
+			fileBaseName="$(basename $fileName)"
+			fileDirName="$(dirname $fileName)"
 			if ! test -w "$fileName"; then
-				echo "${colors[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" 1>&2
+				echo "${colors[yellowOnBlue]}=> The file <$fileBaseName> is already downloaded, skipping ...$normal" 1>&2
 				echo
 				continue
 			else
@@ -32,9 +35,11 @@ function getRestrictedFilenamesSD {
 				fi
 			fi
 		else
-			echo $url | grep --color=auto -q youtube.com/ && urlSuffix="$(echo $url | cut -d= -f2 | sed 's/^-/\\&/')"
-			if test "$urlSuffix" && fileName=$(basename $( $locate -er "$urlSuffix.*mp4$" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null) && test -s "$fileName"; then
-				echo "${colors[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" 1>&2
+			echo $url | \grep --color=auto -q youtube.com/ && urlSuffix="$(echo $url | cut -d= -f2 | sed 's/^-/\\&/')"
+			if test "$urlSuffix" && fileName=$($locate -er "$urlSuffix.*mp4$" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null && test -s "$fileName"; then
+				fileBaseName="$(basename $fileName)"
+				fileDirName="$(dirname $fileName)"
+				echo "${colors[yellowOnBlue]}=> The file <$fileBaseName> is already downloaded, skipping ...$normal" 1>&2
 				echo
 				continue
 			fi
@@ -50,11 +55,16 @@ function getRestrictedFilenamesSD {
 			echo
 			continue
 		fi
+
+		[ $fileDirName != . ]  && cd $fileDirName
 		LANG=C.UTF-8 $youtube_dl -f $format "$url" --restrict-filenames && mp4tags -m "$url" "$fileName" && chmod -w "$fileName" && echo && $(which ffprobe) -hide_banner "$fileName"
+		[ $fileDirName != . ]  && cd -
 		echo
 	done
 	sync
 	trap - INT
 }
 
+debug=$1
+[ "$debug" = "-x" ] && shift && set -x
 getRestrictedFilenamesSD $@
