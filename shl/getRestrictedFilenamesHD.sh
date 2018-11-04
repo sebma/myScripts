@@ -1,48 +1,70 @@
-#!/usr/bin/env ksh
+#!/usr/bin/env bash
 
-ytgetRestrictedFilenamesHD () 
-{ 
-    youtube_dl=$(which youtube-dl)
-    youtubeURLPrefix=https://www.youtube.com/watch?v=
-    dailymotionURLPrefix=https://www.dailymotion.com/video/
-    format="mp4"
-    for url in "$@"
-    do
-        if echo $url | \egrep -vq "www"; then
-            if LANG=C.UTF-8 $youtube_dl -e $youtubeURLPrefix$url > /dev/null 2>&1; then
-                url=$youtubeURLPrefix$url
-            else
-                if LANG=C.UTF-8 $youtube_dl -e $dailymotionURLPrefix$url > /dev/null 2>&1; then
-                    url=$dailymotionURLPrefix$url
-                fi
-            fi
-        fi
-        if echo $url | \egrep -q "youtube|tv2vie"; then
-            format=22
-        else
-            if echo $url | grep --color=auto -q dailymotion; then
-                format=hd
-            fi
-        fi
-        echo "=> url = $url"
-        echo
-        fileName=$(LANG=C.UTF-8 $youtube_dl -f $format --get-filename "$url" --restrict-filenames || LANG=C.UTF-8 $youtube_dl --get-filename "$url" --restrict-filenames)
-        echo "=> fileName= <$fileName>"
-        echo
-        if [ -f "$fileName" ] && [ ! -w "$fileName" ]; then
-            echo "$greenOnBlue=> The file $fileName is already downloaded, skipping ...$normal" 1>&2
-            echo
-            continue
-        fi
-        LANG=C.UTF-8 $youtube_dl --embed-thumbnail -f $format "$url" --restrict-filenames || LANG=C.UTF-8 $youtube_dl --embed-thumbnail "$url" --restrict-filenames || continue
-        mp4tags -m "$url" "$fileName"
-        chmod -w "$fileName"
-        echo
-        mp4info "$fileName"
-        echo
-    done
-    \rm -v *.description
-    sync
+set -o | \grep -q ^xtrace.*off && { declare -A | \grep -wq colors || source $initDir/.colors; }
+function getRestrictedFilenamesSD {
+	trap 'rc=$?;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;return $rc' INT
+	youtube_dl=$(which youtube-dl)
+	youtubeURLPrefix=https://www.youtube.com/watch?v=
+	dailymotionURLPrefix=https://www.dailymotion.com/video/
+	format="mp4"
+	test $# != 0 && echo "=> There are $# urls to download ..."
+	i=0
+	for url in "$@"
+	do
+		let i++
+		echo "=> Downloading url # $i/$# ..."
+		echo "=> url = $url"
+		echo "=> Testing if $url still exists ..."
+		fileDirName="."
+		time LANG=C.UTF-8 $youtube_dl -f "$format" -qs -- "$url" 2>&1 | \grep --color=auto --color -A1 ^ERROR: && continue
+		if ! echo $url | \egrep -wq "www"; then
+			fileName=$($locate -er "$url.*mp4$" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null
+			fileBaseName="$(basename $fileName)"
+			fileDirName="$(dirname $fileName)"
+			if ! test -w "$fileName"; then
+				echo "${colors[yellowOnBlue]}=> The file <$fileBaseName> is already downloaded, skipping ...$normal" 1>&2
+				echo
+				continue
+			else
+				if LANG=C.UTF-8 $youtube_dl -f "$format" -qs $youtubeURLPrefix$url 2> /dev/null; then
+					url=$youtubeURLPrefix$url
+				else
+					if LANG=C.UTF-8 $youtube_dl -f "$format" -qs $dailymotionURLPrefix$url 2> /dev/null; then
+						url=$dailymotionURLPrefix$url
+					fi
+				fi
+			fi
+		else
+			echo $url | \grep --color=auto -q youtube.com/ && urlSuffix="$(echo $url | cut -d= -f2 | sed 's/^-/\\&/')"
+			if test "$urlSuffix" && fileName=$($locate -er "$urlSuffix.*mp4$" | \egrep -v "\.part|AUDIO" | sort -rt. | head -1) 2>/dev/null && test -s "$fileName"; then
+				fileBaseName="$(basename $fileName)"
+				fileDirName="$(dirname $fileName)"
+				echo "${colors[yellowOnBlue]}=> The file <$fileBaseName> is already downloaded, skipping ...$normal" 1>&2
+				echo
+				continue
+			fi
+		fi
+#		set +x
+		format="mp4[height<=?720]"
+		echo
+		fileName=$(LANG=C.UTF-8 $youtube_dl -f $format --get-filename --restrict-filenames -- "$url" || LANG=C.UTF-8 $youtube_dl -f $fallback --get-filename --restrict-filenames -- "$url")
+		echo "=> fileName = <$fileName>"
+		echo
+		if [ -f "$fileName" ] && [ ! -w "$fileName" ]; then
+			echo "${colors[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" 1>&2
+			echo
+			continue
+		fi
+
+		[ $fileDirName != . ]  && cd $fileDirName
+		LANG=C.UTF-8 $youtube_dl -f $format "$url" --restrict-filenames && mp4tags -m "$url" "$fileName" && chmod -w "$fileName" && echo && $(which ffprobe) -hide_banner "$fileName"
+		[ $fileDirName != . ]  && cd -
+		echo
+	done
+	sync
+	trap - INT
 }
 
-ytgetRestrictedFilenamesHD $@
+debug=$1
+[ "$debug" = "-x" ] && shift && set -x
+getRestrictedFilenamesSD $@
