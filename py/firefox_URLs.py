@@ -47,7 +47,7 @@ else :
 
 print("=> firefoxOpenedTabsFile = %s" % firefoxOpenedTabsFile,file=stderr)
 
-openMode = 'rb'
+openMode = 'r'
 with open( firefoxOpenedTabsFile, openMode ) as f :
 # Thanks to : https://unix.stackexchange.com/questions/385023/firefox-reading-out-urls-of-opened-tabs-from-the-command-line/389360#389360
 	if "jsonlz4" in firefoxOpenedTabsFile :
@@ -55,7 +55,11 @@ with open( firefoxOpenedTabsFile, openMode ) as f :
 		if f.read(8) != b"mozLz40\0": raise InvalidHeader("Invalid magic number") #Mozilla specific magic number
 		jdata = json.loads(lz4.block.decompress(f.read()))
 	else :
-		jdata = json.loads(f.read())
+		try :
+			jdata = json.loads(f.read())
+		except TypeError as why :
+			print( why, file = stderr )
+			jdata = json.loads( f.read().decode('utf-8') )
 
 for win in jdata.get("windows"):
 	for tab in win.get("tabs"):
