@@ -27,7 +27,11 @@ elif platform.system() == 'Windows' :
 
 argc = len(argv)
 if argc == 1 :
-	print( "\n".join( os.listdir( firefoxProfilesDIR ) ), file = stderr )
+	filesInFirefoxProfilesDIR = os.listdir( firefoxProfilesDIR )
+	filesInFirefoxProfilesDIR.sort()
+	for item in "profiles.ini","Pending Pings","Crash Reports" :
+		filesInFirefoxProfilesDIR.remove( item )
+	print( "\n".join( filesInFirefoxProfilesDIR ), file = stderr )
 	exit(0)
 else :
 	firefoxProfileName = argv[1]
