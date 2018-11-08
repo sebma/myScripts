@@ -5,7 +5,12 @@ import json
 import platform, os
 from os.path import exists, basename
 from sys import argv, stderr
-from pdb import set_trace
+
+try :
+	from ipdb import set_trace
+except ModuleNotFoundError as why :
+	print( why )
+	from pdb import set_trace
 
 scriptBaseName = basename( argv[0] )
 HOME = os.environ["HOME"]
@@ -30,7 +35,7 @@ if argc == 1 :
 	filesInFirefoxProfilesDIR = os.listdir( firefoxProfilesDIR )
 	filesInFirefoxProfilesDIR.sort()
 	for item in "profiles.ini","Pending Pings","Crash Reports" :
-		filesInFirefoxProfilesDIR.remove( item )
+		if item in filesInFirefoxProfilesDIR : filesInFirefoxProfilesDIR.remove( item )
 	print( "\n".join( filesInFirefoxProfilesDIR ), file = stderr )
 	exit(0)
 else :
