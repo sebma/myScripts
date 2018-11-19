@@ -22,7 +22,7 @@ $sudo lvs | grep -q root || {
 }
 rootFSDevice=$($sudo lvs | awk '/root/{print$2"-"$1}')
 #mount -t proc /proc /mnt/proc # Pour que Grub2 trouve /proc/mounts
-fsck /dev/mapper/$rootFSDevice # Checks the root filesystem
+$sudo fsck /dev/mapper/$rootFSDevice # Checks the root filesystem
 $sudo mkdir -pv /mnt/dev/pts /mnt/proc /mnt/sys
 mount | grep -q $rootFSDevice || $sudo mount /dev/mapper/$rootFSDevice /mnt          # montage de celle-ci en remplacant le X par le bon numero de partition
 for i in dev dev/pts proc sys ; do $sudo mount --bind /$i /mnt/$i ; done
