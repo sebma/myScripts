@@ -1,4 +1,4 @@
-#!/usr/bin/env ksh93
+#!/usr/bin/env bash
 
 set -o nounset
 
