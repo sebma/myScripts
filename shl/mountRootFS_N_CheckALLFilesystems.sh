@@ -35,7 +35,8 @@ $sudo chroot /mnt /bin/bash <<-EOF # mise a la racine du disque monte
 	mv -v /etc/fstab.BACKUP /etc/fstab
 	sync
 	mount /usr # pour la commande awk ou cut
-	for FS in $(fsck -N /dev/mapper/* 2>/dev/null | awk '/btrfs/{printf$NF" "}'); do test -n "$FS" && btrfsck --repair $FS; done # checks only btrfs filesystems
+	#for FS in $(fsck -N /dev/mapper/* 2>/dev/null | awk '/btrfs/{printf$NF" "}'); do test -n "$FS" && btrfsck --repair $FS; done # checks only btrfs filesystems
+	fsck -N /dev/mapper/* 2>/dev/null | egrep -v "/control|^fsck\>" | sort | awk '/btrfs/{print"btrfsck -p "$NF}!/btrfs/{notFound+=1;if(notFound==1)printf"fsck -ps ";else printf$NF" ";}' | sh -x
 	umount -l /usr
 	umount /usr
 EOF
