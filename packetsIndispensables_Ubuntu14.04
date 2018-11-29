@@ -57,6 +57,7 @@ git-man
 gitso
 gnome-terminal
 gnome-translate
+gnome-web-photo
 gns3
 gnuplot-qt
 gparted
@@ -84,6 +85,7 @@ kpcli
 kscreensaver-xsavers
 kvpm
 lftp
+libgoo-canvas-perl
 libmodule-path-perl
 librecad
 libreoffice
