@@ -12,7 +12,7 @@ xsetDPI () {
 	fi
 	if [ -z $newDPI ]; then
 		echo "=> Current DPI: $oldDPI"
-		echo "=> Usage: $FUNCNAME XResxYRes"
+		echo "=> Usage: $FUNCNAME [newDPI]"
 		return 2
 	else
 		echo "=> Setting new resolution command :"
