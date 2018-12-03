@@ -1,13 +1,15 @@
 #!/usr/bin/env sh
 
 xsetResolution () { 
-	local output=$(\xrandr | \awk  '/^.+ connected/{print$1}')
-	local oldResolution=$(\xrandr | \awk '/[0-9].*\*/{print$1}')
+	local awk="command awk"
+	local xrandr="command xrandr"
+	local output=$($xrandr | $awk  '/^.+ connected/{print$1}')
+	local oldResolution=$($xrandr | $awk '/[0-9].*\*/{print$1}')
 	local newResolution=$1
 	echo "=> Reset current resolution command :"
-	echo "\xrandr --output $output --mode $oldResolution"
+	echo "xrandr --output $output --mode $oldResolution"
 	if [ -z $newResolution ]; then
-		xrandr
+		$xrandr
 		echo "=> Usage: $FUNCNAME XResxYRes"
 		return 1
 	else
