@@ -24,3 +24,4 @@ xsetResolution () {
 }
 
 xsetResolution $@
+lxrandr || xfce4-display-settings
