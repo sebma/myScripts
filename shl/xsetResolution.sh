@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 xsetResolution () { 
 	local awk="command awk"
@@ -13,15 +13,15 @@ xsetResolution () {
 		echo "=> Usage: $FUNCNAME XResxYRes"
 		return 1
 	else
-		if ! \xrandr | grep --color=auto -wq $newResolution; then
+		if ! $xrandr | grep --color=auto -wq $newResolution; then
 			echo "=> $FUNCNAME ERROR : The resolution <$newResolution> is not supported." 1>&2
 			return 2
 		fi
 		echo "=> Setting new resolution command :"
-		echo "\xrandr --output $output --mode $newResolution"
-		\xrandr --output $output --mode $newResolution
+		echo "xrandr --output $output --mode $newResolution"
+		$xrandr --output $output --mode $newResolution
 	fi
 }
 
 xsetResolution $@
-lxrandr || xfce4-display-settings
+lxrandr || xfce4-display-settings &
