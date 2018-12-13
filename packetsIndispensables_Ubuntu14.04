@@ -42,6 +42,7 @@ elinks
 eog
 evince
 exfat-fuse
+exiv2
 expect
 fdupes
 ffmpeg
@@ -76,6 +77,7 @@ iperf
 iperf3
 ipython
 ipython3
+jhead
 kde-touchpad
 kde-window-manager
 kdeartwork-theme-window
@@ -88,6 +90,7 @@ kscreensaver-xsavers
 kvpm
 lftp
 libgoo-canvas-perl
+libjpeg-turbo-progs
 libmodule-path-perl
 librecad
 libreoffice
