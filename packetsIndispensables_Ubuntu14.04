@@ -90,6 +90,7 @@ kscreensaver-xsavers
 kvpm
 lftp
 libgoo-canvas-perl
+libimage-exiftool-perl
 libjpeg-turbo-progs
 libmodule-path-perl
 librecad
