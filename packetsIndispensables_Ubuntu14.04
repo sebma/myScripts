@@ -28,6 +28,7 @@ browser-plugin-vlc
 build-essential
 cairo-dock-core
 ccze
+cdw
 cgdb
 checkinstall
 chromium-browser
