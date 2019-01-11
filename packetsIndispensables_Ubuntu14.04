@@ -48,6 +48,7 @@ exiv2
 expect
 fdupes
 ffmpeg
+ffmpegthumbs
 firefox-esr
 firefox-globalmenu
 flpsed
@@ -87,6 +88,7 @@ kdeartwork-theme-window
 kdegraphics-thumbnailers
 keepass2
 keepassx
+kffmpegthumbnailer
 kid3-cli
 kpcli
 kscreensaver-xsavers
@@ -121,6 +123,7 @@ mkvtoolnix
 mkvtoolnix-gui
 mp4v2-utils
 mpg321
+mplayerthumbs
 mpv
 mupdf
 mupdf-tools
