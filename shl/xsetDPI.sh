@@ -6,6 +6,7 @@ xsetDPI () {
 	local newDPI=$1
 	if [ -z $oldDPI ]; then
 		echo "=> Could not infer the current DPI." >&2
+		xfconf-query -c xsettings -n -p /Xft/DPI -t int -s 96
 	else		
 		echo "=> Reset current DPI command :"
 		echo "xfconf-query -c xsettings -p /Xft/DPI -s $oldDPI"
