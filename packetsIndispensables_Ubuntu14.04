@@ -41,6 +41,8 @@ dcfldd
 deborphan
 dfc
 diatheke # command line bible browsing and search tool
+efibootmgr
+efivar
 elinks
 eog
 evince
