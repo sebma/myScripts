@@ -37,6 +37,7 @@ chromium-browser
 cmake
 cmake-curses-gui
 conky-all
+curlftpfs
 dcfldd
 deborphan
 dfc
