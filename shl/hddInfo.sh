@@ -3,7 +3,7 @@
 #set -o errexit
 set -o nounset
 type smartctl >/dev/null || exit
-type sudo >/dev/null 2>&1 && sudo=$(which sudo) || sudo=""
+sudo=$(which sudo 2>/dev/null)
 diskDevice=""
 os=$(uname -s)
 
@@ -32,9 +32,9 @@ else
 	allInformation=-a
 fi
 
-diskModel=$($sudo smartctl -i $diskDevice | awk '/Model:/{print$NF}')
 diskModel="$($sudo smartctl -i $diskDevice |  awk '/Model:/{gsub("/","_");for(i=4;i<NF;++i)printf $i"_";print$i}')"
-test -z $diskModel && exit 
+test -z $diskModel && diskModel="$($sudo smartctl -i $diskDevice |  awk '/Model:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
+test -z $diskModel && echo "=> ERROR : Could not infer diskModel." 2>/dev/null && exit 2
 
 diskFamily="$($sudo smartctl -i $diskDevice |  awk '/Family:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
 test -z $diskFamily && diskFamily="$($sudo smartctl -i $diskDevice |  awk '/Model:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
