@@ -6,10 +6,11 @@ echo list partition
 echo list volume
 ) > diskInfo.dpt
 
+prompt $$$s
+echo on
 diskpart -s diskInfo.dpt
 del diskInfo.dpt
 echo.
-echo on
-
 bcdedit
 bootrec /ScanOs
+@prompt
