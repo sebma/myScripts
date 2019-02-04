@@ -33,16 +33,24 @@ else
 fi
 
 diskModel=$($sudo smartctl -i $diskDevice | awk '/Model:/{print$NF}')
-test -z $diskModel && exit
-diskFamily="$($sudo smartctl -i $diskDevice |  awk '/Family:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
-logDir=$HOME/log
-logFile=$logDir/$(echo smartctl_$diskFamily $diskModel | sed "s/[ .]/_/g").log
-mkdir -p $logDir
+diskModel="$($sudo smartctl -i $diskDevice |  awk '/Model:/{gsub("/","_");for(i=4;i<NF;++i)printf $i"_";print$i}')"
+test -z $diskModel && exit 
 
-blink=$'\E[5m'
-bold=$'\E[1m'
-normal=$'\E[0m'
-red=$'\E[0;31m'
+diskFamily="$($sudo smartctl -i $diskDevice |  awk '/Family:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
+test -z $diskFamily && diskFamily="$($sudo smartctl -i $diskDevice |  awk '/Model:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
+diskFamily="$(echo $diskFamily | sed -E "s/[.]+$|\"//g")"
+
+logDir=$HOME/log
+mkdir -p $logDir
+logFile=$logDir/smartctl__${diskFamily}__${diskModel}.log
+echo
+trap 'rc=$?;set +x;echo "=> CTRL+C Interruption trapped.">&2;echo;echo "=> logFile = $logFile";exit $rc' INT
+
+blink=$(tput blink)
+bold=$(tput bold)
+normal=$(tput sgr0)
+red=$(tput setaf 1)
+blue=$(tput setaf 4)
 {
 	echo "=> Disk general info for $diskFamily model $diskModel on $diskDevice :"
 	echo
@@ -61,11 +69,13 @@ red=$'\E[0;31m'
 	echo
 	$sudo smartctl -H -l selftest $diskDevice
 	echo "=> Disk Errors for $diskFamily model $diskModel on $diskDevice for the SMART Self-Test Log :"
-	echo $red$bold$blink
+	echo
+	printf $red$bold$blink
 	$sudo smartctl -q errorsonly -H -l selftest $diskDevice
 	printf $normal
 	echo "=> Disk Errors for $diskFamily model $diskModel on $diskDevice for the SMART Error Log :"
-	echo $red$bold$blink
+	echo
+	printf $red$bold$blink
 	$sudo smartctl -q errorsonly -H -l error $diskDevice
 	printf $normal 
 	echo "=> SMART Attributes Data for $diskFamily model $diskModel on $diskDevice :"
@@ -80,9 +90,14 @@ red=$'\E[0;31m'
 	echo
 	$sudo smartctl $allInformation $diskDevice | grep Temperature | head -5
 	echo
-	which hddtemp >/dev/null 2>&1 && echo "=> Disk temperature using hddtemp :" && echo && $sudo hddtemp $diskDevice
+	printf "=> Disk temperature using hddtemp :"
+	if $sudo smartctl -i $diskDevice | grep -q "Rotation Rate:.*Solid State Device";
+	then echo "$blue$bold=> hddtemp cannot detect the temperature sensor for $diskDevice.$normal" >&2
+	else which hddtemp >/dev/null 2>&1 && echo && echo && $sudo hddtemp $diskDevice
+	fi
 } 2>&1 | tee $logFile
 
 echo
 echo "=> logFile = $logFile"
 
+trap - INT
