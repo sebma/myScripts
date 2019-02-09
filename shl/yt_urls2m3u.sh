@@ -2,6 +2,7 @@
 
 urlsFile="$1"
 
+export LANG=fr_FR.UTF-8
 echo "#EXTM3U"
 awk '{print$1}' $urlsFile | uniq | while read url
 do
