@@ -83,7 +83,7 @@ blue=$(tput setaf 4)
 	$sudo smartctl -A $diskDevice
 	echo "=> SMART Current_Pending_Sector and Offline_Uncorrectable specific Attributes for $diskFamily model $diskModel on $diskDevice :"
 	echo
-	$sudo smartctl -A $diskDevice | egrep -v "(Current_Pending_Sector|Offline_Uncorrectable).* 0$" | egrep "(Current_Pending_Sector|Offline_Uncorrectable)" | egrep --color=always " [0-9]+$" && echo
+	$sudo smartctl -A $diskDevice | egrep -v " 0$" | egrep "(Reallocated_Sector_Ct|Current_Pending_Sector|Offline_Uncorrectable)" | egrep --color=always " [0-9]+$" && echo
 	echo "=> Disk temperature using smartctl :"
 	echo
 	$sudo smartctl $allInformation $diskDevice | grep Temperature | head -5
