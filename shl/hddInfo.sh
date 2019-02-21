@@ -81,9 +81,11 @@ blue=$(tput setaf 4)
 	echo "=> SMART Attributes Data for $diskFamily model $diskModel on $diskDevice :"
 	echo
 	$sudo smartctl -A $diskDevice
-	echo "=> SMART Current_Pending_Sector and Offline_Uncorrectable specific Attributes for $diskFamily model $diskModel on $diskDevice :"
+	echo "=> SMART Reallocated_Sector_Ct, Current_Pending_Sector, Offline_Uncorrectable specific Attributes for $diskFamily model $diskModel on $diskDevice :"
 	echo
 	$sudo smartctl -A $diskDevice | egrep -v " 0$" | egrep "(Reallocated_Sector_Ct|Current_Pending_Sector|Offline_Uncorrectable)" | egrep --color=always " [0-9]+$" && echo
+	echo "=> SMART Pre-fail non-zero values :"
+	$sudo smartctl -A $diskDevice | egrep -v " 0$" | egrep "Pre-fail" | egrep --color=always " [0-9]+$" && echo
 	echo "=> Disk temperature using smartctl :"
 	echo
 	$sudo smartctl $allInformation $diskDevice | grep Temperature | head -5
