@@ -85,6 +85,7 @@ blue=$(tput setaf 4)
 	echo
 	$sudo smartctl -A $diskDevice | egrep -v " 0$" | egrep "(Reallocated_Sector_Ct|Current_Pending_Sector|Offline_Uncorrectable)" | egrep --color=always " [0-9]+$" && echo
 	echo "=> SMART Pre-fail non-zero values :"
+	echo
 	$sudo smartctl -A $diskDevice | egrep -v " 0$" | egrep "Pre-fail" | egrep --color=always " [0-9]+$" && echo
 	echo "=> Disk temperature using smartctl :"
 	echo
