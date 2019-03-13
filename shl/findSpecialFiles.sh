@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 type sudo >/dev/null 2>&1 && sudo=$(which sudo) || sudo=""
-$sudo echo
+$sudo -v
 
 test $# = 0 && fileSystemList=$(df -T | egrep -iv "home|data" | awk "/btrfs|ext(2|3|4)/"'{print$NF}') || fileSystemList=$@
 
