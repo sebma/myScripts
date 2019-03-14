@@ -405,7 +405,7 @@ function getxvideos {
 function locate {
   echo "$@" | grep -q "\-[a-z]*r" && $(which locate) "$@" || $(which locate) -i "*${@}*"
 }
-function mediaInfoSummary {
+function mediainfoSummary {
   for media
   do
     mediainfo "$media" | \egrep "^Complete name|^Format  |^Format version|^Format profile| size|^Duration|^Video|^Audio|Kbps"
