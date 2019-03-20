@@ -6,6 +6,7 @@
 #virtualbox
 a2ps
 aac-enc
+abcde
 add-apt-key
 android-tools-adb
 apt-file
@@ -51,6 +52,7 @@ evince
 exfat-fuse
 exiv2
 expect
+fdkaac-encoder
 fdupes
 ffmpeg
 ffmpegthumbs
