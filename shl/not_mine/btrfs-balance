@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+#cf. https://github.com/sailfishos/btrfs-balancer/tree/master/scripts
 
 ROOTDEV=/dev/mmcblk0p28
 
