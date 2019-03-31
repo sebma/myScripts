@@ -116,7 +116,12 @@ while getopts "d:t:c:fh" opt; do
 done
 shift $(($OPTIND-1))
 
-[ $show_usages = 1 ] && get_usages && echo "$FREE_SPACE" && exit 0
+[ "$show_usages" = 1 ] && get_usages && echo "$FREE_SPACE" && exit 0
+
+if ! [ -e $ROOTDEV ]; then
+	echo "=> ERROR: $ROOTDEV does not exist." >&2
+	exit 2
+fi
 
 if test check_balance_need; then
 	# We start from empty block groups and advance to more full ones.
