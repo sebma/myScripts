@@ -7,7 +7,6 @@
 a2ps
 aac-enc
 abcde
-add-apt-key
 android-tools-adb
 apt-file
 apt-rdepends
@@ -208,6 +207,7 @@ tmpreaper
 tpconfig
 traceroute
 transfig
+trash-cli
 units
 unoconv
 verse
