@@ -1215,7 +1215,7 @@ test $distribVersion -ge 10 && AddLaunchpadRepositories $ppaRepositoriesList
 
 packageList=""
 #packageList="gammu grub-pc grub-common html-xml-utils hwinfo pdftk libcdio-utils gnome-media-profiles gstreamer-tools lsdvd lame vorbis-tools conky-all ccze colortail mc cdrdao cdparanoia gdebi gdisk unrar-free cabextract keychain gpm mesa-utils vlock icedax mozplugger deborphan quvi lshw-gtk fsarchiver w3m ksh fping hping3"
-#packageList="vim numlockx openssh-server gparted git-core language-pack-gnome-fr gpm system-config-lvm dselect dconf-tools lshw-gtk xmlstarlet fsarchiver flashplugin-installer mozplugger aptitude add-apt-key deborphan firefox firefox-gnome-support firefox-locale-en firefox-locale-fr chromium-browser wodim cdrdao icedax libcdio-utils abcde bashburn xcdroast cdparanoia quvi cclive libav-tools mplayer smplayer"
+#packageList="vim numlockx openssh-server gparted git-core language-pack-gnome-fr gpm system-config-lvm dselect dconf-tools lshw-gtk xmlstarlet fsarchiver flashplugin-installer mozplugger aptitude deborphan firefox firefox-gnome-support firefox-locale-en firefox-locale-fr chromium-browser wodim cdrdao icedax libcdio-utils abcde bashburn xcdroast cdparanoia quvi cclive libav-tools mplayer smplayer"
 total=0
 for package in $packageList
 do
@@ -1282,7 +1282,7 @@ which sound-juicer >/dev/null || {
 	$installPackages sound-juicer gstreamer0.10-plugins-ugly gstreamer0.10-plugins-bad || true
 }
 
-test $distribVersion -gt 9 && universePackageList="transcode gpac ogmtools vobcopy gstreamer0.10-ffmpeg gstreamer0.10-fluendo-mp3 alacarte aptitude system-config-lvm dconf-tools add-apt-key chromium-browser libcdio-utils abcde bashburn cclive w3m-img" || universePackageList="alacarte aptitude system-config-lvm add-apt-key chromium-browser libcdio-utils abcde cclive w3m-img"
+test $distribVersion -gt 9 && universePackageList="transcode gpac ogmtools vobcopy gstreamer0.10-ffmpeg gstreamer0.10-fluendo-mp3 alacarte aptitude system-config-lvm dconf-tools chromium-browser libcdio-utils abcde bashburn cclive w3m-img" || universePackageList="alacarte aptitude system-config-lvm chromium-browser libcdio-utils abcde cclive w3m-img"
 echo "=> Installation des paquets: $universePackageList ..."
 $installPackages $universePackageList | grep -v "is already the newest version."
 $cleanPackages
