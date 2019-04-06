@@ -2,8 +2,7 @@
 
 echo
 ffprobe="command ffprobe -hide_banner -probesize 400M -analyzeduration 400M"
-#movflags="+frag_keyframe"
-movflags="+faststart"
+movflags="+frag_keyframe"
 for file
 do
 	extension=${file/*./}
