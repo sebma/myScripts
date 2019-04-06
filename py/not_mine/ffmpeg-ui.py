@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-1 -*-
+# i.e. https://github.com/moust/ffmpeg-ui/blob/master/ffmpeg-ui.py
 
 import Tkinter
 import ttk
@@ -100,7 +101,7 @@ class Application(Tkinter.Tk):
                 'ar':            44100,
                 'ab':            '128k',
                 'format':        'mp4',
-                'extraOptions':  '-movflags faststart'
+                'extraOptions':  '-movflags +frag_keyframe'
             },
             'H.264 576p': {
                 'vcodec':        'libx264',
@@ -114,7 +115,7 @@ class Application(Tkinter.Tk):
                 'ar':            44100,
                 'ab':            '128k',
                 'format':        'mp4',
-                'extraOptions':  '-movflags faststart'
+                'extraOptions':  '-movflags +frag_keyframe'
             },
             'H.264 360p': {
                 'vcodec':        'libx264',
@@ -128,7 +129,7 @@ class Application(Tkinter.Tk):
                 'ar':            44100,
                 'ab':            '128k',
                 'format':        'mp4',
-                'extraOptions':  '-movflags faststart -maxrate 1500k -bufsize 3000k'
+                'extraOptions':  '-movflags +frag_keyframe -maxrate 1500k -bufsize 3000k'
             },
             'WebM 720p': {
                 'vcodec':        'libvpx',
