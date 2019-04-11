@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 
+#set -o errexit
+set -o nounset
+
+LANG=C.UTF-8
 scriptBaseName=${0/*\/}
 scriptExtension=${0/*./}
 scriptBaseName=${scriptBaseName/.$scriptExtension/}
 funcName=$scriptBaseName
+youtube_dl="command youtube-dl"
 
 unset -f getRestrictedFilenamesFORMAT
 getRestrictedFilenamesFORMAT () {
