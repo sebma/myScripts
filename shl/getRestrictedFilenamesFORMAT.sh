@@ -53,6 +53,7 @@ getRestrictedFilenamesFORMAT () {
 		echo "=> fileName to be downloaded = <$fileName>"
 		echo
 
+		tty -s || COLUMNS=80 # Pour eviter que AtomicParsley sorte en erreur lorsque le script est lance en tache de fond et que "set -o nounset" est defini
 		[ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] && $youtube_dl -o "$fileName" -f "$siteVideoFormat" "$url" --embed-thumbnail || $youtube_dl -o $fileName -f "$siteVideoFormat" "$url"
 		downloadOK=$?
 		if [ $downloadOK = 0 ] 
