@@ -8,7 +8,7 @@ scriptBaseName=${0/*\/}
 scriptExtension=${0/*./}
 scriptBaseName=${scriptBaseName/.$scriptExtension/}
 funcName=$scriptBaseName
-youtube_dl="command youtube-dl"
+youtube_dl="eval LANG=C.UTF-8 command youtube-dl" # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
 
 unset -f getRestrictedFilenamesFORMAT
 getRestrictedFilenamesFORMAT () {
@@ -37,12 +37,11 @@ getRestrictedFilenamesFORMAT () {
 
 		echo "=> Testing if $url still exists ..."
 		fileName=$(time $youtube_dl -f "$siteVideoFormat" --get-filename -- "$url" 2>&1)
+		echo $fileName | \egrep --color -A1 ERROR: && echo && continue
 		extension="${fileName/*./}"
 		fileName="${fileName/.$extension/__$fqdn.$extension}"
 
-		echo $fileName | \egrep --color -A1 ^ERROR: && echo && continue
 		echo
-
 		if [ -f "$fileName" ] && [ ! -w "$fileName" ]
 		then
 			echo "${colors[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" >&2
