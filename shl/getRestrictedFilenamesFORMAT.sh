@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -o nounset
+
 [ $BASH_VERSINFO -ge 4 ] && export declare="declare -A" || export declare="declare"
 $declare colors
 [ $BASH_VERSINFO -ge 4 ] && colors=( [red]=$(tput setaf 1) [green]=$(tput setaf 2) [blue]=$(tput setaf 4) [cyan]=$(tput setaf 6) [yellow]=$(tput setaf 11) [yellowOnRed]=$(tput setaf 11)$(tput setab 1) [greenOnBlue]=$(tput setaf 2)$(tput setab 4) [yellowOnBlue]=$(tput setaf 11)$(tput setab 4) [cyanOnBlue]=$(tput setaf 6)$(tput setab 4) [whiteOnBlue]=$(tput setaf 7)$(tput setab 4) [redOnGrey]=$(tput setaf 1)$(tput setab 7) [blueOnGrey]=$(tput setaf 4)$(tput setab 7) )
@@ -37,7 +39,9 @@ getRestrictedFilenamesFORMAT () {
 		echo
 
 		echo "=> Testing if $url still exists ..."
+		set +x
 		fileName=$(time $youtube_dl -f "$siteVideoFormat" --get-filename -- "$url" 2>&1)
+		set -x
 		echo $fileName | \egrep --color -A1 ERROR: && echo && continue
 		extension="${fileName/*./}"
 		fileName="${fileName/.$extension/__$fqdn.$extension}"
@@ -59,7 +63,7 @@ getRestrictedFilenamesFORMAT () {
 		if [ $downloadOK = 0 ] 
 		then
 			[ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] && mp4tags -m "$url" "$fileName"
-			chmod -w "$fileName" && echo && videoInfo "$fileName"
+			chmod -w "$fileName" && echo && videoInfo.sh "$fileName"
 		fi
 
 		echo
