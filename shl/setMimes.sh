@@ -78,7 +78,4 @@ echo "=> Association du protocole apt:, ssh: avec les applications adequoites ..
 xdg-mime default dolphin.desktop inode/directory
 xdg-mime default apturl.desktop x-scheme-handler/apt
 xdg-mime default putty.desktop x-scheme-handler/ssh
-defaultBrowser=midori
-echo "=> Association des protocoles http et https avec $defaultBrowser ..."
-xdg-mime default $defaultBrowser.desktop x-scheme-handler/http x-scheme-handler/https
 echo "=> Fait."
