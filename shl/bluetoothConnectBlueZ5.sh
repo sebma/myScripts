@@ -42,9 +42,9 @@ fi
 if echo "$deviceList" | awk '/^Device/{print$NF}' | grep -q "$deviceName"; then {
 	deviceHW=$(echo "$deviceList" | awk /^Device.*$deviceName/'{print$2}')
 	cat<<EOF | bluetoothctl -a
+select $bluetoothControllerMACAddress
 power on
 default-agent
-select $bluetoothControllerMACAddress
 pairable on
 pair $deviceHW
 trust $deviceHW
