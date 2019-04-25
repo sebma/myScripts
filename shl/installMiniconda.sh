@@ -24,8 +24,7 @@ function installMinicondaFromScript {
 	local systemType=$(uname -s)
 	local archi=$(uname -m | \sed "s/^i6/x/")
 	local wgetOptions="-c --progress=bar"
-	local wget="$(which wget) $wgetOptions"
-	local wget2="$(which wget2) $wgetOptions"
+	local wget="$(which wget2 2>/dev/null || which wget) $wgetOptions"
 
 	case $systemType in
 
@@ -43,7 +42,7 @@ function installMinicondaFromScript {
 
 	if [ ! -f $minicondaInstallerScript ]
 	then
-		echo "=> Downloading $condaInstallerURL ..." && $wget2 $condaInstallerURL || $wget $condaInstallerURL
+		echo "=> Downloading $condaInstallerURL ..." && $wget $condaInstallerURL
 		chmod +x $minicondaInstallerScript
 	fi
 
