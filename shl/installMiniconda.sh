@@ -49,13 +49,15 @@ function installMiniconda {
 		if [ $systemType = Linux  ] 
 		then 
 			local distribType=$(grep ID_LIKE /etc/os-release | cut -d= -f2 | cut -d'"' -f2 | cut -d" " -f1)
+			local distribName=$(grep -w ID /etc/os-release | cut -d= -f2 | cut -d'"' -f2 | cut -d" " -f1)
 			case $distribType in
 			debian)
 				\curl https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc | gpg --dearmor > conda.gpg
 				test -s /etc/apt/trusted.gpg.d/conda.gpg || sudo install -o root -g root -m 644 conda.gpg /etc/apt/trusted.gpg.d/
 				rm conda.gpg
 				test -s /etc/apt/sources.list.d/conda.list || echo "deb [arch=amd64] https://repo.anaconda.com/pkgs/misc/debrepo/conda stable main" | sudo tee /etc/apt/sources.list.d/conda.list
-				apt show conda >/dev/null 2>&1 || sudo apt-get update
+				apt-cache show conda >/dev/null 2>&1 || sudo apt-get update
+				apt-cache show conda >/dev/null || { echo;echo "=> ERROR : Cannot find the conda $distribName package in the <https://repo.anaconda.com/pkgs/misc/debrepo/conda> repository for the $archi architecture.">&2;exit 2; }
 				dpkg -l conda >/dev/null 2>&1 || sudo apt install -V conda
 				test -s /opt/conda/etc/profile.d/conda.sh && source /opt/conda/etc/profile.d/conda.sh
 				conda -V
