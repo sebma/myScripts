@@ -56,7 +56,9 @@ function installMiniconda {
 				rm conda.gpg
 				test -s /etc/apt/sources.list.d/conda.list || echo "deb [arch=amd64] https://repo.anaconda.com/pkgs/misc/debrepo/conda stable main" | sudo tee /etc/apt/sources.list.d/conda.list
 				apt show conda >/dev/null 2>&1 || sudo apt-get update
-				sudo apt install -V conda
+				dpkg -l conda >/dev/null 2>&1 || sudo apt install -V conda
+				test -s /opt/conda/etc/profile.d/conda.sh && source /opt/conda/etc/profile.d/conda.sh
+				conda -V
 			;;
 			rhel|fedora|centos)
 				rpm --import https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc
@@ -74,7 +76,9 @@ gpgcheck=1
 gpgkey=https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc
 
 EOF
-				sudo yum install conda
+				rpm -q conda >/dev/null 2>&1 || sudo yum install conda
+				test -s /opt/conda/etc/profile.d/conda.sh && source /opt/conda/etc/profile.d/conda.sh
+				conda -V
 			;;
 			*)
 				if [ ! -f $minicondaInstallerScript ]
