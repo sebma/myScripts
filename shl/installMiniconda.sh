@@ -3,6 +3,9 @@
 set -o nounset
 
 scriptBaseName=$(basename $0)
+debug=0
+reInstall=0
+
 function scriptHelp {
 	cat <<-EOF >&2
 	=> Usage:
@@ -11,21 +14,28 @@ function scriptHelp {
 	$scriptBaseName -3 : install miniconda3
 	$scriptBaseName -n Name : install miniconda and C.P.A. DEV Python requirements in "Name" environment
 EOF
-	exit 1
+	exit -1
 }
 
 function installMiniconda {
 	local Version=$1
 	local condaInstallerURL=""
-	if which -a conda | grep -q miniconda$Version/bin/conda
+	local systemType=$(uname -s)
+	local wgetOptions="-c --progress=bar"
+	local wget="$(which wget) $wgetOptions"
+	local wget2="$(which wget2) $wgetOptions"
+
+	[ $debug = 1 ] && set -x
+#	if which -a conda | grep -q miniconda$Version/bin/conda
+	if which -a conda | grep -q miniconda$Version/bin/conda && [ $reInstall = 0 ]
 	then
 		echo "=> INFO: Miniconda version $Version is already installed." >&2
+		exit 1
 	else
-		case $(uname -s) in
+		case $systemType in
 		Darwin)	minicondaInstallerScript=Miniconda$Version-latest-MacOSX-x86_64.sh
 		;;
-		Linux) [ $(uname -m) = i686 ] && archi=x86 || archi=$(uname -m)
-			minicondaInstallerScript=Miniconda$Version-latest-$(uname -s)-$archi.sh
+		Linux) archi=$(uname -m | \sed "s/^i6/x/"); minicondaInstallerScript=Miniconda$Version-latest-$systemType-$archi.sh
 		;;
 		*) ;;
 		esac
@@ -34,12 +44,55 @@ function installMiniconda {
 	#	sudo chown -v $USER:$(id -gn) /usr/local/miniconda$Version
 
 		condaInstallerURL=https://repo.continuum.io/miniconda/$minicondaInstallerScript
-		test ! -f $minicondaInstallerScript && echo "=> Downloading $condaInstallerURL ..." && curl -#O $condaInstallerURL
-		chmod +x $minicondaInstallerScript
+		if [ $systemType = Linux  ] 
+		then 
+			local distribType=$(grep ID_LIKE /etc/os-release | cut -d= -f2 | cut -d'"' -f2 | cut -d" " -f1)
+			case $distribType in
+			debian)
+				\curl https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc | gpg --dearmor > conda.gpg
+				test -s /etc/apt/trusted.gpg.d/conda.gpg || sudo install -o root -g root -m 644 conda.gpg /etc/apt/trusted.gpg.d/
+				rm conda.gpg
+				test -s /etc/apt/sources.list.d/conda.list || echo "deb [arch=amd64] https://repo.anaconda.com/pkgs/misc/debrepo/conda stable main" | sudo tee /etc/apt/sources.list.d/conda.list
+				apt show conda >/dev/null 2>&1 || sudo apt-get update
+				sudo apt install -V conda
+			;;
+			rhel|fedora|centos)
+				rpm --import https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc
+				cat <<-EOF | sudo tee /etc/yum.repos.d/conda.repo
+[conda]
 
-		brew=$(which brew)
-		if [ $(uname -s) = Darwin ] 
+name=Conda
+
+baseurl=https://repo.anaconda.com/pkgs/misc/rpmrepo/conda
+
+enabled=1
+
+gpgcheck=1
+
+gpgkey=https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc
+
+EOF
+				sudo yum install conda
+			;;
+			*)
+				if [ ! -f $minicondaInstallerScript ]
+				then
+					echo "=> Downloading $condaInstallerURL ..." && $wget2 $condaInstallerURL || $wget $condaInstallerURL
+					chmod +x $minicondaInstallerScript
+				fi
+
+				if groups | \egrep -wq "sudo|adm|root" 
+				then
+					sudo ./$minicondaInstallerScript -p /usr/local/miniconda$Version -b 
+				else
+					./$minicondaInstallerScript -b
+				fi
+				test $? = 0 && rm -vf $minicondaInstallerScript
+			;;
+			esac
+		elif [ $systemType = Darwin ] 
 		then
+			brew=$(which brew)
 			$brew -v || {
 				echo "=> ERROR : Homebrew is not installed, you must install it first." >&2
 				exit -1
@@ -55,13 +108,9 @@ function installMiniconda {
 				$brew tap caskroom/cask
 				$brew cask install miniconda
 			fi
-		elif [ $(uname -s) = Linux  ] 
-		then 
-			groups | \egrep -wq "sudo|adm|root" && sudo ./$minicondaInstallerScript -p /usr/local/miniconda$Version -b || ./$minicondaInstallerScript -b
 		fi
-		
 
-		test $? = 0 && rm -v $minicondaInstallerScript || exit
+		test $? = 0 || exit
 	#	sudo chown -R $USER:$(id -gn) /usr/local/miniconda$Version
 	fi
 
@@ -88,6 +137,7 @@ function installCondaPythonPackages {
 	local conda=$(which conda$minicondaVersion)
 	local requiredPythonPackageList="$2"
 	local envName="$3"
+	local systemType=$(uname -s)
 
 	if test -n $envName
 	then
@@ -103,12 +153,14 @@ function installCondaPythonPackages {
 }
 
 function runScriptWithArgs {
-	local OPTSTRING=23hn:
+	local OPTSTRING=23hrxn:
 
 	while getopts $OPTSTRING NAME; do
 		case "$NAME" in
 		2|3) minicondaVersion=$NAME ;;
 		n) envName="$OPTARG" ;;
+		r) reInstall=1;;
+		x) debug=1;;
 		h|*) scriptHelp ;;
 		esac
 	done
