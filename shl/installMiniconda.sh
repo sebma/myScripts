@@ -2,6 +2,8 @@
 
 set -o nounset
 
+trap 'rc=130;set +x;echo "=> $BASH_SOURCE: CTRL+C Interruption trapped.">&2;exit $rc' INT
+
 scriptBaseName=$(basename $0)
 debug=0
 reInstall=0
@@ -173,3 +175,5 @@ installMiniconda $minicondaVersion
 
 #requiredPythonPackageList="python=$minicondaVersion scipy pandas ipython termcolor"
 #installCondaPythonPackages $minicondaVersion "$requiredPythonPackageList" "$envName"
+
+trap - INT
