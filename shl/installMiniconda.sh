@@ -19,52 +19,62 @@ EOF
 	exit -1
 }
 
-function installMiniconda {
-	local Version=$1
-	local condaInstallerURL=""
+function installMinicondaFromScript {
+	[ $debug = 1 ] && set -x
 	local systemType=$(uname -s)
+	local archi=$(uname -m | \sed "s/^i6/x/")
 	local wgetOptions="-c --progress=bar"
 	local wget="$(which wget) $wgetOptions"
 	local wget2="$(which wget2) $wgetOptions"
 
-	[ $debug = 1 ] && set -x
-#	if which -a conda | grep -q miniconda$Version/bin/conda
-	if which -a conda | grep -q miniconda$Version/bin/conda && [ $reInstall = 0 ]
+	case $systemType in
+
+	Darwin)	minicondaInstallerScript=Miniconda$Version-latest-MacOSX-x86_64.sh
+	;;
+	Linux) archi=$(uname -m | \sed "s/^i6/x/"); minicondaInstallerScript=Miniconda$Version-latest-$systemType-$archi.sh
+	;;
+	*) ;;
+	esac
+
+#	sudo mkdir -v /usr/local/miniconda$Version
+#	sudo chown -v $USER:$(id -gn) /usr/local/miniconda$Version
+
+	condaInstallerURL=https://repo.continuum.io/miniconda/$minicondaInstallerScript
+
+	if [ ! -f $minicondaInstallerScript ]
 	then
-		echo "=> INFO: Miniconda version $Version is already installed." >&2
-		exit 1
+		echo "=> Downloading $condaInstallerURL ..." && $wget2 $condaInstallerURL || $wget $condaInstallerURL
+		chmod +x $minicondaInstallerScript
+	fi
+
+	if groups | \egrep -wq "sudo|adm|root" 
+	then
+		sudo ./$minicondaInstallerScript -p /usr/local/miniconda$Version -b 
 	else
-		case $systemType in
-		Darwin)	minicondaInstallerScript=Miniconda$Version-latest-MacOSX-x86_64.sh
-		;;
-		Linux) archi=$(uname -m | \sed "s/^i6/x/"); minicondaInstallerScript=Miniconda$Version-latest-$systemType-$archi.sh
-		;;
-		*) ;;
-		esac
+		./$minicondaInstallerScript -b
+	fi
+	test $? = 0 && rm -vf $minicondaInstallerScript
+}
 
-	#	sudo mkdir -v /usr/local/miniconda$Version
-	#	sudo chown -v $USER:$(id -gn) /usr/local/miniconda$Version
-
-		condaInstallerURL=https://repo.continuum.io/miniconda/$minicondaInstallerScript
-		if [ $systemType = Linux  ] 
-		then 
-			local distribType=$(grep ID_LIKE /etc/os-release | cut -d= -f2 | cut -d'"' -f2 | cut -d" " -f1)
-			local distribName=$(grep -w ID /etc/os-release | cut -d= -f2 | cut -d'"' -f2 | cut -d" " -f1)
-			case $distribType in
-			debian)
-				\curl https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc | gpg --dearmor > conda.gpg
-				test -s /etc/apt/trusted.gpg.d/conda.gpg || sudo install -o root -g root -m 644 conda.gpg /etc/apt/trusted.gpg.d/
-				rm conda.gpg
-				test -s /etc/apt/sources.list.d/conda.list || echo "deb [arch=amd64] https://repo.anaconda.com/pkgs/misc/debrepo/conda stable main" | sudo tee /etc/apt/sources.list.d/conda.list
-				apt-cache show conda >/dev/null 2>&1 || sudo apt-get update
-				apt-cache show conda >/dev/null || { echo;echo "=> ERROR : Cannot find the conda $distribName package in the <https://repo.anaconda.com/pkgs/misc/debrepo/conda> repository for the $archi architecture.">&2;exit 2; }
-				dpkg -l conda >/dev/null 2>&1 || sudo apt install -V conda
-				test -s /opt/conda/etc/profile.d/conda.sh && source /opt/conda/etc/profile.d/conda.sh
-				conda -V
-			;;
-			rhel|fedora|centos)
-				rpm --import https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc
-				cat <<-EOF | sudo tee /etc/yum.repos.d/conda.repo
+function installMinicondaFromRepositories {
+	[ $debug = 1 ] && set -x
+	local distribType=$(grep ID_LIKE /etc/os-release | cut -d= -f2 | cut -d'"' -f2 | cut -d" " -f1)
+	local distribName=$(grep -w ID /etc/os-release | cut -d= -f2 | cut -d'"' -f2 | cut -d" " -f1)
+	case $distribType in
+	debian)
+		\curl https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc | gpg --dearmor > conda.gpg
+		test -s /etc/apt/trusted.gpg.d/conda.gpg || sudo install -o root -g root -m 644 conda.gpg /etc/apt/trusted.gpg.d/
+		rm conda.gpg
+		test -s /etc/apt/sources.list.d/conda.list || echo "deb [arch=amd64] https://repo.anaconda.com/pkgs/misc/debrepo/conda stable main" | sudo tee /etc/apt/sources.list.d/conda.list
+		apt-cache show conda >/dev/null 2>&1 || sudo apt-get update
+		apt-cache show conda >/dev/null || { echo;echo "=> ERROR : Cannot find the conda $distribName package in the <https://repo.anaconda.com/pkgs/misc/debrepo/conda> repository for the $archi architecture.">&2;exit 2; }
+		dpkg -l conda >/dev/null 2>&1 || sudo apt install -V conda
+		test -s /opt/conda/etc/profile.d/conda.sh && source /opt/conda/etc/profile.d/conda.sh
+		conda -V
+	;;
+	rhel|fedora|centos)
+		rpm --import https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc
+		cat <<-EOF | sudo tee /etc/yum.repos.d/conda.repo
 [conda]
 
 name=Conda
@@ -78,44 +88,57 @@ gpgcheck=1
 gpgkey=https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc
 
 EOF
-				rpm -q conda >/dev/null 2>&1 || sudo yum install conda
-				test -s /opt/conda/etc/profile.d/conda.sh && source /opt/conda/etc/profile.d/conda.sh
-				conda -V
-			;;
-			*)
-				if [ ! -f $minicondaInstallerScript ]
-				then
-					echo "=> Downloading $condaInstallerURL ..." && $wget2 $condaInstallerURL || $wget $condaInstallerURL
-					chmod +x $minicondaInstallerScript
-				fi
+		rpm -q conda >/dev/null 2>&1 || sudo yum install conda
+		test -s /opt/conda/etc/profile.d/conda.sh && source /opt/conda/etc/profile.d/conda.sh
+		conda -V
+	;;
+	*) installMinicondaFromScript
+	;;
+	esac
+}
 
-				if groups | \egrep -wq "sudo|adm|root" 
-				then
-					sudo ./$minicondaInstallerScript -p /usr/local/miniconda$Version -b 
-				else
-					./$minicondaInstallerScript -b
-				fi
-				test $? = 0 && rm -vf $minicondaInstallerScript
-			;;
+function installMinicondaFromBrew {
+	[ $debug = 1 ] && set -x
+	local brew=$(which brew)
+	$brew -v || {
+		echo "=> ERROR : Homebrew is not installed, you must install it first." >&2
+		exit -1
+	}
+
+	$brew update
+	if [ $Version = 2 ] 
+	then
+		$brew tap caskroom/versions
+		$brew cask install miniconda2
+		$(which conda) install argcomplete # Add: eval "$(register-python-argcomplete conda)" to your .profile
+	else
+		$brew tap caskroom/cask
+		$brew cask install miniconda
+	fi
+}
+
+function installMiniconda {
+	[ $debug = 1 ] && set -x
+	local Version=$1
+	local condaInstallerURL=""
+	local systemType=$(uname -s)
+	local archi=$(uname -m | \sed "s/^i6/x/")
+
+	if which -a conda | grep -q miniconda$Version/bin/conda && [ $reInstall = 0 ]
+	then
+		echo "=> INFO: Miniconda version $Version is already installed." >&2
+		exit 1
+	else
+		if [ $systemType = Linux  ] 
+		then 
+			case $archi in
+			x86) installMinicondaFromScript ;;
+			x86_64) installMinicondaFromRepositories ;;
+			*) echo "=> ERROR : The $archi architecture is not supported yet.">&2; exit 3 ;;
 			esac
 		elif [ $systemType = Darwin ] 
 		then
-			brew=$(which brew)
-			$brew -v || {
-				echo "=> ERROR : Homebrew is not installed, you must install it first." >&2
-				exit -1
-			}
-
-			$brew update
-			if [ $Version = 2 ] 
-			then
-				$brew tap caskroom/versions
-				$brew cask install miniconda2
-				$(which conda) install argcomplete # Add: eval "$(register-python-argcomplete conda)" to your .profile
-			else
-				$brew tap caskroom/cask
-				$brew cask install miniconda
-			fi
+			installMinicondaFromBrew
 		fi
 
 		test $? = 0 || exit
@@ -137,7 +160,6 @@ EOF
 			test ! -L $cmd$Version && echo "=> Creating symlink $cmd in $PWD ..." && $symlinkCommand $condaRelativeDirName/$cmd $cmd$Version 
 		done
 	fi
-	set +x
 }
 
 function installCondaPythonPackages {
@@ -178,6 +200,7 @@ function runScriptWithArgs {
 
 runScriptWithArgs $@
 installMiniconda $minicondaVersion
+set +x
 
 #requiredPythonPackageList="python=$minicondaVersion scipy pandas ipython termcolor"
 #installCondaPythonPackages $minicondaVersion "$requiredPythonPackageList" "$envName"
