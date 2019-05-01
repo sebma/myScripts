@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 
-egrep -v "EXTM3U|EXTINF" $@
+grep -v EXTM3U $@ | awk -F"," '/EXTINF/{title=$2}/^(https?|s?ftps?|ssh):/{print $0" # "title}'
