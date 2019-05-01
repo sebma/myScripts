@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 urlsFile="$1"
 test $# = 0 && {
@@ -7,10 +7,9 @@ test $# = 0 && {
 }
 
 echo "#EXTM3U"
-awk '{print$1}' $urlsFile | uniq | while read url
+time awk '{print$1}' $urlsFile | uniq | while read url
 do
 	printf "#EXTINF:-1,"
-	youtube-dl -e $url
-#	\curl -Ls $url | awk -F'"' /og:title/'{print$4}'
+	curl -qs $url | pup --charset utf8 'title text{}'
 	echo $url
 done
