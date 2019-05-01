@@ -24,7 +24,7 @@ case $(uname) in
 		;;
 	Linux)
 		brewName=Linuxbrew
-		test -z $brew && $(which ruby) -e "$(\curl -fsSL https://raw.githubusercontent.com/$brewName/install/master/install)"
+		test -z $brew && sh -c "$(\curl -fsSL https://raw.githubusercontent.com/$brewName/install/master/install.sh)"
 		brew=$(which brew) || exit 1
 		$brew update ;;
 	*) echo "=> ERROR : brew does not support <$(uname)> operating system." >&2; exit 1;;
