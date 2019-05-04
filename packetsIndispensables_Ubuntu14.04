@@ -44,6 +44,7 @@ curlftpfs
 dcfldd
 deborphan
 dfc
+dh-make
 diatheke # command line bible browsing and search tool
 efibootmgr
 efivar
