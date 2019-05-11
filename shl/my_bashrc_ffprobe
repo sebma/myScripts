@@ -10,7 +10,7 @@
 alias ....="cd ../../.."
 alias ...="cd ../.."
 alias ..="cd .."
-alias audioInfo="$(which mplayer) -identify -vo null -ao null -frames 0"
+alias audioInfo="$(which mplayer) --identify -vo null -ao null -frames 0"
 alias apt-get="\apt-get -V"
 alias aptitude="\aptitude -V"
 alias bc="\bc -l"
