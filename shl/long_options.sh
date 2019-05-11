@@ -18,7 +18,7 @@ usage() {
 }
 
 #GetOptCMD=$(getopt -V | grep -q getopt.*enhanced && getopt || getopts)
-getopt -V | grep -q getopt.*enhanced && GetOptCMD=getopt || {
+getopt -V | grep -q getopt.*util-linux && GetOptCMD=getopt || {
 	echo "=> ERROR : You must use getopt from util-linux." >&2
 	exit 2
 }
