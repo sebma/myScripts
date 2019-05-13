@@ -1,9 +1,13 @@
+#!/usr/bin/env sh
+
+[ $# = 0 ] && browserList="browser in palemoon firefox-esr firefox midori qupzilla chromim-browser konqueror" || browserList="$@"
+
 #Association du protocole apt:, ssh: avec les applications adequoites
 echo "=> Association du protocole apt:, ssh: avec les applications adequoites ..."
 xdg-mime default apturl.desktop x-scheme-handler/apt
 xdg-mime default putty.desktop x-scheme-handler/ssh
 
-for browser in palemoon firefox-esr firefox midori qupzilla chromim-browser konqueror
+for browser in $browserList
 do
 	which $browser >/dev/null 2>&1 && defaultBrowser=$browser && break
 done
