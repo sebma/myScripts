@@ -74,7 +74,7 @@ function initScript {
 	then
 	  case $distribName in
 			centos|redhat|ubuntu)
-				test -d /usr/lib/firefox/extensions && extensionDir=/usr/lib/firefox/extensions || extensionDir=$(awk -F= '/LIBDIR=\//{print$2}' $(which firefox))/extensions
+				test -d /usr/lib/firefox/extensions && extensionDir=/usr/lib/firefox/browser/extensions || extensionDir=$(awk -F= '/LIBDIR=\//{print$2"/browser/extensions"}' $(which firefox))
 				test -d $extensionDir || extensionDir=/usr/lib/firefox-addons/extensions
 				;;
 			debian) extensionDir=/usr/lib/iceweasel/extensions ;;
