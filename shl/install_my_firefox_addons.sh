@@ -100,7 +100,7 @@ function initScript {
 	elif type xpath >/dev/null 2>&1
 	then
 		xpathTool=xpath
-		xpathCMD="$(which xpath) select -q -e"
+		xpathCMD="$(which xpath) -q -e"
 	fi
 
 	test "$xpathCMD" || {
