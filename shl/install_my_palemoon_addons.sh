@@ -100,7 +100,7 @@ function initScript {
 	elif type xpath >/dev/null 2>&1
 	then
 		xpathTool=xpath
-		xpathCMD="$(which xpath) select -q -e"
+		xpathCMD="$(which xpath) -q -e"
 	fi
 
 	test "$xpathCMD" || {
@@ -113,7 +113,7 @@ function initScript {
 		return 4
 	}
 
-	paleMoonExtensionID={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
+#	paleMoonExtensionID={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
 	xpathExtensionIDQueryList="//Description[@about='urn:mozilla:install-manifest']/em:id/text() //Description[@about='urn:mozilla:install-manifest']/@em:id/text() //Description[@rdf:about='urn:mozilla:install-manifest']/em:id/text() //RDF:Description[@RDF:about='urn:mozilla:install-manifest']/@em:id"
 }
 
