@@ -279,7 +279,7 @@ function main {
 					if [ $(echo $firefoxVersion \< $minFirefoxVersionSupported | bc -l) = 1 ]
 					then
 						echo $blink$yellowOnRed
-						echo "=> ERROR: Firefox v$firefoxVersion n'est pas supporte par le plugin <$currentAddonName> ($extensionID) qui supporte: $minFirefoxVersionSupported < firefox < $maxFirefoxVersionSupported.$normal" >&2
+						echo "=> ERROR: Firefox v$firefoxVersion n'est pas supporte par le plugin <$currentAddonName> ($extensionID) qui supporte: $minFirefoxVersionSupported < firefox > $maxFirefoxVersionSupported.$normal" >&2
 						notInstalledPluginList="$notInstalledPluginList $currentAddonName"
 						echo
 						continue
