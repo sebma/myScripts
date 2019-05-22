@@ -74,7 +74,7 @@ function initScript {
 	then
 	  case $distribName in
 			centos|redhat|ubuntu)
-				test -d /usr/lib/palemoon/extensions && extensionDir=/usr/lib/palemoon/browser/extensions
+				test -d /usr/lib/palemoon/browser/extensions && extensionDir=/usr/lib/palemoon/browser/extensions
 				test -d $extensionDir || extensionDir=/opt/palemoon/browser/extensions
 				;;
 			debian) extensionDir=/usr/lib/iceweasel/extensions ;;
