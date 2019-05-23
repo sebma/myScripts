@@ -191,6 +191,7 @@ function main {
 	
 			if [ $xpathTool = xmlstarlet ] || [ $xpathTool = xml ]
 			then
+				#To add a line-feed at the end of the results
 				xpathExtensionIDQuery="$xpathExtensionIDQuery -n"
 				xpathMinThunderbirdVersionQuery="$xpathMinThunderbirdVersionQuery -n"
 				xpathMaxThunderbirdVersionQuery="$xpathMaxThunderbirdVersionQuery -n"
