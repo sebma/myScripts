@@ -88,22 +88,16 @@ function initScript {
 	echo
 
 	xpathCMD=""
-	if type xmlstarlet >/dev/null 2>&1
-	then
-		xpathTool=xmlstarlet
-		xpathCMD="$(which xmlstarlet) select -t -v"
-	elif type xml >/dev/null 2>&1
-	then
-		xpathTool=xml
-		xpathCMD="$(which xml) select -t -v"
-	elif type xpath >/dev/null 2>&1
-	then
-		xpathTool=xpath
-		xpathCMD="$(which xpath) -q -e"
-	fi
+	xpathTool=$(basename $(which xmlstarlet xml xpath xmllint 2>/dev/null | head -1))
+	case $xpathTool in
+		xmlstarlet|xml) xpathToolArgs="select -t -v";;
+		xpath)			xpathToolArgs="-q -e";;
+		xmllint)		xpathToolArgs="--xpath";;
+		*) echo "$blink$yellowOnRed=> ERROR: No <xmlstarlet> nor <xpath> tool is installed.$normal" >&2;;
+	esac
+	test $xpathTool && xpathCMD="$xpathTool $xpathToolArgs"
 
 	test "$xpathCMD" || {
-		echo "$blink$yellowOnRed=> ERROR: No <xmlstarlet> nor <xpath> tool is installed.$normal" >&2
 		test $distribName = ubuntu && {
 			echo "==> Installing <xmlstarlet> ..."
 			sudo apt-get install xmlstarlet -qq -V
