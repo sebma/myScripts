@@ -3,7 +3,7 @@
 set -o nounset
 set -o errexit
 
-wifiIF=`iwconfig 2>/dev/null | awk '/IEEE 802.11/{print$1}'`
+wifiIF=$(iwconfig 2>/dev/null | awk '/IEEE 802.11/{print$1}')
 
 test $wifiIF && {
 	echo "=> wifiIF = <$wifiIF>"
@@ -21,7 +21,7 @@ test $wifiIF && {
 		sudo iwlist $wifiIF scan > $tmpFile
 	}
 
-	channelID=`grep -B4 $essID $tmpFile | awk -F: '/Channel:/{print$2}'`
+	channelID=$(grep -B4 $essID $tmpFile | awk -F: '/Channel:/{print$2}')
 	rm $tmpFile
 	test $channelID || {
 		echo "=> ERROR: The channelID could not be found." >&2
@@ -38,8 +38,8 @@ test $wifiIF && {
 	}
 
 	echo "=> channelID = <$channelID>"
-	#monitoringIF=`sudo airmon-ng | egrep -v "Interface|$wifiIF|^$" | cut -f1`
-	monitoringIF=`sudo airmon-ng start $wifiIF $channelID | awk '/monitor mode enabled on/{print $NF}' | tr -d ")"`
+	#monitoringIF=$(sudo airmon-ng | egrep -v "Interface|$wifiIF|^$" | cut -f1)
+	monitoringIF=$(sudo airmon-ng start $wifiIF $channelID | awk '/monitor mode enabled on/{print $NF}' | tr -d ")")
 
 	trap "sudo airmon-ng stop $monitoringIF" INT
 
