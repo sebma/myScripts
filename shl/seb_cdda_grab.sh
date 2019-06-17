@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 trap 'echo "=> SIGINT Received, exiting";exit' INT
 
