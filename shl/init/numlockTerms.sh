@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 # Turn Numlock on for the TTYs:
 for tty in /dev/tty[1-6]; do
