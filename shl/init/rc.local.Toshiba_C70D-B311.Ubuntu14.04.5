@@ -12,22 +12,29 @@
 # By default this script does nothing.
 
 # Turn Numlock on for the TTYs:
-for tty in /dev/tty[1-6]; do
-	setleds -D +num < $tty
-done
-
 set -x
 set +e
-grub-install /dev/sda > /rc.local.log 2>&1
-sh -x /usr/local/bin/numlockTerms.sh >> /rc.local.log 2>&1
-echo "=> Mounted filesystems :" >> /rc.local.log 2>&1
-mount | grep ^/dev >> /rc.local.log 2>&1
-PATH=$PATH:/usr/local/bin >> /rc.local.log 2>&1
-echo "=> PATH = " $PATH >> /rc.local.log 2>&1
-echo "=> Unmounting and recreating the </var/cache> filesystem ..." >> /rc.local.log && umount -lv /var/cache >> /rc.local.log 2>&1 && sleep 1 && mkfs.ext4 -v -L /var/cache /dev/KUbuntu_VG/var_cache >> /rc.local.log 2>&1 && mount -v /var/cache >> /rc.local.log 2>&1 && chmod -v 0777 /var/cache >> /rc.local.log 2>&1
-echo "=> Unmounting and recreating the </var/tmp> filesystem ...  " >> /rc.local.log && umount -lv /var/tmp   >> /rc.local.log 2>&1 && sleep 1 && mkfs.ext4 -v -L /var/tmp   /dev/KUbuntu_VG/var_tmp   >> /rc.local.log 2>&1 && mount -v /var/tmp   >> /rc.local.log 2>&1 && chmod -v 1777 /var/tmp   >> /rc.local.log 2>&1
-ls -ld /var/tmp/kdecache-*/ >> /rc.local.log 2>&1
-rm -vfr /var/cache && mkdir -vm777 /var/cache >> /rc.local.log 2>&1
+echo && {
+date
+grub-install /dev/sda
+sh -x /usr/local/bin/numlockTerms.sh
+echo "=> Mounted filesystems :"
+mount | grep ^/dev
+PATH=$PATH:/usr/local/bin
+echo "=> PATH = " $PATH
+mount -v /tmp
+chmod -v 1777 /tmp
+echo "=> Unmounting and recreating the </var/cache> filesystem ..." && umount -lv /var/cache && sleep 1 && mkfs.ext4 -L "/var/cache" /dev/KUbuntu_VG/var_cache
+mount -v /var/cache
+chmod -v 0777 /var/cache
+echo "=> Unmounting and recreating the </var/tmp> filesystem ...  " && umount -lv /var/tmp   && sleep 1 && mkfs.ext4 -L "/var/tmp"   /dev/KUbuntu_VG/var_tmp
+mount -v /var/tmp
+chmod -v 1777 /var/tmp
+ls -ld /var/tmp/kdecache-*/
+rm -vfr /var/cache && mkdir -vm777 /var/cache
+echo "=> Mounted filesystems :"
+mount | grep ^/dev
+} > /rc.local.log 2>&1
 set +x
 sync
 set -e
