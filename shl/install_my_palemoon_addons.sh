@@ -77,7 +77,7 @@ function initScript {
 				test -d /usr/lib/palemoon/browser/extensions && extensionDir=/usr/lib/palemoon/browser/extensions
 				test -d $extensionDir || extensionDir=/opt/palemoon/browser/extensions
 				;;
-			debian) extensionDir=/usr/lib/iceweasel/extensions ;;
+			debian) extensionDir=/usr/lib/palemoon/browser/extensions ;;
 			*) echo "$yellowOnRed=> <$distribName> is not supported by this script for the time being.$normal" >&2; return 3;;
 		esac
 	else
