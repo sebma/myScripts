@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import subprocess
+from ipdb import set_trace
 # change the round factor if you like
 r = 1
 
 screens = [l.split() for l in subprocess.check_output(
 	["xrandr"]).decode("utf-8").strip().splitlines() if " connected" in l]
+#set_trace()
 
 scr_data = []
 for s in screens:
