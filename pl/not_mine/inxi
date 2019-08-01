@@ -31,8 +31,8 @@ use POSIX qw(uname strftime ttyname);
 
 ## INXI INFO ##
 my $self_name='inxi';
-my $self_version='3.0.33';
-my $self_date='2019-03-29';
+my $self_version='3.0.35';
+my $self_date='2019-07-15';
 my $self_patch='00';
 ## END INXI INFO ##
 
@@ -142,9 +142,10 @@ sub main {
 # 	print Dumper \@ARGV;
 	eval $start if $b_log;
 	initialize();
-	## use for start client debugging
+	## Uncomment these two values for start client debugging
 	# $debug = 10; # 3 prints timers
-	# set_debugger(); # for debugging of konvi issues
+	# set_debugger(); # for debugging of konvi and other start client issues
+	## legacy method
 	#my $ob_start = StartClient->new();
 	#$ob_start->get_client_data();
 	StartClient::get_client_data();
@@ -549,6 +550,7 @@ sub system_files {
 		'asound-cards' => '/proc/asound/cards',
 		'asound-modules' => '/proc/asound/modules',
 		'asound-version' => '/proc/asound/version',
+		'cmdline' => '/proc/cmdline',
 		'cpuinfo' => '/proc/cpuinfo',
 		'dmesg-boot' => '/var/run/dmesg.boot',
 		'lsb-release' => '/etc/lsb-release',
@@ -1786,6 +1788,7 @@ sub system_files {
 	copy_files(\@files,'system-distro');
 	@files = (
 	'/proc/1/comm',
+	'/proc/cmdline',
 	'/proc/cpuinfo',
 	'/proc/meminfo',
 	'/proc/modules',
@@ -2437,7 +2440,7 @@ sub run {
 	my (@data,@rows);
 	my $line = make_line();
 	my $pm = get_pm();
-	@data = basic_data($line);
+	@data = basic_data($line,$pm);
 	push @rows,@data;
 	if (!$bsd_type){
 		@data = check_items('required system directories',$line,$pm);
@@ -2467,9 +2470,10 @@ sub run {
 }
 
 sub basic_data {
-	my ($line) = @_;
+	my ($line,$pm_local) = @_;
 	my (@data,@rows);
 	my $client = $client{'name-print'};
+	$pm_local ||= 'N/A';
 	$client .= ' ' . $client{'version'} if $client{'version'};
 	my $default_shell = 'N/A';
 	if ($ENV{'SHELL'}){
@@ -2491,6 +2495,7 @@ sub basic_data {
 	['0', '', '', "Current shell: " . $client ],
 	['0', '', '', "Default shell: " . $default_shell ],
 	['0', '', '', "sh links to: $sh_real" ],
+	['0', '', '', "Package manager: $pm_local" ],
 	);
 	return @rows;
 }
@@ -2612,7 +2617,10 @@ sub check_items {
 		}
 		else {
 			$result = 'Missing';
-			$install = " ~ Install package: $info{$pm}" if (($b_program || $b_module) && $pm);
+			if (($b_program || $b_module) && $pm){
+				$info{$pm} ||= 'N/A';
+				$install = " ~ Install package: $info{$pm}";
+			}
 			push @missing, "$_$install";
 		}
 		$row = make_row($_,$about,$result);
@@ -2640,7 +2648,7 @@ sub check_items {
 sub item_data {
 	my ($type) = @_;
 	my %data = (
-	# directory data
+	# Directory Data
 	'/sys/class/dmi/id' => ({
 	'info' => '-M system, motherboard, bios',
 	}),
@@ -2665,7 +2673,7 @@ sub item_data {
 	'/sys' => ({
 	'info' => '',
 	}),
-	# file data
+	# File Data
 	'/etc/lsb-release' => ({
 	'info' => '-S distro version data (older version)',
 	}),
@@ -2702,8 +2710,9 @@ sub item_data {
 	'/var/run/dmesg.boot' => ({
 	'info' => '-D,-d disk data',
 	}),
-	# system tools
-	# apt-dpkg,apt-get; pm-arch,pacman; rpm-redhat,suse
+	## START PACKAGE MANAGER BLOCK ##
+	# Note: see inxi-perl branch for details: docs/recommends-package-manager.txt
+	# System Tools
 	'blockdev' => ({
 	'info' => '--admin -p/-P (filesystem blocksize)',
 	'info-bsd' => '',
@@ -2921,7 +2930,7 @@ sub item_data {
 	'pacman' => 'wget',
 	'rpm' => 'wget',
 	}),
-	# display tools
+	# Display Tools
 	'glxinfo' => ({
 	'info' => '-G glx info',
 	'info-bsd' => '-G glx info',
@@ -2957,7 +2966,7 @@ sub item_data {
 	'pacman' => 'xrandr',
 	'rpm' => 'x11-server-utils',
 	}),
-	# Perl modules
+	# Perl Modules
 	'Cpanel::JSON::XS' => ({
 	'info' => '--output json - required for export.',
 	'info-bsd' => '--output json - required for export.',
@@ -3007,6 +3016,7 @@ sub item_data {
 	'pacman' => 'perl-xml-dumper',
 	'rpm' => 'perl-XML-Dumper',
 	}),
+	## END PACKAGE MANAGER BLOCK ##
 	);
 	my $ref = $data{$type};
 	my %values = %$ref;
@@ -3014,6 +3024,7 @@ sub item_data {
 }
 sub get_pm {
 	my ($pm) = ('');
+	# support maintainers of other pm types using custom lists
 	if (main::check_program('dpkg')){
 		$pm = 'apt';
 	}
@@ -4447,10 +4458,11 @@ sub show_options {
 	verbose or line output, not short form):" ],
 	['2', '-C', '', "If available: CPU vulnerabilities (bugs); family, model-id, stepping - format:
 	hex (decimal) if greater than 9, otherwise hex; microcode - format: hex." ],
-	['2', '-d', '', "If available: logical and physical block sizes." ],
+	['2', '-d,-D', '', "If available: logical and physical block sizes." ],
 	['2', '-p,-P', '', "If available: raw size of partition, percent available for user, 
 	block size of file system (root required); for swap, shows swapiness and vfs cache 
 	pressure, and if values are default or not." ],
+	['2', '-S', '', "If available: kernel boot parameters." ],
 	['1', '-A', '--audio', "Audio/sound card(s), driver, sound server." ],
 	['1', '-b', '--basic', "Basic output, short form. Same as $self_name^-v^2." ],
 	['1', '-B', '--battery', "System battery info, including charge and condition, plus 
@@ -6662,8 +6674,8 @@ sub create_output_full {
 		$flag_key = ($b_arm || $bsd_type) ? 'features': 'flags';
 		my $flag = 'N/A';
 		if (@flags){
-			# failure to read dmesg.boot: dmesg.boot permissions
-			@flags = grep {/^(dmesg.boot|lm|nx|pae|permissions|pni|svm|vmx|(sss|ss)e([2-9])?([a-z])?(_[0-9])?)$/} @flags;
+			# failure to read dmesg.boot: dmesg.boot permissions; then short -Cx list flags
+			@flags = grep {/^(dmesg.boot|permissions|avx[2-9]?|lm|nx|pae|pni|(sss|ss)e([2-9])?([a-z])?(_[0-9])?|svm|vmx)$/} @flags;
 			@flags = map {s/pni/sse3/; $_} @flags;
 			@flags = sort(@flags);
 			$flag = join ' ', @flags if @flags;
@@ -7866,7 +7878,7 @@ sub cpu_arch {
 		}
 		elsif ($family eq '17'){
 			if ( $model =~ /^(1|11)$/ ) {$arch = 'Zen'}
-			elsif ( $model =~ /^(8)$/ ) {$arch = 'Zen+'}
+			elsif ( $model =~ /^(8|18)$/ ) {$arch = 'Zen+'}
 			elsif ( $model =~ /^2[0123456789ABCDEF]$/ ) {$arch = 'Zen 2'}
 			else {$arch = 'Zen'}
 		}
@@ -8722,67 +8734,74 @@ sub device_vendor {
 	# 0 - match pattern; 1 - replace pattern; 2 - vendor print; 3 - serial pattern
 	# Data URLs: inxi-resources.txt Section: DiskData device_vendor()
 	# $model = 'MEDIAMAX ';
+	# $model = 'Patriot Memory';
 	my @vendors = (
 	## These go first because they are the most likely and common ##
 	['(Crucial|^(FC)?CT|-CT|^M4\b)','Crucial','Crucial',''],
 	['^(INTEL|SSD(PAM|SA2))','^INTEL','Intel',''],
-	['(KINGSTON|DataTraveler|DT\s?(DUO|Microduo|101)|^SMS|^SHS|^SUV|^Ultimate CF)','KINGSTON','Kingston',''], # maybe SHS: SHSS37A SKC SUV
+	['(KINGSTON|DataTraveler|DT\s?(DUO|Microduo|101)|^SMS|^SHS|^SUV|^Ultimate CF|HyperX|^S[AV][34]00)','KINGSTON','Kingston',''], # maybe SHS: SHSS37A SKC SUV
 	# must come before samsung MU. NOTE: toshiba can have: TOSHIBA_MK6475GSX: mush: MKNSSDCR120GB_
 	['(^MKN|Mushkin)','Mushkin','Mushkin',''], # MKNS
 	# MU = Multiple_Flash_Reader too risky: |M[UZ][^L] HD103SI HD start risky
 	# HM320II HM320II
-	['(SAMSUNG|^MCG[0-9]+GC|^MCC|^[GS]2 Portable|^DUO\b|^P3|^(HM|SP)[0-9]{2})','SAMSUNG','Samsung',''], # maybe ^SM, ^HM
+	['(SAMSUNG|^MCG[0-9]+GC|^MCC|^[GS]2 Portable|^DUO\b|^P3|^(HM|SP)[0-9]{2}|^MZMPC|^HD[0-9]{3}[A-Z]{2}$)','SAMSUNG','Samsung',''], # maybe ^SM, ^HM
 	# Android UMS Composite?
 	['(SanDisk|^SDS[S]?[DQ]|^SL([0-9]+)G|^AFGCE|ULTRA\sFIT|Clip Sport|Cruzer|^Extreme)','SanDisk','SanDisk',''],
 	['^STEC\b','^STEC\b','STEC',''], # ssd drive, must come before seagate ST test
 	# real, SSEAGATE Backup+; XP1600HE30002 | 024 HN (spinpoint)
-	['(^ST[^T]|[S]?SEAGATE|^X[AFP]|^5AS|^BUP|Expansion Desk|FreeAgent|GoFlex|Backup(\+|\s?Plus)\s?Hub)','[S]?SEAGATE','Seagate',''], 
-	['^(WD|WL[0]9]|Western Digital|My (Book|Passport)|\d*LPCX|Elements|M000|EARX|EFRX|\d*EAVS|0JD|JPVX|[0-9]+(BEV|(00)?AAK|AAV|AZL))','(^WDC|Western\s?Digital)','Western Digital',''],
+	['(^ST[^T]|[S]?SEAGATE|^X[AFP]|^5AS|^BUP|Expansion Desk|FreeAgent|GoFlex|Backup(\+|\s?Plus)\s?(Hub)?|OneTouch)','[S]?SEAGATE','Seagate',''], 
+	['^(WD|WL[0]9]|Western Digital|My (Book|Passport)|\d*LPCX|Elements|M000|EARX|EFRX|\d*EAVS|0JD|JPVX|[0-9]+(BEV|(00)?AAK|AAV|AZL|EA[CD]S))','(^WDC|Western\s?Digital)','Western Digital',''],
 	## Then better known ones ##
-	['^(A-DATA|ADATA|AXN|CH11)','^(A-DATA|ADATA)','A-Data',''],
+	['^(A-DATA|ADATA|AXN|CH11|HV[1-9])','^(A-DATA|ADATA)','A-Data',''],
 	['^ADTRON','^(ADTRON)','Adtron',''],
 	['^ASUS','^ASUS','ASUS',''],
 	['^ATP','^ATP[\s\-]','ATP',''],
 	# Force MP500
-	['^(Corsair|Force\s|Voyager)','^Corsair','Corsair',''],
-	['^(FUJITSU|MH[VY]|MP)','^FUJITSU','Fujitsu',''],
+	['^(Corsair|Force\s|(Flash\s*)?Voyager)','^Corsair','Corsair',''],
+	['^(FUJITSU|MH[TVWYZ][0-9]|MP|MAP[0-9])','^FUJITSU','Fujitsu',''],
 	# note: 2012:  wdc bought hgst
 	['^(HGST|Touro|5450)','^HGST','HGST (Hitachi)',''], # HGST HUA
 	['^(Hitachi|HD[ST]|DK[0-9]|IC|HT|HU)','^Hitachi','Hitachi',''], 
 	# vb: VB0250EAVER but clashes with vbox; HP_SSD_S700_120G ;GB0500EAFYL GB starter too generic?
-	['^(HP\b|MB0|G[BJ]0|v[0-9]{3}[ow])','^HP','HP',''], 
+	['^(HP\b|MB0|G[BJ]0|v[0-9]{3}[bgorw]$|x[0-9]{3}[w]$)','^HP','HP',''], 
 	['^(LSD|Lexar|JumpDrive|JD\s?Firefly)','^Lexar','Lexar',''], # mmc-LEXAR_0xb016546c; JD Firefly;
 	# OCZSSD2-2VTXE120G is OCZ-VERTEX2_3.5
-	['^(OCZ|APOC|D2|DEN|DEN|DRSAK|EC188|FTNC|GFGC|MANG|MMOC|NIMC|NIMR|PSIR|TALOS2|TMSC|TRSAK)','^OCZ[\s\-]','OCZ',''],
+	['^(OCZ|APOC|D2|DEN|DEN|DRSAK|EC188|FTNC|GFGC|MANG|MMOC|NIMC|NIMR|PSIR|RALLY2|TALOS2|TMSC|TRSAK)','^OCZ[\s\-]','OCZ',''],
 	['^OWC','^OWC[\s\-]','OWC',''],
 	['^Philips','^Philips','Philips',''],
 	['^PIONEER','^PIONEER','Pioneer',''],
 	['^PNY','^PNY\s','PNY','','^PNY'],
 	# note: get rid of: M[DGK] becasue mushkin starts with MK
 	# note: seen: KXG50ZNV512G NVMe TOSHIBA 512GB | THNSN51T02DUK NVMe TOSHIBA 1024GB
-	['(^[S]?TOS|^THN|TOSHIBA|TransMemory)','[S]?TOSHIBA','Toshiba',''], # scsi-STOSHIBA_STOR.E_EDITION_
+	['(^[S]?TOS|^THN|TOSHIBA|TransMemory|^M[KQ][0-9])','[S]?TOSHIBA','Toshiba',''], # scsi-STOSHIBA_STOR.E_EDITION_
 	## These go last because they are short and could lead to false ID, or are unlikely ##
 	# unknown: AL25744_12345678; ADP may be usb 2.5" adapter; udisk unknown: Z1E6FTKJ 00AAKS
 	# SSD2SC240G726A10 MRS020A128GTS25C EHSAJM0016GB
 	['^5ACE','^5ACE','5ACE',''], # could be seagate: ST316021 5ACE
+	['^Addlink','^Addlink','Addlink',''],
 	['^Aireye','^Aireye','Aireye',''],
+	['^Alfawise','^Alfawise','Alfawise',''],
 	['^Android','^Android','Android',''],
 	['^Apotop','^Apotop','Apotop',''],
 	# must come before AP|Apacer
-	['^APPLE','^APPLE','Apple',''],
+	['^(APPLE|iPod)','^APPLE','Apple',''],
 	['^(AP|Apacer)','^Apacer','Apacer',''],
+	['^(A-?RAM|ARSSD)','^A-?RAM','A-RAM',''],
 	['^(ASM|2115)','^ASM','ASMedia',''],#asm1153e
 	['^Bell\b','^Bell','Packard Bell',''],
 	['^BHT','^BHT','BHT',''],
 	['^BIOSTAR','^BIOSTAR','Biostar',''],
 	['^BIWIN','^BIWIN','BIWIN',''],
 	['^BUFFALO','^BUFFALO','Buffalo',''],
+	['^Centerm','^Centerm','Centerm',''],
+	['^Centon','^Centon','Centonm',''],
 	['^CHN\b','','Zheino',''],
 	['^Clover','^Clover','Clover',''],
 	['^Colorful\b','^Colorful','Colorful',''],
 	['^CSD','^CSD','CSD',''],
 	['^(Dane-?Elec|Z Mate)','^Dane-?Elec','DaneElec',''],
 	# Daplink vfs is an ARM software thing
+	['^Dell\b','^Dell','Dell',''],
 	['^DeLOCK','^Delock(\s?products)?','Delock',''],
 	['^DGM','^DGM\b','DGM',''],
 	['^DIGITAL\s?FILM','DIGITAL\s?FILM','Digital Film',''],
@@ -8791,22 +8810,26 @@ sub device_vendor {
 	['^DREVO\b','^DREVO','Drevo',''],
 	['^(Eaget|V8$)','^Eaget','Eaget',''],
 	['^EDGE','^EDGE','EDGE',''],
+	['^Elecom','^ElecomE','Elecom',''],
 	['^EXCELSTOR','^EXCELSTOR( TECHNO(LOGY)?)?','ExcelStor',''],
 	['^EZLINK','^EZLINK','EZLINK',''],
 	['^Fantom','^Fantom( Drive[s]?)?','Fantom Drives',''],
 	['^Faspeed','^Faspeed','Faspeed',''],
 	['^FASTDISK','^FASTDISK','FASTDISK',''],
+	# FK0032CAAZP/FB160C4081 FK or FV can be HP but can be other things
 	['^FORESEE','^FORESEE','Foresee',''],
 	['^GALAX\b','^GALAX','GALAX',''],
 	['^Galaxy\b','^Galaxy','Galaxy',''],
+	['^(Garmin|Fenix)','^Garmin','Garmin',''],
 	['^Geil','^Geil','Geil',''],
 	['^Generic','^Generic','Generic',''],
 	['^Gigabyte','^Gigabyte','Gigabyte',''], # SSD
 	['^Gigastone','^Gigastone','Gigastone',''],
 	['^Gloway','^Gloway','Gloway',''],
-	['^(GOODRAM|IR SSD)','^GOODRAM','GOODRAM',''],
+	['^(GOODRAM|GOODDRIVE|IR SSD)','^GOODRAM','GOODRAM',''],
 	# supertalent also has FM: |FM
 	['^(G[\.]?SKILL)','^G[\.]?SKILL','G.SKILL',''],
+	['^HDC','^HDC\b','HDC',''],
 	['^Hectron','^Hectron','Hectron',''],
 	['^Hoodisk','^Hoodisk','Hoodisk',''],
 	['^HUAWEI','^HUAWEI','Huawei',''],
@@ -8816,8 +8839,9 @@ sub device_vendor {
 	['^(InnoDisk|Innolite)','^InnoDisk( Corp.)?','InnoDisk',''],
 	['^Innostor','^Innostor','Innostor',''],
 	['^Innovation','^Innovation','Innovation',''],
+	['^Innovera','^Innovera','Innovera',''],
 	['^(INM|Integral|V\s?Series)','^Integral(\s?Memory)?','Integral Memory',''],
-	['^(Intenso|(Alu|Mobile|Rainbow|Speed) Line)','^Intenso','Intenso',''],
+	['^(Intenso|(Alu|Basic|Business|Micro|Mobile|Rainbow|Speed|Twister) Line|Rainbow)','^Intenso','Intenso',''],
 	['^(Iomega|ZIP\b)','^Iomega','Iomega',''], 
 	['^JingX','^JingX','JingX',''], #JingX 120G SSD - not confirmed, but guessing
 	# NOTE: ITY2 120GB hard to find
@@ -8826,27 +8850,34 @@ sub device_vendor {
 	['^Kingfast','^Kingfast','Kingfast',''],
 	['^KingMAX','^KingMAX','KingMAX',''],
 	['^KINGSHARE','^KINGSHARE','KingShare',''],
-	['^KingSpec','^KingSpec','KingSpec',''],
+	['^(KingSpec|ACSC)','^KingSpec','KingSpec',''],
 	# kingwin docking, not actual drive
 	['^(EZD|EZ-Dock)','','Kingwin Docking Station',''],
+	['^KLEVV','^KLEVV','KLEVV',''],
+	['^(Lacie|P92)','^Lacie','Lacie',''],
 	['^LDLC','^LDLC','LDLC',''],
 	['^Lenovo','^Lenovo','Lenovo',''],
 	['^RPFT','','Lenovo O.E.M.',''],
+	['^LG\b','^LG','LG',''],
 	['^(LITE[\-\s]?ON[\s\-]?IT)','^LITE[\-]?ON[\s\-]?IT','LITE-ON IT',''], # LITEONIT_LSS-24L6G
 	['^(LITE[\-\s]?ON|PH[1-9])','^LITE[\-]?ON','LITE-ON',''], # PH6-CE240-L
 	['^M-Systems','^M-Systems','M-Systems',''],
-	['^(MAXTOR|Atlas)','^MAXTOR','Maxtor',''], # note M3 is usually maxtor, but can be samsung
-	['^Memorex','^Memorex','Memorex',''],
+	['^(MAXTOR|Atlas|TM[0-9]{4})','^MAXTOR','Maxtor',''], # note M2 M3 is usually maxtor, but can be samsung
+	['^(Memorex|TravelDrive)','^Memorex','Memorex',''],
 	# note: C300/400 can be either micron or crucial, but C400 is M4 from crucial
 	['(^MT|^M5|^Micron|00-MT|C[34]00)','^Micron','Micron',''],# C400-MTFDDAK128MAM
+	['^MARSHAL\b','^MARSHAL','Marshal',''],
 	['^MARVELL','^MARVELL','Marvell',''],
 	['^MDT\b','^MDT','MDT (rebuilt WD/Seagate)',''], # mdt rebuilds wd/seagate hdd
 	['^Medion','^Medion','Medion',''],
 	['^(MEDIAMAX|WL[0-9]{2})','^MEDIAMAX','MediaMax',''],
+	['^Morebeck','^Morebeck','Morebeck',''],
 	['^Motorola','^Motorola','Motorola',''],
 	['^MTRON','^MTRON','MTRON',''],
+	['^MXSSD','^Mach\s*Xtreme','Mach Xtreme',''],
 	['^Netac','^Netac','Netac',''],
 	['^OOS[1-9]','','Utania',''],
+	['^OWC','^OWC\b','OWC',''],
 	['^PALIT','PALIT','Palit',''], # ssd 
 	['^PERC\b','','Dell PowerEdge RAID Card',''], # ssd 
 	['^(PS[8F]|Patriot)','^Patriot([-\s]?Memory)?','Patriot',''],
@@ -8867,9 +8898,9 @@ sub device_vendor {
 	# DIAMOND_040_GB
 	['^(SILICON\s?MOTION|SM[0-9])','^SILICON\s?MOTION','Silicon Motion',''],
 	['^(Silicon\s?Power|SP[CP]C|Silicon|Diamond|Haspeed)','Silicon\s?Power','Silicon Power',''],
-	['Smartbuy','\s?Smartbuy','Smartbuy',''], # SSD Smartbuy 60GB
+	['Smartbuy','\s?Smartbuy','Smartbuy',''], # SSD Smartbuy 60GB; mSata Smartbuy 3
 	# HFS128G39TND-N210A; seen nvme with name in middle
-	['(SK\s?HYNIX|^HFS)','\s?SK\s?HYNIX','SK Hynix',''], 
+	['(SK\s?HYNIX|^HF[MS])','\s?SK\s?HYNIX','SK Hynix',''], 
 	['hynix','hynix','Hynix',''],# nvme middle of string, must be after sk hynix
 	['^SH','','Smart Modular Tech.',''],
 	['^Skill','^Skill','Skill',''],
@@ -8877,9 +8908,10 @@ sub device_vendor {
 	['^(S[FR]-|Sony)','^Sony','Sony',''],
 	['^STE[CK]','^STE[CK]','sTec',''], # wd bought this one
 	['^STORFLY','^STORFLY','StorFly',''],
+	['^SUNEAST','^SUNEAST','SunEast',''],
 	# NOTE: F[MNETU] not reliable, g.skill starts with FM too: 
 	# Seagate ST skips STT. 
-	['^(STT)','','Super Talent',''], 
+	['^(STT|FHM[0-9])','','Super Talent',''], 
 	['^(SF|Swissbit)','^Swissbit','Swissbit',''],
 	# ['^(SUPERSPEED)','^SUPERSPEED','SuperSpeed',''], # superspeed is a generic term
 	['^TANDBERG','^TANDBERG','Tanberg',''],
@@ -8893,9 +8925,9 @@ sub device_vendor {
 	['^TopSunligt','^TopSunligt','TopSunligt',''], # is this a typo? hard to know
 	['^TopSunlight','^TopSunlight','TopSunlight',''],
 	['^(TS|Transcend|JetFlash)','^Transcend','Transcend',''],
-	# Twister Line but if we slice out Twister it would just say Line
 	['^(TrekStor|DS maxi)','^TrekStor','TrekStor',''],
 	['^UDinfo','^UDinfo','UDinfo',''],
+	['^USBTech','^USBTech','USBTech',''],
 	['^(UG|Unigen)','^Unigen','Unigen',''],
 	['^VBOX','','VirtualBox',''],
 	['^(Verbatim|STORE N GO)','^Verbatim','Verbatim',''],
@@ -8904,14 +8936,14 @@ sub device_vendor {
 	['^VMware','^VMware','VMware',''],
 	['^(Vseky|Vaseky)','^Vaseky','Vaseky',''], # ata-Vseky_V880_350G_
 	['^(YUCUN|R880)','^YUCUN','YUCUN',''],
+	['^(Zheino|CHN[0-9])','^Zheino','Zheino',''],
 	['^ZTC','^ZTC','ZTC',''],
 	['^(ASMT|2115)','^ASMT','ASMT (case)',''],
 	);
-	foreach my $ref (@vendors){
-		my @row = @$ref;
-		if ($model =~ /$row[0]/i || ($row[3] && $serial && $serial =~ /$row[3]/)){
-			$vendor = $row[2];
-			$model =~ s/$row[1]//i if $row[1] && lc($model) ne lc($row[1]);
+	foreach my $row (@vendors){
+		if ($model =~ /$row->[0]/i || ($row->[3] && $serial && $serial =~ /$row->[3]/)){
+			$vendor = $row->[2];
+			$model =~ s/$row->[1]//i if $row->[1] && lc($model) ne lc($row->[1]);
 			$model =~ s/^[\s\-_]+|[\s\-_]+$//g;
 			$model =~ s/\s\s/ /g;
 			@data = ($vendor,$model);
@@ -9700,12 +9732,11 @@ sub display_compositor {
 		['westford','westford','','westford'],
 		['xcompmgr','xcompmgr','','xcompmgr'],
 		);
-		foreach my $ref (@compositors){
-			my @item = @$ref;
+		foreach my $item (@compositors){
 			# no need to use check program with short list of ps_gui
 			# if (main::check_program($item[0]) && (grep {/^$item[1]$/} @ps_gui ) ){
-			if (grep {/^$item[1]$/} @ps_gui){
-				$compositor = $item[3];
+			if (grep {/^$item->[1]$/} @ps_gui){
+				$compositor = $item->[3];
 				last;
 			}
 		}
@@ -12767,6 +12798,7 @@ sub create_output {
 		}
 		$rows[$j]{main::key($num++,'use')} = $ref{'use'} if $b_non_system;
 		$rows[$j]{main::key($num++,'slots')} = $ref{'slots'};
+		$ref{'eec'} ||= 'N/A';
 		$rows[$j]{main::key($num++,'EC')} = $ref{'eec'};
 		if ($extra > 0 && (!$b_non_system || 
 		   ( main::is_numeric($ref{'max-module-size'}) && $ref{'max-module-size'} > 10 ) ) ){
@@ -12834,8 +12866,8 @@ sub dmidecode_data {
 	my ($i,$j,$k) = (0,0,0);
 	foreach (@dmi){
 		my @ref = @$_;
-		($derived_module_size,$max_cap_5,$max_cap_16,$max_module_size) = (0,0,0,0);
-		# Portable Battery
+		## NOTE: do NOT reset these values, that causes failures
+		# ($derived_module_size,$max_cap_5,$max_cap_16,$max_module_size) = (0,0,0,0);
 		if ($ref[0] == 5){
 			$ram[$k] = ({}) if !$ram[$k];
 			foreach my $item (@ref){
@@ -12868,7 +12900,6 @@ sub dmidecode_data {
 				next if ! $temp[1];
 				if ($temp[0] eq 'Installed Size'){
 					# get module size
-					
 					$size = calculate_size($temp[1],0);
 					# get data after module size
 					$temp[1] =~ s/ Connection\)?//;
@@ -12892,6 +12923,7 @@ sub dmidecode_data {
 			$ram[$handle] = $ram[$k] if $ram[$k];
 			$ram[$k] = undef;
 			$ram[$handle] = ({}) if !$ram[$handle];
+			# ($derived_module_size,$max_cap_16) = (0,0);
 			foreach my $item (@ref){
 				@temp = split /:\s*/, $item;
 				next if ! $temp[1];
@@ -13048,7 +13080,6 @@ sub data_processor {
 	my $b_debug = 0;
 	my (@return,@temp);
 	my $est = 'est.';
-	
 	foreach (@ram){
 		# because we use the actual array handle as the index, 
 		# there will be many undefined keys
@@ -13057,11 +13088,13 @@ sub data_processor {
 		my ($max_cap,$max_mod_size) = (0,0);
 		my ($alt_cap,$est_cap,$est_mod,$unit) = (0,'','','');
 		$max_cap = $ref{'max-capacity-16'};
+		$max_cap ||= 0;
 		# make sure they are integers not string if empty
 		$ref{'slots-5'} ||= 0; 
 		$ref{'slots-16'} ||= 0; 
 		$ref{'max-capacity-5'} ||= 0;
 		$ref{'max-module-size'} ||= 0;
+		$ref{'used-capacity'} ||= 0;
 		#$ref{'max-module-size'} = 0;# debugger
 		# 1: if max cap 1 is null, and max cap 2 not null, use 2
 		if ($b_debug){
@@ -13163,11 +13196,14 @@ sub data_processor {
 					elsif ($ref{'slots-5'} && $ref{'slots-5'} > $ref{'slots-16'}){
 						$slots = $ref{'slots-5'};
 					}
+					# print "slots: $slots\n" if $b_debug;
 					if ($ref{'derived-module-size'} * $slots > $max_cap){
 						$ref{'max-module-size'} = $ref{'derived-module-size'};
+						print "H\n" if $b_debug;
 					}
 					else {
 						$ref{'max-module-size'} = sprintf("%.f",$max_cap/$slots);
+						print "J\n" if $b_debug;
 					}
 					$est_mod = $est;
 				}
@@ -13178,7 +13214,7 @@ sub data_processor {
 				if (!$est_cap && $ref{'max-module-size'} > 0){
 					if ($max_cap > ( $ref{'max-module-size'} * $ref{'slots-16'})){
 						$est_cap = 'check';
-						print "H\n" if $b_debug;
+						print "K\n" if $b_debug;
 					}
 				}
 			}
@@ -13248,11 +13284,12 @@ sub calculate_size {
 			$data = $1/1024;
 			#print "d3:$data\n";
 		}
+		#print "d1a: $data s1: $size\n";
 		if (main::is_numeric($data) && $data > $size ) {
 		#if ($data =~ /^[0-9][0-9]+$/ && $data > $size ) {
-			$size=$data;
+			$size = $data;
 		}
-		#print "d1: $data s1: $size\n";
+		#print "d1b: $data s1: $size\n";
 	}
 	else {
 		$size = 0;
@@ -16226,18 +16263,17 @@ sub get_env_de_data {
 		[0,'manokwari','manokwari','manokwari',1,0],
 		[1,'ukui','ukui','ukui-session',0,1],
 		);
-		foreach my $ref (@desktops){
-			my @item = @$ref;
-			# Check if in xdg_desktop OR desktop_session OR if in $item[6] and in ps_gui
-			if ( (($item[0] && ($xdg_desktop eq $item[1] || $desktop_session eq $item[1] )) ||
-			   (!$item[0] && ($xdg_desktop =~ /$item[1]/ || $desktop_session  =~ /$item[1]/ )) ) ||
-			   ($item[6] && @ps_gui && (grep {/$item[6]/} @ps_gui) ) ){
-				@data = main::program_values($item[2]);
+		foreach my $item (@desktops){
+			# Check if in xdg_desktop OR desktop_session OR if in $item->[6] and in ps_gui
+			if ( (($item->[0] && ($xdg_desktop eq $item->[1] || $desktop_session eq $item->[1] )) ||
+			   (!$item->[0] && ($xdg_desktop =~ /$item->[1]/ || $desktop_session  =~ /$item->[1]/ )) ) ||
+			   ($item->[6] && @ps_gui && (grep {/$item->[6]/} @ps_gui) ) ){
+				@data = main::program_values($item->[2]);
 				$desktop[0] = $data[3];
-				$b_gtk = $item[4];
-				$b_qt = $item[5];
+				$b_gtk = $item->[4];
+				$b_qt = $item->[5];
 				if ($data[1] && $data[2]){
-					$desktop[1] = main::program_version($item[3],$data[0],$data[1],$data[2],$data[5],$data[6]);
+					$desktop[1] = main::program_version($item->[3],$data[0],$data[1],$data[2],$data[5],$data[6]);
 				}
 				last;
 			}
@@ -16376,11 +16412,10 @@ sub get_xprop_de_data {
 		['openbox','openbox_pid','openbox','openbox'],
 		['amiwm','amiwm','amiwm','amiwm'],
 		);
-		foreach my $ref (@desktops){
-			my @item = @$ref;
-			if (main::check_program($item[0]) && main::awk(\@xprop,$item[1]) && 
-			    (!$item[4] || (@ps_gui && (grep {/$item[4]/} @ps_gui ))) ){
-				@data =  main::program_data($item[2],$item[3],0);
+		foreach my $item (@desktops){
+			if (main::check_program($item->[0]) && main::awk(\@xprop,$item->[1]) && 
+			    (!$item->[4] || (@ps_gui && (grep {/$item->[4]/} @ps_gui ))) ){
+				@data =  main::program_data($item->[2],$item->[3],0);
 				$desktop[0] = $data[0];
 				$desktop[1] = $data[1];
 				last;
@@ -16443,12 +16478,11 @@ sub get_ps_de_data {
 		['wmx','wmx','wmx','wmx'],
 		['xmonad','xmonad','xmonad','xmonad'],
 		);
-		foreach my $ref (@desktops){
-			my @item = @$ref;
+		foreach my $item (@desktops){
 			# no need to use check program with short list of ps_gui
 			# if ( main::check_program($item[0]) && (grep {/^$item[1]$/} @ps_gui)){
-			if (grep {/^$item[1]$/} @ps_gui){
-				@data =  main::program_data($item[2],$item[3],0);
+			if (grep {/^$item->[1]$/} @ps_gui){
+				@data =  main::program_data($item->[2],$item->[3],0);
 				$desktop[0] = $data[0];
 				$desktop[1] = $data[1];
 				last;
@@ -17190,6 +17224,7 @@ sub ubuntu_id {
 	$codename = lc($codename);
 	my ($id) = ('');
 	my %codenames = (
+	'eoan' => '19.10',
 	'disco' => '19.04',
 	'cosmic' => '18.10',
 	'bionic' => '18.04 LTS',
@@ -17409,6 +17444,32 @@ sub get_kernel_bits {
 	$bits ||= 'N/A';
 	eval $end if $b_log;
 	return $bits;
+}
+
+sub get_kernel_parameters {
+	eval $start if $b_log;
+	my ($parameters);
+	if (my $file = system_files('cmdline') ) {
+		$parameters = get_kernel_parameters_linux($file);
+	}
+	elsif ($bsd_type) {
+		$parameters = get_kernel_parameters_bsd();
+	}
+	eval $end if $b_log;
+	return $parameters;
+}
+sub get_kernel_parameters_linux {
+	eval $start if $b_log;
+	my ($file) = @_;
+	my $line = (reader($file))[0];
+	eval $end if $b_log;
+	return $line;
+}
+sub get_kernel_parameters_bsd {
+	eval $start if $b_log;
+	my ($parameters);
+	eval $end if $b_log;
+	return $parameters;
 }
 
 sub get_memory_data_full {
@@ -18071,8 +18132,10 @@ sub pciconf_data {
 			if ($_ =~ /^~$/) {
 				$vendor = main::cleaner($vendor);
 				$device = main::cleaner($device);
+				# handle possible regex in device name, like [ConnectX-3] 
+				my $device_temp = main::regex_cleaner($device);
 				if ($vendor && $device){
-					if ($vendor !~ /$device/i){
+					if (main::regex_cleaner($vendor) !~ /$device_temp/i){
 						$device = "$vendor $device";
 					}
 				}
@@ -18523,6 +18586,7 @@ sub set_dmidecode_data {
 		# my $file = "$ENV{'HOME'}/bin/scripts/inxi/data/dmidecode/dmidecode-loki-1.txt";
 		#my $file = "$ENV{'HOME'}/bin/scripts/inxi/data/dmidecode/dmidecode-t41-1.txt";
 		#my $file = "$ENV{'HOME'}/bin/scripts/inxi/data/dmidecode/dmidecode-mint-20180106.txt";
+		#my $file = "$ENV{'HOME'}/bin/scripts/inxi/data/dmidecode/dmidecode-vmware-ram-1.txt";
 		#open my $fh, '<', $file or die "can't open $file: $!";
 		#chomp(@data = <$fh>);
 	}
@@ -19761,6 +19825,7 @@ sub generate_system_data {
 		$data{$data_name}[$index]{main::key($num++,'Host')} = &get_hostname();
 	}
 	$data{$data_name}[$index]{main::key($num++,'Kernel')} = &get_kernel_data();
+	
 	$data{$data_name}[$index]{main::key($num++,'bits')} = &get_kernel_bits;
 	if ($extra > 0){
 		my @compiler = get_compiler_version(); # get compiler data
@@ -19773,6 +19838,11 @@ sub generate_system_data {
 			$compiler[1] ||= 'N/A';
 			$data{$data_name}[$index]{main::key($num++,'v')} = $compiler[1];
 		}
+	}
+	if ($b_admin && (my $params = get_kernel_parameters())){
+		$index = scalar(@{ $data{$data_name} } );
+		$data{$data_name}[$index]{main::key($num++,'parameters')} = $params;
+		$index = scalar(@{ $data{$data_name} } );
 	}
 	# note: tty can have the value of 0 but the two tools 
 	# return '' if undefined, so we test for explicit ''
