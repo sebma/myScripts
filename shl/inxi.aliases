@@ -1,0 +1,13 @@
+# vim: set syn=sh noet:
+
+inxi_aliases () {
+	local scriptDir=$(dirname $0)
+	scriptDir=$(cd $scriptDir;pwd)
+	
+	alias inxi="perl $scriptDir/../pl/not_mine/inxi -c21"
+	alias binxi="bash $scriptDir/not_mine/binxi -c21"
+	alias inxiSummary='inxi -Admi -v4'
+	alias binxiSummary='binxi -Admi -v4'
+}
+
+inxi_aliases
