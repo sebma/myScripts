@@ -8,6 +8,7 @@ inxi_aliases () {
 	alias binxi="bash $scriptDir/not_mine/binxi -c21"
 	alias inxiSummary='inxi -Admi -v4'
 	alias binxiSummary='binxi -Admi -v4'
+	alias lshw='\lshw -numeric -sanitize'
 	alias lshwBUSINFO='lshw -businfo'
 }
 
