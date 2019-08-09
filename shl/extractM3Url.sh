@@ -3,7 +3,7 @@
 mediaStreamFormats="\\.(m3u|m3u8)"
 baseUrl="$1"
 test $baseUrl || exit
-extractedStreamUrl=$(curl -A Mozilla -# $baseUrl | perl -ne "
+extractedStreamUrl=$(\curl -A Mozilla -# $baseUrl | perl -ne "
         s/^.*http:/http:/;
         s/$mediaStreamFormats.*$/.\$1/i;
         print if /(http|ftp):.*$mediaStreamFormats/i;
@@ -14,7 +14,7 @@ echo "=> extractedStreamUrl = <$extractedStreamUrl>"
 test $extractedStreamUrl || exit
 
 tmpFile=$(mktemp)
-curl -# -L -m 10 -o $tmpFile $extractedStreamUrl
+\curl -# -L -m 10 -o $tmpFile $extractedStreamUrl
 if [ $(grep -v ^# $tmpFile | wc -c) = 0 ]
 then
 	echo "=> ERROR: The stream is not available at the moment." >&2
