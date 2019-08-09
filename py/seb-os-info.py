@@ -12,6 +12,8 @@ def osinfo() :
 	print( "=> OS platform.processor = " , platform.processor() )
 	print( "=> OS platform.architecture = " , platform.architecture() )
 	print( "=> OS platform.node = " , platform.node() )
+	print( "=> Python version = ", platform.python_version() )
+	print( "=> Python interpreter path = ", sys.executable )
 	print()
 	
 	if platform.system() == "Linux" :
