@@ -26,7 +26,7 @@
 
 use strict;
 
-my $i=0;
+my $i=1;
 my $title='';
 my $length=-1;
 
@@ -35,7 +35,7 @@ while(<>)
 {
     chomp;
     next if /^\#EXTM3U/;
-    if(/^\#EXTINF:(\d+),(.*)/)
+    if(/^\#EXTINF:(\d+|-1),(.*)/)
     {
     $title=$2;
     $length=$1;
@@ -48,5 +48,5 @@ while(<>)
     $length=-1;
     $i++;
 }
-
+$i--;
 print "NumberOfEntries=$i\nVersion=2\n";
