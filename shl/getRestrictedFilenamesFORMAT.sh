@@ -18,7 +18,7 @@ getRestrictedFilenamesFORMAT () {
 	trap 'rc=127;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;return $rc' INT
 	local translate=cat
 	local initialSiteVideoFormat="$1"
-	local siteVideoFormat downloadOK extension fqdn fileSizeOnFS remoteFileSize=0
+	local siteVideoFormat downloadOK=-1 extension fqdn fileSizeOnFS remoteFileSize=0
 	shift
 	local -i i=0
 	for url in "$@"
@@ -32,10 +32,10 @@ getRestrictedFilenamesFORMAT () {
 		case $url in
 			*.facebook.com/*)
 				siteVideoFormat=$(echo $initialSiteVideoFormat+m4a | \sed -E "s/^(\(?)\w+/\1bestvideo/g")
-			;
+			;;
 			*)
 				siteVideoFormat=$initialSiteVideoFormat
-			;
+			;;
 		esac
 		echo "=> Testing if $url still exists ..."
 		fileNames=$(set +x;time youtube-dl -f "$siteVideoFormat" --get-filename -- "$url" 2>&1)
