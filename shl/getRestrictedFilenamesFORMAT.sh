@@ -15,62 +15,94 @@ youtube_dl="eval LANG=C.UTF-8 command youtube-dl" # i.e https://unix.stackexchan
 
 unset -f getRestrictedFilenamesFORMAT
 getRestrictedFilenamesFORMAT () {
-	trap 'rc=130;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;return $rc' INT
+	trap 'rc=127;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;return $rc' INT
+	local translate=cat
 	local initialSiteVideoFormat="$1"
-	local siteVideoFormat downloadOK extension fqdn
+	local siteVideoFormat downloadOK extension fqdn fileSizeOnFS remoteFileSize=0
 	shift
 	local -i i=0
-	for url
+	for url in "$@"
 	do
 		let i++
 		echo "=> Downloading url # $i/$# ..."
 		echo
 		echo "=> url = $url"
-		echo $url | \egrep -wq "https?:" || url=https://www.youtube.com/watch?v=$url #Only youtube short urls are handled by "youtube-dl"
-		fqdn=$(echo $url | awk -F "[./]" '{print$4"_"$5}')
-
+		echo $url | \egrep -wq "https?:" || url=https://www.youtube.com/watch?v=$url
+		fqdn=$(echo $url | awk -F "[./]" '{gsub("www.","");print$3"_"$4}')
 		case $url in
-		*.facebook.com/*) siteVideoFormat=\"$(echo $initialSiteVideoFormat+m4a | \sed -E "s/^(\(?)\w+/\1bestvideo/g")\";; #Replace the first word after the oopening parenthesis
-		*) siteVideoFormat=\"$initialSiteVideoFormat\";;
+			*.facebook.com/*)
+				siteVideoFormat=$(echo $initialSiteVideoFormat+m4a | \sed -E "s/^(\(?)\w+/\1bestvideo/g")
+			;
+			*)
+				siteVideoFormat=$initialSiteVideoFormat
+			;
 		esac
-
-		echo
-		echo "=> Downloading $url using the $siteVideoFormat format ..."
-		echo
-
 		echo "=> Testing if $url still exists ..."
-		set +x
-		fileName=$(time $youtube_dl -f "$siteVideoFormat" --get-filename -- "$url" 2>&1)
-		set -x
-		echo $fileName | \egrep --color -A1 ERROR: && echo && continue
-		extension="${fileName/*./}"
-		fileName="${fileName/.$extension/__$fqdn.$extension}"
-
-		echo
-		if [ -f "$fileName" ] && [ ! -w "$fileName" ]
-		then
-			echo "${colors[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" >&2
+		fileNames=$(set +x;time youtube-dl -f "$siteVideoFormat" --get-filename -- "$url" 2>&1)
+		echo $fileNames | \egrep --color -A1 ERROR: && echo && continue
+		local -i j=0
+		declare -a formats=($(echo $siteVideoFormat | \sed "s/,/ /g"))
+		for fileName in $fileNames
+		do
 			echo
-			continue
-		fi
-
-		echo "=> fileName to be downloaded = <$fileName>"
-		echo
-
-		tty -s || COLUMNS=80 # Pour eviter que AtomicParsley sorte en erreur lorsque le script est lance en tache de fond et que "set -o nounset" est defini
-		[ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] && $youtube_dl -o "$fileName" -f "$siteVideoFormat" "$url" --embed-thumbnail || $youtube_dl -o $fileName -f "$siteVideoFormat" "$url"
-		downloadOK=$?
-		if [ $downloadOK = 0 ] 
-		then
-			[ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] && mp4tags -m "$url" "$fileName"
-			chmod -w "$fileName" && echo && videoInfo.sh "$fileName"
-		fi
-
-		echo
+			echo "=> Downloading $url using the <${formats[$j]}> format ..."
+			echo
+			extension="${fileName/*./}"
+			chosenFormatID=$(echo "$fileName" | awk -F '__' '{print$2}')
+			fileName="${fileName/.$extension/__$fqdn.$extension}"
+			if [ -f "$fileName" ]; then
+				fileSizeOnFS=$(stat -c %s "$fileName")
+				time remoteFileSize=$(ytdlGetSize $chosenFormatID $url)
+				test $? != 0 && return
+				if [ ! -w "$fileName" ] || [ $fileSizeOnFS -ge $remoteFileSize ]; then
+					echo
+					echo "${colors[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" 1>&2
+					echo
+					let j++
+					continue
+				fi
+			fi
+			echo "=> fileName to be downloaded = <$fileName>"
+			echo
+			echo "=> chosenFormatID = $chosenFormatID"
+			echo
+			if [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ]; then
+				time LANG=C.UTF-8 command youtube-dl -o "$fileName" -f "${formats[$j]}" "$url" --embed-thumbnail
+				downloadOK=$?
+				test $downloadOK != 0 && {
+					time LANG=C.UTF-8 command youtube-dl -o $fileName -f "${formats[$j]}" "$url" 2>&1 | {
+						egrep --color=auto -A1 'ERROR:.*No space left on device' 1>&2
+						echo 1>&2
+						downloadOK=1
+						return 1
+					}
+					downloadOK=$?
+				}
+			else
+				time LANG=C.UTF-8 command youtube-dl -o $fileName -f "${formats[$j]}" "$url" 2>&1 | {
+					egrep --color=auto -A1 'ERROR:.*No space left on device' 1>&2
+					echo 1>&2
+					downloadOK=1
+					return 1
+				}
+				downloadOK=$?
+			fi
+			if [ $downloadOK = 0 ]; then
+				[ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] && mp4tags -m "$url" "$fileName"
+				chmod -w "$fileName"
+				echo
+				videoInfo "$fileName"
+			fi
+			let j++
+		done
 	done
+	echo
 	sync
+	set +x
 	trap - INT
+	return $downloadOK
 }
+
 function getRestrictedFilenamesBEST {
 	getRestrictedFilenamesFORMAT "(best[ext=mp4]/best[ext=webm]/best[ext=flv])" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
