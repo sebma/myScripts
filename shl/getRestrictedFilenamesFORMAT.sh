@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -o nounset
+#set -o nounset
 
 [ $BASH_VERSINFO -ge 4 ] && export declare="declare -A" || export declare="declare"
 $declare colors
