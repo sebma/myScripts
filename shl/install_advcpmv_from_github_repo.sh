@@ -3,7 +3,13 @@
 scriptName=$(basename "$0")
 scriptDir=$(dirname $0)
 scriptDir=$(cd $scriptDir;pwd)
-download="$(which wget2 2>/dev/null || which wget)"
+download="$(which wget2 2>/dev/null || which wget 2>/dev/null)"
+
+if test "$download"; then
+	download="$download -c"
+else
+	download="$(which curl) -C- -O"
+fi
 
 test "$make" || which remake >/dev/null && make="$(which remake) -j$(nproc)" || make="$(which make) -j$(nproc)"
 
