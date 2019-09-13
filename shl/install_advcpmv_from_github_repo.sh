@@ -25,12 +25,15 @@ version=$1
 patch=$(\ls advcpmv-* | grep $version)
 
 if $download http://ftp.gnu.org/gnu/coreutils/coreutils-$version.tar.xz; then
-	if tar -xvf coreutils-$version.tar.xz; then
+	set -x
+	time if tar -xf coreutils-$version.tar.xz; then
+		set +x
 		cd coreutils-$version
-		mv GNUmakefile GNUmakefile.BACKUP
+#		mv GNUmakefile GNUmakefile.BACKUP
 		\patch -p1 -i ../$patch
-		if time ./configure --prefix=$prefix --exec-prefix=$prefix --enable-shared; then
-			if time $make; then
+		test -s Makefile || time ./configure --prefix=$prefix --exec-prefix=$prefix
+		if [ $? = 0 ]; then
+			time if $make; then
 				if test -x src/cp; then
 					cd src
 					\cp -puv cp advcp
@@ -42,8 +45,8 @@ if $download http://ftp.gnu.org/gnu/coreutils/coreutils-$version.tar.xz; then
 							\gzip -9v adv*.1
 							$sudo install -vpm644 adv* $prefix/share/man/man1/
 						fi
-						cd ..
-						rm -fr coreutils-$version"*"
+						cd ../..
+						rm -fr coreutils-$version*
 						rmdir bin
 					fi
 				fi
