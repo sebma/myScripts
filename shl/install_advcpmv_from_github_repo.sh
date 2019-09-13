@@ -11,7 +11,7 @@ else
 	download="$(which curl) -C- -O"
 fi
 
-test "$make" || which remake >/dev/null && make="$(which remake) -j$(nproc)" || make="$(which make) -j$(nproc)"
+test "$make" || { which remake >/dev/null && export make="$(which remake) -j$(nproc)" || export make="$(which make) -j$(nproc)"; }
 
 if [ $# != 1 ]; then
 	echo "=> Usage: $scriptName <coreutils_version_number>" 1>&2
