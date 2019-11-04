@@ -28,6 +28,7 @@ fi
 
 sudo ln -vfs /usr/share/zoneinfo/Europe/Paris /etc/localtime
 
+grep -q bash4 /etc/shells || echo $(which bash4) | sudo tee -a /etc/shells
 getent passwd $USER | grep -q $(which bash4) || sudo chsh -s $(which bash4) $USER
 
 refreshRepos=0
