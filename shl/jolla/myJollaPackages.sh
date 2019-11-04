@@ -26,6 +26,8 @@ then
 	devel-su sh -xc "groupadd sudo;usermod -aG sudo $USER" && exit
 fi
 
+sudo ln -vfs /usr/share/zoneinfo/Europe/Paris /etc/localtime
+
 getent passwd $USER | grep -q $(which bash4) || sudo chsh -s $(which bash4) $USER
 
 refreshRepos=0
@@ -42,8 +44,9 @@ do
 	fi	
 done
 
-test "$refreshRepos" = 1 && sudo pkcon refresh
-jollaStorePackages="sailfish-utilities sqlite harbour-barcode harbour-file-browser python pciutils curl yum harbour-unplayer harbour-maxvol harbour-bibleme harbour-recorder git-minimal make cmake gcc gettext nano mutt harbour-ipaddress perl ruby perl-CPAN htop"
+test "$refreshRepos" = 1 && sudo pkcon refresh && sudo zypper refresh
+
+jollaStorePackages="harbour-situations2application situations-sonar sailfish-utilities sqlite harbour-barcode harbour-file-browser python pciutils curl yum harbour-unplayer harbour-maxvol harbour-bibleme harbour-recorder git-minimal make cmake gcc gettext nano mutt harbour-ipaddress perl ruby perl-CPAN htop"
 for package in $jollaStorePackages
 do
 	rpm -q $package || sudo zypper -v install $package
@@ -53,7 +56,7 @@ echo
 
 jollaOptionalPackages="gzip jolla-startupwizard-tutorial"
 
-warehouseStorePackages="harbour-warehouse harbour-qrscany bash4 wget aria2 bash-completion harbour-reboot mutt parted man-db less vim sd-utils-0.3.0.1-2 harbour-unplayer harbour-maxvol nano ffmpeg ruby ipython python-matplotlib python-sympy harbour-ytplayer harbour-videoPlayer-1.7-1 android-chatmail-notification-0.2-7"
+warehouseStorePackages="situationreboot harbour-storeman harbour-qrscany bash4 wget aria2 bash-completion harbour-reboot mutt parted man-db less vim sd-utils-0.3.0.1-2 harbour-unplayer harbour-maxvol nano ffmpeg-tools ruby ipython python-matplotlib python-sympy harbour-ytplayer harbour-videoPlayer-1.7-1 android-chatmail-notification-0.2-7"
 for package in $warehouseStorePackages
 do
 	rpm -q $package || sudo zypper -v install $package
