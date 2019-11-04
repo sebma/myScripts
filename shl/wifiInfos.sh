@@ -22,7 +22,7 @@ wifiInfos() {
 	}
 	
 	if which iw >/dev/null; then
-		physicalDevice=$(iw dev | sed -n "1s/#//;1p")
+		physicalDevice=$(iw dev | \sed -n "1s/#//;1p")
 	
 		echo "=> Wifi physical device capabilities :"
 		iw phy $physicalDevice info
