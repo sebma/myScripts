@@ -28,7 +28,7 @@ elif platform.system() == 'Linux' :
 		firefoxProfilesDIR = HOME + "/.mozilla/firefox"
 elif platform.system() == 'Windows' :
 	APPDATA = os.environ["APPDATA"]
-	firefoxProfilesDIR = APPDATA + os.sep + "Mozilla" + os.sep +"Firefox" + os.sep + "Profiles"
+	firefoxProfilesDIR = APPDATA + os.sep + "Mozilla" + os.sep +"Firefox" + os.sep + "Profiles" # A COMPLETER EN FONCTION DU "scriptBaseName"
 
 argc = len(argv)
 if argc == 1 :
