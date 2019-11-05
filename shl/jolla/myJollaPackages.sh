@@ -4,34 +4,46 @@ LANG=C
 set -o nounset
 set -o errexit
 
+os=$(awk -F= '/^ID=/{print$2}' /etc/os-release)
+if [ $os != sailfishos ]
+then
+	echo "=> ERROR : $0 must be run on a SailfishOS machine." 1>&2
+	exit 1
+fi
+
+refreshRepos=0
 if ! which sudo >/dev/null 2>&1
 then
 	set -x
 	if ! ssu repos | egrep -q mer-tools.*https?://releases.jolla.com/releases/.*mer-tools
 	then
 		ssu addrepo mer-tools
-		ssu updaterepos
 		refreshRepos=1
-		devel-su sh -c "pkcon refresh;pkcon install -y sudo"
-	else
-		devel-su sh -c "pkcon install -y sudo"
+		ssu updaterepos
 	fi
 
-	rpm -q sudo
+	devel-su sh -xc "pkcon refresh;pkcon install -y sudo;sed -ri '/%sudo/s/^# //' /etc/sudoers;groupadd sudo;usermod -aG sudo $USER" # Allow members of group sudo to execute any command
+	refreshRepos=0
+
+	rpm -q sudo && exit
 	set +x
 fi
 
-if ! groups | grep -qw sudo
-then
-	devel-su sh -xc "groupadd sudo;usermod -aG sudo $USER" && exit
-fi
-
+echo "=> Configuring Europe/Paris timezone ..."
 sudo ln -vfs /usr/share/zoneinfo/Europe/Paris /etc/localtime
 
-grep -q bash4 /etc/shells || echo $(which bash4) | sudo tee -a /etc/shells
-getent passwd $USER | grep -q $(which bash4) || sudo chsh -s $(which bash4) $USER
+bash4="$(which bash4 2>/dev/null)"
+if [ -z "$bash4" ]
+then
+	echo "=> Configuring bash4 for $USER ..."
+	grep -q bash4 /etc/shells || echo $bash4 | sudo tee -a /etc/shells
+	if ! getent passwd $USER | grep -q $bash4
+	then
+		sudo chsh -s $bash4 $USER
+		exit
+	fi
+fi
 
-refreshRepos=0
 which zypper >/dev/null 2>&1 || sudo pkcon install zypper
 for repo in basil NielDK V10lator edgley llelectronics matolainen equeim inte BloodyFoxy yoktobit nodevel Schturman steffen_f Morpog rzr lourens rcolistete osetr
 do
@@ -46,6 +58,7 @@ do
 done
 
 test "$refreshRepos" = 1 && sudo pkcon refresh && sudo zypper refresh
+refreshRepos=0
 
 jollaStorePackages="harbour-situations2application situations-sonar sailfish-utilities sqlite harbour-barcode harbour-file-browser python pciutils curl yum harbour-unplayer harbour-maxvol harbour-bibleme harbour-recorder git-minimal make cmake gcc gettext nano mutt harbour-ipaddress perl ruby perl-CPAN htop"
 for package in $jollaStorePackages
@@ -72,12 +85,21 @@ done
 
 echo "=> Updating installed packages ..." >&2
 sudo zypper -v update
+echo
 
+echo "=> Installing the speedtest tool ..."
+pip3 show speedtest-cli >/dev/null || sudo -H $(which pip3) install speedtest-cli
+echo
+
+echo "=> Installing a few AlienDalvik Android apps ..."
+echo
+echo "=> Installing FDroid ..."
 grep -qri Exec=.*fdroid /usr/share/applications/ && echo "=> FDroid  is already instaled." >&2 || {
 	echo "=> Downloading and installing FDroid ..." >&2
 	wget --no-check-certificate -nvc https://f-droid.org/FDroid.apk && apkd-install FDroid.apk && rm -vf FDroid.apk
 }
 
+echo "=> Installing APToide ..."
 grep -qri Exec=.*aptoide /usr/share/applications/ && echo "=> APToide is already instaled." >&2 || {
 	echo "=> Downloading and installing APToide ..." >&2
 	#apToideURL=$(curl -s "http://m.aptoide.com/installer/thank-you?utm_source=google&utm_campaign=(organic)&utm_medium=organic&entry_point=installer_mobile" | sed -n "/\.apk/s/.*src=.//;s/\.apk.*/.apk/;/\.apk/p")
@@ -86,9 +108,10 @@ grep -qri Exec=.*aptoide /usr/share/applications/ && echo "=> APToide is already
 	curl -#OC- "$apToideURL" && wget --no-check-certificate -nvc $apToideURL && apkd-install $(basename $apToideURL) && rm -vf $(basename "$apToideURL")
 }
 
+echo "=> Installing MySword v6.6 ..."
 grep -qri Exec=.*mysword /usr/share/applications/ && echo "=> MySword is already instaled." >&2 || {
 	echo "=> Downloading and installing MySword ..." >&2
-	mySwordURL=http://mysword-bible.info:8080/download/mysword4android-6.6.apk
+	mySwordURL=https://mysword-bible.info/download/mysword4android-6.6.apk
 	wget --no-check-certificate -nvc $mySwordURL && apkd-install $(basename $mySwordURL) && rm -vf mysword4android-6.6.apk
 }
 
