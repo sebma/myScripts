@@ -45,7 +45,7 @@ then
 fi
 
 which zypper >/dev/null 2>&1 || sudo pkcon install zypper
-for repo in basil NielDK V10lator edgley llelectronics matolainen equeim inte BloodyFoxy yoktobit nodevel Schturman steffen_f Morpog rzr lourens rcolistete osetr
+for repo in Schturman basil NielDK V10lator edgley llelectronics matolainen equeim inte BloodyFoxy yoktobit nodevel Schturman steffen_f Morpog rzr lourens rcolistete osetr
 do
 	if ! ssu repos | egrep -q openrepos-$repo.*https?://sailfish.openrepos.net/$repo 
 	then
@@ -60,6 +60,10 @@ done
 test "$refreshRepos" = 1 && sudo pkcon refresh && sudo zypper refresh
 refreshRepos=0
 
+sudo zypper -v install hebrewvkb-simple
+systemctl --user restart maliit-server # Restart keyboard service
+systemctl --user status  maliit-server | grep -i Active
+
 jollaStorePackages="harbour-situations2application situations-sonar sailfish-utilities sqlite harbour-barcode harbour-file-browser python pciutils curl yum harbour-unplayer harbour-maxvol harbour-bibleme harbour-recorder git-minimal make cmake gcc gettext nano mutt harbour-ipaddress perl ruby perl-CPAN htop"
 for package in $jollaStorePackages
 do
@@ -70,8 +74,8 @@ echo
 
 jollaOptionalPackages="gzip jolla-startupwizard-tutorial"
 
-warehouseStorePackages="situationreboot harbour-storeman harbour-qrscany bash4 wget aria2 bash-completion harbour-reboot mutt parted man-db less vim sd-utils-0.3.0.1-2 harbour-unplayer harbour-maxvol nano ffmpeg-tools ruby ipython python-matplotlib python-sympy harbour-ytplayer harbour-videoPlayer-1.7-1 android-chatmail-notification-0.2-7"
-for package in $warehouseStorePackages
+openreposStorePackages="situationreboot harbour-storeman harbour-qrscany bash4 wget aria2 bash-completion harbour-reboot mutt parted man-db less vim sd-utils-0.3.0.1-2 harbour-unplayer harbour-maxvol nano ffmpeg-tools ruby ipython python-matplotlib python-sympy harbour-ytplayer harbour-videoPlayer-1.7-1 android-chatmail-notification-0.2-7"
+for package in $openreposStorePackages
 do
 	rpm -q $package || sudo zypper -v install $package
 #	zypper info $package | grep Repository
