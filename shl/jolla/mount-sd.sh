@@ -12,14 +12,26 @@ ACTION=$1
 DEVNAME=$2
 
 if [ -z "${ACTION}" ] || [ -z "${DEVNAME}" ]; then
+	echo "=> Usage : $0 add|remove deviceName" 1>&2
     exit 1
+fi
+
+OS=$(awk -F= '/^ID=/{print$2}' /etc/os-release)
+if [ $OS != sailfishos ]; then
+	echo "=> ERROR : $0 must be run on a SailfishOS machine." 1>&2
+	exit 2
+fi
+
+if [ $UID != 0 ]; then
+	echo "=> ERROR : $0 must be run as root or via sudo." 1>&2
+	exit 3
 fi
 
 systemd-cat -t mount-sd /bin/echo "Called to ${ACTION} ${DEVNAME}"
 
 if [ "$ACTION" = "add" ]; then
 
-    eval "$(/sbin/blkid -c /dev/null -o export /dev/$2)"
+    eval "$(/sbin/blkid -c /dev/null -o export /dev/$DEVNAME)" # Refresh /etc/blkid.tab and export variables for "$DEVNAME"
 
     if [ -z "${UUID}" ] || [ -z "${TYPE}" ]; then
         exit 1
