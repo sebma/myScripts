@@ -19,4 +19,6 @@ echo "=> Association des protocoles http et https avec $desktopFile ..."
 xdg-mime default $desktopFile x-scheme-handler/http x-scheme-handler/https
 echo "=> Verification ..."
 xdg-mime query default x-scheme-handler/https
+xdg-settings set default-web-browser $desktopFile
+xdg-settings get default-web-browser
 echo "=> Fait."
