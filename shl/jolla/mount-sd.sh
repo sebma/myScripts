@@ -31,7 +31,7 @@ systemd-cat -t mount-sd /bin/echo "Called to ${ACTION} ${DEVNAME}"
 
 if [ "$ACTION" = "add" ]; then
 
-    eval "$(/sbin/blkid -c /dev/null -o export /dev/$DEVNAME)" # Refresh /etc/blkid.tab and export variables for "$DEVNAME"
+    eval "$(/sbin/blkid -c /dev/null -o export /dev/$DEVNAME)" # Refresh /etc/blkid.tab and set variables for "$DEVNAME"
 
     if [ -z "${UUID}" ] || [ -z "${TYPE}" ]; then
         exit 1
