@@ -1,13 +1,14 @@
 #!/usr/bin/env sh
 
-adb devices -l
-adb shell "
+androidDeviceSerial=$(adb devices | awk '/device$/{print$1}')
+if [ -n "$androidDeviceSerial" ];then
+	echo "=> INFO : You are connected to the $androidDeviceSerial android device."
+	echo
+	adb shell "
 	alias grep='grep --color'
 	alias egrep='grep -E'
-	set | grep 'VERSION='
-	echo
-	printenv | grep HOSTNAME
-	echo
+	set | grep 'VERSION=' && echo
+	printenv | grep HOSTNAME && echo
 	grep --version
 	echo
 	uname >/dev/null 2>&1 && echo uname -m: && uname -m && echo uname -sr: && uname -sr
@@ -32,4 +33,8 @@ adb shell "
 	echo
 	tail /proc/cpuinfo 2>/dev/null || cat /proc/cpuinfo
 	echo
-" | less
+"
+else
+	echo "=> $0: ERROR : No adb device detected." >&2
+	exit 1
+fi | less -F
