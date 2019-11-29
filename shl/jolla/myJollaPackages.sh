@@ -62,7 +62,7 @@ refreshRepos=0
 
 sudo zypper -v install hebrewvkb-simple
 systemctl --user restart maliit-server timed-qt5.service # Restart keyboard and timed-qt5 services
-systemctl --user status  maliit-server timed-qt5.service | egrep ' - |Active:'
+systemctl --user status  maliit-server timed-qt5.service sshd.service | egrep ' - |Active:'
 
 jollaStorePackages="harbour-situations2application situations-sonar sailfish-utilities sqlite harbour-barcode harbour-file-browser python pciutils curl yum harbour-unplayer harbour-maxvol harbour-bibleme harbour-recorder git-minimal make cmake gcc gettext nano mutt harbour-ipaddress perl ruby perl-CPAN htop"
 for package in $jollaStorePackages
