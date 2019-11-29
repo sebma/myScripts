@@ -1,12 +1,48 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-androidDeviceSerial=$(adb devices | awk '/device$/{print$1}')
-if [ -n "$androidDeviceSerial" ];then
-	echo "=> INFO : You are connected to the $androidDeviceSerial android device."
+adb=$(which adb)
+declare connectionOrIP_To_Connect=usb
+
+if [ $# != 0 ] && [ $# != 1 ]; then
+	echo "=> Usage : $0 [usb] | IP@" >&2
+	exit 1
+fi
+
+test -n "$1" && connectionOrIP_To_Connect=$1
+
+if [ $connectionOrIP_To_Connect != usb ] && ! echo $connectionOrIP_To_Connect | grep -qP '(\d+\.){3}\d+'; then
+	echo "=> ERROR[$0] : The must argument must either be \"usb\" or an ip address." >&2
+	exit 2
+fi
+
+androidDeviceSerial=$($adb devices -l | awk -F ':| +' '/device /{print$(NF-2)}' | sort -u)
+
+if [ $connectionOrIP_To_Connect = usb ];then 
+	androidDeviceNetworkInterface=$($adb shell ip addr | tr -s ' ' | egrep -v '(127.0.0.|169.254.0|inet6)' | grep -P '(\d+\.){3}\d+/\d+' | awk '{print$NF}')
+	androidDeviceIP=$($adb shell ip addr show $androidDeviceNetworkInterface | tr -s ' ' | grep -w inet | cut -d' ' -f3 | cut -d/ -f1)
+
+	set | grep androidDevice
+else
+	$adb connect $connectionOrIP_To_Connect
+fi
+
+if ! $adb shell echo; then
+	retCode=$?
 	echo
-	adb shell "
+	$adb devices
+	exit $retCode
+fi
+
+if [ -n "$androidDeviceSerial" ];then
+	echo "=> INFO : You are connected to the $androidDeviceSerial android device via $connectionOrIP_To_Connect."
+	echo
+
+	$adb shell "
+	COLUMNS=176
 	alias grep='grep --color'
 	alias egrep='grep -E'
+	test -n "$androidDeviceNetworkInterface" && echo '=> IP Address is : $androidDeviceIP'
+	echo
 	set | grep 'VERSION=' && echo
 	printenv | grep HOSTNAME && echo
 	grep --version
@@ -37,4 +73,5 @@ if [ -n "$androidDeviceSerial" ];then
 else
 	echo "=> $0: ERROR : No adb device detected." >&2
 	exit 1
-fi | less -F
+#fi | less -F
+fi
