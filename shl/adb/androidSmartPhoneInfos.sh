@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 adb=$(which adb)
-declare connectionOrIP_To_Connect=usb
+connectionOrIP_To_Connect=usb
 
 if [ $# != 0 ] && [ $# != 1 ]; then
 	echo "=> Usage : $0 [usb] | IP@" >&2
@@ -18,13 +18,15 @@ fi
 androidDeviceSerial=$($adb devices -l | awk -F ':| +' '/device /{print$(NF-2)}' | sort -u)
 
 if [ $connectionOrIP_To_Connect = usb ];then 
+	$adb disconnect
 	androidDeviceNetworkInterface=$($adb shell ip addr | tr -s ' ' | egrep -v '(127.0.0.|169.254.0|inet6)' | grep -P '(\d+\.){3}\d+/\d+' | awk '{print$NF}')
 	androidDeviceIP=$($adb shell ip addr show $androidDeviceNetworkInterface | tr -s ' ' | grep -w inet | cut -d' ' -f3 | cut -d/ -f1)
-
-	set | grep androidDevice
 else
 	$adb connect $connectionOrIP_To_Connect
+	androidDeviceIP=$connectionOrIP_To_Connect
 fi
+
+set | grep androidDevice
 
 if ! $adb shell echo; then
 	retCode=$?
@@ -41,8 +43,7 @@ if [ -n "$androidDeviceSerial" ];then
 	COLUMNS=176
 	alias grep='grep --color'
 	alias egrep='grep -E'
-	test -n "$androidDeviceNetworkInterface" && echo '=> IP Address is : $androidDeviceIP'
-	echo
+	test -n '$androidDeviceIP' && echo '=> IP Address is : $androidDeviceIP' && echo
 	set | grep 'VERSION=' && echo
 	printenv | grep HOSTNAME && echo
 	grep --version
