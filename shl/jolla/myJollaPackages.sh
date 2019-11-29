@@ -32,6 +32,10 @@ fi
 echo "=> Configuring Europe/Paris timezone ..."
 sudo ln -vfs /usr/share/zoneinfo/Europe/Paris /etc/localtime
 
+echo "=> Enabling and starting sshd ..."
+sudo systemctl enable sshd.service
+sudo systemctl start sshd.service
+
 bash4="$(which bash4 2>/dev/null)"
 if [ -z "$bash4" ]
 then
