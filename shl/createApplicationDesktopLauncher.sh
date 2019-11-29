@@ -10,15 +10,17 @@ then
 	
 	programName="$1"
 	appName="$(echo $programName | sed 's/^./\U&/')"
-	destopFilePath=~/.local/share/applications/$1.desktop
-	FORM=$(zenity --forms --title="Simple shortcut maker" --text="Create new .desktop file" \
-		--add-entry="Program Name" \
-		--add-entry="Command or path to file" \
-		--add-combo="Terminal app (true/false)" --combo-values "false|true" \
-		--add-entry="Icon (path)")
+	destopFilePath=~/.local/share/applications/$programName.desktop
+	FORM=$(zenity --forms --title="Simple application shortcut maker" --text="Create new application .desktop file" \
+			--add-entry="Program Name" \
+			--add-entry="Command or path to file" \
+			--add-combo="Terminal app (true/false)" --combo-values "false|true" \
+			--add-entry="Icon (path)" \
+		  )
 	
 	[ $? = 0 ] || exit 2
 	
+	echo
 	awk -F'|' '{
 		print "#!/usr/bin/env xdg-open"
 		print "[Desktop Entry]"
@@ -27,5 +29,5 @@ then
 		print "Exec="$2
 		print "Terminal="$3
 		if ($4 !~ /^[ ]*$/) print "Icon="$4
-	}' <<< "$FORM" | tee $destopFilePath && chmod -v +x $destopFilePath && ls -l $destopFilePath
+	}' <<< "$FORM" | tee $destopFilePath && echo && chmod -v +x $destopFilePath && echo && ls -l $destopFilePath
 fi
