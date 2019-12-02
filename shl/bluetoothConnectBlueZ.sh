@@ -66,7 +66,7 @@ elif which hciconfig >/dev/null 2>&1; then
 
 	echo "=> bluetoothController = $bluetoothController"
 
-	hciconfig hci0 | grep -q DOWN || sudo hciconfig $bluetoothController up
+	hciconfig hci0 | grep -q DOWN && sudo hciconfig $bluetoothController up
 	deviceList=$(echo "=> Scanning for bluetooth devices ..." 1>&2;time -p hcitool scan | grep -v Scanning)
 	if [ -z "$deviceList" ]; then {
 		deviceList=$(echo "=> Scanning deeper for bluetooth devices ..." 1>&2;time -p hcitool scan | grep -v Scanning)
