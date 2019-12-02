@@ -9,9 +9,9 @@ fi
 echo "=> bluetoothController = $bluetoothController"
 sudo hciconfig $bluetoothController up
 
-deviceList=$(time -p hcitool scan | grep -v Scanning)
+deviceList=$(echo "=> Scanning for bluetooth devices ..." 1>&2;time -p hcitool scan | grep -v Scanning)
 if [ -z "$deviceList" ]; then {
-	deviceList=$(hcitool scan | grep -v Scanning)
+	deviceList=$(echo "=> Scanning deeper for bluetooth devices ..." 1>&2;time -p hcitool scan | grep -v Scanning)
 	if [ -z "$deviceList" ]; then {
 		echo "=> ERROR: Could not find any device to connect to." >&2
 		exit 3
