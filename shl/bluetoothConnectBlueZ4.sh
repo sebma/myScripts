@@ -40,6 +40,7 @@ if echo "$deviceList" | grep -q "$deviceName"; then {
 	deviceHW=$(echo "$deviceList" | awk /$deviceName/'{print$1}')
 	sudo hcitool cc $deviceHW
 	sudo -b rfcomm connect 0 $deviceHW
+	sleep 1
 	rfcomm show $deviceHW
 	hcitool con
 } else {
