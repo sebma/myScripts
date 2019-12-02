@@ -96,7 +96,8 @@ elif which hciconfig >/dev/null 2>&1; then
 	if echo "$deviceList" | awk '{print$NF}' | grep -q "$deviceName"; then {
 		deviceHW=$(echo "$deviceList" | awk /$deviceName/'{print$1}')
 		sudo hcitool cc $deviceHW
-		sudo rfcomm connect 0 $deviceHW
+		sudo -b rfcomm connect 0 $deviceHW
+		rfcomm show $deviceHW
 		hcitool con
 	} else {
 		echo "=> ERROR: The device you have chosen is not visible." >&2
