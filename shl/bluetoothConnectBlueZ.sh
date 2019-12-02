@@ -79,7 +79,7 @@ elif which hciconfig >/dev/null 2>&1; then
 	fi
 	
 	printf "Here are the available devices : "
-	echo "$deviceList" | awk '{print$NF}'
+	echo "$deviceList" | tr '\t' ' ' | tr -s ' ' | cut -d' ' -f2-
 	if [ $# = 0 ]; then {
 		printf "Type the device name you want to connect to : "
 		read deviceName
@@ -93,7 +93,7 @@ elif which hciconfig >/dev/null 2>&1; then
 	}
 	fi
 	
-	if echo "$deviceList" | awk '{print$NF}' | grep -q "$deviceName"; then {
+	if echo "$deviceList" | tr '\t' ' ' | tr -s ' ' | cut -d' ' -f2- | grep -q "$deviceName"; then {
 		deviceHW=$(echo "$deviceList" | awk /$deviceName/'{print$1}')
 		sudo hcitool cc $deviceHW
 		sudo -b rfcomm connect 0 $deviceHW
