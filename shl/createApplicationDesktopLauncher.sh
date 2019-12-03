@@ -4,13 +4,13 @@ osFamily=$(uname -s)
 if [ $osFamily = Linux ]
 then
 	[ $# = 0 ] && {
-		echo  "=> Usage: $0 programName"
+		echo  "=> Usage: $0 desktopShortcutFileName"
 		exit 1
 	}
 	
-	programName="$1"
-	appName="$(echo $programName | sed 's/^./\U&/')"
-	destopFilePath=~/.local/share/applications/$programName.desktop
+	desktopShortcutFileName="$1"
+	appName="$(echo $desktopShortcutFileName | sed 's/^./\U&/')"
+	destopFilePath=~/.local/share/applications/$desktopShortcutFileName.desktop
 	FORM=$(zenity --forms --title="Simple application shortcut maker" --text="Create new application .desktop file" \
 			--add-entry="Program Name" \
 			--add-entry="Command or path to file" \
