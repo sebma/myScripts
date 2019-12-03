@@ -15,28 +15,29 @@ if [ $connectionOrIP_To_Connect != usb ] && ! echo $connectionOrIP_To_Connect | 
 	exit 2
 fi
 
-androidDeviceSerial=$($adb devices -l | awk -F ':| +' '/device /{print$(NF-2)}' | sort -u)
-
 if [ $connectionOrIP_To_Connect = usb ];then 
 	$adb disconnect
-	androidDeviceNetworkInterface=$($adb shell ip addr | tr -s ' ' | egrep -v '(127.0.0.|169.254.0|inet6)' | grep -P '(\d+\.){3}\d+/\d+' | awk '{print$NF}')
-	androidDeviceIP=$($adb shell ip addr show $androidDeviceNetworkInterface | tr -s ' ' | grep -w inet | cut -d' ' -f3 | cut -d/ -f1)
+	echo
+	androidDeviceNetworkInterface=$($adb shell ip -o addr | egrep -v '(127.0.0.|169.254.0|inet6|loopback)' | awk '/inet /{print$2}')
+	test -n "$androidDeviceNetworkInterface" && androidDeviceIP=$($adb shell ip -o addr show $androidDeviceNetworkInterface | awk -F ' *|/' '/inet /{print$4}')
 else
 	$adb connect $connectionOrIP_To_Connect
+	sleep 1
 	androidDeviceIP=$connectionOrIP_To_Connect
 fi
 
-set | grep androidDevice
-
-if ! $adb shell echo; then
+if ! $adb shell echo >/dev/null; then
 	retCode=$?
 	echo
 	$adb devices
 	exit $retCode
 fi
 
+androidDeviceSerial=$($adb shell getprop ro.serialno | sed $'s/\r//')
 if [ -n "$androidDeviceSerial" ];then
 	echo "=> INFO : You are connected to the $androidDeviceSerial android device via $connectionOrIP_To_Connect."
+	echo
+	set | grep androidDevice
 	echo
 
 	$adb shell "
@@ -48,8 +49,7 @@ if [ -n "$androidDeviceSerial" ];then
 	printenv | grep HOSTNAME && echo
 	grep --version
 	echo
-	uname >/dev/null 2>&1 && echo uname -m: && uname -m && echo uname -sr: && uname -sr
-	echo
+	uname >/dev/null 2>&1 && echo -n uname -m: && uname -m && echo -n uname -sr: && uname -sr && echo
 	getprop | egrep 'ro.build.version.release|ro.build.version.sdk'
 	echo
 	getprop | egrep 'model|manufacturer|hardware|platform|revision|serialno|product.name|product.device|brand'
@@ -75,4 +75,5 @@ else
 	echo "=> $0: ERROR : No adb device detected." >&2
 	exit 1
 #fi | less -F
-fi
+fi 2>&1 | sed $'s/\r//' | tee ${androidDeviceSerial}_$connectionOrIP_To_Connect.log
+
