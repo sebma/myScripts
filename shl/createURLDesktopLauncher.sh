@@ -8,7 +8,7 @@ then
 		exit 1
 	}
 	
-	URLDesktopFileName="$1"
+	URLDesktopFileName="$1"_URL
 	appName="$(echo $URLDesktopFileName | sed 's/^./\U&/')"
 	destopFilePath=~/.local/share/applications/$URLDesktopFileName.desktop
 	FORM=$(zenity --forms --title="Simple URL shortcut maker" --text="Create new URL .desktop file" \
