@@ -15,11 +15,13 @@ if [ $connectionOrIP_To_Connect != usb ] && ! echo $connectionOrIP_To_Connect | 
 	exit 2
 fi
 
+dos2unix="$(which tr) -d '\r'"
 if [ $connectionOrIP_To_Connect = usb ];then 
 	$adb disconnect
 	echo
-	androidDeviceNetworkInterface=$($adb shell ip -o addr | egrep -v '(127.0.0.|169.254.0|inet6|loopback)' | awk '/inet /{print$2}')
-	test -n "$androidDeviceNetworkInterface" && androidDeviceIP=$($adb shell ip -o addr show $androidDeviceNetworkInterface | awk -F ' *|/' '/inet /{print$4}')
+	androidDeviceNetworkInterface=$($adb shell ip -o addr | egrep -v '(127.0.0.|169.254.0|inet6|loopback)' | awk '/inet /{print$2}' | $dos2unix)
+	test -n "$androidDeviceNetworkInterface" && androidDeviceIP=$($adb shell ip -o addr show $androidDeviceNetworkInterface | awk -F ' *|/' '/inet /{print$4}' | $dos2unix)
+	test -z "$androidDeviceNetworkInterface" && unset androidDeviceNetworkInterface
 else
 	$adb connect $connectionOrIP_To_Connect
 	sleep 1
@@ -33,11 +35,12 @@ if ! $adb shell echo >/dev/null; then
 	exit $retCode
 fi
 
-androidDeviceSerial=$($adb shell getprop ro.serialno | sed $'s/\r//')
+androidDeviceSerial=$($adb shell getprop ro.serialno | $dos2unix)
+androidCodeName=$($adb shell getprop ro.product.device | $dos2unix)
 if [ -n "$androidDeviceSerial" ];then
 	echo "=> INFO : You are connected to the $androidDeviceSerial android device via $connectionOrIP_To_Connect."
 	echo
-	set | grep androidDevice
+	set | grep ^android.*=
 	echo
 
 	$adb shell "
@@ -49,10 +52,10 @@ if [ -n "$androidDeviceSerial" ];then
 	printenv | grep HOSTNAME && echo
 	grep --version
 	echo
-	uname >/dev/null 2>&1 && echo -n uname -m: && uname -m && echo -n uname -sr: && uname -sr && echo
-	getprop | egrep 'ro.build.version.release|ro.build.version.sdk'
+	uname >/dev/null 2>&1 && echo -n 'uname -m: ' && uname -m && echo -n 'uname -sr: ' && uname -sr && echo
+	getprop | egrep -w 'ro.build.version.release|ro.build.version.sdk|ro.product.device|ro.product.cpu.abi'
 	echo
-	getprop | egrep 'model|manufacturer|hardware|platform|revision|serialno|product.name|product.device|brand'
+	getprop | egrep 'model|manufacturer|hardware|platform|revision|serialno|product.name|product.device|brand|cpu.abi'
 	echo
 	dumpsys battery | egrep 'Current Battery|level|scale'
 	echo
@@ -75,5 +78,5 @@ else
 	echo "=> $0: ERROR : No adb device detected." >&2
 	exit 1
 #fi | less -F
-fi 2>&1 | sed $'s/\r//' | tee ${androidDeviceSerial}_$connectionOrIP_To_Connect.log
+fi 2>&1 | $dos2unix | tee ${androidDeviceSerial}_${androidCodeName}_${connectionOrIP_To_Connect}.log
 
