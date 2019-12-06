@@ -43,22 +43,23 @@ if [ -n "$androidDeviceSerial" ];then
 	set | grep ^android.*=
 	echo
 
+	test -n "$androidDeviceIP" && echo "=> IP Address is : $androidDeviceIP" && echo
 	$adb shell "
 	COLUMNS=176
-	alias grep='grep --color'
-	alias egrep='grep -E'
-	test -n '$androidDeviceIP' && echo '=> IP Address is : $androidDeviceIP' && echo
-	set | grep 'VERSION=' && echo
-	printenv | grep HOSTNAME && echo
-	grep --version
+	echo KSH_VERSION=\$KSH_VERSION
 	echo
+	echo HOSTNAME=\$HOSTNAME
+	echo && grep --version 2>/dev/null && echo
 	uname >/dev/null 2>&1 && echo -n 'uname -m: ' && uname -m && echo -n 'uname -sr: ' && uname -sr && echo
-	getprop | egrep -w 'ro.build.version.release|ro.build.version.sdk|ro.product.device|ro.product.cpu.abi'
+	type toolbox busybox toybox
+"
+
 	echo
-	getprop | egrep 'model|manufacturer|hardware|platform|revision|serialno|product.name|product.device|brand|cpu.abi'
-	echo
-	dumpsys battery | egrep 'Current Battery|level|scale'
-	echo
+	$adb shell getprop | egrep -w 'ro.build.version.release|ro.build.version.sdk|ro.product.device';echo
+	$adb shell getprop | egrep 'model|manufacturer|hardware|platform|revision|serialno|product.name|product.device|brand|cpu.abi2|cpu.abi\>';echo
+	$adb shell dumpsys battery | egrep 'Current Battery|level|scale';echo
+
+	$adb shell "
 	df -h 2>/dev/null || df
 	echo
 	wm size
@@ -78,5 +79,5 @@ else
 	echo "=> $0: ERROR : No adb device detected." >&2
 	exit 1
 #fi | less -F
-fi 2>&1 | $dos2unix | tee ${androidDeviceSerial}_${androidCodeName}_${connectionOrIP_To_Connect}.log
+fi 2>&1 | $dos2unix | tee ${androidCodeName}_${androidDeviceSerial}_${connectionOrIP_To_Connect}.log
 
