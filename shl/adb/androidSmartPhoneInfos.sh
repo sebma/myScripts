@@ -17,7 +17,7 @@ fi
 
 dos2unix="$(which tr) -d '\r'"
 if [ $connectionOrIP_To_Connect = usb ];then 
-	$adb disconnect
+	$adb shell echo 2>&1 | grep 'more than one' && $adb disconnect
 	echo
 	androidDeviceNetworkInterface=$($adb shell getprop wifi.interface | $dos2unix)
 	test -n "$androidDeviceNetworkInterface" && androidDeviceIP=$($adb shell ip -o addr show $androidDeviceNetworkInterface | awk -F ' *|/' '/inet /{print$4}' | $dos2unix)
@@ -43,7 +43,7 @@ if [ -n "$androidDeviceSerial" ];then
 	set | grep ^android.*=
 	echo
 
-	test -n "$androidDeviceNetworkInterface" && printf "=> Interface $androidDeviceNetworkInterface state : " && $adb shell ip addr show $androidDeviceNetworkInterface | awk '/state \w+/{print$9}'
+	test -n "$androidDeviceNetworkInterface" && printf "=> Interface <$androidDeviceNetworkInterface> state : " && $adb shell ip addr show $androidDeviceNetworkInterface | awk '/state \w+/{print$9}'
 	test -n "$androidDeviceIP" && echo "=> IP Address is : $androidDeviceIP" && echo
 	$adb shell "
 	COLUMNS=176
