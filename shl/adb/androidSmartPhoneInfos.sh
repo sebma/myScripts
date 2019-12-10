@@ -37,6 +37,8 @@ fi
 
 androidDeviceSerial=$($adb shell getprop ro.serialno | $dos2unix)
 androidCodeName=$($adb shell getprop ro.product.device | $dos2unix)
+androidBrand=$($adb shell getprop ro.product.brand | $dos2unix)
+androidModel=$($adb shell getprop ro.product.model | $dos2unix)
 if [ -n "$androidDeviceSerial" ];then
 	echo "=> INFO : You are connected to the $androidDeviceSerial android device via $connectionOrIP_To_Connect."
 	echo
@@ -46,6 +48,7 @@ if [ -n "$androidDeviceSerial" ];then
 	test -n "$androidDeviceNetworkInterface" && printf "=> Interface <$androidDeviceNetworkInterface> state : " && $adb shell ip addr show $androidDeviceNetworkInterface | awk '/state \w+/{print$9}'
 	test -n "$androidDeviceIP" && echo "=> IP Address is : $androidDeviceIP" && echo
 	$adb shell mount | awk '/emulated|sdcard0/{next}/(Removable|storage)\//{printf"=> ExtSDCard Mount Point = ";if($2=="on")print$3;else print$2}'
+	echo
 	$adb shell "
 	COLUMNS=176
 	echo KSH_VERSION=\$KSH_VERSION
@@ -82,5 +85,5 @@ else
 	echo "=> $0: ERROR : No adb device detected." >&2
 	exit 1
 #fi | less -F
-fi 2>&1 | $dos2unix | tee ${androidCodeName}_${androidDeviceSerial}_${connectionOrIP_To_Connect}.log
+fi 2>&1 | $dos2unix | tee ${androidBrand}_${androidModel}_${androidCodeName}_${androidDeviceSerial}_${connectionOrIP_To_Connect}.log
 
