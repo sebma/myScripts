@@ -19,7 +19,7 @@ dos2unix="$(which tr) -d '\r'"
 if [ $connectionOrIP_To_Connect = usb ];then 
 	$adb disconnect
 	echo
-	androidDeviceNetworkInterface=$($adb shell ip -o addr | egrep -v '(127.0.0.|169.254.0|inet6|loopback)' | awk '/inet /{print$2}' | $dos2unix)
+	androidDeviceNetworkInterface=$($adb shell getprop wifi.interface | $dos2unix)
 	test -n "$androidDeviceNetworkInterface" && androidDeviceIP=$($adb shell ip -o addr show $androidDeviceNetworkInterface | awk -F ' *|/' '/inet /{print$4}' | $dos2unix)
 	test -z "$androidDeviceNetworkInterface" && unset androidDeviceNetworkInterface
 else
@@ -56,7 +56,7 @@ if [ -n "$androidDeviceSerial" ];then
 
 	echo
 	$adb shell getprop | egrep -w 'ro.build.version.release|ro.build.version.sdk|ro.product.device';echo
-	$adb shell getprop | egrep 'model|manufacturer|hardware|platform|revision|serialno|product.name|product.device|brand|cpu.abi2|cpu.abi\>';echo
+	$adb shell getprop | egrep 'model|manufacturer|hardware|platform|revision|serialno|product.name|product.device|brand|cpu.abi2|cpu.abi\>|wifi.interface|service.adb';echo
 	$adb shell dumpsys battery | egrep 'Current Battery|level|scale';echo
 
 	$adb shell "
