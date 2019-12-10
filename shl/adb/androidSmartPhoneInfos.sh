@@ -43,6 +43,7 @@ if [ -n "$androidDeviceSerial" ];then
 	set | grep ^android.*=
 	echo
 
+	test -n "$androidDeviceNetworkInterface" && printf "=> Interface $androidDeviceNetworkInterface state : " && $adb shell ip addr show $androidDeviceNetworkInterface | awk '/state \w+/{print$9}'
 	test -n "$androidDeviceIP" && echo "=> IP Address is : $androidDeviceIP" && echo
 	$adb shell "
 	COLUMNS=176
