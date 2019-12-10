@@ -6,4 +6,4 @@ private/
 *.bin
 nohup.out
 t?t*
-adb/*.log
+shl/adb/*.log
