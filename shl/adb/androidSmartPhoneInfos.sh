@@ -45,6 +45,7 @@ if [ -n "$androidDeviceSerial" ];then
 
 	test -n "$androidDeviceNetworkInterface" && printf "=> Interface <$androidDeviceNetworkInterface> state : " && $adb shell ip addr show $androidDeviceNetworkInterface | awk '/state \w+/{print$9}'
 	test -n "$androidDeviceIP" && echo "=> IP Address is : $androidDeviceIP" && echo
+	$adb shell mount | awk '/emulated|sdcard0/{next}/(Removable|storage)\//{printf"=> ExtSDCard Mount Point = ";if($2=="on")print$3;else print$2}'
 	$adb shell "
 	COLUMNS=176
 	echo KSH_VERSION=\$KSH_VERSION
@@ -58,6 +59,7 @@ if [ -n "$androidDeviceSerial" ];then
 	echo
 	$adb shell getprop | egrep -w 'ro.build.version.release|ro.build.version.sdk|ro.product.device';echo
 	$adb shell getprop | egrep 'model|manufacturer|hardware|platform|revision|serialno|product.name|product.device|brand|cpu.abi2|cpu.abi\>|wifi.interface|service.adb';echo
+	$adb shell getprop | egrep 'storage.mmc.size|mount';echo
 	$adb shell dumpsys battery | egrep 'Current Battery|level|scale';echo
 
 	$adb shell "
