@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-typeset adb=$(which adb)
+adb=$(which adb)
 [ $# != 1 ] && {
 	echo "=> Usage: $0 applicationPattern"
 	exit 1
