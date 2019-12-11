@@ -20,8 +20,12 @@ if [ $connectionOrIP_To_Connect = usb ];then
 	$adb shell echo 2>&1 | grep 'more than one' && $adb disconnect
 	echo
 	androidDeviceNetworkInterface=$($adb shell getprop wifi.interface | $dos2unix)
-	test -n "$androidDeviceNetworkInterface" && androidDeviceIP=$($adb shell ip -o addr show $androidDeviceNetworkInterface | awk -F ' *|/' '/inet /{print$4}' | $dos2unix)
-	test -z "$androidDeviceNetworkInterface" && unset androidDeviceNetworkInterface
+	if [ -n "$androidDeviceNetworkInterface" ];then
+		androidDeviceIP=$($adb shell getprop dhcp.${androidDeviceNetworkInterface/:*/}.ipaddress | $dos2unix)
+		test -z "$androidDeviceIP" && androidDeviceIP=$($adb shell ip -o addr show $androidDeviceNetworkInterface | awk -F ' *|/' '/inet /{print$4}' | $dos2unix)
+	else
+		unset androidDeviceNetworkInterface
+	fi
 else
 	$adb connect $connectionOrIP_To_Connect
 	sleep 1
