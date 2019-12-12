@@ -22,7 +22,7 @@ then
 		ssu updaterepos
 	fi
 
-	devel-su sh -xc "pkcon refresh;pkcon install -y zypper sudo;sed -ri '/%sudo/s/^# //' /etc/sudoers;groupadd sudo;usermod -aG sudo $USER" # Allow members of group sudo to execute any command
+	devel-su sh -xc "pkcon -v refresh;pkcon install -y zypper sudo;sed -ri '/%sudo/s/^# //' /etc/sudoers;groupadd sudo;usermod -aG sudo $USER" # Allow members of group sudo to execute any command
 	refreshRepos=0
 
 	rpm -q sudo && exit
@@ -60,10 +60,9 @@ do
 	fi	
 done
 
-test "$refreshRepos" = 1 && sudo pkcon refresh && sudo zypper refresh
+test "$refreshRepos" = 1 && sudo pkcon -v refresh && sudo zypper -v refresh
 refreshRepos=0
 
-sudo zypper -v install hebrewvkb-simple
 systemctl --user restart maliit-server timed-qt5.service # Restart keyboard and timed-qt5 services
 systemctl --user status  maliit-server timed-qt5.service sshd.service | egrep ' - |Active:'
 
@@ -77,14 +76,14 @@ echo
 
 jollaOptionalPackages="gzip jolla-startupwizard-tutorial"
 
-openreposStorePackages="situationreboot harbour-storeman harbour-qrscany bash4 wget aria2 bash-completion harbour-reboot mutt parted man-db less vim sd-utils-0.3.0.1-2 harbour-unplayer harbour-maxvol nano ffmpeg-tools ruby ipython python-matplotlib python-sympy harbour-ytplayer harbour-videoPlayer-1.7-1 android-chatmail-notification-0.2-7"
+openreposStorePackages="hebrewvkb-simple situationreboot harbour-storeman harbour-qrscany bash4 wget aria2 bash-completion harbour-reboot mutt parted man-db less vim sd-utils-0.3.0.1-2 harbour-unplayer harbour-maxvol nano ffmpeg-tools ruby ipython python-matplotlib python-sympy harbour-ytplayer harbour-videoPlayer-1.7-1 android-chatmail-notification-0.2-7"
 for package in $openreposStorePackages
 do
 	rpm -q $package || sudo zypper -v install $package
 #	zypper info $package | grep Repository
 done
 
-currentOSVersion=$(version | awk '{print$2}')
+currentOSVersion=$(version | awk '{print$3}')
 [ $currentOSVersion ">" 1.1.2.15 ] && for package in harbour-roamer gcc-c++
 do
 	rpm -q $package || sudo zypper -v install $package
