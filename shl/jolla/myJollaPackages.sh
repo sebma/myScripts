@@ -22,7 +22,7 @@ then
 		ssu updaterepos
 	fi
 
-	devel-su sh -xc "pkcon refresh;pkcon install -y sudo;sed -ri '/%sudo/s/^# //' /etc/sudoers;groupadd sudo;usermod -aG sudo $USER" # Allow members of group sudo to execute any command
+	devel-su sh -xc "pkcon refresh;pkcon install -y zypper sudo;sed -ri '/%sudo/s/^# //' /etc/sudoers;groupadd sudo;usermod -aG sudo $USER" # Allow members of group sudo to execute any command
 	refreshRepos=0
 
 	rpm -q sudo && exit
@@ -48,7 +48,6 @@ then
 	fi
 fi
 
-which zypper >/dev/null 2>&1 || sudo pkcon install zypper
 for repo in Schturman basil NielDK V10lator edgley llelectronics matolainen equeim inte BloodyFoxy yoktobit nodevel Schturman steffen_f Morpog rzr lourens rcolistete osetr
 do
 	if ! ssu repos | egrep -q openrepos-$repo.*https?://sailfish.openrepos.net/$repo 
@@ -68,7 +67,7 @@ sudo zypper -v install hebrewvkb-simple
 systemctl --user restart maliit-server timed-qt5.service # Restart keyboard and timed-qt5 services
 systemctl --user status  maliit-server timed-qt5.service sshd.service | egrep ' - |Active:'
 
-jollaStorePackages="harbour-situations2application situations-sonar sailfish-utilities sqlite harbour-barcode harbour-file-browser python pciutils curl yum harbour-unplayer harbour-maxvol harbour-bibleme harbour-recorder git-minimal make cmake gcc gettext nano mutt harbour-ipaddress perl ruby perl-CPAN htop"
+jollaStorePackages="findutils harbour-situations2application situations-sonar sailfish-utilities sqlite harbour-barcode harbour-file-browser python pciutils curl yum harbour-unplayer harbour-maxvol harbour-bibleme harbour-recorder git-minimal make cmake gcc gettext nano mutt harbour-ipaddress perl ruby perl-CPAN htop"
 for package in $jollaStorePackages
 do
 	rpm -q $package || sudo zypper -v install $package
