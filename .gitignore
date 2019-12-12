@@ -7,3 +7,4 @@ private/
 nohup.out
 t?t*
 shl/adb/*.log
+shl/jolla/*.log
