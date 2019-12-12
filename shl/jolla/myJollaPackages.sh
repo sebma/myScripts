@@ -94,6 +94,10 @@ echo "=> Updating installed packages ..." >&2
 sudo zypper -v update
 echo
 
+echo "=> Installing the pip3 tool ..."
+which pip3 >/dev/null 2>&1 || curl -s https://bootstrap.pypa.io/get-pip.py | sudo -H python3
+echo
+
 echo "=> Installing the speedtest tool ..."
 pip3 show speedtest-cli >/dev/null || sudo -H $(which pip3) install speedtest-cli
 echo
