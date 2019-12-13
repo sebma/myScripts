@@ -16,6 +16,7 @@ if [ $connectionOrIP_To_Connect != usb ] && ! echo $connectionOrIP_To_Connect | 
 fi
 
 dos2unix="$(which tr) -d '\r'"
+adb get-state >/dev/null || exit
 if [ $connectionOrIP_To_Connect = usb ];then 
 	$adb shell echo 2>&1 | grep 'more than one' && $adb disconnect
 	echo
