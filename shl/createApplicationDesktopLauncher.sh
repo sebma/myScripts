@@ -20,9 +20,9 @@ then
 	
 	[ $? = 0 ] || exit 2
 	
-	echo
+	echo # Using "exo-open" according to https://askubuntu.com/a/394358/426176
 	awk -F'|' '{
-		print "#!/usr/bin/env xdg-open"
+		print "#!/usr/bin/exo-open"
 		print "[Desktop Entry]"
 		print "Type=Application"
 		print "Name="$1
