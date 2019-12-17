@@ -9,7 +9,7 @@ then
 	}
 	
 	URLDesktopFileName="$1"_URL
-	appName="$(echo $URLDesktopFileName | sed 's/^./\U&/')"
+	appName="$(echo $URLDesktopFileName | sed 's/^./\U&/')" # Switch first letter to uppercase
 	destopFilePath=~/.local/share/applications/$URLDesktopFileName.desktop
 	FORM=$(zenity --forms --title="Simple URL shortcut maker" --text="Create new URL .desktop file" \
 			--add-entry="Name of the Web Page" \
