@@ -9,7 +9,7 @@ then
 	}
 	
 	desktopShortcutFileName="$1"
-	appName="$(echo $desktopShortcutFileName | sed 's/^./\U&/')"
+	appName="$(echo $desktopShortcutFileName | sed 's/^./\U&/')" # Switch first letter to uppercase
 	destopFilePath=~/.local/share/applications/$desktopShortcutFileName.desktop
 	FORM=$(zenity --forms --title="Simple application shortcut maker" --text="Create new application .desktop file" \
 			--add-entry="Program Name" \
