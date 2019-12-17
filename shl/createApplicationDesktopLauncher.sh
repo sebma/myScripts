@@ -26,7 +26,7 @@ then
 		print "[Desktop Entry]"
 		print "Type=Application"
 		print "Name="$1
-		print "Exec="$2
+		print "Exec="$2" %U"
 		print "Terminal="$3
 		if ($4 !~ /^[ ]*$/) print "Icon="$4
 	}' <<< "$FORM" | tee $destopFilePath && echo && chmod -v +x $destopFilePath && echo && ls -l $destopFilePath
