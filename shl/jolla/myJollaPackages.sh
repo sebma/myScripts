@@ -63,7 +63,12 @@ done
 test "$refreshRepos" = 1 && sudo pkcon -v refresh && sudo zypper -v refresh
 refreshRepos=0
 
-systemctl --user restart maliit-server timed-qt5.service # Restart keyboard and timed-qt5 services
+if ! rpm -q hebrewvkb-simple >/dev/null;then
+	sudo zypper -v install hebrewvkb-simple
+	rpm -q hebrewvkb-simple >/dev/null && systemctl --user restart maliit-server # Restart the keyboard service
+fi
+
+systemctl --user restart timed-qt5.service # Restart the "timed-qt5" service
 systemctl --user status  maliit-server timed-qt5.service sshd.service | egrep ' - |Active:'
 
 jollaStorePackages="findutils harbour-situations2application situations-sonar sailfish-utilities sqlite harbour-barcode harbour-file-browser python pciutils curl yum harbour-unplayer harbour-maxvol harbour-bibleme harbour-recorder git-minimal make cmake gcc gettext nano mutt harbour-ipaddress perl ruby perl-CPAN htop"
@@ -76,7 +81,7 @@ echo
 
 jollaOptionalPackages="gzip jolla-startupwizard-tutorial"
 
-openreposStorePackages="hebrewvkb-simple situationreboot harbour-storeman harbour-qrscany bash4 wget aria2 bash-completion harbour-reboot mutt parted man-db less vim sd-utils-0.3.0.1-2 harbour-unplayer harbour-maxvol nano ffmpeg-tools ruby ipython python-matplotlib python-sympy harbour-ytplayer harbour-videoPlayer-1.7-1 android-chatmail-notification-0.2-7"
+openreposStorePackages="situationreboot harbour-storeman harbour-qrscany bash4 wget aria2 bash-completion harbour-reboot mutt parted man-db less vim sd-utils-0.3.0.1-2 harbour-unplayer harbour-maxvol nano ffmpeg-tools ruby ipython python-matplotlib python-sympy harbour-ytplayer harbour-videoPlayer-1.7-1 android-chatmail-notification-0.2-7"
 for package in $openreposStorePackages
 do
 	rpm -q $package || sudo zypper -v install $package
