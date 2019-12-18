@@ -1,33 +1,36 @@
 #!/usr/bin/env bash
 
-
-[ $# -gt 1 ] && {
-	echo "=> Usage: $0 [applicationPattern]"
-	exit 1
-}
+case $1 in
+	-h|-help|--h|--help|-*|"") echo "=> Usage: $0 [applicationPattern|-h|AlL]" >&2; exit 1 ;;
+esac
 
 declare applicationPattern=$1
-declare answer=no
-
-if [ -z "$applicationPattern" ];then
-	read -p "Are you REALLY sure you want to delete all the DATA of ALL the applications ? (YES): " answer
+if [ "$applicationPattern" = AlL ];then
+	declare answer=no
+	read -p "Are you REALLY sure you want to delete all the DATA of ALL the applications ? (YeS): " answer
+	if [ "$answer" = YeS ];then
+		applicationPattern=.
+	else
+		echo "=> INFO : Doing nothing, just exiting ..." >&2
+		exit
+	fi
 fi
 
-if [ -z "$applicationPattern" ] && ( [ -z "$answer" ] || [ $answer != YES ] );then
-	echo "=> INFO : Doing nothing, just exiting ..." >&2
-	exit
-fi
+adb get-state >/dev/null || exit
 
 declare adb=$(which adb)
 declare dos2unix="$(which tr) -d '\r'"
 
-declare machingPackagesNumber=$($adb shell pm list packages $applicationPattern | $dos2unix | wc -l)
-declare packageList=$($adb shell pm list packages $applicationPattern | $dos2unix | cut -d: -f2)
-#echo "=> packageList = <$packageList>"
-declare -i remainingPackages=$machingPackagesNumber
-time for package in $packageList
+declare matchingPackagesNumber=$($adb shell pm list packages | \egrep "$applicationPattern" | $dos2unix | wc -l)
+declare packageList=$($adb shell pm list packages | \egrep "$applicationPattern" | $dos2unix | cut -d: -f2)
+declare -i remainingPackages=$matchingPackagesNumber
+
+#time for package in $packageList
+time $adb shell pm list packages $applicationPattern | $dos2unix | cut -d: -f2 | while read package
 do
-	echo "=> Cleaning <$package> #$remainingPackages/$machingPackagesNumber remaining packages to process ..."
-	$adb shell pm clear $package | $dos2unix
+	echo "=> Cleaning <$package> $remainingPackages/$matchingPackagesNumber remaining packages to process ..."
+	echo $adb shell pm clear $package
+	$adb shell pm clear $package
+	sleep 1
 	let remainingPackages--
-done
+done | $dos2unix
