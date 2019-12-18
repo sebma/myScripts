@@ -28,6 +28,6 @@ declare -i remainingPackages=$matchingPackagesNumber
 time for package in $packageList
 do
 	echo "=> Disabling <$package> #$remainingPackages/$matchingPackagesNumber remaining packages to process ..."
-#	$adb shell pm disable $package || $adb shell pm disable-until-used $package || $adb shell pm disable-user $package
+	$adb shell pm disable $package || $adb shell pm disable-until-used $package || $adb shell pm disable-user $package
 	let remainingPackages--
 done | $dos2unix
