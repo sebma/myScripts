@@ -22,22 +22,22 @@ adb get-state >/dev/null || exit
 if [ $connectionOrIP_To_Connect = usb ];then 
 	$adb shell echo 2>&1 | grep 'more than one' && $adb disconnect
 	echo
-	androidDeviceNetworkInterface=$($adb shell getprop wifi.interface | $dos2unix)
-	androidDeviceNetworkInterfaceState=DORMANT
-	if [ -n "$androidDeviceNetworkInterface" ];then
-		androidDeviceNetworkInterfaceState=$($adb shell ip link | awk "/${androidDeviceNetworkInterface/:*/}/"'{print$9}' | $dos2unix)
-		[ -z "$androidDeviceNetworkInterfaceState" ] && androidDeviceNetworkInterfaceState=UNPLUGGED
-		[ "$androidDeviceNetworkInterfaceState" = UP ] && {
-			androidDeviceIP=$($adb shell getprop dhcp.${androidDeviceNetworkInterface/:*/}.ipaddress | $dos2unix)
-			test -z "$androidDeviceIP" && androidDeviceIP=$($adb shell ip -o addr show ${androidDeviceNetworkInterface} | awk -F ' *|/' '/inet /{print$4}' | $dos2unix)
+	androidDeviceWLanInterface=$($adb shell getprop wifi.interface | $dos2unix)
+	androidDeviceWLanState=DORMANT
+	if [ -n "$androidDeviceWLanInterface" ];then
+		androidDeviceWLanState=$($adb shell ip link | awk "/${androidDeviceWLanInterface/:*/}/"'{print$9}' | $dos2unix)
+		[ -z "$androidDeviceWLanState" ] && androidDeviceWLanState=UNPLUGGED
+		[ "$androidDeviceWLanState" = UP ] && {
+			androidDeviceWLanIP=$($adb shell getprop dhcp.${androidDeviceWLanInterface/:*/}.ipaddress | $dos2unix)
+			test -z "$androidDeviceWLanIP" && androidDeviceWLanIP=$($adb shell ip -o addr show ${androidDeviceWLanInterface} | awk -F ' *|/' '/inet /{print$4}' | $dos2unix)
 		}
 	else
-		unset androidDeviceNetworkInterface
+		unset androidDeviceWLanInterface
 	fi
 else
 	$adb connect $connectionOrIP_To_Connect
 	sleep 1
-	androidDeviceIP=$connectionOrIP_To_Connect
+	androidDeviceWLanIP=$connectionOrIP_To_Connect
 fi
 
 if ! $adb shell echo >/dev/null; then
@@ -57,7 +57,7 @@ if [ -n "$androidDeviceSerial" ];then
 	set | grep ^android.*=
 	echo
 
-	test -n "$androidDeviceIP" && echo "=> IP Address is : $androidDeviceIP"
+	test -n "$androidDeviceWLanIP" && echo "=> IP Address is : $androidDeviceWLanIP"
 	echo
 	$adb shell mount | awk '/emulated|sdcard0/{next}/(Removable|storage)\//{printf"=> ExtSDCard Mount Point = ";if($2=="on")print$3;else print$2}'
 	echo
