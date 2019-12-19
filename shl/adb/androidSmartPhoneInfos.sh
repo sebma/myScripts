@@ -56,8 +56,8 @@ if [ -n "$androidDeviceSerial" ];then
 	set | grep ^android.*=
 	echo
 
-	test -n "$androidDeviceIP" && echo "=> IP Address is : $androidDeviceIP" && echo
-exit
+	test -n "$androidDeviceIP" && echo "=> IP Address is : $androidDeviceIP"
+	echo
 	$adb shell mount | awk '/emulated|sdcard0/{next}/(Removable|storage)\//{printf"=> ExtSDCard Mount Point = ";if($2=="on")print$3;else print$2}'
 	echo
 	$adb shell "
