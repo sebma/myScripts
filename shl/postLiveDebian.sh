@@ -1095,7 +1095,7 @@ myPrinterMake=Lexmark
 myPrinterModel=MS310dn
 myPrinterName=${myPrinterMake}_$myPrinterModel
 myPrinterIP=192.168.1.1
-myPrinterURI=$(ippfind | head -1)
+which ippfind >/dev/null 2>&1 && myPrinterURI=$(ippfind | head -1) || myPrinterURI=ipp://$myPrinterIP/ipp
 myPrinterLocation=Home
 #ppdModelLocation=$(lpinfo -m | grep -i $myPrinterModel | awk '/Foomatic/{print$1}')
 ppdModelLocation=$(lpinfo --make-and-model "$myPrinterMake $myPrinterModel" -m | awk '/Foomatic/{print$1}')
