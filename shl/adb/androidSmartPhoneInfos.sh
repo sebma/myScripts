@@ -3,6 +3,8 @@
 adb=$(which adb)
 connectionOrIP_To_Connect=usb
 
+test "$1" = -x && set -x && shift
+
 if [ $# != 0 ] && [ $# != 1 ]; then
 	echo "=> Usage : $0 [usb] | IP@" >&2
 	exit 1
@@ -21,9 +23,13 @@ if [ $connectionOrIP_To_Connect = usb ];then
 	$adb shell echo 2>&1 | grep 'more than one' && $adb disconnect
 	echo
 	androidDeviceNetworkInterface=$($adb shell getprop wifi.interface | $dos2unix)
+	androidDeviceNetworkInterfaceState=DORMANT
 	if [ -n "$androidDeviceNetworkInterface" ];then
-		androidDeviceIP=$($adb shell getprop dhcp.${androidDeviceNetworkInterface/:*/}.ipaddress | $dos2unix)
-		test -z "$androidDeviceIP" && androidDeviceIP=$($adb shell ip -o addr show $androidDeviceNetworkInterface | awk -F ' *|/' '/inet /{print$4}' | $dos2unix)
+		androidDeviceNetworkInterfaceState=$($adb shell ip link | awk "/${androidDeviceNetworkInterface/:*/}/"'{print$9}' | $dos2unix)
+		[ "$androidDeviceNetworkInterfaceState" = UP ] && {
+			androidDeviceIP=$($adb shell getprop dhcp.${androidDeviceNetworkInterface/:*/}.ipaddress | $dos2unix)
+			test -z "$androidDeviceIP" && androidDeviceIP=$($adb shell ip -o addr show ${androidDeviceNetworkInterface} | awk -F ' *|/' '/inet /{print$4}' | $dos2unix)
+		}
 	else
 		unset androidDeviceNetworkInterface
 	fi
@@ -50,8 +56,8 @@ if [ -n "$androidDeviceSerial" ];then
 	set | grep ^android.*=
 	echo
 
-	test -n "$androidDeviceNetworkInterface" && printf "=> Interface <$androidDeviceNetworkInterface> state : " && $adb shell ip addr show $androidDeviceNetworkInterface | awk '/state \w+/{print$9}'
 	test -n "$androidDeviceIP" && echo "=> IP Address is : $androidDeviceIP" && echo
+exit
 	$adb shell mount | awk '/emulated|sdcard0/{next}/(Removable|storage)\//{printf"=> ExtSDCard Mount Point = ";if($2=="on")print$3;else print$2}'
 	echo
 	$adb shell "
@@ -65,15 +71,16 @@ if [ -n "$androidDeviceSerial" ];then
 "
 
 	echo
-	$adb shell getprop | egrep -w 'ro.build.version.release|ro.build.version.sdk|ro.product.device';echo
+	$adb shell getprop | egrep -w 'ro.build.version.(release|sdk)|ro.build.characteristics|ro.product.device';echo
 	$adb shell getprop | egrep 'model|manufacturer|hardware|platform|revision|serialno|product.name|product.device|brand|cpu.abi2|cpu.abi\>|wifi.interface|service.adb';echo
+	$adb shell getprop | egrep '^.gsm.(sim.state|sim.operator|operator|current.phone-type|lte.ca.support|network.type|ril.uicc.mccmnc)';echo
 	$adb shell getprop | egrep 'storage.mmc.size|mount';echo
 	$adb shell dumpsys battery | egrep 'Current Battery|level|scale';echo
 
 	$adb shell "
 	df -h 2>/dev/null || df
 	echo
-	wm size
+	wm size 2>/dev/null
 	echo
 	dumpsys cpuinfo | head -25 2>/dev/null || dumpsys cpuinfo
 	echo
@@ -91,4 +98,4 @@ else
 	exit 1
 #fi | less -F
 fi 2>&1 | $dos2unix | tee ${androidBrand}_${androidModel}_${androidCodeName}_${androidDeviceSerial}_${connectionOrIP_To_Connect}.log
-
+set +x
