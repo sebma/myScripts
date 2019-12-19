@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
+set -- ${@%/*}  # Remove trailing "/distrib" from all arguments
 for package_name
 do
-	package_name=$(echo $package_name | cut -d/ -f1)
-	
 	if apt-get changelog $package_name &>/dev/null
 	then
 		apt-get changelog $package_name
