@@ -22,7 +22,7 @@ then
 		ssu updaterepos
 	fi
 
-	devel-su sh -xc "pkcon -v refresh;pkcon install -y zypper sudo;sed -ri '/%sudo/s/^# //' /etc/sudoers;groupadd sudo;usermod -aG sudo $USER" # Allow members of group sudo to execute any command
+	devel-su sh -xc "pkcon -v refresh;pkcon install -y zypper sudo;sed -ri '/%sudo/s/^# //' /etc/sudoers;groupadd sudo;usermod -a -G sudo $USER" # Allow members of group sudo to execute any command
 	refreshRepos=0
 
 	rpm -q sudo && exit
@@ -64,9 +64,22 @@ test "$refreshRepos" = 1 && sudo pkcon -v refresh && sudo zypper -v refresh
 refreshRepos=0
 
 if ! rpm -q hebrewvkb-simple >/dev/null;then
+	echo "=> Installing hebrewvkb-simple ..."
 	sudo zypper -v install hebrewvkb-simple
 	rpm -q hebrewvkb-simple >/dev/null && systemctl --user restart maliit-server # Restart the keyboard service
 fi
+
+echo "=> Installing cups ..."
+\wget -O service-script https://www.dropbox.com/s/21ah44ummyn8rdw/service-script.sh
+sudo mkdir -vp /usr/local/sbin/
+sudo install -vm755 ./service-script /usr/local/sbin/
+rm ./service-script
+sudo ln -vs /usr/local/sbin/service-script /sbin/service
+sudo zypper -v install cups
+groups | grep -wq lp || { sudo usermod -a -G lp nemo; exit; }
+sudo systemctl restart cups
+systemctl status cups
+echo "=> Now you have to add a printer with <lpadmin>."
 
 systemctl --user restart timed-qt5.service # Restart the "timed-qt5" service
 systemctl --user status  maliit-server timed-qt5.service sshd.service | egrep ' - |Active:'
