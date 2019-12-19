@@ -26,6 +26,7 @@ if [ $connectionOrIP_To_Connect = usb ];then
 	androidDeviceNetworkInterfaceState=DORMANT
 	if [ -n "$androidDeviceNetworkInterface" ];then
 		androidDeviceNetworkInterfaceState=$($adb shell ip link | awk "/${androidDeviceNetworkInterface/:*/}/"'{print$9}' | $dos2unix)
+		[ -z "$androidDeviceNetworkInterfaceState" ] && androidDeviceNetworkInterfaceState=UNPLUGGED
 		[ "$androidDeviceNetworkInterfaceState" = UP ] && {
 			androidDeviceIP=$($adb shell getprop dhcp.${androidDeviceNetworkInterface/:*/}.ipaddress | $dos2unix)
 			test -z "$androidDeviceIP" && androidDeviceIP=$($adb shell ip -o addr show ${androidDeviceNetworkInterface} | awk -F ' *|/' '/inet /{print$4}' | $dos2unix)
