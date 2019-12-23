@@ -70,12 +70,12 @@ blue=$(tput setaf 4)
 	$sudo smartctl -H -l selftest $diskDevice
 	echo "=> Disk Errors for $diskFamily model $diskModel on $diskDevice for the SMART Self-Test Log :"
 	echo
-	printf $red$bold$blink
+	printf $red$bold
 	$sudo smartctl -q errorsonly -H -l selftest $diskDevice
 	printf $normal
 	echo "=> Disk Errors for $diskFamily model $diskModel on $diskDevice for the SMART Error Log :"
 	echo
-	printf $red$bold$blink
+	printf $red$bold
 	$sudo smartctl -q errorsonly -H -l error $diskDevice
 	printf $normal 
 	echo "=> SMART Attributes Data for $diskFamily model $diskModel on $diskDevice :"
