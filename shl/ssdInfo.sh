@@ -1,1 +1,0 @@
-hddInfo.sh
