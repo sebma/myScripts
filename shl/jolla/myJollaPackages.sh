@@ -76,7 +76,7 @@ sudo install -vm755 ./service-script /usr/local/sbin/
 rm ./service-script
 sudo ln -vs /usr/local/sbin/service-script /sbin/service
 sudo zypper -v install cups
-groups | grep -wq lp || { sudo usermod -a -G lp nemo; exit; }
+groups | grep -wq lp || { sudo groupadd lpadmin; sudo usermod -a -G lp,lpadmin $USER; exit; }
 sudo systemctl restart cups
 systemctl status cups
 echo "=> Now you have to add a printer with <lpadmin>."
