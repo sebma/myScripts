@@ -84,7 +84,7 @@ echo "=> Now you have to add a printer with <lpadmin>."
 systemctl --user restart timed-qt5.service # Restart the "timed-qt5" service
 systemctl --user status  maliit-server timed-qt5.service sshd.service | egrep ' - |Active:'
 
-jollaStorePackages="findutils harbour-situations2application situations-sonar sailfish-utilities sqlite harbour-barcode harbour-file-browser python pciutils curl yum harbour-unplayer harbour-maxvol harbour-bibleme harbour-recorder git-minimal make cmake gcc gettext nano mutt harbour-ipaddress perl ruby perl-CPAN htop"
+jollaStorePackages="speex-tools findutils harbour-situations2application situations-sonar sailfish-utilities sqlite harbour-barcode harbour-file-browser python pciutils curl yum harbour-unplayer harbour-maxvol harbour-bibleme harbour-recorder git-minimal make cmake gcc gettext nano mutt harbour-ipaddress perl ruby perl-CPAN htop"
 for package in $jollaStorePackages
 do
 	rpm -q $package || sudo zypper -v install $package
