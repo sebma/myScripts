@@ -66,7 +66,7 @@ refreshRepos=0
 if ! rpm -q hebrewvkb-simple >/dev/null;then
 	echo "=> Installing hebrewvkb-simple ..."
 	sudo zypper -v install hebrewvkb-simple
-	rpm -q hebrewvkb-simple >/dev/null && systemctl --user restart maliit-server # Restart the keyboard service
+	rpm -q hebrewvkb-simple >/dev/null && systemctl --user restart maliit-server.service # Restart the keyboard service
 fi
 
 echo "=> Installing cups ..."
@@ -82,7 +82,7 @@ systemctl status cups
 echo "=> Now you have to add a printer with <lpadmin>."
 
 systemctl --user restart timed-qt5.service # Restart the "timed-qt5" service
-systemctl --user status  maliit-server timed-qt5.service sshd.service | egrep ' - |Active:'
+systemctl --user status  maliit-server.service timed-qt5.service sshd.service | egrep ' - |Active:'
 
 jollaStorePackages="speex-tools findutils harbour-situations2application situations-sonar sailfish-utilities sqlite harbour-barcode harbour-file-browser python pciutils curl yum harbour-unplayer harbour-maxvol harbour-bibleme harbour-recorder git-minimal make cmake gcc gettext nano mutt harbour-ipaddress perl ruby perl-CPAN htop"
 for package in $jollaStorePackages
