@@ -8,7 +8,7 @@ from sys import argv, stderr
 
 try :
 	from ipdb import set_trace
-except ModuleNotFoundError as why :
+except ImportError as why :
 	print( why )
 	from pdb import set_trace
 
