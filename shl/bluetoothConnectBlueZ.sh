@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+bluetoothController=$(hciconfig 2>/dev/null | awk -F: '/^\w+:/{print$1;exit}')
+if [ -z "$bluetoothController" ]; then
+	echo "=> ERROR: Could not detect any bluetooth controller." >&2
+	exit 1
+else
+	hciconfig hci0 | grep -q DOWN && sudo hciconfig $bluetoothController up
+	echo "=> bluetoothController = $bluetoothController"
+fi
+
 if which bluetoothctl >/dev/null 2>&1; then
 	echo "=> You are using BlueZ5." >&2
 
@@ -57,16 +66,6 @@ EOF
 elif which hciconfig >/dev/null 2>&1; then
 	echo "=> You are using BlueZ4." >&2
 
-	bluetoothController=$(hciconfig 2>/dev/null | awk -F:  '/^\w+:/{print$1;exit}')
-	if [ -z "$bluetoothController" ]; then {
-		echo "=> ERROR: Could not detect any bluetooth controller." >&2
-		exit 2
-	}
-	fi
-
-	echo "=> bluetoothController = $bluetoothController"
-
-	hciconfig hci0 | grep -q DOWN && sudo hciconfig $bluetoothController up
 	deviceList=$(echo "=> Scanning for bluetooth devices ..." 1>&2;time -p hcitool scan | grep -v Scanning)
 	if [ -z "$deviceList" ]; then {
 		deviceList=$(echo "=> Scanning deeper for bluetooth devices ..." 1>&2;time -p hcitool scan | grep -v Scanning)
