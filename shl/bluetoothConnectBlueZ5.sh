@@ -1,19 +1,19 @@
 #!/usr/bin/env sh
 
-if ! which bluetoothctl >/dev/null 2>&1; then {
-	echo "=> ERROR: You must install BlueZ v5." >&2
+bluetoothController=$(hciconfig 2>/dev/null | awk -F: '/^\w+:/{print$1;exit}')
+if [ -z "$bluetoothController" ]; then
+	echo "=> ERROR: Could not detect any bluetooth controller." >&2
 	exit 1
-}
+else
+	hciconfig hci0 | grep -q DOWN && sudo hciconfig $bluetoothController up
+	echo "=> bluetoothController = $bluetoothController"
 fi
 
-bluetoothController=$(hciconfig 2>/dev/null | awk  '/^\w+:/{sub(":","");print$1}')
-if [ -z "$bluetoothController" ]; then {
-	echo "=> ERROR: Could not detect any bluetooth controller." >&2
+if ! which bluetoothctl >/dev/null 2>&1; then {
+	echo "=> ERROR: You must install BlueZ v5." >&2
 	exit 2
 }
 fi
-
-echo "=> bluetoothController = $bluetoothController"
 
 bluetoothControllerMACAddress=$(printf "list\nquit\n" | bluetoothctl | awk /^Controller/'{print$2;exit}')
 
