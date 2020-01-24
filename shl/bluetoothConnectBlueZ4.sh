@@ -1,13 +1,13 @@
 #!/usr/bin/env sh
 
-bluetoothController=$(hciconfig | awk  '/^\w+:/{sub(":","");print$1}')
-if [ -z "$bluetoothController" ]; then {
+bluetoothController=$(hciconfig 2>/dev/null | awk -F: '/^\w+:/{print$1;exit}')
+if [ -z "$bluetoothController" ]; then
 	echo "=> ERROR: Could not detect any bluetooth controller." >&2
-	exit 2
-}
+	exit 1
+else
+	hciconfig hci0 | grep -q DOWN && sudo hciconfig $bluetoothController up
+	echo "=> bluetoothController = $bluetoothController"
 fi
-echo "=> bluetoothController = $bluetoothController"
-hciconfig hci0 | grep -q DOWN && sudo hciconfig $bluetoothController up
 
 deviceList=$(echo "=> Scanning for bluetooth devices ..." 1>&2;time -p hcitool scan | grep -v Scanning)
 if [ -z "$deviceList" ]; then {
