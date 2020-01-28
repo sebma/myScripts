@@ -14,6 +14,7 @@ then
 		param2=$2
 		case $param2 in
 			"start") systemctl start $param1.service ;;
+			"status") systemctl status $param1.service ;;
 			"stop") systemctl stop enable $param1.service ;;
 			"restart") systemctl restart $param1.service ;;
 			"reload") systemctl reload $param1.service ;;
