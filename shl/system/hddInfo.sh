@@ -87,13 +87,17 @@ blue=$(tput setaf 4)
 	echo "=> SMART Pre-fail non-zero values :"
 	echo
 	$sudo smartctl -A $diskDevice | egrep -v " 0$" | egrep "Pre-fail" | egrep --color=always " [0-9]+$" && echo
+	echo "=> journalctl \"smartd\" errors :"
+	echo
+	\journalctl -e -q -u smartd -p 3
+	echo
 	echo "=> Disk temperature using smartctl :"
 	echo
 	$sudo smartctl $allInformation $diskDevice | grep Temperature | head -5
 	echo
 	printf "=> Disk temperature using hddtemp :"
 	if $sudo smartctl -i $diskDevice | grep -q "Rotation Rate:.*Solid State Device";
-	then echo "$blue$bold=> hddtemp cannot detect the temperature sensor for $diskDevice.$normal" >&2
+	then echo "$red$bold ERROR: hddtemp cannot detect the temperature sensor for $diskDevice.$normal" >&2
 	else which hddtemp >/dev/null 2>&1 && echo && echo && $sudo hddtemp $diskDevice
 	fi
 } 2>&1 | tee $logFile
