@@ -89,7 +89,7 @@ blue=$(tput setaf 4)
 	$sudo smartctl -A $diskDevice | egrep -v " 0$" | egrep "Pre-fail" | egrep --color=always " [0-9]+$" && echo
 	echo "=> journalctl \"smartd\" errors :"
 	echo
-	\journalctl -e -q -u smartd -p 3
+	\journalctl -e -q -u smartd -p 3 | grep smartd.*
 	echo
 	echo "=> Disk temperature using smartctl :"
 	echo
