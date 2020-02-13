@@ -15,19 +15,16 @@ if ! which bluetoothctl >/dev/null 2>&1; then {
 }
 fi
 
-bluetoothControllerMACAddress=$(printf "list\nquit\n" | bluetoothctl | awk /^Controller/'{print$2;exit}')
-
-deviceList=$(printf "power on\nscan on\ndevices\nquit\n" | bluetoothctl | grep ^Device)
+deviceList=$(echo | bluetoothctl 2>&1 | grep -w Device)
 if [ -z "$deviceList" ]; then {
 	echo "=> ERROR: Could not find any device." >&2
 	exit 3
 }
 fi
 
-echo "$deviceList" | awk '/^Device/{print$2}' | while read device;
+echo "$deviceList" | awk '/\<Device\>/{print$4}' | while read device
 do
 	set -x
 	echo disconnect $device | bluetoothctl
 	set +x
 done
-
