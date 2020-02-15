@@ -4,10 +4,10 @@ inxi_aliases () {
 	local scriptDir=$(dirname $0)
 	scriptDir=$(cd $scriptDir;pwd)
 	
-	alias inxi="perl $scriptDir/../pl/not_mine/inxi -c21"
-	alias binxi="bash $scriptDir/not_mine/binxi -c21"
-	alias inxiSummary='inxi -Admi -v4'
-	alias binxiSummary='binxi -Admi -v4'
+	alias inxi="perl $scriptDir/../pl/not_mine/inxi -c21 -z"
+	alias binxi="bash $scriptDir/not_mine/binxi -c21 -z"
+	alias inxiSummary='inxi -Fm -v3'
+	alias binxiSummary='binxi -Fm -v3'
 	alias lshw='\lshw -numeric -sanitize'
 	alias lshwBUSINFO='lshw -businfo'
 }
