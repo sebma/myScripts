@@ -54,6 +54,9 @@ blue=$(tput setaf 4)
 {
 	echo "=> Disk general info for $diskFamily model $diskModel on $diskDevice :"
 	echo
+	deviceType=$($sudo smartctl -i $diskDevice | awk -F " *|:" '/Rotation Rate:/{print$4" "$5" "$6}')
+	echo "=> $diskFamily model $diskModel is a $deviceType drive."
+	echo
 	$sudo smartctl -i $diskDevice
 	echo "=> Enabling SMART on $diskFamily model $diskModel on $diskDevice ..."
 	echo
@@ -93,13 +96,11 @@ blue=$(tput setaf 4)
 	echo
 	echo "=> Disk temperature using smartctl :"
 	echo
-	$sudo smartctl $allInformation $diskDevice | grep Temperature | head -5
+	$sudo smartctl -A $diskDevice | egrep "VALUE|Temperature_Cel"
 	echo
+	$sudo smartctl -l scttempsts $diskDevice | tail -n +5
 	printf "=> Disk temperature using hddtemp :"
-	if $sudo smartctl -i $diskDevice | grep -q "Rotation Rate:.*Solid State Device";
-	then echo "$red$bold ERROR: hddtemp cannot detect the temperature sensor for $diskDevice.$normal" >&2
-	else which hddtemp >/dev/null 2>&1 && echo && echo && $sudo hddtemp $diskDevice
-	fi
+	sudo hddtemp $diskDevice 2>&1 | cut -d: -f3 | tr -s ' ' | grep --color=always .
 } 2>&1 | tee $logFile
 
 echo
