@@ -7,7 +7,8 @@ test $# = 0 && {
 
 lastArg="$(eval echo \${$#})"
 baseUrl="$(echo $lastArg | \sed -r "s,(https?|s?ftp)://,," | cut -d/ -f1)"
-wget="$(which wget2 2>/dev/null || which wget)"
+wget="$(which wget)"
+
 #time $wget --output-file=$0-$(date +%Y%m%d-%H_%M_%S).log --no-verbose --no-parent --continue --timestamping --server-response --random-wait --no-directories --directory-prefix=$baseUrl/ --user-agent=Mozilla --content-disposition --convert-links --page-requisites --recursive --level=1 --reject index.html --accept $@
 set -x
 #time $wget --no-verbose --no-parent --continue --timestamping --server-response --random-wait --no-directories --directory-prefix=$baseUrl/ --user-agent=Mozilla --content-disposition --convert-links --page-requisites --recursive --level=1 --reject index.html --accept "$@"
