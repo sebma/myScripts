@@ -9,7 +9,7 @@ test $# = 0 && {
 alias youtube-dl='LANG=C.UTF-8 command youtube-dl'
 
 echo "#EXTM3U"
-time awk '{print$1}' $urlsFile | uniq | while read url
+time awk '!/^($|#)/{print$1}' $urlsFile | uniq | while read url
 do
 	printf "#EXTINF:-1,"
 	youtube-dl -e $url
