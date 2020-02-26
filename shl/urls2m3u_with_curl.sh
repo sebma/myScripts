@@ -7,7 +7,7 @@ test $# = 0 && {
 }
 
 echo "#EXTM3U"
-time awk '{print$1}' $urlsFile | uniq | while read url
+time awk '!/^($|#)/{print$1}' $urlsFile | uniq | while read url
 do
 	printf "#EXTINF:-1,"
 	title=$(\curl -qs $url | pup --charset utf8 'title text{}')
