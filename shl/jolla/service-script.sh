@@ -1,15 +1,14 @@
 #!/bin/bash
 
-if [ $# != 2 ]
-then
-	echo "Usage : $0 serviceName start|stop|status|restart|reload|cat|show" >&2
+if [ $# = 0 ];then
+	systemctlCommands=$(systemctl -h | sed -n '/Commands:/,$p' | awk '!/Commands:|^$|^   /{printf$1"|"}' | sed "s/.$//")
+	echo "Usage : ${0/*\//} serviceName $systemctlCommands" >&2
 	exit 1
+elif [ $# = 1 ];then
+	systemctl $1
 else
 	serviceName=$1
 	action=$2
-	case $action in
-		start|stop|status|restart|reload|cat|show) systemctl $action $serviceName;;
-		daemon-reload) systemctl $action;;
-		*) echo "Unknown operation $action" >&2;exit 1;;
-	esac
+	shift 2
+	systemctl $action "$@" $serviceName
 fi
