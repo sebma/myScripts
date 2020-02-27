@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ $# = 0 ];then
-	systemctlCommands=$(systemctl -h | sed -n '/Commands:/,$p' | awk '!/Commands:|^$|^   /{printf$1"|"}' | sed "s/.$//")
+	systemctlCommands=$(systemctl -h | awk '/Commands:/,EOF { if( !/^$|^   |Commands:/ ) cmds=cmds$1"|";} END { print gensub("[|]$","",1,cmds) }')
 	echo "Usage : ${0/*\//} serviceName $systemctlCommands" >&2
 	exit 1
 elif [ $# = 1 ];then
