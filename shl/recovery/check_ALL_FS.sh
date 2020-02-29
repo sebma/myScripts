@@ -1,6 +1,6 @@
 #!/bin/bash
 
-type busybox2 >/dev/null || exit
+type busybox >/dev/null || exit
 [ $USER != root ] && echo "=> ERROR [$0] You must run $0 as root." >&2 && exit 2
 
 tee="busybox tee"
@@ -8,6 +8,8 @@ awk="busybox awk" # car pour utiliser le "awk" standard, il serait necessaire de
 
 mount -o remount,rw /
 {
+	echo "=> Unmounting all filesystems ..." >&2
+	umount -av
 	echo "=> Checking all filesystems at $(date) ..." >&2
 
 	grep -v "swap" /etc/fstab | $awk '/^\/dev/{print$1" "$3}' | while read FS FSTYPE
