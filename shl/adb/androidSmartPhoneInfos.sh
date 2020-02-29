@@ -47,6 +47,10 @@ if ! $adb shell echo >/dev/null; then
 	exit $retCode
 fi
 
+logDir=log
+mkdir -p $logDir
+logFile=$logDir/${androidBrand}_${androidModel}_${androidCodeName}_${androidDeviceSerial}_${connectionOrIP_To_Connect}.log
+
 androidDeviceSerial=$($adb shell getprop ro.serialno | $dos2unix)
 androidCodeName=$($adb shell getprop ro.product.device | $dos2unix)
 androidBrand=$($adb shell getprop ro.product.brand | $dos2unix)
@@ -98,5 +102,5 @@ else
 	echo "=> $0: ERROR : No adb device detected." >&2
 	exit 1
 #fi | less -F
-fi 2>&1 | $dos2unix | tee ${androidBrand}_${androidModel}_${androidCodeName}_${androidDeviceSerial}_${connectionOrIP_To_Connect}.log
+fi 2>&1 | $dos2unix | tee $logFile
 set +x
