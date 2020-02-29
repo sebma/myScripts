@@ -12,6 +12,7 @@ awk="busybox awk" # car pour utiliser le "awk" standard, il serait necessaire de
 mount -o remount,rw /
 {
 	echo "=> hostname = $(hostname)" >&2
+	date
 	echo "=> The current target is <$currentTarget>."
 	echo "=> Unmounting all filesystems ..." >&2
 	umount -av
