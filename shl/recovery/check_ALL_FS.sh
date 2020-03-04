@@ -46,10 +46,11 @@ mount -o remount,rw /
 		time if [ $FSTYPE = btrfs ];then
 			set -x
 			btrfsck -p --repair $FS
-		else
-			set -x
-			fsck -C -p -v $FS
+#		else
+#			set -x
+#			fsck -t nobtrfs -C -A -v $FS
 		fi
+		fsck -t nobtrfs -C -v -A
 		set +x
 		echo >&2
 	done
