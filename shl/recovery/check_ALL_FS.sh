@@ -48,7 +48,7 @@ mount -o remount,rw /
 			btrfsck -p --repair $FS
 		else
 			set -x
-			fsck -p -v $FS
+			fsck -C -p -v $FS
 		fi
 		set +x
 		echo >&2
