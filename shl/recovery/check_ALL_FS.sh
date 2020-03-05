@@ -1,10 +1,11 @@
 #!/bin/bash
 
+tools="awk cut egrep grep sed tee"
 if mount | grep -q "/usr "; then
-	for tool in awk cut egrep grep sed tee;do declare $tool=$tool;done
+	for tool in $tools;do declare $tool=$tool;done
 else # Si /usr n'est pas monte, on utilise les applets busybox
 	type busybox >/dev/null || exit
-	for tool in awk cut egrep grep sed tee;do declare $tool="busybox $tool";done
+	for tool in $tools;do declare $tool="busybox $tool";done
 fi
 
 [ $USER != root ] && echo "=> ERROR [$0] You must run $0 as root." >&2 && exit 2
