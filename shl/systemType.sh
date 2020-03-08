@@ -1,7 +1,10 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 function systemType {
-	local initPath=$(\ps -p 1 o cmd= | cut -d" " -f1)
-	strings $initPath | egrep -o "upstart|sysvinit|systemd" | head -1
+	local cut="busybox cut"
+	local head="busybox head"
+	local strings="busybox strings"
+	local initPath=$(\ps -p 1 o cmd= | $cut -d" " -f1)
+	$strings $initPath | egrep -o "upstart|sysvinit|systemd" | $head -1
 }
 systemType
