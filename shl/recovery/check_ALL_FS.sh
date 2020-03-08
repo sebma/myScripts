@@ -13,7 +13,7 @@ fi
 currentTarget=$(systemctl -t target | $egrep -o '^(emergency|rescue|graphical|multi-user|recovery|friendly-recovery).target')
 echo $currentTarget | $egrep -q "(recovery|rescue).target" || { echo "=> You must reboot in recovery|rescue mode to run $0." >&2 && exit 3; }
 
-fsTypesList=$(\ls -1 /sbin/fsck.* | $cut -d. -f2)
+fsTypesList="btrfs "$(\ls -1 /sbin/fsck.* | $cut -d. -f2)
 fsTypesERE=$(echo $fsTypesList | $sed "s/ /|/g")
 fsTypesCSV=$(echo $fsTypesList | $sed "s/ /,/g")
 storageMounted_FS_List=$(mount | $awk "/\<$fsTypesERE\>/"'{print$1}')
@@ -28,7 +28,7 @@ mount -o remount,rw /
 	echo "=> The current target is <$currentTarget>."
 	echo "=> Unmounting all storage filesystems ..." >&2
 	echo "=> storageMounted_FS_List = $storageMounted_FS_List" >&2
-	umount -v -t $fsTypesCSV
+	umount -v -a -t $fsTypesCSV
 	echo "=> Checking all filesystems at $(date) ..." >&2
 
 	grep -v "swap" /etc/fstab | $awk '/^\/dev/{print$1" "$3}' | while read FS FSTYPE
@@ -38,14 +38,14 @@ mount -o remount,rw /
 		time if [ $FSTYPE = btrfs ];then
 			set -x
 			btrfsck -p --repair $FS
-#		else
-#			set -x
-#			fsck -t nobtrfs -C -A -v $FS
+		else
+			set -x
+			fsck -t nobtrfs -C -A -v $FS
 		fi
-		fsck -t nobtrfs -C -v -A
 		set +x
 		echo >&2
 	done
+	echo >&2
 
 	date;sync
 } 2>&1 | $tee $logFile
