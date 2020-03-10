@@ -28,3 +28,5 @@ function androidCodeName {
 	}
 	echo $androidCodeName$normal
 }
+
+androidCodeName
