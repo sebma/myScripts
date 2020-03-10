@@ -49,12 +49,12 @@ fi
 
 logDir=log
 mkdir -p $logDir
-logFile=$logDir/${androidBrand}_${androidModel}_${androidCodeName}_${androidDeviceSerial}_${connectionOrIP_To_Connect}.log
 
 androidDeviceSerial=$($adb shell getprop ro.serialno | $dos2unix)
-androidCodeName=$($adb shell getprop ro.product.device | $dos2unix)
+androidDeviceCodeName=$($adb shell getprop ro.product.device | $dos2unix)
 androidBrand=$($adb shell getprop ro.product.brand | $dos2unix)
 androidModel=$($adb shell getprop ro.product.model | $dos2unix)
+logFile=$logDir/${androidBrand}_${androidModel}_${androidDeviceCodeName}_${androidDeviceSerial}_${connectionOrIP_To_Connect}.log
 if [ -n "$androidDeviceSerial" ];then
 	echo "=> INFO : You are connected to the $androidDeviceSerial android device via $connectionOrIP_To_Connect."
 	echo
@@ -76,7 +76,7 @@ if [ -n "$androidDeviceSerial" ];then
 "
 
 	echo
-	$adb shell getprop | egrep -w 'ro.build.version.(release|sdk)|ro.build.characteristics|ro.product.device';echo
+	$adb shell getprop | egrep -w 'ro.build.version.(codename|release|sdk)|ro.build.characteristics|ro.product.device';echo
 	$adb shell getprop | egrep 'model|manufacturer|hardware|platform|revision|serialno|product.name|product.device|brand|cpu.abi2|cpu.abi\>|wifi.interface|service.adb';echo
 	$adb shell getprop | egrep '^.gsm.(sim.state|sim.operator|operator|current.phone-type|lte.ca.support|network.type|ril.uicc.mccmnc)';echo
 	$adb shell getprop | egrep 'storage.mmc.size|mount';echo
@@ -103,4 +103,5 @@ else
 	exit 1
 #fi | less -F
 fi 2>&1 | $dos2unix | tee $logFile
+echo "=> logFile = $logFile" >&2
 set +x
