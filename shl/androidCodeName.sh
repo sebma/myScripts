@@ -1,10 +1,23 @@
 #!/bin/bash
 
 function androidCodeName {
-	local androidRelease=$(getprop ro.build.version.release | cut -d. -f1-2 | tr -d .)
+	( [ $# -ge 2 ] || echo $1 | egrep -q -- "^--?(h|u)" ) && echo "=> Usage : $FUNCNAME <inputFile> <pageRanges> <outputFile>" 1>&2 && exit 1
+	
+	local androidRelease=unknown
+	local androidCodeName=unknown
+	if echo $1 | egrep -q "[0-9.]+"; then
+		androidRelease=$1 
+		androidCodeName="REL" # Do not use "androidCodeName" when it equals to "REL" but infer it from "androidRelease"
+	elif [ -n "$(getprop ro.build.version.release 2>/dev/null)" ]; then
+		androidRelease=$(getprop ro.build.version.release)
+		androidCodeName=$(getprop ro.build.version.codename)
+	fi
 
-	local androidCodeName=$(getprop ro.build.version.codename)
-	test $androidCodeName = REL && {
+	# Time "androidRelease" x10
+	echo $androidRelease | grep -q "\." && androidRelease=$(echo $androidRelease | cut -d. -f1-2 | tr -d .) || androidRelease+="0"
+
+	[ -n "$androidRelease" ] && [ $androidCodeName = REL ] && {
+	# Do not use "androidCodeName" when it equals to "REL" but infer it from "androidRelease"
 		androidCodeName="${colors[blue]}"
 		case $androidRelease in
 		10) androidCodeName+=NoCodename;;
@@ -29,4 +42,4 @@ function androidCodeName {
 	echo $androidCodeName$normal
 }
 
-androidCodeName
+androidCodeName "$@"
