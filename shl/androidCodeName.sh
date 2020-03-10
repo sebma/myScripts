@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function androidCodeName {
-	( [ $# -ge 2 ] || echo $1 | egrep -q -- "^--?(h|u)" ) && echo "=> Usage : $FUNCNAME <inputFile> <pageRanges> <outputFile>" 1>&2 && exit 1
+	( [ $# -ge 2 ] || echo $1 | egrep -q -- "^--?(h|u)" ) && echo "=> Usage : $FUNCNAME [androidRelease]" 1>&2 && exit 1
 	
 	local androidRelease=unknown
 	local androidCodeName=unknown
