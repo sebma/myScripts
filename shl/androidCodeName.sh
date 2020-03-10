@@ -21,7 +21,7 @@ function androidCodeName {
 	# Time "androidRelease" x10
 	case $androidRelease in
 		+([0-9]).+([0-9])?(.)?([0-9]) )  androidRelease=$(echo $androidRelease | cut -d. -f1-2 | tr -d .);;
-		+([0-9]). ) androidRelease=$(echo $androidRelease | tr . 0);;
+		+([0-9]). ) androidRelease=$(echo $androidRelease | sed 's/\./0/');;
 		+([0-9]) ) androidRelease+="0";;
 	esac
 
