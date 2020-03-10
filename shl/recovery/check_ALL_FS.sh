@@ -1,9 +1,9 @@
 #!/bin/bash
 
 tools="awk cut egrep grep sed tee"
-if mount | grep -q "/usr "; then
+if [ -s /usr/bin/tee ]; then # Si "/usr" est accessible
 	for tool in $tools;do declare $tool=$tool;done
-else # Si /usr n'est pas monte, on utilise les applets busybox
+else # Si /usr n'est pas accessible, on utilise les applets busybox
 	type busybox >/dev/null || exit
 	for tool in $tools;do declare $tool="busybox $tool";done
 fi
