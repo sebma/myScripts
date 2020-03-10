@@ -2,7 +2,7 @@
 
 set -o nounset
 
-tools="awk cut grep egrep sed head tail xargs tee sort strings"
+tools="awk cut grep egrep sed head tail xargs tee tr sort strings"
 if [ -s /usr/bin/tee ]; then # Si "/usr" est accessible
 	for tool in $tools;do declare $tool=$tool;done
 else # Si /usr n'est pas accessible, on utilise les applets busybox
