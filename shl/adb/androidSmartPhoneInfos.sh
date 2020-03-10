@@ -52,9 +52,9 @@ mkdir -p $logDir
 
 androidDeviceSerial=$($adb shell getprop ro.serialno | $dos2unix)
 androidDeviceCodeName=$($adb shell getprop ro.product.device | $dos2unix)
-androidBrand=$($adb shell getprop ro.product.brand | $dos2unix)
-androidModel=$($adb shell getprop ro.product.model | $dos2unix)
-logFile=$logDir/${androidBrand}_${androidModel}_${androidDeviceCodeName}_${androidDeviceSerial}_${connectionOrIP_To_Connect}.log
+androidDeviceBrand=$($adb shell getprop ro.product.brand | $dos2unix)
+androidDeviceModel=$($adb shell getprop ro.product.model | $dos2unix)
+logFile=$logDir/${androidDeviceBrand}_${androidDeviceModel}_${androidDeviceCodeName}_${androidDeviceSerial}_${connectionOrIP_To_Connect}.log
 if [ -n "$androidDeviceSerial" ];then
 	echo "=> INFO : You are connected to the $androidDeviceSerial android device via $connectionOrIP_To_Connect."
 	echo
