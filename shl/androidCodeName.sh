@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function androidCodeName {
-	( [ $# -ge 2 ] || echo $1 | egrep -q -- "^--?(h|u)" ) && echo "=> Usage : $FUNCNAME [androidRelease]" 1>&2 && exit 1
+	( [ $# -ge 2 ] || echo $1 | egrep -q -- "^--?(h|u)" ) && echo "=> Usage : $FUNCNAME [androidRelease]" 1>&2 && return 1
 	
 	local androidRelease=unknown
 	local androidCodeName=unknown
@@ -11,6 +11,9 @@ function androidCodeName {
 	elif [ -n "$(getprop ro.build.version.release 2>/dev/null)" ]; then
 		androidRelease=$(getprop ro.build.version.release)
 		androidCodeName=$(getprop ro.build.version.codename)
+	else
+		echo "=> [$FUNCNAME] ERROR: Could not detect android release on this device" >&2
+		return 2
 	fi
 
 	# Time "androidRelease" x10
