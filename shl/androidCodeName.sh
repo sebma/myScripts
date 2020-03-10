@@ -1,5 +1,7 @@
 #!/bin/bash
 
+shopt -s extglob
+
 function androidCodeName {
 	( [ $# -ge 2 ] || echo $1 | egrep -q -- "^--?(h|u)" ) && echo "=> Usage : $FUNCNAME [androidRelease]" 1>&2 && return 1
 	
@@ -18,9 +20,9 @@ function androidCodeName {
 
 	# Time "androidRelease" x10
 	case $androidRelease in
-		[0-9].[0-9])  androidRelease="$(echo $androidRelease | cut -d. -f1-2 | tr -d .)";;
-		[0-9].) androidRelease="$(echo $androidRelease | tr -d .)0";;
-		[0-9]) androidRelease+="0";;
+		+([0-9]).+([0-9])?(.)?([0-9]) )  androidRelease="$(echo $androidRelease | cut -d. -f1-2 | tr -d .)";;
+		+([0-9]). ) androidRelease="$(echo $androidRelease | tr -d .)0";;
+		+([0-9]) ) androidRelease+="0";;
 	esac
 
 	[ -n "$androidRelease" ] && [ $androidCodeName = REL ] && {
