@@ -15,6 +15,7 @@ function moveAudioToBluetoothSink {
 	bluetoothDeviceMacAddr=$(echo | bluetoothctl 2>/dev/null | awk "/Device.*($bluetoothDeviceMacAddr|$bluetoothDeviceName)/"'{print$4;exit}')
 	if [ -n "$bluetoothDeviceMacAddr" ];then
 		bluetoothDeviceMacAddrPACTLString=$(echo $bluetoothDeviceMacAddr | sed s/:/_/g)
+		set -x
 		connectToBluetoothSink=$(pactl list short sinks | grep -q $bluetoothDeviceMacAddrPACTLString && echo true || echo false)
 		if [ $connectToBluetoothSink = true ];then
 			echo "=> BEFORE :"
@@ -29,8 +30,7 @@ function moveAudioToBluetoothSink {
 			echo "=> AFTER :"
 			pactl list short sink-inputs
 		fi
-	else
-		:
+		set +x
 	fi
 }
 
