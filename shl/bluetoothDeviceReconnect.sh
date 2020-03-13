@@ -16,7 +16,7 @@ function bluetoothDeviceReconnect {
 	if [ -n "$bluetoothDeviceMacAddr" ];then
 		set -x
 		echo disconnect $bluetoothDeviceMacAddr | bluetoothctl 2>/dev/null
-		sleep 2
+		sleep 3
 		echo connect $bluetoothDeviceMacAddr | bluetoothctl 2>/dev/null
 		set +x
 	fi
