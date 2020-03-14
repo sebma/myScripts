@@ -27,6 +27,6 @@ EOF
 		sudo systemctl daemon-reload
 	}
 	systemctl is-enabled --quiet btrestart.service || sudo systemctl enable btrestart.service
-	systemctl is-active  --quiet btrestart.service || { echo "=> INFO: Need to start btrestart.service.">&2;sudo systemctl start btrestart.service; }
+	systemctl is-active  --quiet btrestart.service || { echo "=> INFO: Need to start btrestart.service.">&2;sudo systemctl start btrestart.service; sleep 3; }
 	service bluetooth status
 fi
