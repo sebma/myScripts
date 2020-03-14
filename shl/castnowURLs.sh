@@ -11,9 +11,9 @@ castnowURLs ()
 		format="$1"
 		shift
 	}
+	set -x
 	for url in "$@"
 	do
-		echo "youtube-dl --no-continue --ignore-config -f $format -o- -- $url | castnow --quiet -"
 		LANG=C.UTF-8 command youtube-dl --no-continue --ignore-config -f "$format" -o- -- "$url" | castnow --quiet -
 	done
 	set +x
