@@ -1,22 +1,32 @@
 #!/usr/bin/env bash
 
-btrestart_service=/usr/local/bin/btrestart.sh
-printf '#!/bin/sh\n\n' | sudo tee $btrestart_service
-echo 'systemctl --no-block stop bluetooth.service.service;sleep 1;systemctl --no-block start bluetooth.service' | sudo tee -a $btrestart_service
-sudo chmod +x $btrestart_service
-sudo cat<<-EOF>/lib/systemd/system/btrestart.service
-	[Unit]
-	Description=Restart Bluetooth after resume
-	After=suspend.target
+initPath=$(\ps -p 1 o cmd= | cut -d" " -f1)
+systemType=$(strings $initPath | egrep -o "upstart|sysvinit|systemd" | head -1)
 
-	[Service]
-	Type=simple
-	ExecStart=$btrestart_service
+if [ $systemType = systemd ];then
+	btrestart_service=/usr/local/bin/btrestart.sh
+	[ -s $btrestart_service ] || {
+		printf '#!/bin/sh\n\n' | sudo tee $btrestart_service
+		echo 'systemctl stop bluetooth.service;sleep 1;systemctl --no-block start bluetooth.service' | sudo tee -a $btrestart_service
+	}
+	[ -x $btrestart_service ] || sudo chmod -v +x $btrestart_service
 
-	[Install]
-	WantedBy=suspend.target
+	[ -s /lib/systemd/system/btrestart.service ] || systemctl -a -t service | grep -q btrestart || {
+	sudo cat<<-EOF>/lib/systemd/system/btrestart.service
+		[Unit]
+		Description=Restart Bluetooth after resume
+		After=suspend.target
+
+		[Service]
+		Type=simple
+		ExecStart=$btrestart_service
+
+		[Install]
+		WantedBy=suspend.target
 EOF
-sudo systemctl enable btrestart.service
-sudo systemctl daemon-reload
-sudo service btrestart start
-service btrestart status
+		sudo systemctl daemon-reload
+	}
+	systemctl is-enabled --quiet btrestart.service || sudo systemctl enable btrestart.service
+	systemctl is-active  --quiet btrestart.service || { echo "=> INFO: Need to start btrestart.service.">&2;sudo systemctl start btrestart.service; }
+	service bluetooth status
+fi
