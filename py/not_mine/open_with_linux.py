@@ -62,7 +62,7 @@ def install():
 		'type': 'stdio',
 	}
 	locations = {
-		'brave': os.path.join(home_path, '.config', 'BraveSoftware', 'Brave-Browser-Dev', 'NativeMessagingHosts'),
+		'brave': os.path.join(home_path, '.config', 'BraveSoftware', 'Brave-Browser', 'NativeMessagingHosts'),
 		'chrome': os.path.join(home_path, '.config', 'google-chrome', 'NativeMessagingHosts'),
 		'chromium': os.path.join(home_path, '.config', 'chromium', 'NativeMessagingHosts'),
 		'firefox': os.path.join(home_path, '.mozilla', 'native-messaging-hosts'),
