@@ -16,6 +16,7 @@ echo $currentTarget | $egrep -q "(recovery|rescue).target" || { echo "=> You mus
 fsTypesList="btrfs "$(\ls -1 /sbin/fsck.* | $cut -d. -f2)
 fsTypesERE=$(echo $fsTypesList | $sed "s/ /|/g")
 fsTypesCSV=$(echo $fsTypesList | $sed "s/ /,/g")
+rm -v /etc/mtab
 storageMounted_FS_List=$(mount | $awk "/\<$fsTypesERE\>/"'{print$1}')
 
 logDir=log
@@ -40,7 +41,7 @@ mount -o remount,rw /
 			btrfsck -p --repair $FS
 		else
 			set -x
-			fsck -t nobtrfs -C -A -v $FS
+			fsck -C -p -v $FS
 		fi
 		set +x
 		echo >&2
