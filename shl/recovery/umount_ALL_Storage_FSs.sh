@@ -10,7 +10,7 @@ fi
 
 [ $USER != root ] && echo "=> ERROR [$0] You must run $0 as root." >&2 && exit 2
 
-initPath=$(\ps -p 1 o cmd= | cut -d" " -f1)
+initPath=$(\ps -p 1 o cmd= | $cut -d" " -f1)
 systemType=$($strings $initPath | egrep -o "upstart|sysvinit|systemd" | $head -1)
 if [ $systemType = systemd ];then
 	currentTarget=$(systemctl -t target | $egrep -o '^(emergency|rescue|graphical|multi-user|recovery|friendly-recovery).target')
@@ -22,13 +22,12 @@ fi
 fsTypesList="btrfs "$(\ls -1 /sbin/fsck.* | $cut -d. -f2)
 fsTypesERE=$(echo $fsTypesList | $sed "s/ /|/g")
 fsTypesCSV=$(echo $fsTypesList | $sed "s/ /,/g")
-rm -v /etc/mtab
+mount -v -o remount,rw / && rm -v /etc/mtab
 storageMounted_FS_List=$(mount | $awk "/\<$fsTypesERE\>/"'{print$1}')
 
 logDir=log
 mkdir -p $logDir
 logFile=$logDir/umount_$(date +%Y%m%d).log
-mount -o remount,rw /
 {
 	echo "=> hostname = $(hostname)" >&2
 	date
