@@ -1,6 +1,6 @@
 #!/bin/bash
 
-tools="awk cut egrep grep head sed strings tee"
+tools="awk cut egrep grep head runlevel sed strings tee"
 if [ -s /usr/bin/tee ]; then # Si "/usr" est accessible
 	for tool in $tools;do declare $tool=$tool;done
 else # Si /usr n'est pas accessible, on utilise les applets busybox
@@ -16,7 +16,7 @@ if [ $systemType = systemd ];then
 	currentTarget=$(systemctl -t target | $egrep -o '^(emergency|rescue|graphical|multi-user|recovery|friendly-recovery).target')
 	echo $currentTarget | $egrep -q "(recovery|rescue).target" || { echo "=> You must reboot in recovery|rescue mode to run $0." >&2 && exit 3; }
 elif [ $systemType = upstart ];then
-	runlevel=$(runlevel | $awk '{printf$NF}')
+	runlevel=$($runlevel | $awk '{printf$NF}')
 fi
 
 fsTypesList="btrfs "$(\ls -1 /sbin/fsck.* | $cut -d. -f2)
