@@ -3,7 +3,7 @@
 function getURLTitle() {
 	for URL
 	do
-		\curl -qLs $URL | pup --charset utf8 'title text{}'
+		\curl -qLs $URL | pup --charset utf8 'title text{}' | \recode html..latin9
 	done
 }
 
