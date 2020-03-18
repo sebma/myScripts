@@ -6,4 +6,5 @@ private/
 *.bin
 nohup.out
 t?t*
+*.log
 shl/*/log/
