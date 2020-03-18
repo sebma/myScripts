@@ -6,5 +6,4 @@ private/
 *.bin
 nohup.out
 t?t*
-shl/adb/*.log
-shl/jolla/*.log
+shl/*/log/
