@@ -2,7 +2,8 @@
 
 function upgradeAllBut {
 	local packagesNotUpgraded="$@"
-	if [ -z $packagesNotUpgraded ]
+	local apt=$(which apt)
+	if [ -z "$packagesNotUpgraded" ]
 	then
 		packagesToBeUpgraded=$($(which apt-get) dist-upgrade --dry-run | awk '/^Inst/{printf$2" "}' | grep -v "Listing...")
 	else
@@ -12,11 +13,12 @@ function upgradeAllBut {
 
 	echo "=> packagesToBeUpgraded = <$packagesToBeUpgraded>"
 	echo
-	test -n "$packagesToBeUpgraded" && sudo apt install -V $packagesToBeUpgraded
+	test -n "$packagesToBeUpgraded" && sudo screen -L $apt install -V $packagesToBeUpgraded
 	set +x
 }
 
 function main {
+	set -- ${@%/*}  # Remove trailing "/distrib" from all arguments
 	local os=$(uname -s)
 	if [ $os = Linux ]
 	then
