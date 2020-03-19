@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 initPath=$(\ps -p 1 o cmd= | cut -d" " -f1)
-systemType=$(strings $initPath | egrep -o "upstart|sysvinit|systemd" | head -1)
+set -o pipefail
+systemType=$(strings $initPath | egrep -o "upstart|sysvinit|systemd" | head -1 || echo unknown)
+set +o pipefail
 
 if [ $systemType = systemd ];then
 	btrestart_service=/usr/local/bin/btrestart.sh
