@@ -7,7 +7,7 @@ test $# = 0 && {
 }
 
 echo "#EXTM3U"
-\sed -E "s/#/ /;s/ +/ /g" $urlsFile | uniq | while read url title
+egrep -v "^(#|$)" $urlsFile | \sed -E "s/#/ /;s/ +/ /g" | uniq | while read url title
 do
 	echo "#EXTINF:-1,$title"
 	echo $url
