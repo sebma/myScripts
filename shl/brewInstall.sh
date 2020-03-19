@@ -1,18 +1,21 @@
 #!/usr/bin/env sh
 
 brew=$(which brew)
+homeBrewInstallerURL=https://raw.githubusercontent.com/Homebrew/install/master/install.sh
+portableHomeBrewURL=https://github.com/Homebrew/brew
 case $(uname) in 
 	Darwin)
-		brewName=Homebrew
 		if ! which brew > /dev/null 2>&1; then
 			if groups | grep --color -E -wq "adm|admin|sudo"; then
-				$(which ruby) -e "$(\curl -fsSL https://raw.githubusercontent.com/$brewName/install/master/install)" || return
-				brew=/usr/local/bin/brew
+				test -z $brew && bash -c "$(\curl -fsSL $homeBrewInstallerURL)" || return
+				brewPrefix=/usr/local
 			else
 				brewPrefix=$HOME/homebrew
-				\mkdir -pv -p $brewPrefix && \curl -L https://github.com/Homebrew/brew/tarball/master | \tar xz --strip 1 -C $brewPrefix || return
-				brew=$brewPrefix/bin/brew
+				# cf. https://docs.brew.sh/Installation#untar-anywhere
+				#\mkdir -pv -p $brewPrefix && \curl -L https://github.com/Homebrew/brew/tarball/master | \tar xz --strip 1 -C $brewPrefix || return
+				git clone $portableHomeBrewURL $brewPrefix # cf. https://stackoverflow.com/a/55021458/5649639
 			fi
+			brew=$brewPrefix/bin/brew
 		fi
 		set -x
 		$brew update
@@ -23,9 +26,20 @@ case $(uname) in
 		set +x
 		;;
 	Linux)
-		brewName=Linuxbrew
-		test -z $brew && sh -c "$(\curl -fsSL https://raw.githubusercontent.com/$brewName/install/master/install.sh)"
-		brew=$(which brew) || exit 1
+		if ! which brew > /dev/null 2>&1; then
+			if groups | grep --color -E -wq "adm|admin|sudo"; then
+				test -z $brew && bash -c "$(\curl -fsSL $homeBrewInstallerURL)" || return
+				brewPrefix=/home/linuxbrew/.linuxbrew
+			else
+				# cf. https://docs.brew.sh/Homebrew-on-Linux#alternative-installation
+				brewPrefix=$HOME/.linuxbrew/
+				git clone $portableHomeBrewURL $brewPrefix/Homebrew
+				\mkdir -pv $brewPrefix/bin
+				\ln -vs $brewPrefix/Homebrew/bin/brew $brewPrefix/bin/brew
+				eval $($brewPrefix/bin/brew shellenv)
+			fi
+			brew=$brewPrefix/bin/brew
+		fi
 		$brew update ;;
 	*) echo "=> ERROR : brew does not support <$(uname)> operating system." >&2; exit 1;;
 esac
