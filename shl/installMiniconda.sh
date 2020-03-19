@@ -21,16 +21,16 @@ EOF
 
 function installMinicondaFromScript {
 	[ $debug = 1 ] && set -x
-	local systemType=$(uname -s)
+	local osFamily=$(uname -s)
 	local archi=$(uname -m | \sed "s/^i6/x/")
 	local wgetOptions="-c --progress=bar"
 	local wget="$(which wget2 2>/dev/null || which wget) $wgetOptions"
 
-	case $systemType in
+	case $osFamily in
 
 	Darwin)	minicondaInstallerScript=Miniconda$Version-latest-MacOSX-x86_64.sh
 	;;
-	Linux) archi=$(uname -m | \sed "s/^i6/x/"); minicondaInstallerScript=Miniconda$Version-latest-$systemType-$archi.sh
+	Linux) archi=$(uname -m | \sed "s/^i6/x/"); minicondaInstallerScript=Miniconda$Version-latest-$osFamily-$archi.sh
 	;;
 	*) ;;
 	esac
@@ -120,7 +120,7 @@ function installMiniconda {
 	[ $debug = 1 ] && set -x
 	local Version=$1
 	local condaInstallerURL=""
-	local systemType=$(uname -s)
+	local osFamily=$(uname -s)
 	local archi=$(uname -m | \sed "s/^i6/x/")
 
 	if which -a conda | grep -q miniconda$Version/bin/conda && [ $reInstall = 0 ]
@@ -128,14 +128,14 @@ function installMiniconda {
 		echo "=> INFO: Miniconda version $Version is already installed." >&2
 		exit 1
 	else
-		if [ $systemType = Linux  ] 
+		if [ $osFamily = Linux  ] 
 		then 
 			case $archi in
 			x86) installMinicondaFromScript ;;
 			x86_64) installMinicondaFromRepositories ;;
 			*) echo "=> ERROR : The $archi architecture is not supported yet.">&2; exit 3 ;;
 			esac
-		elif [ $systemType = Darwin ] 
+		elif [ $osFamily = Darwin ] 
 		then
 			installMinicondaFromBrew
 		fi
@@ -166,7 +166,7 @@ function installCondaPythonPackages {
 	local conda=$(which conda$minicondaVersion)
 	local requiredPythonPackageList="$2"
 	local envName="$3"
-	local systemType=$(uname -s)
+	local osFamily=$(uname -s)
 
 	if test -n $envName
 	then
