@@ -7,7 +7,6 @@ test $# = 0 && {
 }
 
 echo "#EXTM3U"
-#\sed -E "s/#/ /;s/ +/ /g" $urlsFile | uniq | while read url title
 egrep -v "^(#|$)" $urlsFile | uniq | while read url
 do
 	extension=.mp4
