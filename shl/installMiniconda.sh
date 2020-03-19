@@ -46,9 +46,9 @@ function installMinicondaFromScript {
 		chmod +x $minicondaInstallerScript
 	fi
 
-	if groups | \egrep -wq "sudo|adm|root" 
+	if groups | \egrep -wq "sudo|adm|root"
 	then
-		sudo ./$minicondaInstallerScript -p /usr/local/miniconda$Version -b 
+		sudo ./$minicondaInstallerScript -p /usr/local/miniconda$Version -b
 	else
 		./$minicondaInstallerScript -b
 	fi
@@ -105,7 +105,7 @@ function installMinicondaFromBrew {
 	}
 
 	$brew update
-	if [ $Version = 2 ] 
+	if [ $Version = 2 ]
 	then
 		$brew tap caskroom/versions
 		$brew cask install miniconda2
@@ -128,14 +128,14 @@ function installMiniconda {
 		echo "=> INFO: Miniconda version $Version is already installed." >&2
 		exit 1
 	else
-		if [ $osFamily = Linux  ] 
-		then 
+		if [ $osFamily = Linux  ]
+		then
 			case $archi in
 			x86) installMinicondaFromScript ;;
 			x86_64) installMinicondaFromRepositories ;;
 			*) echo "=> ERROR : The $archi architecture is not supported yet.">&2; exit 3 ;;
 			esac
-		elif [ $osFamily = Darwin ] 
+		elif [ $osFamily = Darwin ]
 		then
 			installMinicondaFromBrew
 		fi
@@ -156,7 +156,7 @@ function installMiniconda {
 		cd $(dirname $condaVersionPath)
 		for cmd in conda conda-env activate deactivate
 		do
-			test ! -L $cmd$Version && echo "=> Creating symlink $cmd in $PWD ..." && $symlinkCommand $condaRelativeDirName/$cmd $cmd$Version 
+			test ! -L $cmd$Version && echo "=> Creating symlink $cmd in $PWD ..." && $symlinkCommand $condaRelativeDirName/$cmd $cmd$Version
 		done
 	fi
 }
