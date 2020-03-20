@@ -13,12 +13,13 @@ do
 done
 
 echo "=> defaultBrowser = $defaultBrowser"
-desktopFile=$(basename $(dpkg -L $defaultBrowser | grep desktop))
+desktopFile=$(basename $(dpkg -L $defaultBrowser | grep desktop$))
 echo "=> desktopFile = $desktopFile"
 echo "=> Association des protocoles http et https avec $desktopFile ..."
 xdg-mime default $desktopFile x-scheme-handler/http x-scheme-handler/https
 echo "=> Verification ..."
 xdg-mime query default x-scheme-handler/https
+echo "=> xdg-settings set default-web-browser $desktopFile ..."
 xdg-settings set default-web-browser $desktopFile
 xdg-settings get default-web-browser
 echo "=> Fait."
