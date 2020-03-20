@@ -37,7 +37,7 @@ elif len(sys.argv) != 1:
   sys.exit(1)
 
 try:
-  currencies = ET.parse(urllib.request.urlopen('http://rss.timegenie.com/forex.xml')).findall('data')
+  currencies = ET.parse(urllib.request.urlopen('http://rss.timegenie.com/forex2.xml')).findall('data')
 except IOError as exc:
   sys.stderr.write('Error connecting to currency server. {0}\n'.format(exc))
   sys.exit(1)
