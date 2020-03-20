@@ -11,12 +11,14 @@ fi
 [ $USER != root ] && echo "=> ERROR [$0] You must run $0 as root." >&2 && exit 2
 
 initPath=$(\ps -p 1 o cmd= | $cut -d" " -f1)
-systemType=$($strings $initPath | egrep -o "upstart|sysvinit|systemd" | $head -1)
+set -o pipefail
+systemType=$($strings $initPath | egrep -o "upstart|sysvinit|systemd" | $head -1 || echo unknown)
+set +o pipefail
 if [ $systemType = systemd ];then
 	currentTarget=$(systemctl -t target | $egrep -o '^(emergency|rescue|graphical|multi-user|recovery|friendly-recovery).target')
 	echo $currentTarget | $egrep -q "(recovery|rescue).target" || { echo "=> You must reboot in recovery|rescue mode to run $0." >&2 && exit 3; }
 elif [ $systemType = upstart ];then
-	runlevel=$($runlevel | $awk '{printf$NF}')
+	runlevelNum=$($runlevel | $awk '{printf$NF}')
 fi
 
 fsTypesList="btrfs "$(\ls -1 /sbin/fsck.* | $cut -d. -f2)
@@ -31,7 +33,8 @@ logFile=$logDir/fsck_$(date +%Y%m%d).log
 {
 	echo "=> hostname = $(hostname)" >&2
 	date
-	echo "=> The current target is <$currentTarget>."
+	echo "=> The current systemType is <$systemType>."
+	[ $systemType = systemd ] && echo "=> The current target is <$currentTarget>."
 	echo "=> Unmounting all storage filesystems ..." >&2
 	echo "=> storageMounted_FS_List = $storageMounted_FS_List" >&2
 	umount -v -a -t $fsTypesCSV
