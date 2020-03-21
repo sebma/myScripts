@@ -14,9 +14,13 @@ AddUbuntuRepository() {
 	echo
 	echo "=> Ajout des depots Ubuntu ..."
 	echo "==> Ajout du depot <$repositoryName> ..."
-	if [ $distribVersion -gt 10 ]
+
+	if [ $distribVersion -ge 10 ]
 	then
 		sudo add-apt-repository "deb http://fr.archive.ubuntu.com/ubuntu/  $distribCodeName $repositoryName"
+	elif [ $distribVersion -ge 12 ]
+	then
+		sudo add-apt-repository universe;sudo add-apt-repository multiverse
 	else
 		sudo add-apt-repository "http://fr.archive.ubuntu.com/ubuntu/ $repositoryName"
 	fi
