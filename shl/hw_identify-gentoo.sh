@@ -34,7 +34,7 @@ then
   sed -i "/\/archive.ubuntu.com/s/archive.ubuntu.com/fr.archive.ubuntu.com/" /etc/apt/sources.list
   sed -i "/^deb cdrom/s/^/# /" /etc/apt/sources.list
 
-  add-apt-repository "http://fr.archive.ubuntu.com/ubuntu/ universe multiverse"
+  sudo add-apt-repository universe;sudo add-apt-repository multiverse
 
   add-apt-repository "deb http://security.ubuntu.com/ubuntu/ $(lsb_release -sc)-security universe multiverse"
   add-apt-repository "deb http://fr.archive.ubuntu.com/ubuntu/  $(lsb_release -sc)-updates universe multiverse"
