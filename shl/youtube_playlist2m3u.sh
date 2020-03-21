@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 if [ $# = 0 ];then
 	echo "=> Usage $(basename $0) youtubePlayListURL" >&2
@@ -10,7 +10,7 @@ youtubeFQDN=http://youtu.be
 
 export LANG=fr_FR.UTF-8
 echo "#EXTM3U"
-command youtube-dl --get-id $youtubePlayListURL | uniq | while read youtubeID
+time command youtube-dl --get-id $youtubePlayListURL | uniq | while read youtubeID
 do
 	url=$youtubeFQDN/$youtubeID
 	printf "#EXTINF:-1,"
