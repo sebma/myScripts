@@ -24,9 +24,12 @@ AddRepositories() {
 	echo "==> Choix des mirroirs Francais pour la proximite ..."
 	sudo sed -i "/\/archive.ubuntu.com/s/archive.ubuntu.com/fr.archive.ubuntu.com/" /etc/apt/sources.list
 	
-	if [ $distribRelease = 10.04 ]
+	if [ $distribVersion -ge 10 ]
 	then
 		sudo add-apt-repository "deb http://fr.archive.ubuntu.com/ubuntu/  $distribCodeName universe multiverse"
+	elif [ $distribVersion -ge 12 ]
+	then
+		sudo add-apt-repository universe;sudo add-apt-repository multiverse
 	else
 		sudo add-apt-repository "http://fr.archive.ubuntu.com/ubuntu/ universe multiverse"
 	fi
