@@ -14,7 +14,7 @@ grep -q "^[ ]*deb cdrom:" /etc/apt/sources.list && sudo sed -i "/deb cdrom:/s/^/
 
 for repo in universe multiverse
 do
-  grep -q "^[^#].*$repo$" /etc/apt/sources.list || sudo sed -i "/^deb [^c]\|^deb-src [^c]/s/$/ $repo/" /etc/apt/sources.list
+  sudo add-apt-repository "http://fr.archive.ubuntu.com/ubuntu/ universe multiverse"
 done
 
 grep -q Europe/Paris /etc/timezone || echo Europe/Paris | sudo tee /etc/timezone
