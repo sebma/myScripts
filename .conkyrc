@@ -1,0 +1,152 @@
+# conky configuration
+# edited by Clapico : http://www.clapico.com
+# set to yes if you want Conky to be forked in the background
+background yes
+# X font when Xft is disabled, you can pick one with program xfontsel
+#font 5×7
+#font 6×10
+#font 7×13
+#font 8×13
+#font 9×15
+#font *mintsmild.se*
+#font -*-*-*-*-*-*-34-*-*-*-*-*-*-*
+# Use Xft?
+use_xft yes
+# Xft font when Xft is enabled
+xftfont Bitstream Vera Sans Mono:size=11
+# Text alpha when using Xft
+xftalpha 0.8
+# Update interval in seconds
+update_interval 1.0
+# This is the number of times Conky will update before quitting.
+# Set to zero to run forever.
+total_run_times 0
+# Create own window instead of using desktop (required in nautilus)
+#own_window no
+# Use double buffering (reduces flicker, may not work for everyone)
+double_buffer yes
+# Minimum size of text area
+minimum_size 480 0
+maximum_width 600
+# Draw shades?
+draw_shades yes
+# Draw outlines?
+#draw_outline no
+# Draw borders around text
+draw_borders no
+#draw_graph_borders yes
+# Stippled borders?
+#stippled_borders 8
+# border margins
+#border_inner_margin 4
+#border_outer_margin 8
+# border width
+border_width 1
+# Default colors and also border colors
+default_color white
+default_shade_color black
+default_outline_color white
+# own window options
+own_window yes
+#own_window_type normal
+own_window_argb_visual yes
+own_window_transparent yes
+#own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager
+own_window_hints undecorated,below,skip_taskbar,skip_pager
+# Text alignment, other possible values are commented
+#alignment top_left
+alignment top_right
+#alignment bottom_left
+#alignment bottom_right
+# Gap between borders of screen and text
+# same thing as passing -x at command line
+gap_x 0
+gap_y 0
+# Subtract file system buffers from used memory?
+no_buffers yes
+# set to yes if you want all text to be in uppercase
+#uppercase no
+# number of cpu samples to average
+# set to 1 to disable averaging
+cpu_avg_samples 2
+# number of net samples to average
+# set to 1 to disable averaging
+net_avg_samples 2
+# Force UTF8? note that UTF8 support required XFT
+#override_utf8_locale yes
+# Add spaces to keep things from moving about? This only affects certain objects.
+use_spacer right
+# colours
+color1 blue
+#color1 F1C6FF
+# light blue
+color2 E0D6BA
+# orange
+#E77320
+color3 E0D6BA
+#color3 3BFE00
+# green
+color4 78BF39
+# red
+color5 CC0000
+# 
+color6 888888
+# yellow
+color7 FC8820
+text_buffer_size 2048
+# variable is given either in format $variable or in ${variable}. Latter
+# allows characters right after the variable and must be used in network
+# stuff because of an argument
+# stuff after 'TEXT' will be formatted on screen
+# ################################################################################################################################################
+TEXT
+#${color white}Bienvenue sur $nodename
+#${color white}${exec lsb_release -si} $sysname $kernel : ${exec lsb_release -sr} (${exec lsb_release -sc})
+${color white}${exec lsb_release -sirc | tr "\n" " "}on ${color green}${time %A %x}${color white} at ${color red}${time %X}
+#${color white}Date: ${color1}${time %A %d %B %Y}${color white} a ${color red}${time %H:%M:%S}
+#${color white}IP Ethernet: ${color1}${addr eth0}${color white}
+${color lightblue}IP Wifi: ${color1}${addr wlan0}${color lightblue} Max BitRate : ${color1}${wireless_bitrate wlan0}${color lightblue} Signal WiFi : ${color1}${wireless_link_qual wlan0}%
+#${offset -5}${color white}${font StyleBats:style=CleanCut:size=12}q ${voffset -2}${font Bitstream Vera Sans Mono:style=Bold:size=11}Meteo${font} ${hr}${color1}${execpi 1800 conkyForecast --location=FRXX5635 --template=/home/seb/.conky/conkyForecast.template}
+#${color white}Load :${color1} $loadavg Nom du desktop: $desktop_name
+${color white}CPU1 Utilise :${color1} ${cpu cpu1}% ${color white}${cpubar cpu1}
+${color white}${cpugraph cpu1 yellow FC8820}
+${color white}CPU2 Utilise :${color1} ${cpu cpu2}% ${color white}${cpubar cpu2}
+${color white}${cpugraph cpu2 yellow FC8820}
+${color white}CPU3 Utilise :${color1} ${cpu cpu3}% ${color white}${cpubar cpu3}
+${color white}${cpugraph cpu3 yellow FC8820}
+${color white}CPU4 Utilise :${color1} ${cpu cpu4}% ${color white}${cpubar cpu4}
+${color white}${cpugraph cpu4 yellow FC8820}
+${color white}Memoire RAM :${color1} $memperc% : $mem/$memmax ${color white}${membar}
+${color white}${memgraph mem yellow FC8820}
+#${color white}IO Writes :${color1} $memperc% : $mem/$memmax ${color white}${membar}
+${color white}Disk I/O R/W :
+${color white}${diskiograph /dev/sda yellow FC8820}
+${color white}Temperature ACPI: ${color1}${acpitemp}degres ${color white}Temperature sda: ${color blue}${hddtemp}degres
+${color white}Occupation du Swap :${color1} $swap/$swapmax - $swapperc% ${color white}${swapbar}
+${color white}Occupation de /boot : ${color1}${fs_used /boot} / ${fs_size /boot} - ${fs_used_perc /boot}% ${color white}${fs_bar /boot}
+${color white}Occupation de /: ${color1}${fs_used /} / ${fs_size /} - ${fs_used_perc /}% ${color white}${fs_bar /}
+${color white}Occupation de /usr : ${color1}${fs_used /usr} / ${fs_size /usr} - ${fs_used_perc /usr}% ${color white}${fs_bar /usr}
+${color white}Occupation de /usr/local : ${color1}${fs_used /usr/local} / ${fs_size /usr/local} - ${fs_used_perc /usr/local}% ${color white}${fs_bar /usr/local}
+${color white}Occupation de /var : ${color1}${fs_used /var} / ${fs_size /var} - ${fs_used_perc /var}% ${color white}${fs_bar /var}
+${color white}Occupation de /var/tmp : ${color1}${fs_used /var/tmp} / ${fs_size /var/tmp} - ${fs_used_perc /var/tmp}% ${color white}${fs_bar /var/tmp}
+${color white}Occupation de /var/cache : ${color1}${fs_used /var/cache} / ${fs_size /var/cache} - ${fs_used_perc /var/cache}% ${color white}${fs_bar /var/cache}
+${color white}Occupation de /opt : ${color1}${fs_used /opt} / ${fs_size /opt} - ${fs_used_perc /opt}% ${color white}${fs_bar /opt}
+${color white}Occupation de /tmp : ${color1}${fs_used /tmp} / ${fs_size /tmp} - ${fs_used_perc /tmp}% ${color white}${fs_bar /tmp}
+${color white}Occupation de /home : ${color1}${fs_used /home} / ${fs_size /home} - ${fs_used_perc /home}% ${color white}${fs_bar /home}
+${color white}Occupation de /iso : ${color1}${fs_used /iso} / ${fs_size /iso} - ${fs_used_perc /iso}% ${color white}${fs_bar /iso}
+${color white}Occupation de /datas : ${color1}${fs_used /datas} / ${fs_size /datas} - ${fs_used_perc /datas}% ${color white}${fs_bar /datas}
+#${color white}Processus :${color1} $processes ${color white} En cours :${color1} $running_processes
+${color white}Utilisation du CPU
+${offset 10}${color white}Nom ${alignr 50}PID ${alignr 20}%CPU
+${offset 10}${color green}${top name 1} ${alignr 30}${top pid 1} ${alignr 15}${top cpu 1}
+${offset 10}${color white}${top name 2} ${alignr 30}${top pid 2} ${alignr 15}${top cpu 2}
+${offset 10}${color white}${top name 3} ${alignr 30}${top pid 3} ${alignr 15}${top cpu 3}
+${offset 10}${color white}${top name 4} ${alignr 30}${top pid 4} ${alignr 15}${top cpu 4}
+${offset 10}${color white}${top name 5} ${alignr 30}${top pid 5} ${alignr 15}${top cpu 5}
+${color white}Utilisation de la Memoire
+${offset 10}${color white}${color white}Nom ${alignr 100}PID ${alignr 50}SIZE ${alignr 20}%RAM
+${offset 10}${color green}${top_mem name 1} ${alignr 45}${top_mem pid 1} ${alignr 25} ${top_mem mem_res 1} ${alignr 15}${top_mem mem 1}
+${offset 10}${color white}${top_mem name 2} ${alignr 45}${top_mem pid 2} ${alignr 25} ${top_mem mem_res 2} ${alignr 15}${top_mem mem 2}
+${offset 10}${color white}${top_mem name 3} ${alignr 45}${top_mem pid 3} ${alignr 25} ${top_mem mem_res 3} ${alignr 15}${top_mem mem 3}
+${offset 10}${color white}${top_mem name 4} ${alignr 45}${top_mem pid 4} ${alignr 25} ${top_mem mem_res 4} ${alignr 15}${top_mem mem 4}
+${offset 10}${color white}${top_mem name 5} ${alignr 45}${top_mem pid 5} ${alignr 25} ${top_mem mem_res 5} ${alignr 15}${top_mem mem 5}
