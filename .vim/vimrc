@@ -1,0 +1,74 @@
+scriptencoding utf-8
+set listchars=tab:»»
+if has("patch-7.4.710") | set listchars+=space:· | else | set listchars+=trail:· | endif
+set listchars+=eol:¶
+"vim --version | grep "\+multi_byte"
+set listchars+=nbsp:☠
+set title
+"set nopaste
+set nohls autoindent
+set noexpandtab tabstop=4 shiftwidth=4
+syntax on
+
+" Shortcut to rapidly toggle `set list` with CTRL+L
+nmap <c-l> :set list!<CR>
+nmap <c-t> :sort u<CR>
+nmap <c-n> :set nu! \| :set ruler<CR>
+nmap <F5> :e<CR>
+map <F6> <C-W>w
+nmap <F8> :TagbarToggle<CR>
+"nnoremap / /\v # enable Extended Regular Expression search
+"vnoremap / /\v
+
+function SortMyAliases()
+	:1
+	:/^alias /,$-3sort u
+endfunction
+function SortBashFunctionsByName()
+	:g/^function /,/^}$/-1 s/\n/<linefeed>/
+	:sort /^function /
+	:%s/<linefeed>/\r/g
+endfunction
+function ReIndent_XML_HTML()
+	:%!pup
+endfunction
+function ReIndent_JSON()
+	:%!jq .
+endfunction
+
+"autocmd StdinReadPost * set buftype=nofile
+autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif "Remember last cursor position
+autocmd FileType xml setlocal equalprg=xmllint\ --format\ --recover\ -\ 2>/dev/null "Pretty print XML when '=G' is pressed
+"autocmd FileType xml exe ':silent %!xmllint --format --recover - 2>/dev/null'
+"autocmd VimEnter * nested :call tagbar#autoopen(1) "open it only if you're opening Vim with a supported file/files
+
+autocmd BufNewFile,BufRead *.ovpn set filetype=openvpn
+autocmd BufNewFile,BufRead *.octave set filetype=matlab
+autocmd BufNewFile,BufRead *.tikz set filetype=tex
+
+"let g:tagbar_ctags_bin = "$HOME/gnu/bin/ctags"
+
+" Initialize plugin system
+call plug#begin('~/.vim/plugged')
+let g:plug_window = 'enew' "Open vim-plug without a split
+Plug 'vim-scripts/AdvancedSorters'
+Plug 'vim-scripts/ingo-library'
+Plug 'vim-scripts/matchit.zip' "use % to travel Shell's if, else, elif, fi.
+Plug 'vim-scripts/python_match.vim' " use % to travel Python's if, elif, etc.
+Plug 'vim-scripts/tagbar'
+Plug 'vim-scripts/openvpn'
+Plug 'sbdchd/vim-shebang'
+Plug 'sirjofri/vim-biblereader'
+Plug 'goerz/ipynb_notedown.vim'
+Plug 'ivanov/vim-ipython'
+call plug#end()
+
+set paste
+set ruler
+set modeline
+set tags+=./tags;
+set incsearch "Search in 'real-time'
+
+autocmd Filetype !vim %s/\%xa0//g
+"autocmd BufRead,BufNewFile * if &filetype != 'vim' | %s/\%xa0//g | endif
+autocmd BufRead,BufNewFile *.md setlocal spell "Activates spell checking for MarkDown files
