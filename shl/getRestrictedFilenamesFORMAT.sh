@@ -91,7 +91,7 @@ getRestrictedFilenamesFORMAT () {
 				[ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] && mp4tags -m "$url" "$fileName"
 				chmod -w "$fileName"
 				echo
-				videoInfo "$fileName"
+				videoInfo.sh "$fileName"
 			fi
 			let j++
 		done
