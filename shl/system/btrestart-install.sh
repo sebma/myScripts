@@ -16,7 +16,7 @@ if [ $systemType = systemd ];then
 	[ -x $btrestart_service ] || sudo chmod -v +x $btrestart_service
 
 	[ -s /lib/systemd/system/btrestart.service ] || systemctl -a -t service | grep -q btrestart || {
-	sudo cat<<-EOF>/lib/systemd/system/btrestart.service
+	cat<<-EOF | sudo tee /lib/systemd/system/btrestart.service
 		[Unit]
 		Description=Restart Bluetooth after resume
 		After=suspend.target
