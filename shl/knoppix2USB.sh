@@ -114,7 +114,7 @@ mount -r $LastUSBKeyPartitionMountPoint && [ -x "$SYSLINUX_NEW" ] && {
 	sudo mv -v $KnoppixUSBPartitionMountPoint/boot/$SrcLoaderSubDir $KnoppixUSBPartitionMountPoint/boot/$DstLoaderSubDir
 	time sync
 	#umount $KnoppixUSBPartitionMountPoint && exit 1
-	sudo cat ${MyScriptsDir}/mbr.bin > "${USBKeyDeviceName}"
+	cat ${MyScriptsDir}/mbr.bin | sudo tee "${USBKeyDeviceName}"
 	sudo parted -s $USBKeyDeviceName set $PartitionNumber boot on
 	sudo $EXTLINUX /boot/$DstLoaderSubDir
   ;;
