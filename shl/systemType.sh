@@ -11,7 +11,7 @@ else # Si /usr n'est pas accessible, on utilise les applets busybox
 fi
 
 function systemType {
-	local initPath=$(\ps -p 1 o cmd= | $cut -d" " -f1)
+	local initPath=$(\ps -p 1 -o cmd= | $cut -d" " -f1)
 	$strings $initPath | $egrep -o "upstart|sysvinit|systemd" | $head -1
 }
 systemType
