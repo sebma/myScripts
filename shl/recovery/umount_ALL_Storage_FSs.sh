@@ -10,7 +10,7 @@ fi
 
 [ $USER != root ] && echo "=> ERROR [$0] You must run $0 as root." >&2 && exit 2
 
-initPath=$(\ps -p 1 o cmd= | $cut -d" " -f1)
+initPath=$(\ps -p 1 -o cmd= | $cut -d" " -f1)
 set -o pipefail
 systemType=$($strings $initPath | egrep -o "upstart|sysvinit|systemd" | $head -1 || echo unknown)
 set +o pipefail
