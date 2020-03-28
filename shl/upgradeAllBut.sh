@@ -14,6 +14,7 @@ function upgradeAllBut {
 	echo "=> packagesToBeUpgraded = <$packagesToBeUpgraded>"
 	echo
 	test -n "$packagesToBeUpgraded" && sudo screen -L $apt install -V $packagesToBeUpgraded
+	sync
 	set +x
 }
 
