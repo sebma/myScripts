@@ -1,3 +1,3 @@
 #!/bin/sh
 
-systemctl stop bluetooth.service;sleep 1;systemctl --no-block start bluetooth.service
+service bluetooth stop;sleep 1;service bluetooth start;sleep 1;service bluetooth status
