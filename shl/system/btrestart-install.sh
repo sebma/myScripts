@@ -15,21 +15,22 @@ if [ $systemType = systemd ];then
 	}
 	[ -x $btrestart_service ] || sudo chmod -v +x $btrestart_service
 
-	[ -s /lib/systemd/system/btrestart.service ] || systemctl -a -t service | grep -q btrestart || {
-	cat<<-EOF | sudo tee /lib/systemd/system/btrestart.service
-		[Unit]
-		Description=Restart Bluetooth after resume
-		After=suspend.target
+	if ! [ -s /lib/systemd/system/btrestart.service ];then
+		cat<<-EOF | sudo tee /lib/systemd/system/btrestart.service
+			[Unit]
+			Description=Restart Bluetooth after resume
+			After=suspend.target
 
-		[Service]
-		Type=simple
-		ExecStart=$btrestart_service
+			[Service]
+			Type=simple
+			ExecStart=$btrestart_service
 
-		[Install]
-		WantedBy=suspend.target
+			[Install]
+			WantedBy=suspend.target
 EOF
 		sudo systemctl daemon-reload
-	}
+	fi
+
 	systemctl is-enabled --quiet btrestart.service || sudo systemctl enable btrestart.service
 	systemctl is-active  --quiet btrestart.service || { echo "=> INFO: Need to start btrestart.service.">&2;sudo systemctl start btrestart.service; sleep 3; }
 	service bluetooth status
