@@ -11,7 +11,7 @@ if [ $systemType = systemd ];then
 	btrestart_service=/usr/local/bin/btrestart.sh
 	[ -s $btrestart_service ] || {
 		printf '#!/bin/sh\n\n' | sudo tee $btrestart_service
-		echo 'systemctl stop bluetooth.service;sleep 1;systemctl --no-block start bluetooth.service' | sudo tee -a $btrestart_service
+		echo 'service bluetooth stop;sleep 1;service bluetooth start;sleep 1;service bluetooth status' | sudo tee -a $btrestart_service
 	}
 	[ -x $btrestart_service ] || sudo chmod -v +x $btrestart_service
 
