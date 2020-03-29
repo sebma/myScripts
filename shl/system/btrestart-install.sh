@@ -1,29 +1,29 @@
 #!/usr/bin/env bash
 
-#ps=$(which ps)
-initPath=$(\ps -p 1 -o cmd= | cut -d" " -f1)
-set +x
+initPath=$(ps -p 1 -o cmd= | cut -d" " -f1)
 set -o pipefail
 systemType=$(strings $initPath | egrep -o "upstart|sysvinit|systemd" | head -1 || echo unknown)
 set +o pipefail
 
+btrestartServiceScript=/usr/local/bin/btrestart.sh
+btrestartServiceName=btrestart
 if [ $systemType = systemd ];then
-	btrestart_service=/usr/local/bin/btrestart.sh
-	[ -s $btrestart_service ] || {
-		printf '#!/bin/sh\n\n' | sudo tee $btrestart_service
-		echo 'service bluetooth stop;sleep 1;service bluetooth start;sleep 1;service bluetooth status' | sudo tee -a $btrestart_service
-	}
-	[ -x $btrestart_service ] || sudo chmod -v +x $btrestart_service
+	if ! [ -s $btrestartServiceScript ];then
+		printf '#!/bin/sh\n\n'
+		echo 'service bluetooth stop;sleep 1;service bluetooth start;sleep 1;service bluetooth status'
+	fi | sudo tee $btrestartServiceScript
 
-	if ! [ -s /lib/systemd/system/btrestart.service ];then
-		cat<<-EOF | sudo tee /lib/systemd/system/btrestart.service
+	[ -x $btrestartServiceScript ] || sudo chmod -v +x $btrestartServiceScript
+
+	if ! [ -s /lib/systemd/system/$btrestartServiceName.service ];then
+		cat<<-EOF | sudo tee /lib/systemd/system/$btrestartServiceName.service
 			[Unit]
 			Description=Restart Bluetooth after resume
 			After=suspend.target
 
 			[Service]
 			Type=simple
-			ExecStart=$btrestart_service
+			ExecStart=$btrestartServiceScript
 
 			[Install]
 			WantedBy=suspend.target
@@ -31,7 +31,7 @@ EOF
 		sudo systemctl daemon-reload
 	fi
 
-	systemctl is-enabled --quiet btrestart.service || sudo systemctl enable btrestart.service
-	systemctl is-active  --quiet btrestart.service || { echo "=> INFO: Need to start btrestart.service.">&2;sudo systemctl start btrestart.service; sleep 3; }
+	systemctl is-enabled --quiet $btrestartServiceName.service || sudo systemctl enable $btrestartServiceName.service
+	systemctl is-active  --quiet $btrestartServiceName.service || { echo "=> INFO: Need to start $btrestartServiceName.service.">&2;sudo systemctl start $btrestartServiceName.service; sleep 3; }
 	service bluetooth status
 fi
