@@ -72,6 +72,7 @@ getRestrictedFilenamesFORMAT () {
 				test $downloadOK != 0 && {
 					time LANG=C.UTF-8 command youtube-dl -o $fileName -f "${formats[$j]}" "$url" 2>&1 | {
 						egrep --color=auto -A1 'ERROR:.*No space left on device' 1>&2
+						trap - INT
 						echo 1>&2
 						downloadOK=1
 						return 1
@@ -81,6 +82,7 @@ getRestrictedFilenamesFORMAT () {
 			else
 				time LANG=C.UTF-8 command youtube-dl -o $fileName -f "${formats[$j]}" "$url" 2>&1 | {
 					egrep --color=auto -A1 'ERROR:.*No space left on device' 1>&2
+					trap - INT
 					echo 1>&2
 					downloadOK=1
 					return 1
@@ -99,7 +101,6 @@ getRestrictedFilenamesFORMAT () {
 	echo
 	sync
 	set +x
-	trap - INT
 	return $downloadOK
 }
 
