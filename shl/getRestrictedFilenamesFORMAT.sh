@@ -27,7 +27,10 @@ getRestrictedFilenamesFORMAT () {
 	echo $initialSiteVideoFormat | grep -q "^9[0-9]" && isLIVE=true
 	if $isLIVE;then
 #		ytdlExtraOptions='--external-downloader ffmpeg --external-downloader-args "-movflags frag_keyframe+empty_moov"'
-		ytdlExtraOptions=""
+		ytdlExtraOptions[0]="--external-downloader"
+		ytdlExtraOptions[1]="ffmpeg"
+		ytdlExtraOptions[2]="--external-downloader-args"
+		ytdlExtraOptions[3]="-movflags frag_keyframe+empty_moov"
 	fi
 
 	for url
@@ -77,7 +80,9 @@ getRestrictedFilenamesFORMAT () {
 			echo
 			trap - INT
 			if [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ]; then
-				time LANG=C.UTF-8 command youtube-dl -o "$fileName" -f "${formats[$j]}" $ytdlExtraOptions "$url" --embed-thumbnail
+				set -x
+				time LANG=C.UTF-8 command youtube-dl -o "$fileName" -f "${formats[$j]}" "${ytdlExtraOptions[@]}" "$url" --embed-thumbnail
+				set +x
 				downloadOK=$?
 				test $downloadOK != 0 && {
 					time LANG=C.UTF-8 command youtube-dl -o $fileName -f "${formats[$j]}" "$url" 2>&1 | {
@@ -89,7 +94,7 @@ getRestrictedFilenamesFORMAT () {
 					downloadOK=$?
 				}
 			else
-				time LANG=C.UTF-8 command youtube-dl -o $fileName -f "${formats[$j]}" $ytdlExtraOptions "$url" 2>&1 | {
+				time LANG=C.UTF-8 command youtube-dl -o $fileName -f "${formats[$j]}" "${ytdlExtraOptions[@]}" "$url" 2>&1 | {
 					egrep --color=auto -A1 'ERROR:.*No space left on device' 1>&2
 					echo 1>&2
 					downloadOK=1
