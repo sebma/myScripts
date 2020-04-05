@@ -5,10 +5,10 @@ function upgradeAllBut {
 	local apt=$(which apt)
 	if [ -z "$packagesNotUpgraded" ]
 	then
-		packagesToBeUpgraded=$($(which apt-get) dist-upgrade --dry-run | awk '/^Inst/{printf$2" "}' | grep -v "Listing...")
+		packagesToBeUpgraded=$($(which apt-get) dist-upgrade --dry-run | awk '/^Inst/{print$2}' | grep -v "Listing..." | xargs)
 	else
 		packagesNotUpgraded=$(echo $packagesNotUpgraded | tr ' ' '|')
-		packagesToBeUpgraded=$($(which apt-get) dist-upgrade --dry-run | awk '/^Inst/{print$2" "}' | egrep -v "$packagesNotUpgraded" | grep -v "Listing...")
+		packagesToBeUpgraded=$($(which apt-get) dist-upgrade --dry-run | awk '/^Inst/{print$2}' | egrep -v "$packagesNotUpgraded" | grep -v "Listing..." | xargs)
 	fi
 
 	echo "=> packagesToBeUpgraded = <$packagesToBeUpgraded>"
