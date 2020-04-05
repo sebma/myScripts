@@ -16,11 +16,20 @@ youtube_dl="eval LANG=C.UTF-8 command youtube-dl" # i.e https://unix.stackexchan
 unset -f getRestrictedFilenamesFORMAT
 getRestrictedFilenamesFORMAT () {
 	trap 'rc=127;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;return $rc' INT
+	local ytdlExtraOptions=""
 	local translate=cat
 	local initialSiteVideoFormat="$1"
 	local siteVideoFormat downloadOK=-1 extension fqdn fileSizeOnFS remoteFileSize=0
 	shift
 	local -i i=0
+	local isLIVE=false
+
+	echo $initialSiteVideoFormat | grep -q "^9[0-9]" && isLIVE=true
+	if $isLIVE;then
+#		ytdlExtraOptions='--external-downloader ffmpeg --external-downloader-args "-movflags frag_keyframe+empty_moov"'
+		ytdlExtraOptions=""
+	fi
+
 	for url
 	do
 		let i++
@@ -38,7 +47,7 @@ getRestrictedFilenamesFORMAT () {
 			;;
 		esac
 		echo "=> Testing if $url still exists ..."
-		fileNames=$(set +x;time youtube-dl -f "$siteVideoFormat" --get-filename -- "$url" 2>&1)
+		fileNames=$(set +x;time command youtube-dl -f "$siteVideoFormat" --get-filename -- "$url" 2>&1)
 		echo $fileNames | \egrep --color -A1 ERROR: && echo && continue
 		local -i j=0
 		declare -a formats=($(echo $siteVideoFormat | \sed "s/,/ /g"))
@@ -68,7 +77,7 @@ getRestrictedFilenamesFORMAT () {
 			echo
 			trap - INT
 			if [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ]; then
-				time LANG=C.UTF-8 command youtube-dl -o "$fileName" -f "${formats[$j]}" "$url" --embed-thumbnail
+				time LANG=C.UTF-8 command youtube-dl -o "$fileName" -f "${formats[$j]}" $ytdlExtraOptions "$url" --embed-thumbnail
 				downloadOK=$?
 				test $downloadOK != 0 && {
 					time LANG=C.UTF-8 command youtube-dl -o $fileName -f "${formats[$j]}" "$url" 2>&1 | {
@@ -80,7 +89,7 @@ getRestrictedFilenamesFORMAT () {
 					downloadOK=$?
 				}
 			else
-				time LANG=C.UTF-8 command youtube-dl -o $fileName -f "${formats[$j]}" "$url" 2>&1 | {
+				time LANG=C.UTF-8 command youtube-dl -o $fileName -f "${formats[$j]}" $ytdlExtraOptions "$url" 2>&1 | {
 					egrep --color=auto -A1 'ERROR:.*No space left on device' 1>&2
 					echo 1>&2
 					downloadOK=1
