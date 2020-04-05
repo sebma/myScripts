@@ -17,7 +17,7 @@ fi
 
 bluetoothControllerMACAddress=$(printf "list\nquit\n" | bluetoothctl | awk /^Controller/'{print$2;exit}')
 
-deviceList=$(printf "power on\nscan on\ndevices\nquit\n" | bluetoothctl | grep ^Device)
+deviceList=$(printf "power on\nscan on\ndevices\nquit\n" | bluetoothctl | grep ^Device | sed 's/^.* Device/Device/')
 if [ -z "$deviceList" ]; then {
 	echo "=> ERROR: Could not find any device to connect to." >&2
 	exit 3
@@ -40,7 +40,7 @@ if [ $# = 0 ]; then {
 fi
 
 if echo "$deviceList" | awk '/^Device/{print$NF}' | grep -q "$deviceName"; then {
-	deviceHW=$(echo "$deviceList" | awk /^Device.*$deviceName/'{print$2}')
+	deviceHW=$(echo "$deviceList" | awk /^Device.*$deviceName/'{print$2}' | sort -u)
 	cat<<EOF | bluetoothctl -a
 select $bluetoothControllerMACAddress
 power on
