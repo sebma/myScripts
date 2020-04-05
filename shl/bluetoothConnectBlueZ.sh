@@ -43,7 +43,7 @@ if which bluetoothctl >/dev/null 2>&1; then
 	}
 	fi
 	
-	if echo "$deviceList" | awk '/^Device/{print$NF}' | grep -q "$deviceName"; then {
+	if echo "$deviceList" | grep -q "$deviceName"; then {
 		deviceHW=$(echo "$deviceList" | awk /^Device.*$deviceName/'{print$2}' | sort -u)
 		cat<<EOF | bluetoothctl -a
 	select $bluetoothControllerMACAddress
