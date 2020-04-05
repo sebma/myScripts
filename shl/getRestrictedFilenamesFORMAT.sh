@@ -21,7 +21,7 @@ getRestrictedFilenamesFORMAT () {
 	local siteVideoFormat downloadOK=-1 extension fqdn fileSizeOnFS remoteFileSize=0
 	shift
 	local -i i=0
-	for url in "$@"
+	for url
 	do
 		let i++
 		echo "=> Downloading url # $i/$# ..."
