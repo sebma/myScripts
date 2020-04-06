@@ -26,11 +26,7 @@ getRestrictedFilenamesFORMAT () {
 
 	echo $initialSiteVideoFormat | grep -q "^9[0-9]" && isLIVE=true
 	if $isLIVE;then
-#		ytdlExtraOptions='--external-downloader ffmpeg --external-downloader-args "-movflags frag_keyframe+empty_moov"'
-		ytdlExtraOptions[0]="--external-downloader"
-		ytdlExtraOptions[1]="ffmpeg"
-		ytdlExtraOptions[2]="--external-downloader-args"
-		ytdlExtraOptions[3]="-movflags frag_keyframe+empty_moov"
+		ytdlExtraOptions=(--external-downloader ffmpeg --external-downloader-args "-movflags frag_keyframe+empty_moov")
 	fi
 
 	for url
