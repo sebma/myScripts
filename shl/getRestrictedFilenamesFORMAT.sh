@@ -14,7 +14,7 @@ youtube_dl="eval LANG=C.UTF-8 command youtube-dl" # i.e https://unix.stackexchan
 unset -f getRestrictedFilenamesFORMAT
 getRestrictedFilenamesFORMAT () {
 	trap 'rc=127;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;return $rc' INT
-	local ytdlExtraOptions=""
+	local ytdlExtraOptions
 	local translate=cat
 	local initialSiteVideoFormat="$1"
 	local siteVideoFormat downloadOK=-1 extension fqdn fileSizeOnFS remoteFileSize=0
@@ -44,7 +44,7 @@ getRestrictedFilenamesFORMAT () {
 			;;
 		esac
 		echo "=> Testing if $url still exists ..."
-		fileNames=$(set +x;time command youtube-dl -f "$siteVideoFormat" --get-filename -- "$url" 2>&1)
+		fileNames=$(set +x;time command youtube-dl -f "$siteVideoFormat" --get-filename -o "%(title)s__%(format_id)s__%(id)s.%(ext)s" --restrict-filenames -- "$url" 2>&1)
 		echo $fileNames | \egrep --color -A1 ERROR: && echo && continue
 		local -i j=0
 		declare -a formats=($(echo $siteVideoFormat | \sed "s/,/ /g"))
@@ -57,8 +57,10 @@ getRestrictedFilenamesFORMAT () {
 			chosenFormatID=$(echo "$fileName" | awk -F '__' '{print$2}')
 			fileName="${fileName/.$extension/__$fqdn.$extension}"
 			if [ -f "$fileName" ]; then
+				echo "=> The file <$fileName> is already exists, comparing it's size with the remote file ..." 1>&2
+				echo
 				fileSizeOnFS=$(stat -c %s "$fileName")
-				time remoteFileSize=$(ytdlGetSize $chosenFormatID $url)
+				time remoteFileSize=$(command youtube-dl --ignore-config -j -f $chosenFormatID $url | jq -r .filesize)
 				test $? != 0 && return
 				if [ ! -w "$fileName" ] || [ $fileSizeOnFS -ge $remoteFileSize ]; then
 					echo
@@ -95,7 +97,7 @@ getRestrictedFilenamesFORMAT () {
 				downloadOK=$?
 			fi
 			if [ $downloadOK = 0 ]; then
-				[ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] && mp4tags -m "$url" "$fileName"
+				[ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] && timestamp=$(mktemp) && touch -r "$fileName" $timestamp && mp4tags -m "$url" "$fileName" && touch -r $timestamp "$fileName" && \rm $timestamp
 				chmod -w "$fileName"
 				echo
 				videoInfo.sh "$fileName"
