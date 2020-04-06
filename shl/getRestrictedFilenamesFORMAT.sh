@@ -80,9 +80,7 @@ getRestrictedFilenamesFORMAT () {
 			echo
 			trap - INT
 			if [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ]; then
-				set -x
 				time LANG=C.UTF-8 command youtube-dl -o "$fileName" -f "${formats[$j]}" "${ytdlExtraOptions[@]}" "$url" --embed-thumbnail
-				set +x
 				downloadOK=$?
 				test $downloadOK != 0 && {
 					time LANG=C.UTF-8 command youtube-dl -o $fileName -f "${formats[$j]}" "$url" 2>&1 | {
