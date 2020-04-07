@@ -24,7 +24,8 @@ fi
 fsTypesList="btrfs "$(\ls -1 /sbin/fsck.* | $cut -d. -f2)
 fsTypesERE=$(echo $fsTypesList | $sed "s/ /|/g")
 fsTypesCSV=$(echo $fsTypesList | $sed "s/ /,/g")
-mount -v -o remount,rw / && rm -v /etc/mtab && touch /etc/mtab
+mount -v -o remount,rw /
+[ -L /etc/mtab ] || ln -v -s -f /proc/mounts /etc/mtab
 storageMounted_FS_List=$(mount | $awk "/\<$fsTypesERE\>/"'{print$1}')
 
 logDir=log
@@ -43,12 +44,10 @@ logFile=$logDir/fsck_$(date +%Y%m%d).log
 	grep -v "swap" /etc/fstab | $awk '/^\/dev/{print$1" "$3}' | while read FS FSTYPE
 	do
 		echo >&2
-		echo "=> Checking $FS ..." >&2
+		echo "=> Checking the $FSTYPE $FS filesystem ..." >&2
 		time if [ $FSTYPE = btrfs ];then
-			set -x
 			btrfsck -p --repair $FS
 		else
-			set -x
 			fsck -C -p -v $FS
 		fi
 		set +x
