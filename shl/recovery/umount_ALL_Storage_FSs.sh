@@ -24,7 +24,8 @@ fi
 fsTypesList="btrfs "$(\ls -1 /sbin/fsck.* | $cut -d. -f2)
 fsTypesERE=$(echo $fsTypesList | $sed "s/ /|/g")
 fsTypesCSV=$(echo $fsTypesList | $sed "s/ /,/g")
-mount -v -o remount,rw / && rm -v /etc/mtab && touch /etc/mtab
+mount -v -o remount,rw /
+[ -L /etc/mtab ] || ln -v -s -f /proc/mounts /etc/mtab
 storageMounted_FS_List=$(mount | $awk "/\<$fsTypesERE\>/"'{print$1}')
 
 logDir=log
