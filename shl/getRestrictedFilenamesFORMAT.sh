@@ -32,7 +32,6 @@ getRestrictedFilenamesFORMAT () {
 		let i++
 		echo "=> Downloading url # $i/$# ..."
 		echo
-		echo "=> url = $url"
 		echo $url | \egrep -wq "https?:" || url=https://www.youtube.com/watch?v=$url
 		fqdn=$(echo $url | awk -F "[./]" '{gsub("www.","");print$3"_"$4}')
 		case $url in
