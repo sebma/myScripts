@@ -17,7 +17,7 @@ getRestrictedFilenamesFORMAT () {
 	local ytdlExtraOptions
 	local translate=cat
 	local initialSiteVideoFormat="$1"
-	local siteVideoFormat downloadOK=-1 extension fqdn fileSizeOnFS remoteFileSize=0
+	local siteVideoFormat downloadOK=-1 extension fqdn fileSizeOnFS=0 remoteFileSize=0
 	shift
 	local -i i=0
 	local isLIVE=false
@@ -55,7 +55,7 @@ getRestrictedFilenamesFORMAT () {
 			extension="${fileName/*./}"
 			chosenFormatID=$(echo "$fileName" | awk -F '__' '{print$2}')
 			fileName="${fileName/.$extension/__$fqdn.$extension}"
-			if [ -f "$fileName" ]; then
+			if [ -f "$fileName" ] && [ $isLIVE = false ]; then
 				echo "=> The file <$fileName> is already exists, comparing it's size with the remote file ..." 1>&2
 				echo
 				fileSizeOnFS=$(stat -c %s "$fileName")
