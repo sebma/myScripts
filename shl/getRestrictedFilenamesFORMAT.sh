@@ -63,6 +63,7 @@ getRestrictedFilenamesFORMAT () {
 				fileSizeOnFS=$(stat -c %s "$fileName")
 				time remoteFileSize=$(command youtube-dl --ignore-config -j -f $chosenFormatID $url | jq -r .filesize)
 				test $? != 0 && return
+				[ $remoteFileSize = null ] && remoteFileSize=-1
 				if [ ! -w "$fileName" ] || [ $fileSizeOnFS -ge $remoteFileSize ]; then
 					echo
 					echo "${colors[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" 1>&2
