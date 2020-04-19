@@ -33,7 +33,7 @@ getRestrictedFilenamesFORMAT () {
 		if $isLIVE;then
 			ytdlExtraOptions="--external-downloader ffmpeg --external-downloader-args -movflags\\ frag_keyframe+empty_moov"
 		else
-			ytdlExtraOptions=--hls-prefer-native
+			ytdlExtraOptions="--hls-prefer-native"
 		fi
 	fi
 
