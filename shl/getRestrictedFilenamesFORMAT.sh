@@ -23,10 +23,18 @@ getRestrictedFilenamesFORMAT () {
 	local isLIVE=false
 
 	echo $initialSiteVideoFormat | grep -q "^9[0-9]" && isLIVE=true
-	if $isLIVE;then
-		ytdlExtraOptions=( --external-downloader ffmpeg --external-downloader-args "-movflags frag_keyframe+empty_moov" )
+	if [ $BASH_VERSINFO -ge 4 ];then
+		if $isLIVE;then
+			ytdlExtraOptions=( --external-downloader ffmpeg --external-downloader-args "-movflags frag_keyframe+empty_moov" )
+		else
+			ytdlExtraOptions=( --hls-prefer-native )
+		fi
 	else
-		ytdlExtraOptions=( --hls-prefer-native )
+		if $isLIVE;then
+			ytdlExtraOptions="--external-downloader ffmpeg --external-downloader-args -movflags\\ frag_keyframe+empty_moov"
+		else
+			ytdlExtraOptions=--hls-prefer-native
+		fi
 	fi
 
 	for url
