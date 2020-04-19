@@ -21,6 +21,8 @@ getRestrictedFilenamesFORMAT () {
 	shift
 	local -i i=0
 	local isLIVE=false
+	local embedThumbnail=""
+	which AtomicParsley >/dev/null 2>&1 && embedThumbnail="--embed-thumbnail"
 
 	echo $initialSiteVideoFormat | grep -q "^9[0-9]" && isLIVE=true
 
@@ -87,7 +89,7 @@ getRestrictedFilenamesFORMAT () {
 			echo
 			trap - INT
 			if [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ]; then
-				time LANG=C.UTF-8 command youtube-dl -o "$fileName" -f "${formats[$j]}" "${ytdlExtraOptions[@]}" "$url" --embed-thumbnail
+				time LANG=C.UTF-8 command youtube-dl -o "$fileName" -f "${formats[$j]}" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail
 				downloadOK=$?
 				test $downloadOK != 0 && {
 					time LANG=C.UTF-8 command youtube-dl -o $fileName -f "${formats[$j]}" "$url" 2>&1 | {
