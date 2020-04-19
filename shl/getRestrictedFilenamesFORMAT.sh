@@ -22,6 +22,7 @@ getRestrictedFilenamesFORMAT () {
 	local -i i=0
 	local isLIVE=false
 	local embedThumbnail=""
+	local ffmpeg="$(which ffmpeg) -hide_banner"
 	which AtomicParsley >/dev/null 2>&1 && embedThumbnail="--embed-thumbnail"
 
 	echo $initialSiteVideoFormat | grep -q "^9[0-9]" && isLIVE=true
@@ -110,7 +111,17 @@ getRestrictedFilenamesFORMAT () {
 				downloadOK=$?
 			fi
 			if [ $downloadOK = 0 ]; then
-				[ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] && timestamp=$(mktemp) && touch -r "$fileName" $timestamp && mp4tags -m "$url" "$fileName" && touch -r $timestamp "$fileName" && \rm $timestamp
+				if [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ];then
+					echo "=> Adding $url to $fileName metadata ..."
+					timestampFileRef=$(mktemp) && touch -r "$fileName" $timestampFileRef
+					if which mp4tags >/dev/null 2>&1;then
+						mp4tags -m "$url" "$fileName"
+					else
+						$ffmpeg -i "$fileName" -map 0 -c copy -metadata description="$url" "${fileName/.$extension/_NEW.$extension}"
+						mv "${fileName/.$extension/_NEW.$extension}" "$fileName"
+					fi
+					touch -r $timestampFileRef "$fileName" && \rm $timestampFileRef
+				fi
 				chmod -w "$fileName"
 				echo
 				videoInfo.sh "$fileName"
