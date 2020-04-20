@@ -5,7 +5,7 @@ function extractVideoURLs {
 	do
 		fqdn=$(echo $url | cut -d/ -f1-3)
 		domain=$(echo $fqdn | awk -F '[.]|/' '{print $(NF-1)}')
-		\curl -qs $url | grep -oP 'video\b.*href="\K/[^/][^ &"]+' | uniq | sed "s|^|$fqdn|"
+		\curl -qs $url | grep -w video | grep -oP 'href="\K/[^/][^ &"]+' | uniq | sed "s|^|$fqdn|"
 	done
 }
 
