@@ -48,9 +48,7 @@ getRestrictedFilenamesFORMAT () {
 		echo $url | \egrep -wq "https?:" || url=https://www.youtube.com/watch?v=$url
 		fqdn=$(echo $url | awk -F "[./]" '{gsub("www.","");print$3"_"$4}')
 		case $url in
-			*.facebook.com/*)
-				siteVideoFormat=$(echo $initialSiteVideoFormat+m4a | \sed -E "s/^(\(?)\w+/\1bestvideo/g")
-			;;
+#			*.facebook.com/*) siteVideoFormat=$(echo $initialSiteVideoFormat+m4a | \sed -E "s/^(\(?)\w+/\1bestvideo/g") ;;
 			*)
 				siteVideoFormat=$initialSiteVideoFormat
 			;;
@@ -112,18 +110,19 @@ getRestrictedFilenamesFORMAT () {
 
 			if ! which AtomicParsley >/dev/null 2>&1; then
 				if [ -s "${fileName/.$extension/.jpg}" ];then
-					time $ffmpeg -i "$fileName" -i "${fileName/.$extension/.jpg}" -map 0 -map 1 -c copy -disposition:v:1 attached_pic "${fileName/.$extension/_NEW.$extension}" && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "${fileName/.$extension/.jpg}"
+					echo "[ffmpeg] Adding thumbnail to '$fileName'"
+					$ffmpeg -loglevel repeat+warning -i "$fileName" -i "${fileName/.$extension/.jpg}" -map 0 -map 1 -c copy -disposition:v:1 attached_pic "${fileName/.$extension/_NEW.$extension}" && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "${fileName/.$extension/.jpg}"
 				fi
 			fi
 
 			if [ $downloadOK = 0 ]; then
 				if [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ];then
-					echo "=> Adding $url to $fileName metadata ..."
 					timestampFileRef=$(mktemp) && touch -r "$fileName" $timestampFileRef
 					if which mp4tags >/dev/null 2>&1;then
 						mp4tags -m "$url" "$fileName"
 					else
-						time $ffmpeg -i "$fileName" -map 0 -c copy -metadata description="$url" "${fileName/.$extension/_NEW.$extension}" && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName"
+						echo "[ffmpeg] Adding '$url' to '$fileName' metadata"
+						$ffmpeg -loglevel repeat+warning -i "$fileName" -map 0 -c copy -metadata description="$url" "${fileName/.$extension/_NEW.$extension}" && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName"
 					fi
 					touch -r $timestampFileRef "$fileName" && \rm $timestampFileRef
 				fi
@@ -140,26 +139,51 @@ getRestrictedFilenamesFORMAT () {
 	return $downloadOK
 }
 
+bestFormats="bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best[ext=webm]/best[ext=avi]/best[ext=mov]/best[ext=flv]"
 function getRestrictedFilenamesBEST {
-	getRestrictedFilenamesFORMAT "(best[ext=mp4]/best[ext=webm]/best[ext=flv])" $@ # because of the "eval" statement in the "youtube_dl" bash variable
+	getRestrictedFilenamesFORMAT "($bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
 function getRestrictedFilenamesFHD {
-	getRestrictedFilenamesFORMAT "(mp4[height<=?1080]/mp4/best)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
+	local height=1080
+	local other_Formats=fhd
+	local possibleFormats="bestvideo[ext=mp4][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
+	getRestrictedFilenamesFORMAT "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
 function getRestrictedFilenamesHD {
-	getRestrictedFilenamesFORMAT "(mp4[height<=?720]/mp4/best)"  $@ # because of the "eval" statement in the "youtube_dl" bash variable
+	local height=720
+	local other_Formats=hd/high
+	local possibleFormats="bestvideo[ext=mp4][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
+	getRestrictedFilenamesFORMAT "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
+}
+function getRestrictedFilenamesHQ {
+	local height=576
+	local other_Formats=hq/fsd/std/sd
+	local possibleFormats="bestvideo[ext=mp4][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
+	getRestrictedFilenamesFORMAT "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
 function getRestrictedFilenamesFSD {
-	getRestrictedFilenamesFORMAT "(mp4[height<=?480]/mp4/best)"  $@ # because of the "eval" statement in the "youtube_dl" bash variable
+	local height=480
+	local other_Formats=fsd/std/sd
+	local possibleFormats="bestvideo[ext=mp4][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
+	getRestrictedFilenamesFORMAT "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
 function getRestrictedFilenamesSD {
-	getRestrictedFilenamesFORMAT "(mp4[height<=?360]/mp4/best)"  $@ # because of the "eval" statement in the "youtube_dl" bash variable
+	local height=360
+	local other_Formats=low/sd/std
+	local possibleFormats="bestvideo[ext=mp4][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
+	getRestrictedFilenamesFORMAT "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
 function getRestrictedFilenamesLD {
-	getRestrictedFilenamesFORMAT "(mp4[height<=?240]/mp4/best)"  $@ # because of the "eval" statement in the "youtube_dl" bash variable
+	local height=240
+	local other_Formats=ld/low
+	local possibleFormats="bestvideo[ext=mp4][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
+	getRestrictedFilenamesFORMAT "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
 function getRestrictedFilenamesVLD {
-	getRestrictedFilenamesFORMAT "(mp4[height<=?144]/mp4/best)"  $@ # because of the "eval" statement in the "youtube_dl" bash variable
+	local height=144
+	local other_Formats=vld/low
+	local possibleFormats="bestvideo[ext=mp4][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
+	getRestrictedFilenamesFORMAT "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
 
 $funcName $@
