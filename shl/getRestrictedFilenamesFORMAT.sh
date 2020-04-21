@@ -110,7 +110,7 @@ getRestrictedFilenamesFORMAT () {
 			fi
 
 			if [ $downloadOK = 0 ]; then
-				if [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ];then
+				if [ $extension = mp4 ] || [ $extension = m4a ];then
 					if ! which AtomicParsley >/dev/null 2>&1; then
 						if [ -s "${fileName/.$extension/.jpg}" ];then
 							echo
@@ -118,6 +118,8 @@ getRestrictedFilenamesFORMAT () {
 							$ffmpeg -loglevel repeat+warning -i "$fileName" -i "${fileName/.$extension/.jpg}" -map 0 -map 1 -c copy -disposition:v:1 attached_pic "${fileName/.$extension/_NEW.$extension}" && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "${fileName/.$extension/.jpg}"
 						fi
 					fi
+				elif [ $extension = mp3 ];then
+					$ffmpeg -loglevel repeat+warning -i "$fileName" -i "${fileName/.$extension/.jpg}" -map 0 -map 1 -c copy -map_metadata 0 "${fileName/.$extension/_NEW.$extension}" && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "${fileName/.$extension/.jpg}"
 				fi
 
 				if [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] || [ $extension = webm ];then
