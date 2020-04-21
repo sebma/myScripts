@@ -110,6 +110,7 @@ getRestrictedFilenamesFORMAT () {
 
 			if ! which AtomicParsley >/dev/null 2>&1; then
 				if [ -s "${fileName/.$extension/.jpg}" ];then
+					echo
 					echo "[ffmpeg] Adding thumbnail to '$fileName'"
 					$ffmpeg -loglevel repeat+warning -i "$fileName" -i "${fileName/.$extension/.jpg}" -map 0 -map 1 -c copy -disposition:v:1 attached_pic "${fileName/.$extension/_NEW.$extension}" && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "${fileName/.$extension/.jpg}"
 				fi
