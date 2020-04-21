@@ -115,11 +115,17 @@ getRestrictedFilenamesFORMAT () {
 						if [ -s "${fileName/.$extension/.jpg}" ];then
 							echo
 							echo "[ffmpeg] Adding thumbnail to '$fileName'"
-							$ffmpeg -loglevel repeat+warning -i "$fileName" -i "${fileName/.$extension/.jpg}" -map 0 -map 1 -c copy -disposition:v:1 attached_pic "${fileName/.$extension/_NEW.$extension}" && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "${fileName/.$extension/.jpg}"
+							$ffmpeg -loglevel repeat+warning -i "$fileName" -i "${fileName/.$extension/.jpg}" -map 0 -map 1 -c copy -disposition:v:1 attached_pic "${fileName/.$extension/_NEW.$extension}"
+							[ $? = 0 ] && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "${fileName/.$extension/.jpg}"
 						fi
 					fi
 				elif [ $extension = mp3 ];then
-					$ffmpeg -loglevel repeat+warning -i "$fileName" -i "${fileName/.$extension/.jpg}" -map 0 -map 1 -c copy -map_metadata 0 "${fileName/.$extension/_NEW.$extension}" && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "${fileName/.$extension/.jpg}"
+					$ffmpeg -loglevel repeat+warning -i "$fileName" -i "${fileName/.$extension/.jpg}" -map 0 -map 1 -c copy -map_metadata 0 "${fileName/.$extension/_NEW.$extension}"
+					[ $? = 0 ] && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "${fileName/.$extension/.jpg}"
+				elif [ $extension = webm ];then
+# Complicated with the "METADATA_BLOCK_PICTURE" ogg according to https://superuser.com/a/706808/528454 and https://xiph.org/flac/format.html#metadata_block_picture use another tool instead
+					echo "=> NOT IMPLEMENTED YET"
+					rm "${fileName/.$extension/.jpg}"
 				fi
 
 				if [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] || [ $extension = webm ];then
