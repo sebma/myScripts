@@ -22,6 +22,7 @@ getRestrictedFilenamesFORMAT () {
 	local -i i=0
 	local isLIVE=false
 	local ffmpeg="$(which ffmpeg) -hide_banner"
+	local metadataURL=description
 	which AtomicParsley >/dev/null 2>&1 && local embedThumbnail="--embed-thumbnail" || local embedThumbnail="--write-thumbnail"
 
 	echo $initialSiteVideoFormat | grep -q "^9[0-9]" && isLIVE=true
@@ -91,7 +92,7 @@ getRestrictedFilenamesFORMAT () {
 				downloadOK=$?
 				test $downloadOK != 0 && {
 					time LANG=C.UTF-8 command youtube-dl -o $fileName -f "${formats[$j]}" "$url" 2>&1 | {
-						egrep --color=auto -A1 'ERROR:.*No space left on device' 1>&2
+						egrep --color=auto -A1 'ERROR:.*' 1>&2
 						echo 1>&2
 						downloadOK=1
 						return 1
@@ -100,7 +101,7 @@ getRestrictedFilenamesFORMAT () {
 				}
 			else
 				time LANG=C.UTF-8 command youtube-dl -o $fileName -f "${formats[$j]}" "${ytdlExtraOptions[@]}" "$url" 2>&1 | {
-					egrep --color=auto -A1 'ERROR:.*No space left on device' 1>&2
+					egrep --color=auto -A1 'ERROR:.*' 1>&2
 					echo 1>&2
 					downloadOK=1
 					return 1
@@ -108,22 +109,26 @@ getRestrictedFilenamesFORMAT () {
 				downloadOK=$?
 			fi
 
-			if ! which AtomicParsley >/dev/null 2>&1; then
-				if [ -s "${fileName/.$extension/.jpg}" ];then
-					echo
-					echo "[ffmpeg] Adding thumbnail to '$fileName'"
-					$ffmpeg -loglevel repeat+warning -i "$fileName" -i "${fileName/.$extension/.jpg}" -map 0 -map 1 -c copy -disposition:v:1 attached_pic "${fileName/.$extension/_NEW.$extension}" && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "${fileName/.$extension/.jpg}"
-				fi
-			fi
-
 			if [ $downloadOK = 0 ]; then
 				if [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ];then
+					if ! which AtomicParsley >/dev/null 2>&1; then
+						if [ -s "${fileName/.$extension/.jpg}" ];then
+							echo
+							echo "[ffmpeg] Adding thumbnail to '$fileName'"
+							$ffmpeg -loglevel repeat+warning -i "$fileName" -i "${fileName/.$extension/.jpg}" -map 0 -map 1 -c copy -disposition:v:1 attached_pic "${fileName/.$extension/_NEW.$extension}" && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "${fileName/.$extension/.jpg}"
+						fi
+					fi
+				fi
+
+				if [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] || [ $extension = webm ];then
 					timestampFileRef=$(mktemp) && touch -r "$fileName" $timestampFileRef
+					[ $extension = mp4 ] &&  metadataURL=description
+					[ $extension = webm ] && metadataURL=PURL
 					if which mp4tags >/dev/null 2>&1;then
 						mp4tags -m "$url" "$fileName"
 					else
 						echo "[ffmpeg] Adding '$url' to '$fileName' metadata"
-						$ffmpeg -loglevel repeat+warning -i "$fileName" -map 0 -c copy -metadata description="$url" "${fileName/.$extension/_NEW.$extension}" && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName"
+						$ffmpeg -loglevel repeat+warning -i "$fileName" -map 0 -c copy -metadata $metadataURL="$url" "${fileName/.$extension/_NEW.$extension}" && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName"
 					fi
 					touch -r $timestampFileRef "$fileName" && \rm $timestampFileRef
 				fi
