@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #set -o nounset
-
+[ $BASH_VERSINFO -lt 4 ] && echo "=> [WARNING] BASH_VERSINFO = $BASH_VERSINFO then continuing in bash4 ..." && exec bash4 $0 "$@"
 [ $BASH_VERSINFO -ge 4 ] && declare -A colors=( [red]=$(tput setaf 1) [green]=$(tput setaf 2) [blue]=$(tput setaf 4) [cyan]=$(tput setaf 6) [yellow]=$(tput setaf 11) [yellowOnRed]=$(tput setaf 11)$(tput setab 1) [greenOnBlue]=$(tput setaf 2)$(tput setab 4) [yellowOnBlue]=$(tput setaf 11)$(tput setab 4) [cyanOnBlue]=$(tput setaf 6)$(tput setab 4) [whiteOnBlue]=$(tput setaf 7)$(tput setab 4) [redOnGrey]=$(tput setaf 1)$(tput setab 7) [blueOnGrey]=$(tput setaf 4)$(tput setab 7) )
 
 LANG=C.UTF-8
@@ -14,7 +14,7 @@ youtube_dl="eval LANG=C.UTF-8 command youtube-dl" # i.e https://unix.stackexchan
 unset -f getRestrictedFilenamesFORMAT
 getRestrictedFilenamesFORMAT () {
 	trap 'rc=127;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;return $rc' INT
-	local ytdlExtraOptions
+	local ytdlExtraOptions="--add-metadata"
 	local translate=cat
 	local initialSiteVideoFormat="$1"
 	local siteVideoFormat downloadOK=-1 extension fqdn fileSizeOnFS=0 remoteFileSize=0
@@ -23,21 +23,23 @@ getRestrictedFilenamesFORMAT () {
 	local isLIVE=false
 	local ffmpeg="$(which ffmpeg) -hide_banner"
 	local metadataURL=description
-	which AtomicParsley >/dev/null 2>&1 && local embedThumbnail="--embed-thumbnail" || local embedThumbnail="--write-thumbnail"
+	local embedThumbnail="--write-thumbnail"
+	local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__%(extractor)s.%(ext)s"
+	local AtomicParsley=$(which AtomicParsley 2>/dev/null)
 
 	echo $initialSiteVideoFormat | grep -q "^9[0-9]" && isLIVE=true
 
 	if [ $BASH_VERSINFO -ge 4 ];then
 		if $isLIVE;then
-			ytdlExtraOptions=( --external-downloader ffmpeg --external-downloader-args "-movflags frag_keyframe+empty_moov" )
+			ytdlExtraOptions+=( --external-downloader ffmpeg --external-downloader-args "-movflags frag_keyframe+empty_moov" )
 		else
-			ytdlExtraOptions=( --hls-prefer-native )
+			ytdlExtraOptions+=( --hls-prefer-native )
 		fi
 	else
 		if $isLIVE;then
-			ytdlExtraOptions="--external-downloader ffmpeg --external-downloader-args -movflags\\ frag_keyframe+empty_moov"
+			ytdlExtraOptions+=" --external-downloader ffmpeg --external-downloader-args -movflags\\ frag_keyframe+empty_moov"
 		else
-			ytdlExtraOptions="--hls-prefer-native"
+			ytdlExtraOptions+=" --hls-prefer-native"
 		fi
 	fi
 
@@ -46,37 +48,53 @@ getRestrictedFilenamesFORMAT () {
 		let i++
 		echo "=> Downloading url # $i/$# ..."
 		echo
-		echo $url | \egrep -wq "https?:" || url=https://www.youtube.com/watch?v=$url
-		fqdn=$(echo $url | awk -F "[./]" '{gsub("www.","");print$3"_"$4}')
-		case $url in
-#			*.facebook.com/*) siteVideoFormat=$(echo $initialSiteVideoFormat+m4a | \sed -E "s/^(\(?)\w+/\1bestvideo/g") ;;
+		echo $url | egrep -wq "https?:" || url=https://www.youtube.com/watch?v=$url
+		urlBase=$(echo "$url" | cut -d/ -f1-3)
+		fqdn=$(echo "$url" | cut -d/ -f3 | awk -F. '{print$(NF-1)"."$NF}')
+		fqdnStringForFilename=$(echo $fqdn | tr . _)
+		youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__$fqdnStringForFilename.%(ext)s"
+		domain=$(echo $fqdn | awk -F '[.]|/' '{print $(NF-1)}')
+		case $domain in
+#			facebook) siteVideoFormat=$(echo $initialSiteVideoFormat+m4a | \sed -E "s/^(\(?)\w+/\1bestvideo/g") ;;
 			*)
 				siteVideoFormat=$initialSiteVideoFormat
 			;;
 		esac
-		echo "=> Testing if $url still exists ..."
-		fileNames=$(set +x;time command youtube-dl -f "$siteVideoFormat" --get-filename -o "%(title)s__%(format_id)s__%(id)s.%(ext)s" --restrict-filenames -- "$url" 2>&1)
-		echo $fileNames | \egrep --color -A1 ERROR: && echo && continue
-		local -i j=0
-		declare -a formats=($(echo $siteVideoFormat | \sed "s/,/ /g"))
-		for fileName in $fileNames
+		formats=( $(echo $siteVideoFormat | \sed "s/,/ /g") )
+
+		echo "=> Fetching the generated destination filename(s) if \"$url\" still exists ..."
+		errorLogFile="youtube-dl_errors_$$.log"
+		local fileNames=()
+		local remoteFileSizes=()
+		local -i i=0
+		while read fileName remoteFileSize
 		do
-			echo
+			fileNames+=($fileName)
+			remoteFileSizes+=($remoteFileSize)
+#			echo -e "${fileNames[$i]}\t${remoteFileSizes[$i]}";let i++
+		done < <(time command youtube-dl --restrict-filenames -f "$siteVideoFormat" -o "$youtube_dl_FileNamePattern" -j -- "$url" 2>$errorLogFile | jq -r '._filename,.filesize' | paste - -)
+
+		grep -A1 ERROR: $errorLogFile && echo && continue || \rm $errorLogFile
+		echo
+
+		local -i j=0
+		for fileName in "${fileNames[@]}"
+		do
 			echo "=> Downloading $url using the <${formats[$j]}> format ..."
 			echo
 			extension="${fileName/*./}"
 			chosenFormatID=$(echo "$fileName" | awk -F '__' '{print$2}')
-			fileName="${fileName/.$extension/__$fqdn.$extension}"
 			if [ -f "$fileName" ] && [ $isLIVE = false ]; then
 				echo "=> The file <$fileName> is already exists, comparing it's size with the remote file ..." 1>&2
 				echo
 				fileSizeOnFS=$(stat -c %s "$fileName")
-				time remoteFileSize=$(command youtube-dl --ignore-config -j -f $chosenFormatID $url | jq -r .filesize)
+#				time remoteFileSize=$(command youtube-dl --ignore-config -j -f $chosenFormatID $url | jq -r .filesize)
+				remoteFileSize=${remoteFileSizes[$j]}
 				test $? != 0 && return
 				[ $remoteFileSize = null ] && remoteFileSize=-1
 				if [ ! -w "$fileName" ] || [ $fileSizeOnFS -ge $remoteFileSize ]; then
 					echo
-					echo "${colors[yellowOnBlue]}=> The file <$fileName> is already downloaded, skipping ...$normal" 1>&2
+					echo "${colors[yellowOnBlue]}=> The file <$fileName> is already downloaded ang greater or equal to remote file, skipping ...$normal" 1>&2
 					echo
 					let j++
 					continue
@@ -87,28 +105,22 @@ getRestrictedFilenamesFORMAT () {
 			echo "=> chosenFormatID = $chosenFormatID"
 			echo
 			trap - INT
-			if [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ]; then
+
+			( [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] ) && test $AtomicParsley && embedThumbnail="--embed-thumbnail" || embedThumbnail="--write-thumbnail"
+
+			echo
+			echo "=> The download is now starting ..."
+			echo
 				time LANG=C.UTF-8 command youtube-dl -o "$fileName" -f "${formats[$j]}" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail
 				downloadOK=$?
 				test $downloadOK != 0 && {
-					time LANG=C.UTF-8 command youtube-dl -o $fileName -f "${formats[$j]}" "$url" 2>&1 | {
-						egrep --color=auto -A1 'ERROR:.*' 1>&2
-						echo 1>&2
-						downloadOK=1
-						return 1
-					}
+					errorLogFile="youtube-dl_errors_$$.log"
+					time LANG=C.UTF-8 command youtube-dl -o $fileName -f "${formats[$j]}" "$url" 2>$errorLogFile
 					downloadOK=$?
+					egrep -A1 'ERROR:.*' $errorLogFile && downloadOK=1 && return 1 || \rm $errorLogFile
 				}
-			else
-				time LANG=C.UTF-8 command youtube-dl -o $fileName -f "${formats[$j]}" "${ytdlExtraOptions[@]}" "$url" 2>&1 | {
-					egrep --color=auto -A1 'ERROR:.*' 1>&2
-					echo 1>&2
-					downloadOK=1
-					return 1
-				}
-				downloadOK=$?
-			fi
 
+			echo
 			if [ $downloadOK = 0 ]; then
 				if [ $extension = mp4 ] || [ $extension = m4a ];then
 					if ! which AtomicParsley >/dev/null 2>&1; then
@@ -124,7 +136,7 @@ getRestrictedFilenamesFORMAT () {
 					[ $? = 0 ] && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "${fileName/.$extension/.jpg}"
 				elif [ $extension = webm ];then
 # Complicated with the "METADATA_BLOCK_PICTURE" ogg according to https://superuser.com/a/706808/528454 and https://xiph.org/flac/format.html#metadata_block_picture use another tool instead
-					echo "=> NOT IMPLEMENTED YET"
+					echo "=> ADDING COVER TO THE OGG CONTAINER IS NOT IMPLEMENTED YET"
 					rm "${fileName/.$extension/.jpg}"
 				fi
 
