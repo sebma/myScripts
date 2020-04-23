@@ -49,24 +49,24 @@ getRestrictedFilenamesFORMAT () {
 		echo "=> Downloading url # $i/$# ..."
 		echo
 		echo $url | egrep -wq "https?:" || url=https://www.youtube.com/watch?v=$url
-		urlBase=$(echo "$url" | cut -d/ -f1-3)
-		fqdn=$(echo "$url" | cut -d/ -f3 | awk -F. '{print$(NF-1)"."$NF}')
-		fqdnStringForFilename=$(echo $fqdn | tr . _)
-		youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__$fqdnStringForFilename.%(ext)s"
-		domain=$(echo $fqdn | awk -F '[.]|/' '{print $(NF-1)}')
+		local urlBase=$(echo "$url" | cut -d/ -f1-3)
+		local fqdn=$(echo "$url" | cut -d/ -f3 | awk -F. '{print$(NF-1)"."$NF}')
+		local fqdnStringForFilename=$(echo $fqdn | tr . _)
+		local domain=$(echo $fqdn | awk -F '[.]|/' '{print $(NF-1)}')
 		case $domain in
 #			facebook) siteVideoFormat=$(echo $initialSiteVideoFormat+m4a | \sed -E "s/^(\(?)\w+/\1bestvideo/g") ;;
 			*)
 				siteVideoFormat=$initialSiteVideoFormat
 			;;
 		esac
-		formats=( $(echo $siteVideoFormat | \sed "s/,/ /g") )
+		local formats=( $(echo $siteVideoFormat | \sed "s/,/ /g") )
 
 		echo "=> Fetching the generated destination filename(s) if \"$url\" still exists ..."
 		errorLogFile="youtube-dl_errors_$$.log"
 		local fileNames=()
 		local remoteFileSizes=()
 		local -i i=0
+		local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__$fqdnStringForFilename.%(ext)s"
 		while read fileName remoteFileSize
 		do
 			fileNames+=($fileName)
