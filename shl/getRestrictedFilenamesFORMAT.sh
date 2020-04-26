@@ -69,14 +69,14 @@ getRestrictedFilenamesFORMAT () {
 			echo
 
 			if [ $BASH_VERSINFO -ge 4 ];then
-				echo $formatString | \grep -q "audio only" && ytdlExtraOptions+=( -x )
+				echo $formatString | \grep -v '+' | \grep -q "audio only" && ytdlExtraOptions+=( -x )
 				if [ $isLIVE = true ];then
 					ytdlExtraOptions+=( --external-downloader ffmpeg --external-downloader-args "-movflags frag_keyframe+empty_moov" )
 				else
 					ytdlExtraOptions+=( --hls-prefer-native )
 				fi
 			else
-				echo $formatString | \grep -q "audio only" && ytdlExtraOptions+=" -x"
+				echo $formatString | \grep -v '+' | \grep -q "audio only" && ytdlExtraOptions+=" -x"
 				if [ $isLIVE = true ];then
 					ytdlExtraOptions+=" --external-downloader ffmpeg --external-downloader-args -movflags\\ frag_keyframe+empty_moov"
 				else
@@ -118,6 +118,7 @@ getRestrictedFilenamesFORMAT () {
 			}
 
 			if [ $downloadOK = 0 ]; then
+				echo $formatString | \grep -q "audio only" && test $extension = webm && extension=opus && fileName="${fileName/.webm/.opus}"
 				if [ $extension = mp4 ] || [ $extension = m4a ];then
 					if ! which AtomicParsley >/dev/null 2>&1; then
 						if [ -s "${fileName/.$extension/.jpg}" ];then
