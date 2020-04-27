@@ -59,11 +59,16 @@ getRestrictedFilenamesFORMAT () {
 		do
 			fileName=$(echo "$jsonResults"  | jq -n -r "first(inputs | select(.format_id==\"$formatID\"))._filename")
 			extension=$(echo "$jsonResults" | jq -n -r "first(inputs | select(.format_id==\"$formatID\")).ext")
+			thumbnailURL=$(echo "$jsonResults" | jq -n -r "first(inputs | select(.format_id==\"$formatID\")).thumbnail")
 			formatString=$(echo "$jsonResults"  | jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format")
 			chosenFormatID=$(echo "$jsonResults"  | jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format_id")
 			isLIVE=$(echo "$jsonResults" | jq -n -r "first(inputs | select(.format_id==\"$formatID\")).is_live")
 
-			echo "=> chosenFormatID = <$chosenFormatID>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString>";echo
+			thumbnailExtension=$(basename "${thumbnailURL/*\//}" | awk -F"[.]" '{print$2}')
+			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -qs "$thumbnailURL" | file -bi - | awk -F ';' '{print gensub(".*/","",1,$1)}' | sed 's/jpeg/jpg/')
+			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/.$extension/.$thumbnailExtension}
+
+			echo "=> chosenFormatID = <$chosenFormatID>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> artworkFileName = <$artworkFileName>";echo
 
 			echo "=> Downloading <$url> using the <$chosenFormatID> $domain format ..."
 			echo
@@ -112,29 +117,37 @@ getRestrictedFilenamesFORMAT () {
 			echo
 			test $downloadOK != 0 && {
 				errorLogFile="youtube-dl_errors_$$.log"
-				time LANG=C.UTF-8 command youtube-dl -o $fileName -f "$chosenFormatID" "$url" 2>$errorLogFile
-				downloadOK=$?
-				egrep -A1 'ERROR:.*' $errorLogFile && downloadOK=1 && return 1 || \rm $errorLogFile
+				fileSizeOnFS=$(stat -c %s "$fileName")
+				if [ $fileSizeOnFS -ge $remoteFileSize ]; then
+					if [ -n "$artworkFileName" ];then
+						echo "[ffmpeg] Adding thumbnail to '$fileName'" && $ffmpeg -loglevel repeat+warning -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -disposition:v:1 attached_pic "${fileName/.$extension/_NEW.$extension}"
+						[ $? = 0 ] && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "$artworkFileName" && downloadOK=0
+					fi
+				else
+					time LANG=C.UTF-8 command youtube-dl -o $fileName -f "$chosenFormatID" "$url" 2>$errorLogFile
+					downloadOK=$?
+					egrep -A1 'ERROR:.*' $errorLogFile && downloadOK=1 && return 1 || \rm $errorLogFile
+				fi
 			}
 
 			if [ $downloadOK = 0 ]; then
 				echo $formatString | \grep -q "audio only" && test $extension = webm && extension=opus && fileName="${fileName/.webm/.opus}"
 				if [ $extension = mp4 ] || [ $extension = m4a ];then
-					if ! which AtomicParsley >/dev/null 2>&1; then
-						if [ -s "${fileName/.$extension/.jpg}" ];then
+					if [ -z "$AtomicParsley" ]; then
+						if [ -s "$artworkFileName" ];then
 							echo
 							echo "[ffmpeg] Adding thumbnail to '$fileName'"
-							$ffmpeg -loglevel repeat+warning -i "$fileName" -i "${fileName/.$extension/.jpg}" -map 0 -map 1 -c copy -disposition:v:1 attached_pic "${fileName/.$extension/_NEW.$extension}"
-							[ $? = 0 ] && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "${fileName/.$extension/.jpg}"
+							$ffmpeg -loglevel repeat+warning -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -disposition:v:1 attached_pic "${fileName/.$extension/_NEW.$extension}"
+							[ $? = 0 ] && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "$artworkFileName"
 						fi
 					fi
 				elif [ $extension = mp3 ];then
-					$ffmpeg -loglevel repeat+warning -i "$fileName" -i "${fileName/.$extension/.jpg}" -map 0 -map 1 -c copy -map_metadata 0 "${fileName/.$extension/_NEW.$extension}"
-					[ $? = 0 ] && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "${fileName/.$extension/.jpg}"
+					$ffmpeg -loglevel repeat+warning -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -map_metadata 0 "${fileName/.$extension/_NEW.$extension}"
+					[ $? = 0 ] && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "$artworkFileName"
 				elif [ $extension = webm ];then
 # Complicated with the "METADATA_BLOCK_PICTURE" ogg according to https://superuser.com/a/706808/528454 and https://xiph.org/flac/format.html#metadata_block_picture use another tool instead
 					echo "=> ADDING COVER TO THE OGG CONTAINER IS NOT IMPLEMENTED YET"
-					rm "${fileName/.$extension/.jpg}"
+					rm "$artworkFileName"
 				fi
 
 				if [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] || [ $extension = webm ];then
