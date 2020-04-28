@@ -20,9 +20,10 @@ getRestrictedFilenamesFORMAT () {
 	local siteVideoFormat downloadOK=-1 extension fqdn fileSizeOnFS=0 remoteFileSize=0
 	shift
 	local -i i=0
+	local -i j=0
 	local isLIVE=false
 	local ffmpeg="$(which ffmpeg) -hide_banner"
-	local metadataURL=description
+	local metadataURLFieldName=description
 	local embedThumbnail="--write-thumbnail"
 	local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__%(extractor)s.%(ext)s"
 	local AtomicParsley=$(which AtomicParsley 2>/dev/null)
@@ -30,6 +31,7 @@ getRestrictedFilenamesFORMAT () {
 	for url
 	do
 		let i++
+		local numberOfURLsToDownload=$#
 		echo "=> Downloading url # $i/$# ..."
 		echo
 		echo $url | egrep -wq "https?:" || url=https://www.youtube.com/watch?v=$url
@@ -57,6 +59,8 @@ getRestrictedFilenamesFORMAT () {
 
 		for formatID in "${formatsIDs[@]}"
 		do
+			let j++
+			let numberOfFilesToDownload=$numberOfURLsToDownload*${#formatsIDs[@]}
 			fileName=$(echo "$jsonResults"  | jq -n -r "first(inputs | select(.format_id==\"$formatID\"))._filename")
 			extension=$(echo "$jsonResults" | jq -n -r "first(inputs | select(.format_id==\"$formatID\")).ext")
 			thumbnailURL=$(echo "$jsonResults" | jq -n -r "first(inputs | select(.format_id==\"$formatID\")).thumbnail")
@@ -110,31 +114,39 @@ getRestrictedFilenamesFORMAT () {
 
 			( [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] ) && embedThumbnail="--write-thumbnail"
 
-			echo "=> The download is now starting ..."
+			echo "=> Downloading file # $j/$numberOfFilesToDownload ..."
 			echo
 			errorLogFile="youtube-dl_errors_$$.log"
 			time LANG=C.UTF-8 command youtube-dl -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 			downloadOK=$?
+			sync
 			echo
 
 			grep -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && continue || \rm -v $errorLogFile
 
+			echo $formatString | \grep -v '+' | \grep -q "audio only" && extension=opus && fileName="${fileName/.webm/.opus}"
+
 			fileSizeOnFS=$(stat -c %s "$fileName" || echo 0)
+			videoContainer=$(command ffprobe -hide_banner -v error -show_format -of json "$fileName" | jq -r .format.format_name)
 			embeddedArtworkCodecName=$(command ffprobe -hide_banner -v error -show_streams -of json "$fileName" | jq -r '[ .streams[] | select(.codec_type=="video") ][1].codec_name')
 			if [ $fileSizeOnFS -ge $remoteFileSize ] || [ $downloadOK = 0 ]; then
 				if [ -s "$artworkFileName" ] && [ "$embeddedArtworkCodecName" = null ];then
-					timestampFileRef=$(mktemp) && touch -r "$fileName" $timestampFileRef
-					if [ $extension = mp4 ] || [ $extension = m4a ];then
+					local mimetype=$(file -bi "$artworkFileName" | cut -d';' -f1)
+					local timestampFileRef=$(mktemp) && touch -r "$fileName" $timestampFileRef
+					if echo $videoContainer | \grep -qw mp4; then
 						echo "[ffmpeg] Adding thumbnail to '$fileName'"
 						$ffmpeg -loglevel repeat+error -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -disposition:v:1 attached_pic "${fileName/.$extension/_NEW.$extension}"
 						[ $? = 0 ] && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "$artworkFileName" && downloadOK=0
-					elif [ $extension = mp3 ];then
+					elif echo $videoContainer | \grep -qw mp3; then
 						echo "[ffmpeg] Adding thumbnail to '$fileName'"
 						$ffmpeg -loglevel repeat+error -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -map_metadata 0 "${fileName/.$extension/_NEW.$extension}"
 						[ $? = 0 ] && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "$artworkFileName" && downloadOK=0
-					elif [ $extension = webm ];then
+					elif echo $videoContainer | \grep -qw matroska; then
+						echo "[ffmpeg] Adding thumbnail to '$fileName'"
+						$ffmpeg -loglevel repeat+error -i "$fileName" -map 0 -c copy -attach "$artworkFileName" -metadata:s:t mimetype=$mimetype "${fileName/.$extension/_NEW.$extension}"
+						[ $? = 0 ] && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "$artworkFileName" && downloadOK=0
+					elif echo $videoContainer | \grep -qw ogg; then
 # Complicated with the "METADATA_BLOCK_PICTURE" ogg according to https://superuser.com/a/706808/528454 and https://xiph.org/flac/format.html#metadata_block_picture use another tool instead
-						echo $formatString | \grep -q "audio only" && extension=opus && fileName="${fileName/.webm/.opus}"
 						echo "=> ADDING COVER TO THE OGG CONTAINER IS NOT IMPLEMENTED YET"
 						\rm "$artworkFileName"
 						downloadOK=0
@@ -150,16 +162,11 @@ getRestrictedFilenamesFORMAT () {
 			fi
 
 			if [ $downloadOK = 0 ]; then
-				if [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] || [ $extension = webm ];then
+				if [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ];then
 					timestampFileRef=$(mktemp) && touch -r "$fileName" $timestampFileRef
-					[ $extension = mp4  ] && metadataURL=description
-					[ $extension = webm ] && metadataURL=PURL
-					if which mp4tags >/dev/null 2>&1;then
-						mp4tags -m "$url" "$fileName"
-					else
-						echo "[ffmpeg] Adding '$url' to '$fileName' metadata"
-						$ffmpeg -loglevel repeat+error -i "$fileName" -map 0 -c copy -metadata $metadataURL="$url" "${fileName/.$extension/_NEW.$extension}" && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName"
-					fi
+					metadataURLFieldName=description
+					echo "[ffmpeg] Adding '$url' to '$fileName' metadata"
+					$ffmpeg -loglevel repeat+error -i "$fileName" -map 0 -c copy -metadata $metadataURLFieldName="$url" "${fileName/.$extension/_NEW.$extension}" && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName"
 					touch -r $timestampFileRef "$fileName" && \rm $timestampFileRef
 				fi
 				chmod -w "$fileName"
