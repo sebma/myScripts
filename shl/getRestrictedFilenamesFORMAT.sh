@@ -55,7 +55,7 @@ getRestrictedFilenamesFORMAT () {
 		local formatsIDs=( $(echo "$jsonResults" | jq -r .format_id | awk '!seen[$0]++') )
 		echo
 
-		grep -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && continue || \rm -v $errorLogFile
+		grep -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && continue || \rm $errorLogFile
 
 		for formatID in "${formatsIDs[@]}"
 		do
@@ -122,7 +122,7 @@ getRestrictedFilenamesFORMAT () {
 			sync
 			echo
 
-			grep -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && continue || \rm -v $errorLogFile
+			grep -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && continue || \rm $errorLogFile
 
 			echo $formatString | \grep -v '+' | \grep -q "audio only" && extension=opus && fileName="${fileName/.webm/.opus}"
 
@@ -158,7 +158,7 @@ getRestrictedFilenamesFORMAT () {
 				downloadOK=$?
 				echo
 
-				egrep -A1 'ERROR:.*' $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && return $downloadOK || \rm -v $errorLogFile
+				egrep -A1 'ERROR:.*' $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && return $downloadOK || \rm $errorLogFile
 			fi
 
 			if [ $downloadOK = 0 ]; then
