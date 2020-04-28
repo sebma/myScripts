@@ -124,11 +124,11 @@ getRestrictedFilenamesFORMAT () {
 					timestampFileRef=$(mktemp) && touch -r "$fileName" $timestampFileRef
 					if [ $extension = mp4 ] || [ $extension = m4a ];then
 						echo "[ffmpeg] Adding thumbnail to '$fileName'"
-						$ffmpeg -loglevel repeat+warning -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -disposition:v:1 attached_pic "${fileName/.$extension/_NEW.$extension}"
+						$ffmpeg -loglevel repeat+error -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -disposition:v:1 attached_pic "${fileName/.$extension/_NEW.$extension}"
 						[ $? = 0 ] && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "$artworkFileName" && downloadOK=0
 					elif [ $extension = mp3 ];then
 						echo "[ffmpeg] Adding thumbnail to '$fileName'"
-						$ffmpeg -loglevel repeat+warning -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -map_metadata 0 "${fileName/.$extension/_NEW.$extension}"
+						$ffmpeg -loglevel repeat+error -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -map_metadata 0 "${fileName/.$extension/_NEW.$extension}"
 						[ $? = 0 ] && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "$artworkFileName" && downloadOK=0
 					elif [ $extension = webm ];then
 # Complicated with the "METADATA_BLOCK_PICTURE" ogg according to https://superuser.com/a/706808/528454 and https://xiph.org/flac/format.html#metadata_block_picture use another tool instead
@@ -154,7 +154,7 @@ getRestrictedFilenamesFORMAT () {
 						mp4tags -m "$url" "$fileName"
 					else
 						echo "[ffmpeg] Adding '$url' to '$fileName' metadata"
-						$ffmpeg -loglevel repeat+warning -i "$fileName" -map 0 -c copy -metadata $metadataURL="$url" "${fileName/.$extension/_NEW.$extension}" && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName"
+						$ffmpeg -loglevel repeat+error -i "$fileName" -map 0 -c copy -metadata $metadataURL="$url" "${fileName/.$extension/_NEW.$extension}" && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName"
 					fi
 					touch -r $timestampFileRef "$fileName" && \rm $timestampFileRef
 				fi
