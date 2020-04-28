@@ -45,7 +45,7 @@ getRestrictedFilenamesFORMAT () {
 		esac
 		local formats=( $(echo $siteVideoFormat | \sed "s/,/ /g") )
 
-		echo "=> Fetching the generated destination filename(s) if \"$url\" still exists ..."
+		echo "=> Fetching the generated destination filename(s) for \"$url\" ..."
 		errorLogFile="youtube-dl_errors_$$.log"
 		local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__$fqdnStringForFilename.%(ext)s"
 
