@@ -48,7 +48,7 @@ getRestrictedFilenamesFORMAT () {
 		echo "=> Fetching the generated destination filename(s) if \"$url\" still exists ..."
 		errorLogFile="youtube-dl_errors_$$.log"
 		local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__$fqdnStringForFilename.%(ext)s"
-#		local jsonResults=$(set -x;time command youtube-dl --restrict-filenames -f "$siteVideoFormat" -o "$youtube_dl_FileNamePattern" -j -- "$url" 2>$errorLogFile | jq -r .)
+
 		local jsonResults=$(time command youtube-dl --restrict-filenames -f "$siteVideoFormat" -o "$youtube_dl_FileNamePattern" -j -- "$url" 2>$errorLogFile | jq -r .)
 		local formatsIDs=( $(echo "$jsonResults" | jq -r .format_id | awk '!seen[$0]++') )
 		echo
@@ -64,7 +64,7 @@ getRestrictedFilenamesFORMAT () {
 			chosenFormatID=$(echo "$jsonResults"  | jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format_id")
 			isLIVE=$(echo "$jsonResults" | jq -n -r "first(inputs | select(.format_id==\"$formatID\")).is_live")
 
-			thumbnailExtension=$(basename "${thumbnailURL/*\//}" | awk -F"[.]" '{print$2}')
+			thumbnailExtension=$(echo "${thumbnailURL/*\//}" | awk -F"[.]" '{print$2}')
 			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -qs "$thumbnailURL" | file -bi - | awk -F ';' '{print gensub(".*/","",1,$1)}' | sed 's/jpeg/jpg/')
 			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/.$extension/.$thumbnailExtension}
 
@@ -92,7 +92,7 @@ getRestrictedFilenamesFORMAT () {
 			if [ -f "$fileName" ] && [ $isLIVE != true ]; then
 				echo "=> The file <$fileName> is already exists, comparing it's size with the remote file ..." 1>&2
 				echo
-				fileSizeOnFS=$(stat -c %s "$fileName")
+				fileSizeOnFS=$(stat -c %s "$fileName" || echo 0)
 				remoteFileSize=$(echo "$jsonResults" | jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize")
 				test $? != 0 && return
 				[ $remoteFileSize = null ] && remoteFileSize=-1
@@ -108,51 +108,47 @@ getRestrictedFilenamesFORMAT () {
 			echo
 			trap - INT
 
-			( [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] ) && test $AtomicParsley && embedThumbnail="--embed-thumbnail" || embedThumbnail="--write-thumbnail"
+			( [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] ) && embedThumbnail="--write-thumbnail"
 
 			echo "=> The download is now starting ..."
 			echo
 			time LANG=C.UTF-8 command youtube-dl -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail
 			downloadOK=$?
 			echo
-			test $downloadOK != 0 && {
-				errorLogFile="youtube-dl_errors_$$.log"
-				fileSizeOnFS=$(stat -c %s "$fileName")
-				if [ $fileSizeOnFS -ge $remoteFileSize ]; then
-					if [ -n "$artworkFileName" ];then
-						echo "[ffmpeg] Adding thumbnail to '$fileName'" && $ffmpeg -loglevel repeat+warning -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -disposition:v:1 attached_pic "${fileName/.$extension/_NEW.$extension}"
+
+			fileSizeOnFS=$(stat -c %s "$fileName" || echo 0)
+			embeddedArtworkCodecName=$(command ffprobe -hide_banner -v error -show_streams -of json "$fileName" | jq -r '[ .streams[] | select(.codec_type=="video") ][1].codec_name')
+			errorLogFile="youtube-dl_errors_$$.log"
+			if [ $fileSizeOnFS -ge $remoteFileSize ] || [ $downloadOK = 0 ]; then
+				if [ -s "$artworkFileName" ] && [ "$embeddedArtworkCodecName" = null ];then
+					timestampFileRef=$(mktemp) && touch -r "$fileName" $timestampFileRef
+					if [ $extension = mp4 ] || [ $extension = m4a ];then
+						echo "[ffmpeg] Adding thumbnail to '$fileName'"
+						$ffmpeg -loglevel repeat+warning -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -disposition:v:1 attached_pic "${fileName/.$extension/_NEW.$extension}"
 						[ $? = 0 ] && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "$artworkFileName" && downloadOK=0
+					elif [ $extension = mp3 ];then
+						echo "[ffmpeg] Adding thumbnail to '$fileName'"
+						$ffmpeg -loglevel repeat+warning -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -map_metadata 0 "${fileName/.$extension/_NEW.$extension}"
+						[ $? = 0 ] && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "$artworkFileName" && downloadOK=0
+					elif [ $extension = webm ];then
+# Complicated with the "METADATA_BLOCK_PICTURE" ogg according to https://superuser.com/a/706808/528454 and https://xiph.org/flac/format.html#metadata_block_picture use another tool instead
+						echo $formatString | \grep -q "audio only" && extension=opus && fileName="${fileName/.webm/.opus}"
+						echo "=> ADDING COVER TO THE OGG CONTAINER IS NOT IMPLEMENTED YET"
+						\rm "$artworkFileName"
+						downloadOK=0
 					fi
-				else
-					time LANG=C.UTF-8 command youtube-dl -o $fileName -f "$chosenFormatID" "$url" 2>$errorLogFile
-					downloadOK=$?
-					egrep -A1 'ERROR:.*' $errorLogFile && downloadOK=1 && return 1 || \rm $errorLogFile
+					touch -r $timestampFileRef "$fileName" && \rm $timestampFileRef
 				fi
-			}
+			else
+				time LANG=C.UTF-8 command youtube-dl -o $fileName -f "$chosenFormatID" "$url" 2>$errorLogFile
+				downloadOK=$?
+				egrep -A1 'ERROR:.*' $errorLogFile && downloadOK=1 && return 1 || \rm $errorLogFile
+			fi
 
 			if [ $downloadOK = 0 ]; then
-				echo $formatString | \grep -q "audio only" && test $extension = webm && extension=opus && fileName="${fileName/.webm/.opus}"
-				if [ $extension = mp4 ] || [ $extension = m4a ];then
-					if [ -z "$AtomicParsley" ]; then
-						if [ -s "$artworkFileName" ];then
-							echo
-							echo "[ffmpeg] Adding thumbnail to '$fileName'"
-							$ffmpeg -loglevel repeat+warning -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -disposition:v:1 attached_pic "${fileName/.$extension/_NEW.$extension}"
-							[ $? = 0 ] && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "$artworkFileName"
-						fi
-					fi
-				elif [ $extension = mp3 ];then
-					$ffmpeg -loglevel repeat+warning -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -map_metadata 0 "${fileName/.$extension/_NEW.$extension}"
-					[ $? = 0 ] && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "$artworkFileName"
-				elif [ $extension = webm ];then
-# Complicated with the "METADATA_BLOCK_PICTURE" ogg according to https://superuser.com/a/706808/528454 and https://xiph.org/flac/format.html#metadata_block_picture use another tool instead
-					echo "=> ADDING COVER TO THE OGG CONTAINER IS NOT IMPLEMENTED YET"
-					rm "$artworkFileName"
-				fi
-
 				if [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] || [ $extension = webm ];then
 					timestampFileRef=$(mktemp) && touch -r "$fileName" $timestampFileRef
-					[ $extension = mp4 ] &&  metadataURL=description
+					[ $extension = mp4  ] && metadataURL=description
 					[ $extension = webm ] && metadataURL=PURL
 					if which mp4tags >/dev/null 2>&1;then
 						mp4tags -m "$url" "$fileName"
