@@ -76,16 +76,16 @@ getRestrictedFilenamesFORMAT () {
 			if [ $BASH_VERSINFO -ge 4 ];then
 				echo $formatString | \grep -v '+' | \grep -q "audio only" && ytdlExtraOptions+=( -x )
 				if [ $isLIVE = true ];then
-					ytdlExtraOptions+=( --external-downloader ffmpeg --external-downloader-args "-movflags frag_keyframe+empty_moov" )
+					ytdlExtraOptions+=( --embed-subs --write-auto-sub --sub-lang=en,fr,es,de --external-downloader ffmpeg --external-downloader-args "-movflags frag_keyframe+empty_moov" )
 				else
-					ytdlExtraOptions+=( --hls-prefer-native )
+					ytdlExtraOptions+=( --embed-subs --write-auto-sub --sub-lang=en,fr,es,de --hls-prefer-native )
 				fi
 			else
 				echo $formatString | \grep -v '+' | \grep -q "audio only" && ytdlExtraOptions+=" -x"
 				if [ $isLIVE = true ];then
-					ytdlExtraOptions+=" --external-downloader ffmpeg --external-downloader-args -movflags\\ frag_keyframe+empty_moov"
+					ytdlExtraOptions+=" --embed-subs --write-auto-sub --sub-lang=en,fr,es,de --external-downloader ffmpeg --external-downloader-args -movflags\\ frag_keyframe+empty_moov"
 				else
-					ytdlExtraOptions+=" --hls-prefer-native"
+					ytdlExtraOptions+=" --embed-subs --write-auto-sub --sub-lang=en,fr,es,de --hls-prefer-native"
 				fi
 			fi
 
