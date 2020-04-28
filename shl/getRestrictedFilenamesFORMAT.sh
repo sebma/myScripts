@@ -46,14 +46,14 @@ getRestrictedFilenamesFORMAT () {
 		local formats=( $(echo $siteVideoFormat | \sed "s/,/ /g") )
 
 		echo "=> Fetching the generated destination filename(s) for \"$url\" ..."
-		errorLogFile="youtube-dl_errors_$$.log"
+		local errorLogFile="youtube-dl_errors_$$.log"
 		local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__$fqdnStringForFilename.%(ext)s"
 
 		local jsonResults=$(time command youtube-dl --restrict-filenames -f "$siteVideoFormat" -o "$youtube_dl_FileNamePattern" -j -- "$url" 2>$errorLogFile | jq -r .)
 		local formatsIDs=( $(echo "$jsonResults" | jq -r .format_id | awk '!seen[$0]++') )
 		echo
 
-		grep -A1 ERROR: $errorLogFile && echo && continue || \rm $errorLogFile
+		grep -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && continue || \rm -v $errorLogFile
 
 		for formatID in "${formatsIDs[@]}"
 		do
@@ -68,7 +68,7 @@ getRestrictedFilenamesFORMAT () {
 			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -qs "$thumbnailURL" | file -bi - | awk -F ';' '{print gensub(".*/","",1,$1)}' | sed 's/jpeg/jpg/')
 			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/.$extension/.$thumbnailExtension}
 
-			echo "=> chosenFormatID = <$chosenFormatID>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> artworkFileName = <$artworkFileName>";echo
+#			echo "=> chosenFormatID = <$chosenFormatID>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> artworkFileName = <$artworkFileName>";echo
 
 			echo "=> Downloading <$url> using the <$chosenFormatID> $domain format ..."
 			echo
@@ -112,13 +112,15 @@ getRestrictedFilenamesFORMAT () {
 
 			echo "=> The download is now starting ..."
 			echo
-			time LANG=C.UTF-8 command youtube-dl -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail
+			errorLogFile="youtube-dl_errors_$$.log"
+			time LANG=C.UTF-8 command youtube-dl -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 			downloadOK=$?
 			echo
 
+			grep -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && continue || \rm -v $errorLogFile
+
 			fileSizeOnFS=$(stat -c %s "$fileName" || echo 0)
 			embeddedArtworkCodecName=$(command ffprobe -hide_banner -v error -show_streams -of json "$fileName" | jq -r '[ .streams[] | select(.codec_type=="video") ][1].codec_name')
-			errorLogFile="youtube-dl_errors_$$.log"
 			if [ $fileSizeOnFS -ge $remoteFileSize ] || [ $downloadOK = 0 ]; then
 				if [ -s "$artworkFileName" ] && [ "$embeddedArtworkCodecName" = null ];then
 					timestampFileRef=$(mktemp) && touch -r "$fileName" $timestampFileRef
@@ -142,7 +144,9 @@ getRestrictedFilenamesFORMAT () {
 			else
 				time LANG=C.UTF-8 command youtube-dl -o $fileName -f "$chosenFormatID" "$url" 2>$errorLogFile
 				downloadOK=$?
-				egrep -A1 'ERROR:.*' $errorLogFile && downloadOK=1 && return 1 || \rm $errorLogFile
+				echo
+
+				egrep -A1 'ERROR:.*' $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && return $downloadOK || \rm -v $errorLogFile
 			fi
 
 			if [ $downloadOK = 0 ]; then
