@@ -35,11 +35,11 @@ getRestrictedFilenamesFORMAT () {
 		echo "=> Downloading url # $i/$# ..."
 		echo
 		echo $url | egrep -wq "https?:" || url=https://www.youtube.com/watch?v=$url
-		local urlBase=$(echo "$url" | cut -d/ -f1-3)
-		local fqdn=$(echo "$url" | cut -d/ -f3 | awk -F. '{print$(NF-1)"."$NF}')
-		local fqdnStringForFilename=$(echo $fqdn | tr . _)
-		local domain=$(echo $fqdn | awk -F '[.]|/' '{print $(NF-1)}')
-		case $domain in
+		local fqdn=$(echo "$url" | cut -d/ -f3)
+		local domain=$(echo $fqdn | awk -F. '{print$(NF-1)"."$NF}')
+		local domainStringForFilename=$(echo $domain | tr . _)
+		local sld=$(echo $fqdn | awk -F '.' '{print $(NF-1)}')
+		case $sld in
 #			facebook) siteVideoFormat=$(echo $initialSiteVideoFormat+m4a | \sed -E "s/^(\(?)\w+/\1bestvideo/g") ;;
 			*)
 				siteVideoFormat=$initialSiteVideoFormat
@@ -49,7 +49,7 @@ getRestrictedFilenamesFORMAT () {
 
 		echo "=> Fetching the generated destination filename(s) for \"$url\" ..."
 		local errorLogFile="youtube-dl_errors_$$.log"
-		local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__$fqdnStringForFilename.%(ext)s"
+		local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__$domainStringForFilename.%(ext)s"
 
 		local jsonResults=$(time command youtube-dl --restrict-filenames -f "$siteVideoFormat" -o "$youtube_dl_FileNamePattern" -j -- "$url" 2>$errorLogFile | jq -r .)
 		local formatsIDs=( $(echo "$jsonResults" | jq -r .format_id | awk '!seen[$0]++') )
@@ -74,7 +74,7 @@ getRestrictedFilenamesFORMAT () {
 
 #			echo "=> chosenFormatID = <$chosenFormatID>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> artworkFileName = <$artworkFileName>";echo
 
-			echo "=> Downloading <$url> using the <$chosenFormatID> $domain format ..."
+			echo "=> Downloading <$url> using the <$chosenFormatID> $sld format ..."
 			echo
 
 			if [ $BASH_VERSINFO -ge 4 ];then
