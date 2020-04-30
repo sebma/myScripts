@@ -11,7 +11,8 @@ function extractVideoURLs {
 			urlPrefix=${urlBase}/video
 			\curl -qs ${url/www/api}/videos | jq -r "\"$urlPrefix/\"+.list[].id"
 		else
-			\curl -qs $url | grep -w video | grep -oP 'href="\K/[^/][^ &"]+' | uniq | sed "s|^|$urlBase|"
+			urlPrefix=$urlBase
+			\curl -qs $url | grep -w video | grep -oP 'href="\K/[^/][^ &"]+' | uniq | sed "s|^|$urlPrefix|"
 		fi
 	done
 }
