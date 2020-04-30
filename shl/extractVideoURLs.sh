@@ -9,9 +9,7 @@ function extractVideoURLs {
 		sld=$(echo $fqdn | awk -F. '{print $(NF-1)}') # Second level domain
 		if [ $sld = dailymotion ];then
 			urlPrefix=${urlBase}/video
-			url=${url/www/api}
-			url=${url/%/\/videos}
-			\curl -qs $url | jq -r "\"$urlPrefix/\"+.list[].id"
+			\curl -qs ${url/www/api}/videos | jq -r "\"$urlPrefix/\"+.list[].id"
 		else
 			\curl -qs $url | grep -w video | grep -oP 'href="\K/[^/][^ &"]+' | uniq | sed "s|^|$urlBase|"
 		fi
