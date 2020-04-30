@@ -14,9 +14,11 @@ function extractVideoURLs {
 			urlPrefix=$urlBase
 			channel="${url/*\//}"
 			\curl -qs $urlBase/api/v2/$channel/videos.json | jq -r '.[] | "'$urlPrefix/'"+(.id|tostring)'
-		else
+		elif [ $sld = youtube ];then
 			urlPrefix=$urlBase
 			\curl -qs "$url" | grep -w video | grep -oP 'href="\K/[^/][^ &"]+' | uniq | sed "s|^|$urlPrefix|"
+		else
+			:
 		fi
 	done
 }
