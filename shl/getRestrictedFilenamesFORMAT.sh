@@ -78,14 +78,14 @@ getRestrictedFilenamesFORMAT () {
 			echo
 
 			if [ $BASH_VERSINFO -ge 4 ];then
-				echo $formatString | \grep -v '+' | \grep -q "audio only" && ytdlExtraOptions+=( -x )
+				echo $chosenFormatID | \grep -v '+' | \grep -q "audio only" && ytdlExtraOptions+=( -x )
 				if [ $isLIVE = true ];then
 					ytdlExtraOptions+=( --embed-subs --write-auto-sub --sub-lang=en,fr,es,de --external-downloader ffmpeg --external-downloader-args "-movflags frag_keyframe+empty_moov" )
 				else
 					ytdlExtraOptions+=( --embed-subs --write-auto-sub --sub-lang=en,fr,es,de --hls-prefer-native )
 				fi
 			else
-				echo $formatString | \grep -v '+' | \grep -q "audio only" && ytdlExtraOptions+=" -x"
+				echo $chosenFormatID | \grep -v '+' | \grep -q "audio only" && ytdlExtraOptions+=" -x"
 				if [ $isLIVE = true ];then
 					ytdlExtraOptions+=" --embed-subs --write-auto-sub --sub-lang=en,fr,es,de --external-downloader ffmpeg --external-downloader-args -movflags\\ frag_keyframe+empty_moov"
 				else
