@@ -55,10 +55,10 @@ getRestrictedFilenamesFORMAT () {
 	local artworkFileName=null
 
 	echo $1 | grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
-	echo $scriptOptions | \egrep -q -- "-x" && ytdlExtraOptions+=" -x"
+	echo $scriptOptions | \egrep -q -- "-x" && ytdlExtraOptions+=( -x )
 	echo $scriptOptions | \egrep -q -- "-v" && debug="set -x" && undebug="set +x"
-	echo $scriptOptions | \egrep -q -- "-vv" && debug="set -x" && undebug="set +x" && ytdlExtraOptions+=" -v"
-	echo $scriptOptions | \egrep -q -- "-vvv" && debug="set -x" && undebug="set +x" && ytdlExtraOptions+=" -v" && ffmpegLogLevel=$ffmpegInfoLogLevel
+	echo $scriptOptions | \egrep -q -- "-vv" && debug="set -x" && undebug="set +x" && ytdlExtraOptions+=( -v )
+	echo $scriptOptions | \egrep -q -- "-vvv" && debug="set -x" && undebug="set +x" && ytdlExtraOptions+=( -v ) && ffmpegLogLevel=$ffmpegInfoLogLevel
 
 	initialSiteVideoFormat="$1"
 	shift
@@ -125,23 +125,14 @@ getRestrictedFilenamesFORMAT () {
 			echo "=> Downloading <$url> using the <$chosenFormatID> $sld format ..."
 			echo
 
-			if [ $BASH_VERSINFO -ge 4 ];then
-				ytdlExtraOptions+=( --embed-subs --write-auto-sub --sub-lang=en,fr,es,de )
-				echo $formatString | \grep -v '+' | \grep -q "audio only" && ytdlExtraOptions+=( -x )
-				if [ $isLIVE = true ];then
-					ytdlExtraOptions+=( --hls-use-mpegts )
-				else
-					ytdlExtraOptions+=( --hls-prefer-native )
-				fi
+			ytdlExtraOptions+=( --embed-subs --write-auto-sub --sub-lang=en,fr,es,de )
+			echo $formatString | \grep -v '+' | \grep -q "audio only" && ytdlExtraOptions+=( -x )
+			if [ $isLIVE = true ];then
+				ytdlExtraOptions+=( --hls-use-mpegts )
 			else
-				ytdlExtraOptions+=" --embed-subs --write-auto-sub --sub-lang=en,fr,es,de"
-				echo $formatString | \grep -v '+' | \grep -q "audio only" && ytdlExtraOptions+=" -x"
-				if [ $isLIVE = true ];then
-					ytdlExtraOptions+=" --hls-use-mpegts"
-				else
-					ytdlExtraOptions+=" --hls-prefer-native"
-				fi
+				ytdlExtraOptions+=( --hls-prefer-native )
 			fi
+
 			echo
 			$undebug
 			echo "=> ytdlExtraOptions = ${ytdlExtraOptions[@]}"
