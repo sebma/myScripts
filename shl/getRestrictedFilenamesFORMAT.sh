@@ -43,8 +43,9 @@ getRestrictedFilenamesFORMAT () {
 	local timestampFileRef=null
 
 	echo $1 | grep -q -- "^-[a-z]" && local scriptOptions=$1 && shift
-	echo $scriptOptions | \grep -q -- "-x" && debug="set -x" && undebug="set +x"
-	echo $scriptOptions | \egrep -q -- "-(xv|vx)" && debug="set -x" && undebug="set +x" && ffmpegLogLevel=$ffmpegInfoLogLevel
+	echo $scriptOptions | \egrep -q -- "-(x|v)" && debug="set -x" && undebug="set +x"
+	echo $scriptOptions | \egrep -q -- "-(xv|vx|vv)" && debug="set -x" && undebug="set +x" && ytdlExtraOptions+=-v
+	echo $scriptOptions | \egrep -q -- "-(xvv|vvx|vvv)" && debug="set -x" && undebug="set +x" && ytdlExtraOptions+=-v && ffmpegLogLevel=$ffmpegInfoLogLevel
 
 	local initialSiteVideoFormat="$1"
 	shift
@@ -97,24 +98,26 @@ getRestrictedFilenamesFORMAT () {
 			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -qs "$thumbnailURL" | file -bi - | awk -F ';' '{print gensub(".*/","",1,$1)}' | sed 's/jpeg/jpg/')
 			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/.$extension/.$thumbnailExtension}
 
-			[ "$debug" ] && echo "=> chosenFormatID = <$chosenFormatID>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> artworkFileName = <$artworkFileName>";echo
+			[ "$debug" ] && echo "=> chosenFormatID = <$chosenFormatID>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> artworkFileName = <$artworkFileName>" && echo
 
 			echo "=> Downloading <$url> using the <$chosenFormatID> $sld format ..."
 			echo
 
 			if [ $BASH_VERSINFO -ge 4 ];then
+				ytdlExtraOptions+=( --embed-subs --write-auto-sub --sub-lang=en,fr,es,de )
 				echo $formatString | \grep -v '+' | \grep -q "audio only" && ytdlExtraOptions+=( -x )
 				if [ $isLIVE = true ];then
-					ytdlExtraOptions+=( -v --embed-subs --write-auto-sub --sub-lang=en,fr,es,de --external-downloader ffmpeg --external-downloader-args "-movflags frag_keyframe+empty_moov" )
+					ytdlExtraOptions+=( --hls-use-mpegts )
 				else
-					ytdlExtraOptions+=( --embed-subs --write-auto-sub --sub-lang=en,fr,es,de --hls-prefer-native )
+					ytdlExtraOptions+=( --hls-prefer-native )
 				fi
 			else
+				ytdlExtraOptions+=" --embed-subs --write-auto-sub --sub-lang=en,fr,es,de"
 				echo $formatString | \grep -v '+' | \grep -q "audio only" && ytdlExtraOptions+=" -x"
 				if [ $isLIVE = true ];then
-					ytdlExtraOptions+=" -v --embed-subs --write-auto-sub --sub-lang=en,fr,es,de --external-downloader ffmpeg --external-downloader-args -movflags\\ frag_keyframe+empty_moov"
+					ytdlExtraOptions+=" --hls-use-mpegts"
 				else
-					ytdlExtraOptions+=" --embed-subs --write-auto-sub --sub-lang=en,fr,es,de --hls-prefer-native"
+					ytdlExtraOptions+=" --hls-prefer-native"
 				fi
 			fi
 			$undebug
@@ -136,7 +139,7 @@ getRestrictedFilenamesFORMAT () {
 			echo
 			trap - INT
 
-			( [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ] ) && embedThumbnail="--write-thumbnail"
+			( [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = m4b ] || [ $extension = mp3 ] ) && embedThumbnail="--embed-thumbnail"
 
 			echo "=> Downloading file # $j/$numberOfFilesToDownload ..."
 			echo
@@ -166,7 +169,7 @@ getRestrictedFilenamesFORMAT () {
 
 			major_brand=$(echo $ffprobeJSON_Info | jq -r .format.tags.major_brand)
 
-			[ "$debug" ] && echo "=> videoContainer = <$videoContainer>  latestVideoStreamCodecName = <$latestVideoStreamCodecName> major_brand = <$major_brand>"
+			[ "$debug" ] && echo "=> videoContainer = <$videoContainer>  latestVideoStreamCodecName = <$latestVideoStreamCodecName> major_brand = <$major_brand>" && echo
 
 			if [ $fileSizeOnFS -ge $remoteFileSize ] || [ $downloadOK = 0 ]; then
 				if [ -s "$artworkFileName" ] && [ "$latestVideoStreamCodecName" != mjpeg ] && [ "$latestVideoStreamCodecName" != png ];then
