@@ -34,7 +34,7 @@ getRestrictedFilenamesFORMAT () {
 	local thumbnailerExecutable=$(which $thumbnailerName 2>/dev/null)
 	local retCode=-1
 	local ffmpegNormalLogLevel=repeat+error
-	local ffmpegDebugLogLevel=repeat+info
+	local ffmpegInfoLogLevel=repeat+info
 	local ffmpegLogLevel=$ffmpegNormalLogLevel
 	local ffprobeJSON_Info=null
 	local videoContainer=null
@@ -44,7 +44,7 @@ getRestrictedFilenamesFORMAT () {
 
 	echo $1 | grep -q -- "^-[a-z]" && local scriptOptions=$1 && shift
 	echo $scriptOptions | \grep -q -- "-x" && debug="set -x" && undebug="set +x"
-	echo $scriptOptions | \egrep -q -- "-(xv|vx)" && debug="set -x" && undebug="set +x" && ffmpegLogLevel=$ffmpegDebugLogLevel
+	echo $scriptOptions | \egrep -q -- "-(xv|vx)" && debug="set -x" && undebug="set +x" && ffmpegLogLevel=$ffmpegInfoLogLevel
 
 	local initialSiteVideoFormat="$1"
 	shift
@@ -105,14 +105,14 @@ getRestrictedFilenamesFORMAT () {
 			if [ $BASH_VERSINFO -ge 4 ];then
 				echo $formatString | \grep -v '+' | \grep -q "audio only" && ytdlExtraOptions+=( -x )
 				if [ $isLIVE = true ];then
-					ytdlExtraOptions+=( --embed-subs --write-auto-sub --sub-lang=en,fr,es,de --external-downloader ffmpeg --external-downloader-args "-movflags frag_keyframe+empty_moov" )
+					ytdlExtraOptions+=( -v --embed-subs --write-auto-sub --sub-lang=en,fr,es,de --external-downloader ffmpeg --external-downloader-args "-movflags frag_keyframe+empty_moov" )
 				else
 					ytdlExtraOptions+=( --embed-subs --write-auto-sub --sub-lang=en,fr,es,de --hls-prefer-native )
 				fi
 			else
 				echo $formatString | \grep -v '+' | \grep -q "audio only" && ytdlExtraOptions+=" -x"
 				if [ $isLIVE = true ];then
-					ytdlExtraOptions+=" --embed-subs --write-auto-sub --sub-lang=en,fr,es,de --external-downloader ffmpeg --external-downloader-args -movflags\\ frag_keyframe+empty_moov"
+					ytdlExtraOptions+=" -v --embed-subs --write-auto-sub --sub-lang=en,fr,es,de --external-downloader ffmpeg --external-downloader-args -movflags\\ frag_keyframe+empty_moov"
 				else
 					ytdlExtraOptions+=" --embed-subs --write-auto-sub --sub-lang=en,fr,es,de --hls-prefer-native"
 				fi
@@ -163,7 +163,7 @@ getRestrictedFilenamesFORMAT () {
 			videoContainer=$(echo $ffprobeJSON_Info | jq -r .format.format_name | cut -d, -f1)
 #			numberOfVideoStreams=$(echo $ffprobeJSON_Info | jq -r '[ .streams[] | select(.codec_type=="video") ] | length'
 			latestVideoStreamCodecName=$(echo $ffprobeJSON_Info | jq -r '[ .streams[] | select(.codec_type=="video") ][-1].codec_name')
-			
+
 			major_brand=$(echo $ffprobeJSON_Info | jq -r .format.tags.major_brand)
 
 			[ "$debug" ] && echo "=> videoContainer = <$videoContainer>  latestVideoStreamCodecName = <$latestVideoStreamCodecName> major_brand = <$major_brand>"
@@ -181,7 +181,7 @@ getRestrictedFilenamesFORMAT () {
 							sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "$artworkFileName" && downloadOK=0
 						else
 							set -x
-							$ffmpeg -loglevel $ffmpegDebugLogLevel -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -disposition:$disposition_stream_specifier attached_pic "${fileName/.$extension/_NEW.$extension}"
+							$ffmpeg -loglevel $ffmpegInfoLogLevel -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -disposition:$disposition_stream_specifier attached_pic "${fileName/.$extension/_NEW.$extension}"
 							set +x
 							\rm "${fileName/.$extension/_NEW.$extension}"
 						fi
@@ -193,7 +193,7 @@ getRestrictedFilenamesFORMAT () {
 							sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "$artworkFileName" && downloadOK=0
 						else
 							set -x
-							$ffmpeg -loglevel $ffmpegDebugLogLevel -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -map_metadata 0 "${fileName/.$extension/_NEW.$extension}"
+							$ffmpeg -loglevel $ffmpegInfoLogLevel -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -map_metadata 0 "${fileName/.$extension/_NEW.$extension}"
 							set +x
 							\rm "${fileName/.$extension/_NEW.$extension}"
 						fi
@@ -205,7 +205,7 @@ getRestrictedFilenamesFORMAT () {
 							sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "$artworkFileName" && downloadOK=0
 						else
 							set -x
-							$ffmpeg -loglevel $ffmpegDebugLogLevel -i "$fileName" -map 0 -c copy -attach "$artworkFileName" -metadata:s:t mimetype=$mimetype "${fileName/.$extension/_NEW.$extension}"
+							$ffmpeg -loglevel $ffmpegInfoLogLevel -i "$fileName" -map 0 -c copy -attach "$artworkFileName" -metadata:s:t mimetype=$mimetype "${fileName/.$extension/_NEW.$extension}"
 							set +x
 							\rm "${fileName/.$extension/_NEW.$extension}"
 						fi
