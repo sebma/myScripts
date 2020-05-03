@@ -143,6 +143,8 @@ getRestrictedFilenamesFORMAT () {
 
 			echo "=> Downloading file # $j/$numberOfFilesToDownload ..."
 			echo
+			printf "=> Starting youtube-dl at %s ...\n" "$(LC_MESSAGES=en date)"
+			echo
 			errorLogFile="youtube-dl_errors_$$.log"
 			$debug
 			time LANG=C.UTF-8 command youtube-dl -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
