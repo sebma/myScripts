@@ -55,9 +55,10 @@ getRestrictedFilenamesFORMAT () {
 	local artworkFileName=null
 
 	echo $1 | grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
-	echo $scriptOptions | \egrep -q -- "-(x|v)" && debug="set -x" && undebug="set +x"
-	echo $scriptOptions | \egrep -q -- "-(xv|vx|vv)" && debug="set -x" && undebug="set +x" && ytdlExtraOptions+=-v
-	echo $scriptOptions | \egrep -q -- "-(xvv|vvx|vvv)" && debug="set -x" && undebug="set +x" && ytdlExtraOptions+=-v && ffmpegLogLevel=$ffmpegInfoLogLevel
+	echo $scriptOptions | \egrep -q -- "-x" && ytdlExtraOptions+=" -x"
+	echo $scriptOptions | \egrep -q -- "-v" && debug="set -x" && undebug="set +x"
+	echo $scriptOptions | \egrep -q -- "-vv" && debug="set -x" && undebug="set +x" && ytdlExtraOptions+=" -v"
+	echo $scriptOptions | \egrep -q -- "-vvv" && debug="set -x" && undebug="set +x" && ytdlExtraOptions+=" -v" && ffmpegLogLevel=$ffmpegInfoLogLevel
 
 	initialSiteVideoFormat="$1"
 	shift
@@ -107,12 +108,15 @@ getRestrictedFilenamesFORMAT () {
 			isLIVE=$(echo "$jsonResults" | jq -n -r "first(inputs | select(.format_id==\"$formatID\")).is_live")
 
 			thumbnailExtension=$(echo "${thumbnailURL/*\//}" | awk -F"[.]" '{print$2}')
-			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -qs "$thumbnailURL" | file -bi - | awk -F ';' '{print gensub(".*/","",1,$1)}' | sed 's/jpeg/jpg/')
+			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -qs "$thumbnailURL" | file -bi - | awk -F ';' '{sub(".*/","",$1);print gensub("jpeg","jpg",1,$1)}')
 			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/.$extension/.$thumbnailExtension}
 
 			if [ $thumbnailerName = AtomicParsley ] && ! \curl -qs "$thumbnailURL" | file -b - | \grep -q JFIF;then # because of https://bitbucket.org/wez/atomicparsley/issues/63
 				if \curl -qs "$thumbnailURL" -o "$artworkFileName.tmp";then
-					convert -verbose "$artworkFileName.tmp" "$artworkFileName"
+					echo "=> Converting <$artworkFileName> to JPEG JFIF for AtomicParsley ..."
+					convert -verbose "$artworkFileName.tmp" "$artworkFileName" && rm -f "$artworkFileName.tmp"
+					echo "=> Done."
+					echo
 				fi
 			fi
 
@@ -138,7 +142,10 @@ getRestrictedFilenamesFORMAT () {
 					ytdlExtraOptions+=" --hls-prefer-native"
 				fi
 			fi
+			echo
 			$undebug
+			echo "=> ytdlExtraOptions = ${ytdlExtraOptions[@]}"
+			echo
 
 			if [ -f "$fileName" ] && [ $isLIVE != true ]; then
 				echo "=> The file <$fileName> is already exists, comparing it's size with the remote file ..." 1>&2
@@ -162,6 +169,8 @@ getRestrictedFilenamesFORMAT () {
 			echo "=> Downloading file # $j/$numberOfFilesToDownload ..."
 			echo
 			printf "=> Starting youtube-dl at %s ...\n" "$(LC_MESSAGES=en date)"
+			echo
+			echo "=> ytdlExtraOptions = ${ytdlExtraOptions[@]}"
 			echo
 			errorLogFile="youtube-dl_errors_$$.log"
 			$debug
