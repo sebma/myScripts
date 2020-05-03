@@ -27,10 +27,11 @@ getRestrictedFilenamesFORMAT () {
 	local isLIVE=false
 	local ffmpeg="$(which ffmpeg) -hide_banner"
 	local ffprobe="$(which ffprobe) -hide_banner"
+	local jsonResults=null
 	local metadataURLFieldName=description
 	local embedThumbnail="--write-thumbnail"
 	local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__%(extractor)s.%(ext)s"
-	local thumbnailerName=$(basename $(which mp4art 2>/dev/null || which ffmpeg 2>/dev/null))
+	local thumbnailerName=$(basename $(which AtomicParsley 2>/dev/null || which ffmpeg 2>/dev/null))
 	local thumbnailerExecutable=$(which $thumbnailerName 2>/dev/null)
 	local retCode=-1
 	local ffmpegNormalLogLevel=repeat+error
@@ -41,42 +42,53 @@ getRestrictedFilenamesFORMAT () {
 	local latestVideoStreamCodecName=null
 	local mimetype=null
 	local timestampFileRef=null
+	local domainStringForFilename=null
+	local fqdn=null domain=null sld=null
+	local errorLogFile=null
+	local youtube_dl_FileNamePattern=null
+	local scriptOptions=null
+	local initialSiteVideoFormat=null
+	local numberOfURLsToDownload=null
+	local formats=null
+	local formatsIDs=null
+	local thumbnailExtension=null
+	local artworkFileName=null
 
-	echo $1 | grep -q -- "^-[a-z]" && local scriptOptions=$1 && shift
+	echo $1 | grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
 	echo $scriptOptions | \egrep -q -- "-(x|v)" && debug="set -x" && undebug="set +x"
 	echo $scriptOptions | \egrep -q -- "-(xv|vx|vv)" && debug="set -x" && undebug="set +x" && ytdlExtraOptions+=-v
 	echo $scriptOptions | \egrep -q -- "-(xvv|vvx|vvv)" && debug="set -x" && undebug="set +x" && ytdlExtraOptions+=-v && ffmpegLogLevel=$ffmpegInfoLogLevel
 
-	local initialSiteVideoFormat="$1"
+	initialSiteVideoFormat="$1"
 	shift
 
 	youtube-dl --rm-cache
 	for url
 	do
 		let i++
-		local numberOfURLsToDownload=$#
+		numberOfURLsToDownload=$#
 		echo "=> Downloading url # $i/$# ..."
 		echo
 		echo $url | egrep -wq "https?:" || url=https://www.youtube.com/watch?v=$url
-		local fqdn=$(echo "$url" | cut -d/ -f3)
-		local domain=$(echo $fqdn | awk -F. '{print$(NF-1)"."$NF}')
-		local domainStringForFilename=$(echo $domain | tr . _)
-		local sld=$(echo $fqdn | awk -F '.' '{print $(NF-1)}')
+		fqdn=$(echo "$url" | cut -d/ -f3)
+		domain=$(echo $fqdn | awk -F. '{print$(NF-1)"."$NF}')
+		domainStringForFilename=$(echo $domain | tr . _)
+		sld=$(echo $fqdn | awk -F '.' '{print $(NF-1)}')
 		case $sld in
 #			facebook) siteVideoFormat=$(echo $initialSiteVideoFormat+m4a | \sed -E "s/^(\(?)\w+/\1bestvideo/g") ;;
 			*)
 				siteVideoFormat=$initialSiteVideoFormat
 			;;
 		esac
-		local formats=( $(echo $siteVideoFormat | \sed "s/,/ /g") )
+		formats=( $(echo $siteVideoFormat | \sed "s/,/ /g") )
 
 		echo "=> Fetching the generated destination filename(s) for \"$url\" ..."
-		local errorLogFile="youtube-dl_errors_$$.log"
-		local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__$domainStringForFilename.%(ext)s"
+		errorLogFile="youtube-dl_errors_$$.log"
+		youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__$domainStringForFilename.%(ext)s"
 
-		local jsonResults=null
+		jsonResults=null
 		jsonResults=$(time command youtube-dl --restrict-filenames -f "$siteVideoFormat" -o "$youtube_dl_FileNamePattern" -j -- "$url" 2>$errorLogFile | jq -r .)
-		local formatsIDs=( $(echo "$jsonResults" | jq -r .format_id | awk '!seen[$0]++') )
+		formatsIDs=( $(echo "$jsonResults" | jq -r .format_id | awk '!seen[$0]++') )
 		echo
 
 		grep -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && continue || \rm $errorLogFile
@@ -97,6 +109,12 @@ getRestrictedFilenamesFORMAT () {
 			thumbnailExtension=$(echo "${thumbnailURL/*\//}" | awk -F"[.]" '{print$2}')
 			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -qs "$thumbnailURL" | file -bi - | awk -F ';' '{print gensub(".*/","",1,$1)}' | sed 's/jpeg/jpg/')
 			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/.$extension/.$thumbnailExtension}
+
+			if [ $thumbnailerName = AtomicParsley ] && ! \curl -qs "$thumbnailURL" | file -b - | \grep -q JFIF;then # because of https://bitbucket.org/wez/atomicparsley/issues/63
+				if \curl -qs "$thumbnailURL" -o "$artworkFileName.tmp";then
+					convert -verbose "$artworkFileName.tmp" "$artworkFileName"
+				fi
+			fi
 
 			[ "$debug" ] && echo "=> chosenFormatID = <$chosenFormatID>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> artworkFileName = <$artworkFileName>" && echo
 
@@ -139,7 +157,7 @@ getRestrictedFilenamesFORMAT () {
 			echo
 			trap - INT
 
-			( [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = m4b ] || [ $extension = mp3 ] ) && embedThumbnail="--embed-thumbnail"
+			[ $thumbnailerName = AtomicParsley ] && ( [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = m4b ] || [ $extension = mp3 ] ) && embedThumbnail="--embed-thumbnail"
 
 			echo "=> Downloading file # $j/$numberOfFilesToDownload ..."
 			echo
