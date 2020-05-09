@@ -194,7 +194,7 @@ getRestrictedFilenamesFORMAT () {
 			[ "$debug" ] && echo "=> ytdlExtraOptions = ${ytdlExtraOptions[@]}" && echo
 
 			if [ -f "$newFileName" ] && [ $isLIVE != true ]; then
-				echo "=> The file <$newFileName> is already exists, comparing it's size with the remote file ..." 1>&2
+				echo "=> The file <$newFileName> already exists, comparing it's size with the remote file ..." 1>&2
 				echo 1>&2
 				fileSizeOnFS=$(stat -c %s "$newFileName" || echo 0)
 				test $? != 0 && return
