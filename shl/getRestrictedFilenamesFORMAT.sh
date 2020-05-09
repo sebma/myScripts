@@ -50,7 +50,8 @@ getRestrictedFilenamesFORMAT () {
 		return 1
 	fi
 
-	local ytdlExtraOptions=( --add-metadata )
+	local ytdlExtraOptions=()
+	local ytdlInitialOptions=()
 	local youtube_dl="eval LANG=C.UTF-8 command youtube-dl" # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
 	local translate=cat
 	local siteVideoFormat downloadOK=-1 extension fqdn fileSizeOnFS=0 remoteFileSize=0
@@ -93,9 +94,9 @@ getRestrictedFilenamesFORMAT () {
 	ffprobe+=" -hide_banner"
 
 	echo $1 | $grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
-	echo $scriptOptions | $grep -q -- "-x" && ytdlExtraOptions+=( -x )
+	echo $scriptOptions | $grep -q -- "-x" && ytdlInitialOptions+=( -x )
 	echo $scriptOptions | $grep -q -- "-v" && debug="set -x"
-	echo $scriptOptions | $grep -q -- "-vv" && debug="set -x" && ytdlExtraOptions+=( -v )
+	echo $scriptOptions | $grep -q -- "-vv" && debug="set -x" && ytdlInitialOptions+=( -v )
 	echo $scriptOptions | $grep -q -- "-vvv" && debug="set -x" && ffmpegLogLevel=$ffmpegInfoLogLevel
 
 	initialSiteVideoFormat="$1"
@@ -166,9 +167,10 @@ getRestrictedFilenamesFORMAT () {
 				fi
 			fi
 
+			ytdlExtraOptions=( "${ytdlInitialOptions[@]}" )
 			echo $formatString | $grep -v '+' | $grep -q "audio only" && ytdlExtraOptions+=( -x )
 
-			if echo "${ytdlExtraOptions[@]}" | $grep -qw -- "-x" ;then
+			if echo "${ytdlExtraOptions[@]}" | $grep -qw -- "-x";then
 				extension=$(getAudioExtension $latestAudioStreamCodecName)
 				( [ $extension = m4a ] || [ $extension = opus ] ) && ytdlExtraOptions+=( -k )
 				newFileName="${fileName/.*/.$extension}"
@@ -181,7 +183,7 @@ getRestrictedFilenamesFORMAT () {
 			echo "=> Downloading <$url> using the <$chosenFormatID> $sld format ..."
 			echo
 
-			ytdlExtraOptions+=( --prefer-ffmpeg --restrict-filenames --embed-subs --write-auto-sub --sub-lang=en,fr,es,de )
+			ytdlExtraOptions+=( --add-metadata --prefer-ffmpeg --restrict-filenames --embed-subs --write-auto-sub --sub-lang='en,fr,es,de' )
 			if [ $isLIVE = true ];then
 				ytdlExtraOptions+=( --hls-use-mpegts )
 			else
@@ -214,7 +216,7 @@ getRestrictedFilenamesFORMAT () {
 			echo
 			errorLogFile="youtube-dl_errors_$$.log"
 			$debug
-			time LANG=C.UTF-8 command youtube-dl -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+			time LANG=C.UTF-8 command youtube-dl --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 			downloadOK=$?
 			$undebug
 			sync
@@ -222,7 +224,7 @@ getRestrictedFilenamesFORMAT () {
 
 			grep -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && continue || \rm $errorLogFile
 
-			if echo "${ytdlExtraOptions[@]}" | $grep -qw -- "-x" ;then
+			if echo "${ytdlExtraOptions[@]}" | $grep -qw -- "-x";then
 				extension=$(getAudioExtension $latestAudioStreamCodecName)
 				fileName="${fileName/.*/.$extension}"
 			fi
