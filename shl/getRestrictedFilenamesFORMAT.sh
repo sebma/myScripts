@@ -160,6 +160,7 @@ getRestrictedFilenamesFORMAT () {
 					echo "=> Converting <$artworkFileName> to JPEG JFIF for AtomicParsley ..."
 					echo
 					convert -verbose "$artworkFileName.tmp" "$artworkFileName" && rm -f "$artworkFileName.tmp"
+					echo
 					echo "=> Done."
 					echo
 				fi
@@ -169,6 +170,7 @@ getRestrictedFilenamesFORMAT () {
 
 			if echo "${ytdlExtraOptions[@]}" | $grep -qw -- "-x" ;then
 				extension=$(getAudioExtension $latestAudioStreamCodecName)
+				( [ $extension = m4a ] || [ $extension = opus ] ) && ytdlExtraOptions+=( -k )
 				newFileName="${fileName/.*/.$extension}"
 			else
 				newFileName="$fileName"
@@ -196,7 +198,6 @@ getRestrictedFilenamesFORMAT () {
 				test $? != 0 && return
 				if [ ! -w "$newFileName" ] || [ $fileSizeOnFS -ge $remoteFileSize ]; then
 					echo "${colors[yellowOnBlue]}=> The file <$newFileName> is already downloaded and is greater or equal to remote file, skipping ...$normal" 1>&2
-#					echo 1>&2
 					continue
 				fi
 			fi
@@ -243,20 +244,19 @@ getRestrictedFilenamesFORMAT () {
 				videoContainer=$(echo $ffprobeJSON_File_Info | $jq -r .format.format_name | cut -d, -f1)
 
 				if [ $videoContainer = mov ];then
-					subTitleExtension=vtt
 					addURL2mp4Metadata "$fileName" "$url"
+					subTitleExtension=vtt
 				elif [ $videoContainer = matroska ];then
 					subTitleExtension=srt
 				fi
 
-				echo "=>" addSubtitles2media "$fileName" "${fileName/.*/}".*.$subTitleExtension
-				chmod -w "$fileName"
+				[ $extension = m4a ] && addSubtitles2media "$fileName" "${fileName/.*/}".*.$subTitleExtension
+				df -T . | awk '{print$2}' | egrep -q "fuseblk|vfat" || chmod -w "$fileName"
 				echo
 				videoInfo.sh "$fileName"
 			fi
 		done
 	done
-	echo
 	sync
 	set +x
 	return $downloadOK
@@ -294,7 +294,7 @@ addURL2mp4Metadata() {
 	echo "[ffmpeg] Adding '$url' to '$fileName' metadata"
 	$ffmpeg -loglevel $ffmpegLogLevel -i "$fileName" -map 0 -c copy -metadata $metadataURLFieldName="$url" "$outputVideo"
 	retCode=$?
-	[ $retCode = 0 ] && sync && touch -r "$fileName" "$outputVideo" && \mv -v "$outputVideo" "$fileName"
+	[ $retCode = 0 ] && sync && touch -r "$fileName" "$outputVideo" && \mv -f "$outputVideo" "$fileName"
 }
 function addSubtitles2media {
 	local inputVideo=$1
@@ -311,15 +311,22 @@ function addSubtitles2media {
 		*) subTitleCodec=not_supported;;
 	esac
 
+	local ffmpeg="$(which ffmpeg)"
+	ffmpeg+=" -hide_banner"
+	local ffmpegNormalLogLevel=repeat+error
+	local ffmpegInfoLogLevel=repeat+info
+	local ffmpegLogLevel=$ffmpegNormalLogLevel
+
 	local outputVideo="${inputVideo/.$extension/_NEW.$extension}"
 	shift
 	local numberOfSubtitles=$#
-	(printf "ffmpeg -hide_banner -i $inputVideo ";printf -- "-i %s " "$@";printf -- "-map 0:a? -map 0:v? ";printf -- "-map %d " $(seq $numberOfSubtitles);printf -- "-c copy -c:s $subTitleCodec $outputVideo\n") | sh -x
+	echo "[ffmpeg] Adding Subtitles to '$fileName'"
+	(printf "$ffmpeg -loglevel $ffmpegLogLevel -i $inputVideo ";printf -- "-i %s " "$@";printf -- "-map 0:a? -map 0:v? ";printf -- "-map %d " $(seq $numberOfSubtitles);printf -- "-c copy -c:s $subTitleCodec $outputVideo\n") | sh
 	local retCode=$?
 	sync
 	sleep 1
 	touch -r "$inputVideo" "$outputVideo"
-	[ $retCode = 0 ] && echo && \mv -vf "$outputVideo" "$inputVideo" && \rm "$@"
+	[ $retCode = 0 ] && \mv -f "$outputVideo" "$inputVideo" && \rm "$@"
 }
 addThumbnail2media() {
 	local scriptOptions=null
@@ -390,7 +397,7 @@ addThumbnail2media() {
 		set +x
 		sync
 		[ $retCode != 0 ] && [ -f "$outputVideo" ] && \rm "$outputVideo"
-		[ $retCode = 0 ] && touch -r "$fileName" "$outputVideo" && \mv -v "$outputVideo" "$fileName" && \rm -v "$artworkFileName"
+		[ $retCode = 0 ] && touch -r "$fileName" "$outputVideo" && \mv -f "$outputVideo" "$fileName" && \rm "$artworkFileName"
 	else
 		retCode=0
 	fi
