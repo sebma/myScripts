@@ -15,8 +15,8 @@ getRestrictedFilenamesFORMAT () {
 	trap 'rc=127;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;return $rc' INT
 
 	if [ $# -le 1 ];then
-		echo "=> Usage : $scriptBaseName url1 url2 ..."
-		exit 1
+		echo "=> [$FUNCNAME] Usage : $scriptBaseName initialSiteVideoFormat url1 url2 ..."
+		return 1
 	fi
 
 	local ytdlExtraOptions="--add-metadata"
@@ -25,8 +25,6 @@ getRestrictedFilenamesFORMAT () {
 	local -i i=0
 	local -i j=0
 	local isLIVE=false
-	local ffmpeg="$(which ffmpeg) -hide_banner"
-	local ffprobe="$(which ffprobe) -hide_banner"
 	local jsonResults=null
 	local metadataURLFieldName=description
 	local embedThumbnail="--write-thumbnail"
@@ -37,7 +35,7 @@ getRestrictedFilenamesFORMAT () {
 	local ffmpegNormalLogLevel=repeat+error
 	local ffmpegInfoLogLevel=repeat+info
 	local ffmpegLogLevel=$ffmpegNormalLogLevel
-	local ffprobeJSON_Info=null
+	local ffprobeJSON_File_Info=null
 	local videoContainer=null
 	local latestVideoStreamCodecName=null
 	local mimetype=null
@@ -53,12 +51,25 @@ getRestrictedFilenamesFORMAT () {
 	local formatsIDs=null
 	local thumbnailExtension=null
 	local artworkFileName=null
+	local tool=null
+	local undebug="set +x"
+
+	for tool in ffmpeg ffprobe jq;do
+		local $tool="$(which $tool)"
+		if [ -z "${!tool}" ];then
+			echo "=> [$FUNCNAME] ERROR: $tool is required, you need to install it." >&2
+			return 2
+		fi
+	done
+
+	ffmpeg+=" -hide_banner"
+	ffprobe+=" -hide_banner"
 
 	echo $1 | grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
 	echo $scriptOptions | \egrep -q -- "-x" && ytdlExtraOptions+=( -x )
-	echo $scriptOptions | \egrep -q -- "-v" && debug="set -x" && undebug="set +x"
-	echo $scriptOptions | \egrep -q -- "-vv" && debug="set -x" && undebug="set +x" && ytdlExtraOptions+=( -v )
-	echo $scriptOptions | \egrep -q -- "-vvv" && debug="set -x" && undebug="set +x" && ytdlExtraOptions+=( -v ) && ffmpegLogLevel=$ffmpegInfoLogLevel
+	echo $scriptOptions | \egrep -q -- "-v" && debug="set -x"
+	echo $scriptOptions | \egrep -q -- "-vv" && debug="set -x" && ytdlExtraOptions+=( -v )
+	echo $scriptOptions | \egrep -q -- "-vvv" && debug="set -x" && ffmpegLogLevel=$ffmpegInfoLogLevel
 
 	initialSiteVideoFormat="$1"
 	shift
@@ -88,8 +99,8 @@ getRestrictedFilenamesFORMAT () {
 		youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__$domainStringForFilename.%(ext)s"
 
 		jsonResults=null
-		jsonResults=$(time command youtube-dl --restrict-filenames -f "$siteVideoFormat" -o "$youtube_dl_FileNamePattern" -j -- "$url" 2>$errorLogFile | jq -r .)
-		formatsIDs=( $(echo "$jsonResults" | jq -r .format_id | awk '!seen[$0]++') )
+		jsonResults=$(time command youtube-dl --restrict-filenames -f "$siteVideoFormat" -o "$youtube_dl_FileNamePattern" -j -- "$url" 2>$errorLogFile | $jq -r .)
+		formatsIDs=( $(echo "$jsonResults" | $jq -r .format_id | awk '!seen[$0]++') ) # Remove duplicate lines i.e: https://stackoverflow.com/a/1444448/5649639
 		echo
 
 		grep -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && continue || \rm $errorLogFile
@@ -99,13 +110,16 @@ getRestrictedFilenamesFORMAT () {
 			let j++
 			let numberOfFilesToDownload=$numberOfURLsToDownload*${#formatsIDs[@]}
 			$undebug
-			fileName=$(echo "$jsonResults"  | jq -n -r "first(inputs | select(.format_id==\"$formatID\"))._filename")
-			extension=$(echo "$jsonResults" | jq -n -r "first(inputs | select(.format_id==\"$formatID\")).ext")
-			thumbnailURL=$(echo "$jsonResults" | jq -n -r "first(inputs | select(.format_id==\"$formatID\")).thumbnail")
-			formatString=$(echo "$jsonResults"  | jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format")
-			chosenFormatID=$(echo "$jsonResults"  | jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format_id")
-			remoteFileSize=$(echo "$jsonResults" | jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize" | sed "s/null/-1/")
-			isLIVE=$(echo "$jsonResults" | jq -n -r "first(inputs | select(.format_id==\"$formatID\")).is_live")
+			fileName=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\"))._filename")
+			extension=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).ext")
+			thumbnailURL=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).thumbnail")
+			formatString=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format")
+			chosenFormatID=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format_id")
+			streamDirectURL="$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).url")"
+			remoteFileSize=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize" | sed "s/null/-1/")
+			isLIVE=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).is_live")
+			ffprobeJSON_Stream_Info=$($ffprobe -hide_banner -v error -show_format -show_streams -print_format json "$streamDirectURL")
+			latestAudioStreamCodecName=$(echo "$ffprobeJSON_Stream_Info" | $jq -r '[ .streams[] | select(.codec_type=="audio") ][-1].codec_name')
 
 			thumbnailExtension=$(echo "${thumbnailURL/*\//}" | awk -F"[.]" '{print$2}')
 			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -qs "$thumbnailURL" | file -bi - | awk -F ';' '{sub(".*/","",$1);print gensub("jpeg","jpg",1,$1)}')
@@ -120,12 +134,22 @@ getRestrictedFilenamesFORMAT () {
 				fi
 			fi
 
-			[ "$debug" ] && echo "=> chosenFormatID = <$chosenFormatID>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> artworkFileName = <$artworkFileName>" && echo
+			echo $formatString | \grep -v '+' | \grep -q "audio only" && ytdlExtraOptions+=( -x )
+
+			if echo $formatString | \grep -v '+' | \grep -q "audio only" || echo "${ytdlExtraOptions[@]}" | \grep -qw -- "-x" ;then
+				case $extension in
+					webm) extension=opus && fileName="${fileName/.webm/.opus}" ;;
+					mp4) extension=m4a && fileName="${fileName/.mp4/.m4a}" ;;
+					*) ;;
+				esac
+			fi
+
+			[ "$debug" ] && echo "=> chosenFormatID = <$chosenFormatID>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> artworkFileName = <$artworkFileName>  latestAudioStreamCodecName = <$latestAudioStreamCodecName>" && echo
 
 			echo "=> Downloading <$url> using the <$chosenFormatID> $sld format ..."
 			echo
 
-			ytdlExtraOptions+=( --embed-subs --write-auto-sub --sub-lang=en,fr,es,de )
+			ytdlExtraOptions+=( --prefer-ffmpeg --restrict-filenames --embed-subs --write-auto-sub --sub-lang=en,fr,es,de )
 			echo $formatString | \grep -v '+' | \grep -q "audio only" && ytdlExtraOptions+=( -x )
 			if [ $isLIVE = true ];then
 				ytdlExtraOptions+=( --hls-use-mpegts )
@@ -133,9 +157,8 @@ getRestrictedFilenamesFORMAT () {
 				ytdlExtraOptions+=( --hls-prefer-native )
 			fi
 
-			echo
 			$undebug
-			echo "=> ytdlExtraOptions = ${ytdlExtraOptions[@]}"
+			[ "$debug" ] && echo "=> ytdlExtraOptions = ${ytdlExtraOptions[@]}"
 			echo
 
 			if [ -f "$fileName" ] && [ $isLIVE != true ]; then
@@ -173,21 +196,14 @@ getRestrictedFilenamesFORMAT () {
 
 			grep -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && continue || \rm $errorLogFile
 
-			if echo $formatString | \grep -v '+' | \grep -q "audio only";then
-				case $extension in
-					webm) extension=opus && fileName="${fileName/.webm/.opus}" ;;
-					*) ;;
-				esac
-			fi
-
 			fileSizeOnFS=$(stat -c %s "$fileName" || echo 0)
-			ffprobeJSON_Info=$($ffprobe -hide_banner -v error -show_format -show_streams -print_format json "$fileName")
+			ffprobeJSON_File_Info=$($ffprobe -hide_banner -v error -show_format -show_streams -print_format json "$fileName")
 
-			videoContainer=$(echo $ffprobeJSON_Info | jq -r .format.format_name | cut -d, -f1)
-#			numberOfVideoStreams=$(echo $ffprobeJSON_Info | jq -r '[ .streams[] | select(.codec_type=="video") ] | length'
-			latestVideoStreamCodecName=$(echo $ffprobeJSON_Info | jq -r '[ .streams[] | select(.codec_type=="video") ][-1].codec_name')
+			videoContainer=$(echo $ffprobeJSON_File_Info | $jq -r .format.format_name | cut -d, -f1)
+#			numberOfVideoStreams=$(echo $ffprobeJSON_File_Info | $jq -r '[ .streams[] | select(.codec_type=="video") ] | length'
+			latestVideoStreamCodecName=$(echo $ffprobeJSON_File_Info | $jq -r '[ .streams[] | select(.codec_type=="video") ][-1].codec_name')
 
-			major_brand=$(echo $ffprobeJSON_Info | jq -r .format.tags.major_brand)
+			major_brand=$(echo $ffprobeJSON_File_Info | $jq -r .format.tags.major_brand)
 
 			[ "$debug" ] && echo "=> videoContainer = <$videoContainer>  latestVideoStreamCodecName = <$latestVideoStreamCodecName> major_brand = <$major_brand>" && echo
 
