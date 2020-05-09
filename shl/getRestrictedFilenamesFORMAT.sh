@@ -145,6 +145,7 @@ getRestrictedFilenamesFORMAT () {
 			streamDirectURL="$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).url")"
 			remoteFileSize=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize" | sed "s/null/-1/")
 			isLIVE=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).is_live")
+
 			ffprobeJSON_Stream_Info=$($ffprobe -hide_banner -v error -show_format -show_streams -print_format json "$streamDirectURL")
 			latestAudioStreamCodecName=$(echo "$ffprobeJSON_Stream_Info" | $jq -r '[ .streams[] | select(.codec_type=="audio") ][-1].codec_name')
 
@@ -238,13 +239,7 @@ getRestrictedFilenamesFORMAT () {
 			$undebug
 
 			if [ $downloadOK = 0 ]; then
-				if [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ];then
-					timestampFileRef=$(mktemp) && touch -r "$fileName" $timestampFileRef
-					metadataURLFieldName=description
-					echo "[ffmpeg] Adding '$url' to '$fileName' metadata"
-					$ffmpeg -loglevel $ffmpegLogLevel -i "$fileName" -map 0 -c copy -metadata $metadataURLFieldName="$url" "${fileName/.$extension/_NEW.$extension}" && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName"
-					touch -r $timestampFileRef "$fileName" && \rm $timestampFileRef
-				fi
+				addURL2mp4Metadata "$fileName" "$url"
 				chmod -w "$fileName"
 				echo
 				videoInfo.sh "$fileName"
@@ -257,6 +252,28 @@ getRestrictedFilenamesFORMAT () {
 	return $downloadOK
 }
 
+addURL2mp4Metadata() {
+	if [ $# != 2 ];then
+		echo "=> Usage: $FUNCNAME mediaFile url" 1>&2
+		exit 1
+	fi
+
+	local fileName=$1
+	local url=$2
+	local extension=${fileName/*./}
+
+	local ffmpegNormalLogLevel=repeat+error
+	local ffmpegInfoLogLevel=repeat+info
+	local ffmpegLogLevel=$ffmpegNormalLogLevel
+
+	if [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = mp3 ];then
+		timestampFileRef=$(mktemp) && touch -r "$fileName" $timestampFileRef
+		metadataURLFieldName=description
+		echo "[ffmpeg] Adding '$url' to '$fileName' metadata"
+		$ffmpeg -loglevel $ffmpegLogLevel -i "$fileName" -map 0 -c copy -metadata $metadataURLFieldName="$url" "${fileName/.$extension/_NEW.$extension}" && sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName"
+		touch -r $timestampFileRef "$fileName" && \rm $timestampFileRef
+	fi
+}
 addThumbnail2media() {
 	local scriptOptions=null
 	echo $1 | \grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
