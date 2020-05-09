@@ -5,7 +5,6 @@
 
 set_colors() {
 	[ $BASH_VERSINFO -ge 4 ] && declare -Ag colors=( [red]=$(tput setaf 1) [green]=$(tput setaf 2) [blue]=$(tput setaf 4) [cyan]=$(tput setaf 6) [yellow]=$(tput setaf 11) [yellowOnRed]=$(tput setaf 11)$(tput setab 1) [greenOnBlue]=$(tput setaf 2)$(tput setab 4) [yellowOnBlue]=$(tput setaf 11)$(tput setab 4) [cyanOnBlue]=$(tput setaf 6)$(tput setab 4) [whiteOnBlue]=$(tput setaf 7)$(tput setab 4) [redOnGrey]=$(tput setaf 1)$(tput setab 7) [blueOnGrey]=$(tput setaf 4)$(tput setab 7) )
-	[ $BASH_VERSINFO -ge 4 ] &&	declare -g normal=$(tput sgr0)
 }
 
 LANG=C.UTF-8
@@ -44,6 +43,7 @@ getRestrictedFilenamesFORMAT () {
 	trap 'rc=127;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;return $rc' INT
 
 	set_colors
+	local normal=$(tput sgr0)
 
 	if [ $# -le 1 ];then
 		echo "=> [$FUNCNAME] Usage : $scriptBaseName initialSiteVideoFormat url1 url2 ..."
@@ -198,8 +198,8 @@ getRestrictedFilenamesFORMAT () {
 				fileSizeOnFS=$(stat -c %s "$newFileName" || echo 0)
 				test $? != 0 && return
 				if [ ! -w "$newFileName" ] || [ $fileSizeOnFS -ge $remoteFileSize ]; then
-					echo "${colors[yellowOnBlue]}=> The file <$newFileName> is already downloaded and is greater or equal to remote file, skipping$normal ..." 1>&2
-					echo 1>&2
+					echo "${colors[yellowOnBlue]}=> The file <$newFileName> is already downloaded and is greater or equal to remote file, skipping ...$normal" 1>&2
+#					echo 1>&2
 					continue
 				fi
 			fi
@@ -213,8 +213,6 @@ getRestrictedFilenamesFORMAT () {
 			echo "=> Downloading file # $j/$numberOfFilesToDownload ..."
 			echo
 			printf "=> Starting youtube-dl at %s ...\n" "$(LC_MESSAGES=en date)"
-			echo
-			echo "=> ytdlExtraOptions = ${ytdlExtraOptions[@]}"
 			echo
 			errorLogFile="youtube-dl_errors_$$.log"
 			$debug
@@ -243,54 +241,7 @@ getRestrictedFilenamesFORMAT () {
 			[ "$debug" ] && echo "=> videoContainer = <$videoContainer>  latestVideoStreamCodecName = <$latestVideoStreamCodecName> major_brand = <$major_brand>" && echo
 
 			if [ $fileSizeOnFS -ge $remoteFileSize ] || [ $downloadOK = 0 ]; then
-				if [ -s "$artworkFileName" ] && [ "$latestVideoStreamCodecName" != mjpeg ] && [ "$latestVideoStreamCodecName" != png ];then
-					mimetype=$(file -bi "$artworkFileName" | cut -d';' -f1)
-					timestampFileRef=$(mktemp) && touch -r "$fileName" $timestampFileRef
-					if [ $videoContainer = mov ];then
-						echo "[ffmpeg] Adding thumbnail to '$fileName'"
-						[ $major_brand = M4A ] && disposition_stream_specifier=v:0 || disposition_stream_specifier=v:1
-						$ffmpeg -loglevel $ffmpegLogLevel -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -disposition:$disposition_stream_specifier attached_pic "${fileName/.$extension/_NEW.$extension}"
-						retCode=$?
-						if [ $retCode = 0 ];then
-							sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "$artworkFileName" && downloadOK=0
-						else
-							set -x
-							$ffmpeg -loglevel $ffmpegInfoLogLevel -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -disposition:$disposition_stream_specifier attached_pic "${fileName/.$extension/_NEW.$extension}"
-							set +x
-							\rm "${fileName/.$extension/_NEW.$extension}"
-						fi
-					elif [ $videoContainer = mp3 ];then
-						echo "[ffmpeg] Adding thumbnail to '$fileName'"
-						$ffmpeg -loglevel $ffmpegLogLevel -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -map_metadata 0 "${fileName/.$extension/_NEW.$extension}"
-						retCode=$?
-						if [ $retCode = 0 ];then
-							sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "$artworkFileName" && downloadOK=0
-						else
-							set -x
-							$ffmpeg -loglevel $ffmpegInfoLogLevel -i "$fileName" -i "$artworkFileName" -map 0 -map 1 -c copy -map_metadata 0 "${fileName/.$extension/_NEW.$extension}"
-							set +x
-							\rm "${fileName/.$extension/_NEW.$extension}"
-						fi
-					elif [ $videoContainer = matroska ];then
-						echo "[ffmpeg] Adding thumbnail to '$fileName'"
-						$ffmpeg -loglevel $ffmpegLogLevel -i "$fileName" -map 0 -c copy -attach "$artworkFileName" -metadata:s:t mimetype=$mimetype "${fileName/.$extension/_NEW.$extension}"
-						retCode=$?
-						if [ $retCode = 0 ];then
-							sync && mv "${fileName/.$extension/_NEW.$extension}" "$fileName" && rm "$artworkFileName" && downloadOK=0
-						else
-							set -x
-							$ffmpeg -loglevel $ffmpegInfoLogLevel -i "$fileName" -map 0 -c copy -attach "$artworkFileName" -metadata:s:t mimetype=$mimetype "${fileName/.$extension/_NEW.$extension}"
-							set +x
-							\rm "${fileName/.$extension/_NEW.$extension}"
-						fi
-					elif [ $videoContainer = ogg ];then
-# Complicated with the "METADATA_BLOCK_PICTURE" ogg according to https://superuser.com/a/706808/528454 and https://xiph.org/flac/format.html#metadata_block_picture use another tool instead
-						echo "=> ADDING COVER TO THE OGG CONTAINER IS NOT IMPLEMENTED YET"
-						\rm "$artworkFileName"
-						downloadOK=0
-					fi
-					touch -r $timestampFileRef "$fileName" && \rm $timestampFileRef
-				fi
+				addThumbnail2media "$fileName" "$artworkFileName"
 			else
 				time LANG=C.UTF-8 command youtube-dl -o $fileName -f "$chosenFormatID" "$url" 2>$errorLogFile
 				downloadOK=$?
