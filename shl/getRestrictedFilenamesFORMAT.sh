@@ -2,17 +2,48 @@
 
 #set -o nounset
 [ $BASH_VERSINFO -lt 4 ] && echo "=> [WARNING] BASH_VERSINFO = $BASH_VERSINFO then continuing in bash4 ..." && exec bash4 $0 "$@"
-[ $BASH_VERSINFO -ge 4 ] && declare -A colors=( [red]=$(tput setaf 1) [green]=$(tput setaf 2) [blue]=$(tput setaf 4) [cyan]=$(tput setaf 6) [yellow]=$(tput setaf 11) [yellowOnRed]=$(tput setaf 11)$(tput setab 1) [greenOnBlue]=$(tput setaf 2)$(tput setab 4) [yellowOnBlue]=$(tput setaf 11)$(tput setab 4) [cyanOnBlue]=$(tput setaf 6)$(tput setab 4) [whiteOnBlue]=$(tput setaf 7)$(tput setab 4) [redOnGrey]=$(tput setaf 1)$(tput setab 7) [blueOnGrey]=$(tput setaf 4)$(tput setab 7) )
+
+set_colors() {
+	[ $BASH_VERSINFO -ge 4 ] && declare -Ag colors=( [red]=$(tput setaf 1) [green]=$(tput setaf 2) [blue]=$(tput setaf 4) [cyan]=$(tput setaf 6) [yellow]=$(tput setaf 11) [yellowOnRed]=$(tput setaf 11)$(tput setab 1) [greenOnBlue]=$(tput setaf 2)$(tput setab 4) [yellowOnBlue]=$(tput setaf 11)$(tput setab 4) [cyanOnBlue]=$(tput setaf 6)$(tput setab 4) [whiteOnBlue]=$(tput setaf 7)$(tput setab 4) [redOnGrey]=$(tput setaf 1)$(tput setab 7) [blueOnGrey]=$(tput setaf 4)$(tput setab 7) )
+	[ $BASH_VERSINFO -ge 4 ] &&	declare -g normal=$(tput sgr0)
+}
 
 LANG=C.UTF-8
 scriptBaseName=${0/*\//}
 scriptExtension=${0/*./}
 funcName=${scriptBaseName/.$scriptExtension/}
-youtube_dl="eval LANG=C.UTF-8 command youtube-dl" # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
+
+getAudioExtension () {
+	if [ $# != 1 ];then
+		echo "=> [$FUNCNAME] Usage: $FUNCNAME ffprobeAudioCodecName"
+		return 1
+	fi
+	
+	local acodec=$1
+	local audioExtension=unknown
+
+	if [ $BASH_VERSINFO -ge 4 ];then
+		declare -A audioExtension=( [libspeex]=spx [speex]=spx [opus]=opus [vorbis]=ogg [aac]=m4a [mp3]=mp3 [mp2]=mp2 [ac3]=ac3 [wmav2]=wma [pcm_dvd]=wav [pcm_s16le]=wav )
+		audioExtension=${audioExtension[$acodec]}
+	else
+		case $acodec in
+			libspeex|speex) audioExtension=spx;;
+			opus|mp2|mp3|ac3) audioExtension=$acodec;;
+			vorbis) audioExtension=ogg;;
+			aac) audioExtension=m4a;;
+			wmav2) audioExtension=wma;;
+			pcm_dvd|pcm_s16le) audioExtension=wav;;
+			*) audioExtension=unknown;;
+		esac
+	fi
+	echo $audioExtension
+}
 
 unset -f getRestrictedFilenamesFORMAT
 getRestrictedFilenamesFORMAT () {
 	trap 'rc=127;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;return $rc' INT
+
+	set_colors
 
 	if [ $# -le 1 ];then
 		echo "=> [$FUNCNAME] Usage : $scriptBaseName initialSiteVideoFormat url1 url2 ..."
@@ -20,6 +51,7 @@ getRestrictedFilenamesFORMAT () {
 	fi
 
 	local ytdlExtraOptions="--add-metadata"
+	local youtube_dl="eval LANG=C.UTF-8 command youtube-dl" # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
 	local translate=cat
 	local siteVideoFormat downloadOK=-1 extension fqdn fileSizeOnFS=0 remoteFileSize=0
 	local -i i=0
@@ -54,7 +86,7 @@ getRestrictedFilenamesFORMAT () {
 	local tool=null
 	local undebug="set +x"
 
-	for tool in ffmpeg ffprobe jq;do
+	for tool in ffmpeg grep ffprobe jq;do
 		local $tool="$(which $tool)"
 		if [ -z "${!tool}" ];then
 			echo "=> [$FUNCNAME] ERROR: $tool is required, you need to install it." >&2
@@ -65,11 +97,11 @@ getRestrictedFilenamesFORMAT () {
 	ffmpeg+=" -hide_banner"
 	ffprobe+=" -hide_banner"
 
-	echo $1 | grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
-	echo $scriptOptions | \egrep -q -- "-x" && ytdlExtraOptions+=( -x )
-	echo $scriptOptions | \egrep -q -- "-v" && debug="set -x"
-	echo $scriptOptions | \egrep -q -- "-vv" && debug="set -x" && ytdlExtraOptions+=( -v )
-	echo $scriptOptions | \egrep -q -- "-vvv" && debug="set -x" && ffmpegLogLevel=$ffmpegInfoLogLevel
+	echo $1 | $grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
+	echo $scriptOptions | $grep -q -- "-x" && ytdlExtraOptions+=( -x )
+	echo $scriptOptions | $grep -q -- "-v" && debug="set -x"
+	echo $scriptOptions | $grep -q -- "-vv" && debug="set -x" && ytdlExtraOptions+=( -v )
+	echo $scriptOptions | $grep -q -- "-vvv" && debug="set -x" && ffmpegLogLevel=$ffmpegInfoLogLevel
 
 	initialSiteVideoFormat="$1"
 	shift
@@ -125,7 +157,9 @@ getRestrictedFilenamesFORMAT () {
 			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -qs "$thumbnailURL" | file -bi - | awk -F ';' '{sub(".*/","",$1);print gensub("jpeg","jpg",1,$1)}')
 			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/.$extension/.$thumbnailExtension}
 
-			if [ $thumbnailerName = AtomicParsley ] && ! \curl -qs "$thumbnailURL" | file -b - | \grep -q JFIF;then # because of https://bitbucket.org/wez/atomicparsley/issues/63
+			[ "$debug" ] && echo "=> chosenFormatID = <$chosenFormatID>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> artworkFileName = <$artworkFileName>  latestAudioStreamCodecName = <$latestAudioStreamCodecName>" && echo
+
+			if [ $thumbnailerName = AtomicParsley ] && ! \curl -qs "$thumbnailURL" | file -b - | $grep -q JFIF;then #Because of https://bitbucket.org/wez/atomicparsley/issues/63
 				if \curl -qs "$thumbnailURL" -o "$artworkFileName.tmp";then
 					echo "=> Converting <$artworkFileName> to JPEG JFIF for AtomicParsley ..."
 					convert -verbose "$artworkFileName.tmp" "$artworkFileName" && rm -f "$artworkFileName.tmp"
@@ -134,23 +168,21 @@ getRestrictedFilenamesFORMAT () {
 				fi
 			fi
 
-			echo $formatString | \grep -v '+' | \grep -q "audio only" && ytdlExtraOptions+=( -x )
+			echo $formatString | $grep -v '+' | $grep -q "audio only" && ytdlExtraOptions+=( -x )
 
-			if echo $formatString | \grep -v '+' | \grep -q "audio only" || echo "${ytdlExtraOptions[@]}" | \grep -qw -- "-x" ;then
-				case $extension in
-					webm) extension=opus && fileName="${fileName/.webm/.opus}" ;;
-					mp4) extension=m4a && fileName="${fileName/.mp4/.m4a}" ;;
-					*) ;;
-				esac
+			if echo "${ytdlExtraOptions[@]}" | $grep -qw -- "-x" ;then
+				extension=$(getAudioExtension $latestAudioStreamCodecName)
+				newFileName="${fileName/.*/.$extension}"
+			else
+				newFileName="$fileName"
 			fi
 
-			[ "$debug" ] && echo "=> chosenFormatID = <$chosenFormatID>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> artworkFileName = <$artworkFileName>  latestAudioStreamCodecName = <$latestAudioStreamCodecName>" && echo
+			[ "$debug" ] && echo "=> newFileName = <$newFileName>" && echo
 
 			echo "=> Downloading <$url> using the <$chosenFormatID> $sld format ..."
 			echo
 
 			ytdlExtraOptions+=( --prefer-ffmpeg --restrict-filenames --embed-subs --write-auto-sub --sub-lang=en,fr,es,de )
-			echo $formatString | \grep -v '+' | \grep -q "audio only" && ytdlExtraOptions+=( -x )
 			if [ $isLIVE = true ];then
 				ytdlExtraOptions+=( --hls-use-mpegts )
 			else
@@ -158,18 +190,16 @@ getRestrictedFilenamesFORMAT () {
 			fi
 
 			$undebug
-			[ "$debug" ] && echo "=> ytdlExtraOptions = ${ytdlExtraOptions[@]}"
-			echo
+			[ "$debug" ] && echo "=> ytdlExtraOptions = ${ytdlExtraOptions[@]}" && echo
 
-			if [ -f "$fileName" ] && [ $isLIVE != true ]; then
-				echo "=> The file <$fileName> is already exists, comparing it's size with the remote file ..." 1>&2
-				echo
-				fileSizeOnFS=$(stat -c %s "$fileName" || echo 0)
+			if [ -f "$newFileName" ] && [ $isLIVE != true ]; then
+				echo "=> The file <$newFileName> is already exists, comparing it's size with the remote file ..." 1>&2
+				echo 1>&2
+				fileSizeOnFS=$(stat -c %s "$newFileName" || echo 0)
 				test $? != 0 && return
-				if [ ! -w "$fileName" ] || [ $fileSizeOnFS -ge $remoteFileSize ]; then
-					echo
-					echo "${colors[yellowOnBlue]}=> The file <$fileName> is already downloaded ang greater or equal to remote file, skipping ...$normal" 1>&2
-					echo
+				if [ ! -w "$newFileName" ] || [ $fileSizeOnFS -ge $remoteFileSize ]; then
+					echo "${colors[yellowOnBlue]}=> The file <$newFileName> is already downloaded and is greater or equal to remote file, skipping$normal ..." 1>&2
+					echo 1>&2
 					continue
 				fi
 			fi
@@ -195,6 +225,11 @@ getRestrictedFilenamesFORMAT () {
 			echo
 
 			grep -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && continue || \rm $errorLogFile
+
+			if echo "${ytdlExtraOptions[@]}" | $grep -qw -- "-x" ;then
+				extension=$(getAudioExtension $latestAudioStreamCodecName)
+				fileName="${fileName/.*/.$extension}"
+			fi
 
 			fileSizeOnFS=$(stat -c %s "$fileName" || echo 0)
 			ffprobeJSON_File_Info=$($ffprobe -hide_banner -v error -show_format -show_streams -print_format json "$fileName")
@@ -261,7 +296,7 @@ getRestrictedFilenamesFORMAT () {
 				downloadOK=$?
 				echo
 
-				egrep -A1 'ERROR:.*' $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && return $downloadOK || \rm $errorLogFile
+				$grep -A1 'ERROR:.*' $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && return $downloadOK || \rm $errorLogFile
 			fi
 			$undebug
 
