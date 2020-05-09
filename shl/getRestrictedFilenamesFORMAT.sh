@@ -274,6 +274,32 @@ addURL2mp4Metadata() {
 		touch -r $timestampFileRef "$fileName" && \rm $timestampFileRef
 	fi
 }
+function addSubtitles2media {
+	local inputVideo=$1
+	test $# -le 1 && {
+		echo "=> Usage: $FUNCNAME inputVideo subFile1 subFile2 subFile3 ..." >&2
+		return 1
+	}
+
+	local extension=${inputVideo/*./}
+
+	case $extension in
+		mp4|m4a|m4b|mov) subTitleCodec=mov_text;;
+		webm|mkv|mka) subTitleCodec=srt;;
+		ogg|opus) subTitleCodec=not_know_yet;;
+		*) subTitleCodec=not_supported;;
+	esac
+
+	local outputVideo=${inputVideo/.$extension/_NEW.$extension}
+	shift
+	local numberOfSubtitles=$#
+	(printf "ffmpeg -hide_banner -i $inputVideo ";printf -- "-i %s " "$@";printf -- "-map 0:a? -map 0:v? ";printf -- "-map %d " $(seq $numberOfSubtitles);printf -- "-c copy -c:s $subTitleCodec $outputVideo\n") | sh -x
+	local retCode=$?
+	sync
+	sleep 1
+	touch -r "$inputVideo" "$outputVideo"
+	[ $retCode = 0 ] && echo && \mv -vf "$outputVideo" "$inputVideo" && \rm "$@"
+}
 addThumbnail2media() {
 	local scriptOptions=null
 	echo $1 | \grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
