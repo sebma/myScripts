@@ -199,7 +199,8 @@ getRestrictedFilenamesFORMAT () {
 				fileSizeOnFS=$(stat -c %s "$newFileName" || echo 0)
 				test $? != 0 && return
 				if [ ! -w "$newFileName" ] || [ $fileSizeOnFS -ge $remoteFileSize ]; then
-					echo "${colors[yellowOnBlue]}=> The file <$newFileName> is already downloaded and is greater or equal to remote file, skipping ...$normal" 1>&2
+					echo "${colors[yellowOnBlue]}=> The file <$newFileName> is already downloaded and greater/equal to the remote, skipping ...$normal" 1>&2
+					echo 1>&2
 					continue
 				fi
 			fi
