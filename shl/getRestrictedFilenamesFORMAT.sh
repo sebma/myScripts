@@ -133,7 +133,7 @@ getRestrictedFilenamesFORMAT () {
 		formatsIDs=( $(echo "$jsonResults" | $jq -r .format_id | awk '!seen[$0]++') ) # Remove duplicate lines i.e: https://stackoverflow.com/a/1444448/5649639
 		echo
 
-		$grepColor -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && continue || \rm $errorLogFile
+		$grepColor -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && echo >&2 && continue || \rm $errorLogFile
 
 		for formatID in "${formatsIDs[@]}"
 		do
@@ -225,7 +225,7 @@ getRestrictedFilenamesFORMAT () {
 			sync
 			echo
 
-			$grepColor -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && continue || \rm $errorLogFile
+			$grepColor -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && echo >&2 && continue || \rm $errorLogFile
 
 			if echo "${ytdlExtraOptions[@]}" | $grep -qw -- "-x";then
 				extension=$(getAudioExtension $latestAudioStreamCodecName)
@@ -240,7 +240,7 @@ getRestrictedFilenamesFORMAT () {
 				downloadOK=$?
 				echo
 
-				$grepColor -A1 'ERROR:.*' $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && return $downloadOK || \rm $errorLogFile
+				$grepColor -A1 'ERROR:.*' $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && echo >&2 && return $downloadOK || \rm $errorLogFile
 			fi
 			$undebug
 
