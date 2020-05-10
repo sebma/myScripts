@@ -40,7 +40,7 @@ getAudioExtension () {
 
 unset -f getRestrictedFilenamesFORMAT
 getRestrictedFilenamesFORMAT () {
-	trap 'rc=127;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;return $rc' INT
+	trap 'rc=127;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;exit $rc' INT
 
 	set_colors
 	local normal=$(tput sgr0)
