@@ -5,4 +5,4 @@ if [ $# = 0 ];then
 	exit 1
 fi
 
-getRestrictedFilenamesFORMAT.sh 249/139/250/140/251 "$@"
+getRestrictedFilenamesFORMAT.sh 140/249/139/250/251 "$@"
