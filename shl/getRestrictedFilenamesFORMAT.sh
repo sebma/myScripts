@@ -150,13 +150,13 @@ getRestrictedFilenamesFORMAT () {
 			isLIVE=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).is_live")
 
 			ffprobeJSON_Stream_Info=$($ffprobe -hide_banner -v error -show_format -show_streams -print_format json "$streamDirectURL")
-			latestAudioStreamCodecName=$(echo "$ffprobeJSON_Stream_Info" | $jq -r '[ .streams[] | select(.codec_type=="audio") ][-1].codec_name')
+			firstAudioStreamCodecName=$(echo "$ffprobeJSON_Stream_Info" | $jq -r '[ .streams[] | select(.codec_type=="audio") ][0].codec_name')
 
 			thumbnailExtension=$(echo "${thumbnailURL/*\//}" | awk -F"[.]" '{print$2}')
 			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -qs "$thumbnailURL" | file -bi - | awk -F ';' '{sub(".*/","",$1);print gensub("jpeg","jpg",1,$1)}')
 			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/.$extension/.$thumbnailExtension}
 
-			[ "$debug" ] && echo "=> chosenFormatID = <$chosenFormatID>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> artworkFileName = <$artworkFileName>  latestAudioStreamCodecName = <$latestAudioStreamCodecName>" && echo
+			[ "$debug" ] && echo "=> chosenFormatID = <$chosenFormatID>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> artworkFileName = <$artworkFileName>  firstAudioStreamCodecName = <$firstAudioStreamCodecName>" && echo
 
 			if [ $thumbnailerName = AtomicParsley ] && ! \curl -qs "$thumbnailURL" | file -b - | $grep -q JFIF;then #Because of https://bitbucket.org/wez/atomicparsley/issues/63
 				if \curl -qs "$thumbnailURL" -o "$artworkFileName.tmp";then
@@ -173,7 +173,7 @@ getRestrictedFilenamesFORMAT () {
 			echo $formatString | $grep -v '+' | $grep -q "audio only" && ytdlExtraOptions+=( -x )
 
 			if echo "${ytdlExtraOptions[@]}" | $grep -qw -- "-x";then
-				extension=$(getAudioExtension $latestAudioStreamCodecName)
+				extension=$(getAudioExtension $firstAudioStreamCodecName)
 				( [ $extension = m4a ] || [ $extension = opus ] ) && ytdlExtraOptions+=( -k )
 				newFileName="${fileName/.*/.$extension}"
 			else
@@ -228,7 +228,7 @@ getRestrictedFilenamesFORMAT () {
 			$grepColor -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && echo >&2 && continue || \rm $errorLogFile
 
 			if echo "${ytdlExtraOptions[@]}" | $grep -qw -- "-x";then
-				extension=$(getAudioExtension $latestAudioStreamCodecName)
+				extension=$(getAudioExtension $firstAudioStreamCodecName)
 				fileName="${fileName/.*/.$extension}"
 			fi
 
