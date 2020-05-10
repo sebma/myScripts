@@ -109,6 +109,7 @@ getRestrictedFilenamesFORMAT () {
 	do
 		let i++
 		numberOfURLsToDownload=$#
+		echo
 		echo "=> Downloading url # $i/$# ..."
 		echo
 		echo $url | egrep -wq "https?:" || url=https://www.youtube.com/watch?v=$url
