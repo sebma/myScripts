@@ -14,7 +14,7 @@ funcName=${scriptBaseName/.$scriptExtension/}
 
 getAudioExtension () {
 	if [ $# != 1 ];then
-		echo "=> [$FUNCNAME] Usage: $FUNCNAME ffprobeAudioCodecName"
+		echo "=> [$FUNCNAME] Usage: $FUNCNAME ffprobeAudioCodecName" 1>&2
 		return 1
 	fi
 	
@@ -46,7 +46,7 @@ getRestrictedFilenamesFORMAT () {
 	local normal=$(tput sgr0)
 
 	if [ $# -le 1 ];then
-		echo "=> [$FUNCNAME] Usage : $scriptBaseName initialSiteVideoFormat url1 url2 ..."
+		echo "=> [$FUNCNAME] Usage : $scriptBaseName initialSiteVideoFormat url1 url2 ..." 1>&2
 		return 1
 	fi
 
@@ -303,7 +303,7 @@ addURL2mp4Metadata() {
 function addSubtitles2media {
 	local inputVideo=$1
 	test $# -le 1 && {
-		echo "=> Usage: $FUNCNAME inputVideo subFile1 subFile2 subFile3 ..." >&2
+		echo "=> Usage: $FUNCNAME inputVideo subFile1 subFile2 subFile3 ..." 1>&2
 		return 1
 	}
 
