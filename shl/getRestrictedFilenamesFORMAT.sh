@@ -135,7 +135,7 @@ getRestrictedFilenamesFORMAT () {
 
 		$grepColor -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && echo >&2 && continue || \rm $errorLogFile
 
-		for formatID in "${formatsIDs[@]}"
+		time for formatID in "${formatsIDs[@]}"
 		do
 			let j++
 			let numberOfFilesToDownload=$numberOfURLsToDownload*${#formatsIDs[@]}
@@ -457,4 +457,4 @@ function getRestrictedFilenamesVLD {
 	getRestrictedFilenamesFORMAT "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
 
-$funcName $@
+time $funcName $@
