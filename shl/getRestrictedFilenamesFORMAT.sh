@@ -92,6 +92,8 @@ getRestrictedFilenamesFORMAT () {
 
 	ffmpeg+=" -hide_banner"
 	ffprobe+=" -hide_banner"
+	grepColor=$grep
+	grep --help | grep -q -- --color && grepColor+=" --color"
 
 	echo $1 | $grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
 	echo $scriptOptions | $grep -q -- "-x" && ytdlInitialOptions+=( -x )
@@ -131,7 +133,7 @@ getRestrictedFilenamesFORMAT () {
 		formatsIDs=( $(echo "$jsonResults" | $jq -r .format_id | awk '!seen[$0]++') ) # Remove duplicate lines i.e: https://stackoverflow.com/a/1444448/5649639
 		echo
 
-		grep -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && continue || \rm $errorLogFile
+		$grepColor -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && continue || \rm $errorLogFile
 
 		for formatID in "${formatsIDs[@]}"
 		do
@@ -223,7 +225,7 @@ getRestrictedFilenamesFORMAT () {
 			sync
 			echo
 
-			grep -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && continue || \rm $errorLogFile
+			$grepColor -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && continue || \rm $errorLogFile
 
 			if echo "${ytdlExtraOptions[@]}" | $grep -qw -- "-x";then
 				extension=$(getAudioExtension $latestAudioStreamCodecName)
@@ -238,7 +240,7 @@ getRestrictedFilenamesFORMAT () {
 				downloadOK=$?
 				echo
 
-				$grep -A1 'ERROR:.*' $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && return $downloadOK || \rm $errorLogFile
+				$grepColor -A1 'ERROR:.*' $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && return $downloadOK || \rm $errorLogFile
 			fi
 			$undebug
 
@@ -253,7 +255,7 @@ getRestrictedFilenamesFORMAT () {
 					subTitleExtension=srt
 				fi
 
-				[ $extension = m4a ] && addSubtitles2media "$fileName" "${fileName/.*/}".*.$subTitleExtension
+				[ $extension = m4a ] && \ls "${fileName/.*/}".*.$subTitleExtension >/dev/null 2>&1  && addSubtitles2media "$fileName" "${fileName/.*/}".*.$subTitleExtension
 				df -T . | awk '{print$2}' | egrep -q "fuseblk|vfat" || chmod -w "$fileName"
 				echo
 				videoInfo.sh "$fileName"
@@ -309,7 +311,8 @@ function addSubtitles2media {
 	local extension="${inputVideo/*./}"
 	case $extension in
 		mp4|m4a|m4b|mov) subTitleCodec=mov_text;;
-		webm|mkv|mka) subTitleCodec=srt;;
+#		webm|mkv|mka) subTitleCodec=srt;;
+		webm|mkv|mka) subTitleCodec=webvtt;;
 		ogg|opus) subTitleCodec=not_know_yet;;
 		*) subTitleCodec=not_supported;;
 	esac
