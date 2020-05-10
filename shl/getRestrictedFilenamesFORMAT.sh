@@ -258,7 +258,6 @@ getRestrictedFilenamesFORMAT () {
 
 				[ $extension = m4a ] && \ls "${fileName/.*/}".*.$subTitleExtension >/dev/null 2>&1  && addSubtitles2media "$fileName" "${fileName/.*/}".*.$subTitleExtension
 				df -T . | awk '{print$2}' | egrep -q "fuseblk|vfat" || chmod -w "$fileName"
-				echo
 				videoInfo.sh "$fileName"
 			fi
 		done
