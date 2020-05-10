@@ -12,6 +12,7 @@ function videoInfo {
 		local ffprobe='command ffprobe -hide_banner'
 		for urlOrFile
 		do
+			echo
 			echo "=> urlOrFile = $urlOrFile"
 			if echo "$urlOrFile" | egrep -q "(https?|s?ftps?|ssh|rtmp|rtsp|mms)://"
 			then
@@ -42,7 +43,6 @@ function videoInfo {
 				echo "Size: $size"
 				$ffprobe "$urlOrFile" || $ffprobe $ffprobeOptions "$urlOrFile"
 			fi
-			echo
 		done 2>&1 | \egrep -vi "^ +(:|comment|description +: [^/]+$)" | uniq | egrep --color -iw "^$|description.*:/|PURL.*:/|stream|local|urlOrFile|kb/s|Input|Size:|Title:|Duration:|Stream|Chapter|Invalid|error|bad| no such file|^\[.* not"
 	}
 }
