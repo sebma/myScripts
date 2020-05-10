@@ -174,7 +174,7 @@ getRestrictedFilenamesFORMAT () {
 			echo $formatString | $grep -v '+' | $grep -q "audio only" && ytdlExtraOptions+=( -x )
 
 			if echo "${ytdlExtraOptions[@]}" | $grep -qw -- "-x";then
-				extension=$(getAudioExtension $firstAudioStreamCodecName)
+				extension=$(getAudioExtension $firstAudioStreamCodecName || continue)
 				( [ $extension = m4a ] || [ $extension = opus ] ) && ytdlExtraOptions+=( -k )
 				newFileName="${fileName/.*/.$extension}"
 			else
@@ -228,7 +228,7 @@ getRestrictedFilenamesFORMAT () {
 			$grepColor -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && echo >&2 && continue || \rm $errorLogFile
 
 			if echo "${ytdlExtraOptions[@]}" | $grep -qw -- "-x";then
-				extension=$(getAudioExtension $firstAudioStreamCodecName)
+				extension=$(getAudioExtension $firstAudioStreamCodecName || continue)
 				fileName="${fileName/.*/.$extension}"
 			fi
 
