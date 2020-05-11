@@ -47,6 +47,7 @@ deborphan
 dfc
 dh-make
 diatheke # command line bible browsing and search tool
+dlocate
 dpkg-repack
 efibootmgr
 efivar
