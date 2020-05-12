@@ -71,6 +71,7 @@ getRestrictedFilenamesFORMAT () {
 
 	echo $1 | $grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
 	echo $scriptOptions | $grep -q -- "-x" && ytdlInitialOptions+=( -x )
+	echo $scriptOptions | $grep -q -- "-p" && playlistFileName=$2 && shift 2
 	echo $scriptOptions | $grep -q -- "-v" && debug="set -x"
 	echo $scriptOptions | $grep -q -- "-vv" && debug="set -x" && ytdlInitialOptions+=( -v )
 	echo $scriptOptions | $grep -q -- "-vvv" && debug="set -x" && ffmpegLogLevel=$ffmpegInfoLogLevel
@@ -110,6 +111,8 @@ getRestrictedFilenamesFORMAT () {
 
 		$grepColor -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && echo >&2 && continue || \rm $errorLogFile
 
+		test -n "$playlistFileName" && echo '#EXTM3U' > "$playlistFileName"
+
 		time for formatID in "${formatsIDs[@]}"
 		do
 			let j++
@@ -117,13 +120,17 @@ getRestrictedFilenamesFORMAT () {
 			$undebug
 			fileName=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\"))._filename")
 			extension=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).ext")
-			duration=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).duration" | $grep '^[0-9]*' || echo -1) # To create an M3U file
 			thumbnailURL=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).thumbnail")
 			formatString=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format")
 			chosenFormatID=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format_id")
 			streamDirectURL="$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).url")"
 			remoteFileSize=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize" | sed "s/null/-1/")
 			isLIVE=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).is_live")
+
+			duration=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).duration" | $grep '^[0-9]*' || echo -1) # To create an M3U file
+			title=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).title")
+			webpage_url=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).webpage_url")
+			test -n "$playlistFileName" && printf '#EXTINF:'"$duration,$title\n$webpage_url\n" >> "$playlistFileName"
 
 			ffprobeJSON_Stream_Info=$($ffprobe -hide_banner -v error -show_format -show_streams -print_format json "$streamDirectURL")
 			firstAudioStreamCodecName=$(echo "$ffprobeJSON_Stream_Info" | $jq -r '[ .streams[] | select(.codec_type=="audio") ][0].codec_name')
