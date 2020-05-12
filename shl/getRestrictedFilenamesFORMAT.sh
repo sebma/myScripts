@@ -143,6 +143,7 @@ getRestrictedFilenamesFORMAT () {
 			$undebug
 			fileName=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\"))._filename")
 			extension=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).ext")
+			duration=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).duration" | $grep '^[0-9]*' || echo -1) # To create an M3U file
 			thumbnailURL=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).thumbnail")
 			formatString=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format")
 			chosenFormatID=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format_id")
