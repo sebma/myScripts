@@ -12,32 +12,6 @@ scriptBaseName=${0/*\//}
 scriptExtension=${0/*./}
 funcName=${scriptBaseName/.$scriptExtension/}
 
-getAudioExtension () {
-	if [ $# != 1 ];then
-		echo "=> [$FUNCNAME] Usage: $FUNCNAME ffprobeAudioCodecName" 1>&2
-		return 1
-	fi
-	
-	local acodec=$1
-	local audioExtension=unknown
-
-	if [ $BASH_VERSINFO -ge 4 ];then
-		declare -A audioExtension=( [libspeex]=spx [speex]=spx [opus]=opus [vorbis]=ogg [aac]=m4a [mp3]=mp3 [mp2]=mp2 [ac3]=ac3 [wmav2]=wma [pcm_dvd]=wav [pcm_s16le]=wav )
-		audioExtension=${audioExtension[$acodec]}
-	else
-		case $acodec in
-			libspeex|speex) audioExtension=spx;;
-			opus|mp2|mp3|ac3) audioExtension=$acodec;;
-			vorbis) audioExtension=ogg;;
-			aac) audioExtension=m4a;;
-			wmav2) audioExtension=wma;;
-			pcm_dvd|pcm_s16le) audioExtension=wav;;
-			*) audioExtension=unknown;;
-		esac
-	fi
-	echo $audioExtension
-}
-
 unset -f getRestrictedFilenamesFORMAT
 getRestrictedFilenamesFORMAT () {
 	trap 'rc=127;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;exit $rc' INT
@@ -265,6 +239,31 @@ getRestrictedFilenamesFORMAT () {
 	sync
 	set +x
 	return $downloadOK
+}
+getAudioExtension () {
+	if [ $# != 1 ];then
+		echo "=> [$FUNCNAME] Usage: $FUNCNAME ffprobeAudioCodecName" 1>&2
+		return 1
+	fi
+
+	local acodec=$1
+	local audioExtension=unknown
+
+	if [ $BASH_VERSINFO -ge 4 ];then
+		declare -A audioExtension=( [libspeex]=spx [speex]=spx [opus]=opus [vorbis]=ogg [aac]=m4a [mp3]=mp3 [mp2]=mp2 [ac3]=ac3 [wmav2]=wma [pcm_dvd]=wav [pcm_s16le]=wav )
+		audioExtension=${audioExtension[$acodec]}
+	else
+		case $acodec in
+			libspeex|speex) audioExtension=spx;;
+			opus|mp2|mp3|ac3) audioExtension=$acodec;;
+			vorbis) audioExtension=ogg;;
+			aac) audioExtension=m4a;;
+			wmav2) audioExtension=wma;;
+			pcm_dvd|pcm_s16le) audioExtension=wav;;
+			*) audioExtension=unknown;;
+		esac
+	fi
+	echo $audioExtension
 }
 addURL2mp4Metadata() {
 	if [ $# != 2 ];then
