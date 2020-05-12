@@ -130,7 +130,7 @@ getRestrictedFilenamesFORMAT () {
 			duration=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).duration" | $grep '^[0-9]*' || echo -1) # To create an M3U file
 			title=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).title")
 			webpage_url=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).webpage_url")
-			test -n "$playlistFileName" && printf '#EXTINF:'"$duration,$title\n$webpage_url\n" >> "$playlistFileName"
+			test -n "$playlistFileName" && printf "#EXTINF:$duration,$title\n$webpage_url\n" >> "$playlistFileName"
 
 			ffprobeJSON_Stream_Info=$($ffprobe -hide_banner -v error -show_format -show_streams -print_format json "$streamDirectURL")
 			firstAudioStreamCodecName=$(echo "$ffprobeJSON_Stream_Info" | $jq -r '[ .streams[] | select(.codec_type=="audio") ][0].codec_name')
