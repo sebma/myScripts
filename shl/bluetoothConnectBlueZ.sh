@@ -43,6 +43,7 @@ if which bluetoothctl >/dev/null 2>&1; then
 	}
 	fi
 	
+	deviceRegExp=$(sed "s/ /./g" <<< "$deviceRegExp")
 	if echo "$deviceList" | grep -q "$deviceRegExp"; then {
 		deviceHW=$(echo "$deviceList" | awk /^Device.*$deviceRegExp/'{print$2}' | sort -u)
 		cat<<EOF | bluetoothctl -a
@@ -93,6 +94,7 @@ elif which hciconfig >/dev/null 2>&1; then
 	}
 	fi
 	
+	deviceRegExp=$(sed "s/ /./g" <<< "$deviceRegExp")
 	if echo "$deviceList" | grep -q "$deviceRegExp"; then {
 		deviceHW=$(echo "$deviceList" | awk /$deviceRegExp/'{print$1}')
 		sudo hcitool cc $deviceHW
