@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 bluetoothController=$(hciconfig 2>/dev/null | awk -F: '/^\w+:/{print$1;exit}')
 if [ -z "$bluetoothController" ]; then
@@ -36,6 +36,7 @@ if [ $# = 0 ]; then {
 }
 fi
 
+deviceRegExp=$(sed "s/ /./g" <<< "$deviceRegExp")
 if echo "$deviceList" | grep -q "$deviceRegExp"; then {
 	deviceHW=$(echo "$deviceList" | awk /$deviceRegExp/'{print$1}')
 	sudo hcitool cc $deviceHW
