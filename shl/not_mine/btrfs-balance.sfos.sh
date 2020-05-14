@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 #cf. https://github.com/sailfishos/btrfs-balancer/tree/master/scripts
 
+if ! awk -F= '/^ID=/{print$2}' /etc/os-release | grep -q sailfishos;then
+	echo "=> [$0] ERROR : This script must be run on sailfishos." >&2
+	exit 1
+fi
+
 ROOTDEV=/dev/mmcblk0p28
 
 USED=0
