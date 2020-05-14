@@ -127,9 +127,10 @@ getRestrictedFilenamesFORMAT () {
 			remoteFileSize=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize" | sed "s/null/-1/")
 			isLIVE=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).is_live")
 
-			duration=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).duration" | $grep '^[0-9]*' || echo -1) # To create an M3U file
-			title=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).title")
-			webpage_url=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).webpage_url")
+			# To create an M3U file
+			read title duration webpage_url <<< $(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")) | .title, .duration, .webpage_url")
+			duration=$($grep '^[0-9]*' <<< $duration || echo -1)
+
 			test -n "$playlistFileName" && printf "#EXTINF:$duration,$title\n$webpage_url\n" >> "$playlistFileName"
 
 			ffprobeJSON_Stream_Info=$($ffprobe -hide_banner -v error -show_format -show_streams -print_format json "$streamDirectURL")

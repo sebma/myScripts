@@ -246,8 +246,8 @@ function main {
 					let nb+=1
 				else
 					echo "=> Verification de la compatibilite du module <$currentAddonName> avec Palemoon v$palemoonVersion ..."
-#					if [ $(echo $palemoonVersion \< $minPalemoonVersionSupported | bc -l) = 1 ] || [ $(echo $palemoonVersion \> $maxPalemoonVersionSupported | bc -l) = 1 ]
-					if [ $(echo $palemoonVersion \< $minPalemoonVersionSupported | bc -l) = 1 ]
+#					if [ $(bc <<< "$palemoonVersion < $minPalemoonVersionSupported") = 1 ] || [ $(bc <<< "$palemoonVersion > $maxPalemoonVersionSupported") = 1 ]
+					if [ $(bc <<< "$palemoonVersion < $minPalemoonVersionSupported") = 1 ]
 					then
 						echo $blink$yellowOnRed
 						echo "=> ERROR: Palemoon v$palemoonVersion n'est pas supporte par le plugin <$currentAddonName> ($extensionID) qui supporte: $minPalemoonVersionSupported < palemoon > $maxPalemoonVersionSupported.$normal" >&2
