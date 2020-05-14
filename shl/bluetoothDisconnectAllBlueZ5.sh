@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 bluetoothController=$(hciconfig 2>/dev/null | awk -F: '/^\w+:/{print$1;exit}')
 if [ -z "$bluetoothController" ]; then
@@ -15,14 +15,18 @@ if ! which bluetoothctl >/dev/null 2>&1; then {
 }
 fi
 
-deviceList=$(echo | bluetoothctl 2>&1 | grep -w Device)
-if [ -z "$deviceList" ]; then {
-	echo "=> ERROR: Could not find any device." >&2
-	exit 3
-}
+if which bt-device >/dev/null 2>&1;then
+	devices=$(bt-device -l | grep -vw "Added devices" | awk -F "[()]" '{print$(NF-1)}')
+else
+	devices=$(echo | bluetoothctl 2>/dev/null | awk '/\<Device\>/{print$4}')
 fi
 
-echo "$deviceList" | awk '/\<Device\>/{print$4}' | while read device
+if [ -z "$devices" ]; then
+	echo "=> ERROR: Could not find any device." >&2
+	exit 3
+fi
+
+echo "$devices" | while read device
 do
 	set -x
 	echo disconnect $device | bluetoothctl
