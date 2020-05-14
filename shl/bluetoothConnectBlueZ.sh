@@ -32,19 +32,19 @@ if which bluetoothctl >/dev/null 2>&1; then
 	echo "$deviceList" | awk '/^Device/{print$NF}'
 	if [ $# = 0 ]; then {
 		printf "Type the device name you want to connect to : "
-		read deviceName
-		if [ -z "$deviceName" ]; then {
+		read deviceRegExp
+		if [ -z "$deviceRegExp" ]; then {
 			echo "=> ERROR: The device name you typed is empty." >&2
 			exit 4
 		}
 		fi
 	} else {
-		deviceName=$1
+		deviceRegExp=$1
 	}
 	fi
 	
-	if echo "$deviceList" | grep -q "$deviceName"; then {
-		deviceHW=$(echo "$deviceList" | awk /^Device.*$deviceName/'{print$2}' | sort -u)
+	if echo "$deviceList" | grep -q "$deviceRegExp"; then {
+		deviceHW=$(echo "$deviceList" | awk /^Device.*$deviceRegExp/'{print$2}' | sort -u)
 		cat<<EOF | bluetoothctl -a
 	select $bluetoothControllerMACAddress
 	power on
@@ -82,19 +82,19 @@ elif which hciconfig >/dev/null 2>&1; then
 	echo "$deviceList" | cut -d' ' -f3-
 	if [ $# = 0 ]; then {
 		printf "Type the device name you want to connect to : "
-		read deviceName
-		if [ -z "$deviceName" ]; then {
+		read deviceRegExp
+		if [ -z "$deviceRegExp" ]; then {
 			echo "=> ERROR: The device name you typed is empty." >&2
 			exit 4
 		}
 		fi
 	} else {
-		deviceName=$1
+		deviceRegExp=$1
 	}
 	fi
 	
-	if echo "$deviceList" | grep -q "$deviceName"; then {
-		deviceHW=$(echo "$deviceList" | awk /$deviceName/'{print$1}')
+	if echo "$deviceList" | grep -q "$deviceRegExp"; then {
+		deviceHW=$(echo "$deviceList" | awk /$deviceRegExp/'{print$1}')
 		sudo hcitool cc $deviceHW
 		sudo -b rfcomm connect 0 $deviceHW
 		sleep 1
