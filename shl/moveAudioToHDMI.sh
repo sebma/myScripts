@@ -2,7 +2,7 @@
 
 function moveAudioToHDMI {
 	echo "=> BEFORE :"
-	pactl list short sinks >/dev/null 2>&1 || pax11publish -r
+	! pactl list short sinks >/dev/null 2>&1 && test "$SSH_CONNECTION" && pax11publish -r
 	pactl list short sink-inputs
 
 	hdmiOutputPattern='\.hdmi-stereo\>'
