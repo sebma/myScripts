@@ -30,6 +30,9 @@ function moveAudioToBluetoothSink {
 
 			echo "=> AFTER :"
 			pactl list short sink-inputs
+		else
+			echo "=> ERROR : There is no audio sink for $bluetoothDeviceMacAddr" >&2
+			exit 1
 		fi
 	fi
 }
