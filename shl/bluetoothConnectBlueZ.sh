@@ -52,7 +52,6 @@ if which bluetoothctl >/dev/null 2>&1; then
 	default-agent
 	pairable on
 	pair $deviceHW
-	trust $deviceHW
 	paired-devices
 	connect $deviceHW
 	info $deviceHW
