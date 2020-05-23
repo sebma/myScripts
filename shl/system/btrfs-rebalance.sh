@@ -11,7 +11,7 @@ fi
 mountPoint=$1
 time for p in $(seq 0 5 95);do
 	echo "[$scriptBaseName] Running with $p% ..."
-	time sudo btrfs balance start -dusage=$p -musage=$p $mountPoint
+	time sudo btrfs balance start -dusage=$p -musage=$p $mountPoint || exit
 	echo
 done
 sudo btrfs filesystem usage -T $mountPoint
