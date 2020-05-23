@@ -42,16 +42,15 @@ fi
 deviceRegExp=$(sed "s/ /./g" <<< "$deviceRegExp")
 if echo "$deviceList" | grep -q "$deviceRegExp"; then {
 	deviceHW=$(echo "$deviceList" | awk /^Device.*$deviceRegExp/'{print$2}' | sort -u)
-	cat<<EOF | bluetoothctl -a
-select $bluetoothControllerMACAddress
-power on
-default-agent
-pairable on
-pair $deviceHW
-paired-devices
-connect $deviceHW
-info $deviceHW
-quit
+	cat<<-EOF | bluetoothctl -a
+	select $bluetoothControllerMACAddress
+	power on
+	default-agent
+	pairable on
+	pair $deviceHW
+	connect $deviceHW
+	info $deviceHW
+	quit
 EOF
 } else {
 	echo "=> ERROR: The device you have chosen is not visible." >&2
