@@ -1,0 +1,1 @@
+../../../jolla/shl/check_ALL_FS.sh

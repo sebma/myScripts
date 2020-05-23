@@ -1,0 +1,1 @@
+../../../jolla/shl/androidCodeName.sh

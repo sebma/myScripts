@@ -1,0 +1,1 @@
+../../../jolla/shl/gitUpdateRepos.sh

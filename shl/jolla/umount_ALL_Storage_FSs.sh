@@ -1,0 +1,1 @@
+../../../jolla/shl/umount_ALL_Storage_FSs.sh
