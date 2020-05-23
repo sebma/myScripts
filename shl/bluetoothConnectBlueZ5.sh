@@ -48,7 +48,6 @@ power on
 default-agent
 pairable on
 pair $deviceHW
-trust $deviceHW
 paired-devices
 connect $deviceHW
 info $deviceHW
