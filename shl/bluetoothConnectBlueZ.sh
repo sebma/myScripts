@@ -46,13 +46,12 @@ if which bluetoothctl >/dev/null 2>&1; then
 	deviceRegExp=$(sed "s/ /./g" <<< "$deviceRegExp")
 	if echo "$deviceList" | grep -q "$deviceRegExp"; then {
 		deviceHW=$(echo "$deviceList" | awk /^Device.*$deviceRegExp/'{print$2}' | sort -u)
-		cat<<EOF | bluetoothctl -a
+		cat<<-EOF | bluetoothctl -a
 	select $bluetoothControllerMACAddress
 	power on
 	default-agent
 	pairable on
 	pair $deviceHW
-	paired-devices
 	connect $deviceHW
 	info $deviceHW
 	quit
