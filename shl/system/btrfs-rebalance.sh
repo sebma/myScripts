@@ -24,8 +24,11 @@ time for p in $(seq 0 5 95);do
 	}
 	echo
 done
+
 echo
 sudo btrfs filesystem usage -T $mountPoint
+[ $rc = 0 ] && \rm btrfs-balance_$$.log
+
 exit $rc
 
 trap - INT
