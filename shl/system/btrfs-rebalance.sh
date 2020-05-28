@@ -14,7 +14,7 @@ time for p in $(seq 0 5 95);do
 	echo "[$scriptBaseName] Running with $p% ..."
 	time {
 		sudo btrfs balance start -dusage=$p -musage=$p $mountPoint > btrfs-balance_$$.log 2>&1
-		cat btrfs-balance_$$.log | \grep -1 --color -i "error.*" && {
+		\grep -1 --color -i "error.*" btrfs-balance_$$.log && {
 			rc=1
 			break
 			true
