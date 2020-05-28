@@ -9,11 +9,23 @@ if [ $# != 1 ];then
 fi
 
 mountPoint=$1
+rc=0
 time for p in $(seq 0 5 95);do
 	echo "[$scriptBaseName] Running with $p% ..."
-	time sudo btrfs balance start -dusage=$p -musage=$p $mountPoint || exit
+	time {
+		sudo btrfs balance start -dusage=$p -musage=$p $mountPoint > btrfs-balance_$$.log 2>&1
+		cat btrfs-balance_$$.log | \grep -1 --color -i "error.*" && {
+			rc=1
+			break
+			true
+		} || {
+			cat btrfs-balance_$$.log
+		}
+	}
 	echo
 done
+echo
 sudo btrfs filesystem usage -T $mountPoint
+exit $rc
 
 trap - INT
