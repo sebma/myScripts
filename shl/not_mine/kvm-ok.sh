@@ -42,25 +42,29 @@ verdict() {
 ARM_CPU_PART_CORTEX_A15="0xc0f" # <asm/cputype.h>
 
 # check cpu flags for capability
-if [ "$(uname -m)" = "armv7l" ]; then
-    if egrep -m1 -w '^CPU part[[:blank:]]*:' /proc/cpuinfo | \
-	egrep -wq "$ARM_CPU_PART_CORTEX_A15"; then
+case "$(uname -m)" in
+    armv7l)
+	if egrep -m1 -w '^CPU part[[:blank:]]*:' /proc/cpuinfo | \
+		egrep -wq "$ARM_CPU_PART_CORTEX_A15"; then
+	    virt="ARM"
+	    kvm_mod="kvm"
+	fi
+	;;
+    aarch64)
 	virt="ARM"
 	kvm_mod="kvm"
-    fi
-elif [ "$(uname -m)" = "aarch64" ]; then
-	virt="ARM"
+	;;
+    ppc64le|ppc64|s390x)
+	# FIXME: Assume that all POWER and z/Systems are KVM capable
+	virt="generic"
 	kvm_mod="kvm"
-elif [ "$(uname -m)" = "ppc64le" ]; then
-	# FIXME: Assume that all ppc64el is kvm capable
-	exit 0
-	virt="POWER"
-	kvm_mod="kvm"
-else
-    virt=$(egrep -m1 -w '^flags[[:blank:]]*:' /proc/cpuinfo | egrep -wo '(vmx|svm)') || true
-    [ "$virt" = "vmx" ] && kvm_mod="kvm_intel"
-    [ "$virt" = "svm" ] && kvm_mod="kvm_amd"
-fi
+	;;
+    *)
+      virt=$(egrep -m1 -w '^flags[[:blank:]]*:' /proc/cpuinfo | egrep -wo '(vmx|svm)') || true
+      [ "$virt" = "vmx" ] && kvm_mod="kvm_intel"
+      [ "$virt" = "svm" ] && kvm_mod="kvm_amd"
+      ;;
+esac
 
 if [ -z "$virt" ]; then
 	echo "INFO: Your CPU does not support KVM extensions"
@@ -111,8 +115,7 @@ elif [ "$virt" = "svm" ]; then
 elif [ "$virt" = "ARM" ]; then
     # Should also test that we booted in HYP mode, if detectable
     :
-elif [ "$virt" = "POWER" ]; then
-    # Should also test that we booted in HYP mode, if detectable
+elif [ "$virt" = "generic" ]; then
     :
 else
 	echo "FAIL: Unknown virtualization extension: $virt"
