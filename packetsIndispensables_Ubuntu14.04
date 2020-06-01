@@ -86,6 +86,7 @@ gparted
 gpm
 gpw
 grub-efi-amd64-bin
+grub-qemu
 gstreamer1.0-libav
 handbrake-cli
 hddtemp
@@ -202,6 +203,7 @@ smartmontools
 smplayer
 sox
 speex
+spice-vdagent
 spyder
 sqlitebrowser
 sshfs
