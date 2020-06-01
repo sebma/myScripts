@@ -12,6 +12,7 @@ fi
 
 function systemType {
 	local initPath=$(\ps -p 1 -o cmd= | $cut -d" " -f1)
+	initPath=$(which $initPath) #For gentoo and maybe others
 	$strings $initPath | $egrep -o "upstart|sysvinit|systemd" | $head -1
 }
 systemType
