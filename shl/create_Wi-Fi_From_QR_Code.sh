@@ -6,14 +6,18 @@ function create_Wi-Fi_From_QR_Code {
 		return 1
 	fi
 	local qrcodePictureFile="$1"
+	if [ ! -s "$qrcodePictureFile" ];then
+		echo "=> ERROR: The file <$qrcodePictureFile> does not exist or is empty." >&2
+		return 2
+	fi
+
 	local qrdecode="zbarimg -q --raw"
 	local ssid security pass hidden
 	read ssid security pass hidden <<< $($qrdecode "$qrcodePictureFile" | awk -F":|;" '/WIFI:/{print$3" "$5" "$7" "$9}')
 	[ $hidden = true ] && hidden=yes || hidden=no
 	readonly ssid security pass hidden
-	set -x
+	echo nmcli device wifi connect $ssid password xxxxxxxxxxxx name ${ssid}_TEST hidden $hidden
 	nmcli device wifi connect $ssid password "$pass" name ${ssid}_TEST hidden $hidden
-	set +x
 }
 
 create_Wi-Fi_From_QR_Code "$@"
