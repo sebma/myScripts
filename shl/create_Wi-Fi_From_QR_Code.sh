@@ -37,6 +37,7 @@ function create_Wi-Fi_From_QR_Code {
 		nmcli device wifi connect $ssid password "$pass" name ${ssid}
 	else
 		echo "=>" nmcli device wifi connect $ssid password xxxxxxxxxxxx name ${ssid} hidden $hidden
+		nmcli device wifi rescan ssid $ssid
 		nmcli device wifi connect $ssid password "$pass" name ${ssid} hidden $hidden
 	fi || sleep 5
 	nmcli connection | \egrep "UUID|802-11-wireless|wifi"
