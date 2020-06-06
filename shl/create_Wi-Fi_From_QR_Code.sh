@@ -39,6 +39,7 @@ function create_Wi-Fi_From_QR_Code {
 		echo "=>" nmcli device wifi connect $ssid password xxxxxxxxxxxx name ${ssid} hidden $hidden
 		nmcli device wifi connect $ssid password "$pass" name ${ssid} hidden $hidden
 	fi
+	nmcli connection | \egrep "UUID|802-11-wireless|wifi"
 }
 function versionSmallerEqual {
 	version1=$1
