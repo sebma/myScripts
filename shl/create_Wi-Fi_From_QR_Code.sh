@@ -11,19 +11,20 @@ function create_Wi-Fi_From_QR_Code {
 		return 2
 	fi
 
+	local nmcliVersion=$(nmcli -v | awk '/version/{print$NF}')
 	local qrdecode="zbarimg -q --raw"
 	local ssid security pass hidden
+
 	read ssid security pass hidden <<< $($qrdecode "$qrcodePictureFile" | awk -F":|;" '/WIFI:/{print$3" "$5" "$7" "$9}')
 	[ $hidden = true ] && hidden=yes || hidden=no
 	readonly ssid security pass hidden
-#	local nmcliVersion=$(nmcli -v | awk -F"[. ]" '/version/{printf"%d.%d%02d\n", $4, $5, $6}')
-	local nmcliVersion=$(nmcli -v | awk '/version/{print$NF}')
+
 	if versionSmallerEqual $nmcliVersion 0.9.10;then
-		echo "=>" nmcli device wifi connect $ssid password xxxxxxxxxxxx name ${ssid}_TEST
-		nmcli device wifi connect $ssid password "$pass" name ${ssid}_TEST
+		echo "=>" nmcli device wifi connect $ssid password xxxxxxxxxxxx name ${ssid}
+		nmcli device wifi connect $ssid password "$pass" name ${ssid}
 	else
-		echo "=>" nmcli device wifi connect $ssid password xxxxxxxxxxxx name ${ssid}_TEST hidden $hidden
-		nmcli device wifi connect $ssid password "$pass" name ${ssid}_TEST hidden $hidden
+		echo "=>" nmcli device wifi connect $ssid password xxxxxxxxxxxx name ${ssid} hidden $hidden
+		nmcli device wifi connect $ssid password "$pass" name ${ssid} hidden $hidden
 	fi
 }
 function versionSmallerEqual {
