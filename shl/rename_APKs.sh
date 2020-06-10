@@ -6,7 +6,7 @@ function renameAPK {
 	do
 		echo "=> package = $package"
 		[ -f "$package" ] || {
-			echo "==> ERROR : The package $package does not exist." >&2; continue
+			echo "==> ERROR : The package <$package> does not exist." >&2; continue
 		}
 
 		packagePath=$(dirname "$package")
@@ -17,4 +17,4 @@ function renameAPK {
 	done
 }
 
-renameAPK $@
+renameAPK "$@"
