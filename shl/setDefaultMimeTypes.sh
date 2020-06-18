@@ -75,7 +75,8 @@ which smplayer >/dev/null 2>&1 && {
 
 #Association du protocole apt:, ssh: avec les applications adequoites
 echo "=> Association du protocole apt:, ssh: avec les applications adequoites ..."
-xdg-mime default dolphin.desktop inode/directory
+applicationsFolder=/usr/share/applications
+xdg-mime default $(command locate $applicationsFolder/*dolphin.desktop | sed "s|$applicationsFolder/||;s|/|-|") inode/directory
 xdg-mime default apturl.desktop x-scheme-handler/apt
 xdg-mime default putty.desktop x-scheme-handler/ssh
 echo "=> Fait."
