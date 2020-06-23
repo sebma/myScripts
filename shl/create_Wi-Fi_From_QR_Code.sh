@@ -40,7 +40,7 @@ function create_Wi-Fi_From_QR_Code {
 		nmcli device wifi rescan ssid $ssid
 		nmcli device wifi connect $ssid password "$pass" name ${ssid} hidden $hidden
 	fi || sleep 5
-	nmcli connection | \egrep "UUID|802-11-wireless|wifi"
+	test $? = 0 && nmcli connection | \egrep "UUID|802-11-wireless|wifi"
 }
 function versionSmallerEqual {
 	version1=$1
