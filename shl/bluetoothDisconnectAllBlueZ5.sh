@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-dirName=$(pwd)
+dirName=$(dirname $0)
 bluetoothController=$(hciconfig 2>/dev/null | awk -F: '/^\w+:/{print$1;exit}')
 if [ -z "$bluetoothController" ]; then
 	echo "=> ERROR: Could not detect any bluetooth controller." >&2
@@ -35,4 +35,3 @@ do
 done
 
 $dirName/moveAudio2HDMI.sh
-moveAudio2HDMI.sh
