@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+dirName=$(dirname $0)
 bluetoothController=$(hciconfig 2>/dev/null | awk -F: '/^\w+:/{print$1;exit}')
 if [ -z "$bluetoothController" ]; then
 	echo "=> ERROR: Could not detect any bluetooth controller." >&2
@@ -52,6 +53,8 @@ if echo "$deviceList" | grep -q "$deviceRegExp"; then {
 	info $deviceHW
 	quit
 EOF
+
+	$dirName/moveAudio2BlueToothSink.sh $deviceHW
 } else {
 	echo "=> ERROR: The device you have chosen is not visible." >&2
 	exit 5
