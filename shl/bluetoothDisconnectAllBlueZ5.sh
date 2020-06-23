@@ -5,7 +5,7 @@ if [ -z "$bluetoothController" ]; then
 	echo "=> ERROR: Could not detect any bluetooth controller." >&2
 	exit 1
 else
-	hciconfig hci0 | grep -q DOWN && sudo hciconfig $bluetoothController up
+	hciconfig $bluetoothController | grep -q DOWN && sudo hciconfig $bluetoothController up
 	echo "=> bluetoothController = $bluetoothController"
 fi
 
@@ -32,3 +32,5 @@ do
 	echo disconnect $device | bluetoothctl
 	set +x
 done
+
+moveAudio2HDMI.sh
