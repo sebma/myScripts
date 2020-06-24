@@ -41,8 +41,8 @@ deviceRegExp=$(sed "s/ /./g" <<< "$deviceRegExp")
 if echo "$deviceList" | grep -q "$deviceRegExp"; then {
 	deviceHW=$(echo "$deviceList" | awk /$deviceRegExp/'{print$1}')
 	sudo hcitool cc $deviceHW
-	sudo -b rfcomm connect 0 $deviceHW
-	sleep 1
+	sudo -b rfcomm connect 0 $deviceHW 2>&1 | grep refused && exit 1
+	sleep 5
 	rfcomm show $deviceHW
 	hcitool con
 
