@@ -53,6 +53,7 @@ if echo "$deviceList" | grep -q "$deviceRegExp"; then {
 	info $deviceHW
 	quit
 EOF
+	sleep 5
 
 	$dirName/moveAudio2BlueToothSink.sh $deviceHW
 } else {
