@@ -6,10 +6,10 @@ https2zoomtg () {
 		echo "=> Usage: $(basename $0) httpsURL" >&2
 		return 1
 	fi
-	local httpsURL="$1"
-	zoomtgURL=$(echo "$httpsURL" | sed "s/^https/zoomtg/;s|/j/|/join?action=join\&confno=|;s/?pwd=/\&pwd=/")
-	echo "zoom $zoomtgURL"
-	zoom $zoomtgURL &
+
+	zoommtgURL="$(echo "$1" | sed 's/^https/zoommtg/;s|/j/|/join?action=join\&confno=|;s/?pwd=/\&pwd=/')"
+	echo "zoom $zoommtgURL & ..."
+	zoom $zoommtgURL &
 }
 
 https2zoomtg "$@"
