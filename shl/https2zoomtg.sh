@@ -7,7 +7,7 @@ https2zoomtg () {
 		return 1
 	fi
 
-	zoommtgURL="$(echo "$1" | sed 's/^https/zoommtg/;s|/j/|/join?action=join\&confno=|;s/?pwd=/\&pwd=/')"
+	zoommtgURL="$(echo "$1" | sed 's/^https:/zoommtg:/;s|/j/|/join?action=join\&confno=|;s/?pwd=/\&pwd=/')"
 	echo "zoom $zoommtgURL & ..."
 	zoom $zoommtgURL &
 }
