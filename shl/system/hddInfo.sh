@@ -55,8 +55,9 @@ blue=$(tput setaf 4)
 	echo "=> Disk general info for $diskFamily model $diskModel on $diskDevice :"
 	echo
 	deviceType=$(test $(</sys/block/${diskDevice/*\//}/queue/rotational) = 0 && echo SSD || echo HDD)
+	printf $blue$bold
 	echo "=> $diskFamily model $diskModel is a $deviceType drive."
-	echo
+	echo $normal
 	$sudo smartctl -i $diskDevice
 	echo
 	test $deviceType = SSD && $sudo smartctl -l ssd $diskDevice && echo
@@ -64,18 +65,20 @@ blue=$(tput setaf 4)
 	echo
 	$sudo smartctl --smart=on --offlineauto=on --saveauto=on $diskDevice >/dev/null
 	if ! sudo smartctl -l error $diskDevice | grep -q No.Errors;then
-		echo "=> Error counter log  pages  for  reads, write and verifies on $diskFamily model $diskModel on $diskDevice ..."
+		echo "=> Error counter log pages for reads, write and verifies on $diskFamily model $diskModel on $diskDevice ..."
 		echo
+		printf $red$bold
 		$sudo smartctl -l error $diskDevice | \grep -A1 -m1 Command/Feature_Name
 		$sudo smartctl -l error $diskDevice | grep Error:
-		echo
+		echo $normal
 	fi
 	if ! sudo smartctl -l xerror $diskDevice | grep -q No.Errors;then
 		echo "=> Extended Comprehensive SMART error log on $diskFamily model $diskModel on $diskDevice ..."
 		echo
+		printf $red$bold
 		$sudo smartctl -l xerror $diskDevice | \grep -A1 -m1 Command/Feature_Name
 		$sudo smartctl -l xerror $diskDevice | grep Error:
-		echo
+		echo $normal
 	fi
 	which hddparm >/dev/null 2>&1 && echo "=> hdparm info for $diskFamily model $diskModel on $diskDevice :" && $sudo hdparm -I $diskDevice
 #	echo "=> Printing all SMART and non-SMART information about the $diskFamily model $diskModel on $diskDevice :"
