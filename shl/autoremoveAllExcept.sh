@@ -5,10 +5,10 @@ function autoremoveAllBut {
 	local apt=$(which apt)
 	if [ -z "$packagesNotUpgraded" ]
 	then
-		packagesToBeRemoved=$($(which apt-get) autoremove --dry-run | awk '/^Inst/{print$2}' | grep -v "Listing..." | xargs)
+		packagesToBeRemoved=$($(which apt-get) autoremove --dry-run | awk '/^Remv/{print$2}' | grep -v "Listing..." | xargs)
 	else
 		packagesNotUpgraded=$(echo $packagesNotUpgraded | tr ' ' '|')
-		packagesToBeRemoved=$($(which apt-get) autoremove --dry-run | awk '/^Inst/{print$2}' | egrep -v "$packagesNotUpgraded" | grep -v "Listing..." | xargs)
+		packagesToBeRemoved=$($(which apt-get) autoremove --dry-run | awk '/^Remv/{print$2}' | egrep -v "$packagesNotUpgraded" | grep -v "Listing..." | xargs)
 	fi
 
 	echo "=> packagesToBeRemoved = <$packagesToBeRemoved>"
