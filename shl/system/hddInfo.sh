@@ -63,6 +63,20 @@ blue=$(tput setaf 4)
 	echo "=> Enabling SMART on $diskFamily model $diskModel on $diskDevice ..."
 	echo
 	$sudo smartctl --smart=on --offlineauto=on --saveauto=on $diskDevice >/dev/null
+	if ! sudo smartctl -l error $diskDevice | grep -q No.Errors;then
+		echo "=> Error counter log  pages  for  reads, write and verifies on $diskFamily model $diskModel on $diskDevice ..."
+		echo
+		$sudo smartctl -l error $diskDevice | \grep -A1 -m1 Command/Feature_Name
+		$sudo smartctl -l error $diskDevice | grep Error:
+		echo
+	fi
+	if ! sudo smartctl -l xerror $diskDevice | grep -q No.Errors;then
+		echo "=> Extended Comprehensive SMART error log on $diskFamily model $diskModel on $diskDevice ..."
+		echo
+		$sudo smartctl -l xerror $diskDevice | \grep -A1 -m1 Command/Feature_Name
+		$sudo smartctl -l xerror $diskDevice | grep Error:
+		echo
+	fi
 	which hddparm >/dev/null 2>&1 && echo "=> hdparm info for $diskFamily model $diskModel on $diskDevice :" && $sudo hdparm -I $diskDevice
 #	echo "=> Printing all SMART and non-SMART information about the $diskFamily model $diskModel on $diskDevice :"
 #	echo
