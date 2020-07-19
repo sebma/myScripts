@@ -54,10 +54,12 @@ blue=$(tput setaf 4)
 {
 	echo "=> Disk general info for $diskFamily model $diskModel on $diskDevice :"
 	echo
-	deviceType=$($sudo smartctl -i $diskDevice | awk -F " *|:" '/Rotation Rate:/{print$4" "$5" "$6}')
+	deviceType=$(test $(</sys/block/${diskDevice/*\//}/queue/rotational) = 0 && echo SSD || echo HDD)
 	echo "=> $diskFamily model $diskModel is a $deviceType drive."
 	echo
 	$sudo smartctl -i $diskDevice
+	echo
+	test $deviceType = SSD && $sudo smartctl -l ssd $diskDevice && echo
 	echo "=> Enabling SMART on $diskFamily model $diskModel on $diskDevice ..."
 	echo
 	$sudo smartctl --smart=on --offlineauto=on --saveauto=on $diskDevice >/dev/null
