@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-[ $# = 0 ] && browserList="google-chrome brave-browser palemoon firefox-esr firefox midori qupzilla chromim-browser konqueror" || browserList="$@"
+[ $# = 0 ] && browserList="google-chrome brave-browser palemoon firefox-esr firefox midori qupzilla chromium-browser konqueror" || browserList="$@"
 
 #Association du protocole apt:, ssh: avec les applications adequoites
 echo "=> Association du protocole apt:, ssh: avec les applications adequoites ..."
@@ -13,7 +13,7 @@ do
 done
 
 echo "=> defaultBrowser = $defaultBrowser"
-desktopFile=$(basename $(dpkg -L $defaultBrowser | grep desktop$))
+desktopFile=$(basename $(locate /usr/share/*/$defaultBrowser.desktop) | head -1)
 echo "=> desktopFile = $desktopFile"
 echo "=> Association des protocoles http et https avec $desktopFile ..."
 xdg-mime default $desktopFile x-scheme-handler/http x-scheme-handler/https
