@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-[ $# = 0 ] && browserList="brave-browser palemoon firefox-esr firefox midori qupzilla chromim-browser konqueror" || browserList="$@"
+[ $# = 0 ] && browserList="google-chrome brave-browser palemoon firefox-esr firefox midori qupzilla chromim-browser konqueror" || browserList="$@"
 
 #Association du protocole apt:, ssh: avec les applications adequoites
 echo "=> Association du protocole apt:, ssh: avec les applications adequoites ..."
