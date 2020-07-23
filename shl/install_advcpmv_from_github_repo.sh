@@ -28,6 +28,8 @@ else
 fi
 
 version=$1
+advcpmvGitHubRepo=jarun/advcpmv
+$download https://raw.githubusercontent.com/$advcpmvGitHubRepo/master/advcpmv-0.5-$version.patch
 patch=$(\ls advcpmv-* | grep $version)
 
 if $download http://ftp.gnu.org/gnu/coreutils/coreutils-$version.tar.xz; then
@@ -44,12 +46,12 @@ if $download http://ftp.gnu.org/gnu/coreutils/coreutils-$version.tar.xz; then
 					cd src
 					\cp -puv cp advcp
 					\cp -puv mv advmv
-					if $sudo install -vpm755 adv* $prefix/bin/; then
+					if $sudo install -vpm 755 adv* $prefix/bin/; then
 						if cd ../man; then
 							\cp -puv cp.1 advcp.1
 							\cp -puv mv.1 advmv.1
 							\gzip -9v adv*.1
-							$sudo install -vpm644 adv* $prefix/share/man/man1/
+							$sudo install -vpm 644 adv* $prefix/share/man/man1/
 						fi
 						cd ../..
 						rm -fr coreutils-$version*
