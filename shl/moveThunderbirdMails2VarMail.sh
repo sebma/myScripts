@@ -10,4 +10,4 @@ fi
 sudo mkdir -p $varMailPartition/thunderbird/$USER
 sudo chown $USER:$USER $varMailPartition/thunderbird/$USER
 mv $HOME/.thunderbird/* $varMailPartition/thunderbird/$USER
-ln -svf 
+ln -svf $varMailPartition/thunderbird/$USER $HOME/.thunderbird
