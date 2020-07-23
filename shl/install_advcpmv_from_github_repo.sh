@@ -54,7 +54,7 @@ if $download http://ftp.gnu.org/gnu/coreutils/coreutils-$version.tar.xz; then
 							$sudo install -vpm 644 adv* $prefix/share/man/man1/
 						fi
 						cd ../..
-						rm -fr coreutils-$version*
+						rm -fr coreutils-$version* $patch
 						rmdir bin
 					fi
 				fi
