@@ -7,7 +7,10 @@ if ! df $varMailPartition | grep $varMailPartition;then
 	exit 1
 fi
 
+rsync=$(which rsync)
+move="$rsync -uth -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST $RSYNC_EXCLUSION -ogpuv -lH --remove-source-files"
 sudo mkdir -p $varMailPartition/thunderbird/$USER
 sudo chown $USER:$USER $varMailPartition/thunderbird/$USER
-mv $HOME/.thunderbird/* $varMailPartition/thunderbird/$USER
+$move $HOME/.thunderbird/* $varMailPartition/thunderbird/$USER || exit $?
 ln -svf $varMailPartition/thunderbird/$USER $HOME/.thunderbird
+sync
