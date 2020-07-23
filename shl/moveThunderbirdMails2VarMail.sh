@@ -11,8 +11,8 @@ fi
 rsync=$(which rsync)
 move="$rsync -uth -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST $RSYNC_EXCLUSION -ogpuv -lH --remove-source-files"
 
-test -d $varMailPartition/thunderbird/$USER || sudo mkdir -v -p $varMailPartition/thunderbird/$USER
-ls -ld $varMailPartition/thunderbird/$USER | grep -q "$USER " || sudo chown -v $USER:$USER $varMailPartition/thunderbird/$USER
+test -d $varMailPartition/thunderbird/$USER || { groups | grep -q sudo && sudo mkdir -v -p $varMailPartition/thunderbird/$USER || exit; }
+ls -ld $varMailPartition/thunderbird/$USER | grep -q "$USER " || { groups | grep -q sudo && sudo chown -v $USER:$USER $varMailPartition/thunderbird/$USER || exit; }
 
 if [ -e $HOME/.thunderbird ];then
 	if ! [ -L $HOME/.thunderbird ];then
