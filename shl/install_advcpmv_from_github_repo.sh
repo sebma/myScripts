@@ -28,8 +28,8 @@ else
 fi
 
 version=$1
-advcpmvGitHubRepo=jarun/advcpmv
-$download https://raw.githubusercontent.com/$advcpmvGitHubRepo/master/advcpmv-0.5-$version.patch
+advcpmvGitHubRepo=sebma/advcpmv
+$download https://raw.githubusercontent.com/$advcpmvGitHubRepo/master/advcpmv-$version.patch
 patch=$(\ls advcpmv-* | grep $version)
 
 if $download http://ftp.gnu.org/gnu/coreutils/coreutils-$version.tar.xz; then
