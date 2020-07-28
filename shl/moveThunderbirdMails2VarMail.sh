@@ -18,7 +18,7 @@ if [ -e $HOME/.thunderbird ];then
 	if ! [ -L $HOME/.thunderbird ];then
 		set -x
 		$move -r $HOME/.thunderbird/* $varMailPartition/thunderbird/$USER || exit
-		find $HOME/.thunderbird/ -empty -delete
+		find $HOME/.thunderbird/ -type d -empty -delete
 		ln -svf $varMailPartition/thunderbird/$USER $HOME/.thunderbird
 		sync
 	fi
