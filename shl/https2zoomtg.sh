@@ -8,8 +8,12 @@ https2zoomtg () {
 	fi
 
 	zoommtgURL="$(echo "$1" | sed 's/^https:/zoommtg:/;s|/j/|/join?action=join\&confno=|;s/?pwd=/\&pwd=/')"
-	echo "zoom $zoommtgURL & ..."
-	zoom $zoommtgURL &
+	xdg-mime default Zoom.desktop x-scheme-handler/zoommtg
+#	xdg-mime query default x-scheme-handler/zoommtg
+	xdg-open $zoommtgURL
+
+#	echo "zoom $zoommtgURL & ..."
+#	zoom $zoommtgURL &
 }
 
 https2zoomtg "$@"
