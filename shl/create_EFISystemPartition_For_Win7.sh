@@ -47,7 +47,7 @@ $sudo dosfslabel $espPartition "SYSTEM"
 $sudo parted -s $disk set $espPartitionNumber boot on
 $sudo parted -s $disk set $espPartitionNumber esp on
 $sudo parted -s $disk set $espPartitionNumber hidden on
-#$sudo parted -s $disk name $espPartitionNumber '"EFI System"' #FAILS because of GNU parted bug 1183074 : https://bugzilla.redhat.com/1183074
+$sudo parted -s $disk name $espPartitionNumber '"EFI System"'
 printf "C\n$espPartitionNumber\nEFI System\nW\nY\n" | $sudo gdisk $disk
 $sudo parted -s $disk print
 
