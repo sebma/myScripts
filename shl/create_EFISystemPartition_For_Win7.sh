@@ -41,7 +41,7 @@ fi
 espPartition=$disk$espPartitionNumber
 espFS=/mnt/$(basename $espPartition)
 
-#$sudo parted $disk mkpart primary fat32 1 550
+#$sudo parted -s $disk mkpart primary fat32 1 550
 #$sudo mkfs.fat -F32 $espPartition
 $sudo dosfslabel $espPartition "SYSTEM"
 $sudo parted -s $disk set $espPartitionNumber boot on
