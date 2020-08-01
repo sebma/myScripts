@@ -38,7 +38,7 @@ then
 	exit 3
 fi
 
-#$sudo parted $disk mkpart primary 1B 1M
+#$sudo parted -s $disk mkpart primary 1B 1M
 $sudo parted -s $disk set $bbPartitionNumber bios_grub on
 $sudo parted -s $disk name $bbPartitionNumber '"BIOS boot partition"'
 $sudo parted -s $disk print
