@@ -22,7 +22,7 @@ fi
 echo $disk | grep -q /dev/ 2>/dev/null || disk=/dev/$disk
 echo "=> disk = $disk"
 
-printf "=> Quel est le numero de la partition E.S.P ? : "
+printf "=> Quel est le numero de la partition BIOS boot partition ? : "
 read bbPartitionNumber
 if ! test $bbPartitionNumber
 then
