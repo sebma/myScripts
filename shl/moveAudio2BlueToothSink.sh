@@ -6,9 +6,9 @@ function moveAudioToBluetoothSink {
 	local bluetoothDeviceName=null
 	local bluetoothDeviceMacAddr=null
 
-	case $firtArg in
+	case $firstArg in
 		*:*) bluetoothDeviceMacAddr=$firstArg;;
-		connected) bluetoothDeviceMacAddr=$(bt-device -l | awk -F "[()]" '/[0-9A-F]:/{print$2}' | while read address; do bt-device -i $address | grep -q 'Connected: 1' && echo $address && break ;done);;
+		"connected") bluetoothDeviceMacAddr=$(pactl list sinks short | awk '/bluez_sink/{address=$2;sub("bluez_sink.","",address);print gensub("_",":","g",address)}');;
 		*) bluetoothDeviceName=$firstArg;;
 	esac
 
