@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
 function moveAudioToBluetoothSink {
-	( [ $# != 1 ] || echo $1 | egrep -q -- "^--?(h|u)" ) && echo "=> Usage : $FUNCNAME bluetoothDeviceName|bluetoothDeviceMacAddr" 1>&2 && return 1
+	( echo $1 | egrep -q -- "^--?(h|u)" ) && echo "=> Usage : $FUNCNAME connected|bluetoothDeviceName|bluetoothDeviceMacAddr" 1>&2 && return 1
 	local firstArg=$1
 	local bluetoothDeviceName=null
 	local bluetoothDeviceMacAddr=null
 
-	if echo $firstArg | grep -q :; then
-		bluetoothDeviceMacAddr=$firstArg 
-	else
-		bluetoothDeviceName=$firstArg
-	fi
+	case $firtArg in
+		*:*) bluetoothDeviceMacAddr=$firstArg;;
+		connected) bluetoothDeviceMacAddr=$(bt-device -l | awk -F "[()]" '/[0-9A-F]:/{print$2}' | while read address; do bt-device -i $address | grep -q 'Connected: 1' && echo $address && break ;done);;
+		*) bluetoothDeviceName=$firstArg;;
+	esac
 
 	bluetoothDeviceMacAddr=$(echo | bluetoothctl 2>/dev/null | awk "/Device.*($bluetoothDeviceMacAddr|$bluetoothDeviceName)/"'{print$4;exit}')
 	if [ -n "$bluetoothDeviceMacAddr" ];then
