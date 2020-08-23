@@ -8,7 +8,7 @@ function moveAudioToBluetoothSink {
 
 	case $firstArg in
 		*:*) bluetoothDeviceMacAddr=$firstArg;;
-		"connected") bluetoothDeviceMacAddr=$(pactl list sinks short | awk '/bluez_sink/{address=$2;sub("bluez_sink.","",address);print gensub("_",":","g",address)}');;
+		connected) bluetoothDeviceMacAddr=$(pactl list sinks short | awk '/bluez_sink/{address=$2;sub("bluez_sink.","",address);print gensub("_",":","g",address)}');;
 		*) bluetoothDeviceName=$firstArg;;
 	esac
 
