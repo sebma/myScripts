@@ -44,6 +44,7 @@ checkinstall
 chromium-browser
 cmake
 cmake-curses-gui
+command-not-found
 conky-all
 curlftpfs
 dcfldd
