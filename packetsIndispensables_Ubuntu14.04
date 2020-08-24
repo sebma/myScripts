@@ -46,6 +46,7 @@ cmake
 cmake-curses-gui
 command-not-found
 conky-all
+cups-ipp-utils
 curlftpfs
 dcfldd
 deborphan
