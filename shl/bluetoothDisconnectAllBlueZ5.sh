@@ -7,7 +7,6 @@ if [ -z "$bluetoothController" ]; then
 	exit 1
 else
 	hciconfig $bluetoothController | grep -q DOWN && sudo hciconfig $bluetoothController up
-	echo "=> bluetoothController = $bluetoothController"
 fi
 
 if ! which bluetoothctl >/dev/null 2>&1; then {
@@ -16,10 +15,10 @@ if ! which bluetoothctl >/dev/null 2>&1; then {
 }
 fi
 
-if which bt-device >/dev/null 2>&1;then
-	devices=$(bt-device -l | grep -vw "Added devices" | awk -F "[()]" '{print$(NF-1)}')
+if devices=$(bt-device -l 2>/dev/null | grep -vw "Added devices");then
+	devices=$(echo "$devices" | awk -F "[()]" '{print$(NF-1)}')
 else
-	devices=$(echo | bluetoothctl 2>/dev/null | awk '/\<Device\>/{print$4}')
+	devices=$(echo devices | bluetoothctl 2>/dev/null | awk '/^Device\>/{print$2}')
 fi
 
 if [ -z "$devices" ]; then
@@ -30,7 +29,7 @@ fi
 echo "$devices" | while read device
 do
 	set -x
-	echo disconnect $device | bluetoothctl
+	echo info $device | bluetoothctl 2>/dev/null | \grep -q 'Connected: yes' && echo disconnect $device | bluetoothctl 2>/dev/null
 	set +x
 done
 
