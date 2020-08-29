@@ -40,6 +40,13 @@ if [ $# = 0 ]; then {
 }
 fi
 
+command locate -r /module-bluetooth-discover.so$ | grep -q /module-bluetooth-discover.so$ || {
+	echo "=> ERROR: The <module-bluetooth-discover.so> needs to be installed." >&2
+	exit 5
+}
+
+pactl list modules | grep -q module-bluetooth-discover || pactl load-module module-bluetooth-discover
+
 deviceRegExp=$(sed "s/ /./g" <<< "$deviceRegExp")
 if echo "$deviceList" | grep -q "$deviceRegExp"; then {
 	deviceHW=$(echo "$deviceList" | awk /^Device.*$deviceRegExp/'{print$2}' | sort -u)
