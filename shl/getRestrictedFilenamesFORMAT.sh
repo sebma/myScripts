@@ -171,7 +171,8 @@ getRestrictedFilenamesFORMAT () {
 
 			ytdlExtraOptions+=( --add-metadata --prefer-ffmpeg --restrict-filenames --embed-subs --write-auto-sub --sub-lang='en,fr,es,de' )
 			if [ $isLIVE = true ];then
-				ytdlExtraOptions+=( --hls-use-mpegts )
+				ytdlExtraOptions+=( --hls-use-mpegts --hls-prefer-ffmpeg )
+#				ytdlExtraOptions+=( --hls-use-mpegts )
 			else
 				ytdlExtraOptions+=( --hls-prefer-native )
 			fi
@@ -192,7 +193,6 @@ getRestrictedFilenamesFORMAT () {
 
 			echo "=> fileName to be downloaded = <$fileName>"
 			echo
-			trap - INT
 
 			[ $thumbnailerName = AtomicParsley ] && ( [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = m4b ] || [ $extension = mp3 ] ) && embedThumbnail="--embed-thumbnail"
 
@@ -201,8 +201,9 @@ getRestrictedFilenamesFORMAT () {
 			printf "=> Starting youtube-dl at %s ...\n" "$(LC_MESSAGES=en date)"
 			echo
 			errorLogFile="youtube-dl_errors_$$.log"
+			trap - INT
 			$debug
-			time LANG=C.UTF-8 command youtube-dl --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+			time LANG=C.UTF-8 command youtube-dl -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 			downloadOK=$?
 			$undebug
 			sync
@@ -247,6 +248,17 @@ getRestrictedFilenamesFORMAT () {
 	sync
 	set +x
 	return $downloadOK
+}
+webp2jpg () {
+	local image
+	for image
+	do
+		if identify "$image" | \grep -q "no decode delegate for this image format"; then
+			dwebp "$image" -o - 2> /dev/null | convert - "${image/.webp/.jpg}"
+		else
+			convert "$image" "${image/.webp/.jpg}"
+		fi
+	done
 }
 getAudioExtension () {
 	if [ $# != 1 ];then
