@@ -1,0 +1,22 @@
+[user]
+	name = sebma
+	email = sebma@users.noreply.github.com
+[color]
+	ui = true
+[alias]
+	addv = add -v
+	co = checkout
+	br = branch
+	st = status -bs
+	stu = status -bs -uno
+	com = commit -uno
+	mvv = "!f2() { cd ${GIT_PREFIX:-.};git mv -v $1 $2/;git commit -uno $1 $2 -m \"Moved $1 to $2/\"; }; f2"
+[credential]
+	helper = cache --timeout=86400
+[push]
+	default = current
+[filter "lfs"]
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
