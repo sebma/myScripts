@@ -17,7 +17,6 @@ apvlv
 aria2
 arp-scan
 ascii
-asciinema
 atomicparsley
 audacious
 audacity
@@ -46,7 +45,6 @@ cmake
 cmake-curses-gui
 command-not-found
 conky-all
-cups-ipp-utils
 curlftpfs
 dcfldd
 deborphan
@@ -65,11 +63,9 @@ exiv2
 expect
 fatresize
 fbset
-fdkaac-encoder
 fdupes
 ffmpeg
 ffmpegthumbs
-firefox-esr
 firefox-globalmenu
 flpsed
 fslint
@@ -89,7 +85,6 @@ gparted
 gpm
 gpw
 grub-efi-amd64-bin
-grub-qemu
 gstreamer1.0-libav
 handbrake-cli
 hddtemp
@@ -132,7 +127,6 @@ libterm-readline-gnu-perl
 libtool
 libvirt-bin
 links2
-linssid
 lsdvd
 lshw-gtk
 lynx
@@ -229,7 +223,6 @@ texlive-xetex
 thunderbird
 thunderbird-globalmenu
 tlp
-tlp-rdw
 tmpreaper
 tmux
 tpconfig
