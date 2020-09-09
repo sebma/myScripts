@@ -1,5 +1,6 @@
 bluez-compat
 dex
+firefox-esr
 firefox-esr-globalmenu
 firefox-esr-locale-en
 firefox-esr-locale-fr
@@ -8,6 +9,7 @@ kde-window-manager-active
 kde-window-manager-common
 kwin-style-crystal
 kwin-style-qtcurve
+linssid
 mesa-vdpau-drivers-lts-xenial
 nget
 notepadqq
