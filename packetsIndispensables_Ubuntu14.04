@@ -13,6 +13,7 @@ apt-file
 apt-rdepends
 apt-src
 aptitude
+aptitude-doc-en
 apvlv
 aria2
 arp-scan
