@@ -7,7 +7,6 @@ if [ -z "$bluetoothController" ]; then
 	echo "=> ERROR: Could not detect any bluetooth controller." >&2
 	exit 1
 else
-	hciconfig $bluetoothController | grep -q DOWN && sudo hciconfig $bluetoothController up
 	echo "=> bluetoothController = $bluetoothController"
 fi
 
