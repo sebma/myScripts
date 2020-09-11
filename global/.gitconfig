@@ -6,6 +6,7 @@
 [alias]
 	addv = add -v
 	co = checkout
+	ct = describe --tags --abbrev=0 # current tag
 	br = branch
 	st = status -bs
 	stu = status -bs -uno
