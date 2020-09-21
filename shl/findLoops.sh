@@ -1,8 +1,12 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 findLoops() {
-    $(which find) . "$@" -o -follow -printf "" 2>&1 | egrep -w "loop|denied"
+#	local args=("$@")
+	if [ $# = 0 ];then
+	    time $(which find) . -xdev -follow -printf ""
+	else
+	    time $(which find) . "$@" -o -follow -printf ""
+	fi
 }
 
 findLoops "$@"
-type nbPages
