@@ -1,8 +1,9 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 gitUpdateAllMyLocalRepos ()
 {
 	local find="$(which find)"
+	echo $OSTYPE | grep --color=auto -q android && local osFamily=Android || local osFamily=$(uname -s)
 	[ $osFamily = Darwin ] && find=gfind
 	local dir=""
 	$find ~ -maxdepth 2 -type d -name .git | while read dir; do
