@@ -7,3 +7,4 @@ sudo add-apt-repository ppa:unit193/inxi -y
 sudo add-apt-repository ppa:mikhailnov/hw-probe -y
 sudo apt-get update
 sudo apt-get install hw-probe --no-install-recommends -y
+sudo -E hw-probe -all -upload
