@@ -8,3 +8,7 @@ grep -q "^deb .*mikhailnov/hw-probe" /etc/apt/sources.list.d/*.list || sudo add-
 sudo apt-get update
 sudo apt-get install inxi hw-probe --no-install-recommends -y
 #sudo -E hw-probe -all -upload
+#Request inventory ID:
+#hw-probe -generate-inventory -email YOUR@EMAIL
+#Mark your probes by this ID:
+#sudo -E hw-probe -all -upload -i ID
