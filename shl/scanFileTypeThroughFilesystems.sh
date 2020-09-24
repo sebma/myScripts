@@ -5,17 +5,21 @@ RSYNC_SKIP_COMPRESS_LIST=7z/aac/avi/bz2/deb/flv/gz/iso/jpeg/jpg/mkv/mov/m4a/mp2/
 
 sudo -k
 find=$(which find)
+rsync=$(which rsync)
+rsyncOptions="-h -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST -ut -pgo -r"
 if sudo true;then
 	time for dir in $(df -T | egrep -v "/media/|/dev/sd[b-z]" | awk "/$fsRegExp/"'{print$NF}' | egrep -vw "/home|/tmp" | sort -u)
 	do
 		printf "=> dir = $dir "
-		fileTypes=$(time sudo $find $dir -xdev -printf "%M\n" 2>/dev/null | cut -c1  | sort -u | tr "\n" " ")
+		findOutput=$(time sudo $find $dir -xdev -printf "%M %n %S\n" 2>/dev/null | awk '{$1=substr($1,1,1);print}')
+
+		fileTypes=$(echo "$findOutput" | cut -c1  | sort -u | tr "\n" " ")
 		printf "fileTypes = $fileTypes "
-		rsyncOptions="-h -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST -ut -pgo"
+
 		rsyncAdditionalOptions=""
 		mount | grep $dir | grep -q acl && rsyncAdditionalOptions+=" -A"
-		time sudo find $dir -xdev -type f -printf "%S\t%p\n" 2>/dev/null | awk '$1 < 1.0 {print"sparseFile : "$2}' | grep -m1 -i -q sparseFile && rsyncAdditionalOptions+=" -S"
-		time sudo find $dir -xdev -printf "%n %p\n" 2>/dev/null | grep -m1 -q "^[3-9] " && rsyncAdditionalOptions+=" -H"
+		echo "$findOutput" | awk '$3 < 1.0 {exit}' && rsyncAdditionalOptions+=" -S" # File's sparseness. normally sparse files will have values less than 1.0
+		echo "$findOutput" | awk '$2 > 1 && /^-/ {exit}' && rsyncAdditionalOptions+=" -H" # Number of hardlink to a file
 
 		for type in $fileTypes
 		do
