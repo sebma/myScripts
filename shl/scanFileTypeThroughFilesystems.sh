@@ -11,17 +11,15 @@ if sudo true;then
 	time for dir in $(df -T | egrep -v "/media/|/dev/sd[b-z]" | awk "/$fsRegExp/"'{print$NF}' | egrep -vw "/home|/tmp" | sort -u)
 	do
 		printf "=> dir = $dir "
-		findOutput=$(sudo $find $dir -xdev -printf "%M %n %S %p\n" 2>/dev/null | awk '{$1=substr($1,1,1);print}')
-
-		fileTypes=$(echo "$findOutput" | cut -c1  | sort -u | tr "\n" " ")
-		printf "fileTypes = $fileTypes "
+		findOutput=$(sudo $find $dir -xdev -printf "%y %n %S %p\n" 2>/dev/null)
 
 		rsyncAdditionalOptions=""
 		mount | grep $dir | grep -q acl && rsyncAdditionalOptions+=" -A"
-		echo
 		rsyncAdditionalOptions+=$(echo "$findOutput" | awk '$3 > 0 && $3 < 1.0 {print" -S";exit}') # File's sparseness. normally sparse files will have values less than 1.0
 		rsyncAdditionalOptions+=$(echo "$findOutput" | awk '$2 > 1 && /^-/ {print" -H";print>"/dev/stderr";exit}') # Number of hardlink to a file
 
+		fileTypes=$(echo "$findOutput" | cut -c1  | sort -u | tr "\n" " ")
+		printf "fileTypes = $fileTypes "
 		for type in $fileTypes
 		do
 			case $type in
