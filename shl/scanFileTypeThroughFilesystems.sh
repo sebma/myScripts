@@ -16,7 +16,7 @@ if sudo true;then
 		rsyncAdditionalOptions=""
 		mount | grep $dir | grep -q acl && rsyncAdditionalOptions+=" -A"
 		rsyncAdditionalOptions+=$(echo "$findOutput" | awk '$3 > 0 && $3 < 1.0 {print" -S";exit}') # File's sparseness. normally sparse files will have values less than 1.0
-		rsyncAdditionalOptions+=$(echo "$findOutput" | awk '$2 > 1 && /^-/ {print" -H";print>"/dev/stderr";exit}') # Number of hardlink to a file
+		rsyncAdditionalOptions+=$(echo "$findOutput" | awk '($1 == "f" && $2 > 1) {print" -H";print"\n"$0>"/dev/stderr";exit}') # Number of hardlink to a file
 
 		fileTypes=$(echo "$findOutput" | cut -c1  | sort -u | tr "\n" " ")
 		printf "fileTypes = $fileTypes "
