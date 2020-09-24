@@ -12,6 +12,7 @@ if sudo true;then
 		fileTypes=$(time sudo $find $dir -xdev -printf "%M\n" 2>/dev/null | cut -c1  | sort -u | tr "\n" " ")
 		printf "fileTypes = $fileTypes "
 		rsyncOptions="-h -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST -ut -pgo"
+		mount | grep $dir | grep -q acl && rsyncOptions+=" -A"
 		rsyncAdditionalOptions=""
 		for type in $fileTypes
 		do
