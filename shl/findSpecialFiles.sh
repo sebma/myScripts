@@ -10,5 +10,5 @@ do
 	echo "=> fileSystem = $fileSystem"
 	$sudo find $fileSystem -xdev -printf "%M\n" 2>/dev/null | cut -c1  | sort -u
 	echo "==> Inode (hardlinks) :"
-	$sudo find $fileSystem -xdev -ls | awk '{print $1}' | sort | uniq -c | egrep -v " +1 "
+	$sudo find $fileSystem -xdev -printf "%n %p\n" 2>/dev/null | grep "^[3-9] "
 done
