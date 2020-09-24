@@ -12,8 +12,11 @@ if sudo true;then
 		fileTypes=$(time sudo $find $dir -xdev -printf "%M\n" 2>/dev/null | cut -c1  | sort -u | tr "\n" " ")
 		printf "fileTypes = $fileTypes "
 		rsyncOptions="-h -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST -ut -pgo"
-		mount | grep $dir | grep -q acl && rsyncOptions+=" -A"
 		rsyncAdditionalOptions=""
+		mount | grep $dir | grep -q acl && rsyncAdditionalOptions+=" -A"
+		time sudo find $dir -xdev -type f -printf "%S\t%p\n" 2>/dev/null | awk '$1 < 1.0 {print"sparseFile : "$2}' | grep -m1 -i -q sparseFile && rsyncAdditionalOptions+=" -S"
+		time sudo find $dir -xdev -printf "%n %p\n" 2>/dev/null | grep -m1 -q "^[3-9] " && rsyncAdditionalOptions+=" -H"
+
 		for type in $fileTypes
 		do
 			case $type in
