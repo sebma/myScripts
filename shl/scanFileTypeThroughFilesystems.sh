@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-fsRegExp="ext[234]|btrfs|f2fs|xfs|vfat|fuseblk|devtmpfs|tmpfs"
+fsRegExp="ext[234]|btrfs|f2fs|xfs|jfs|reiserfs|nilfs|hfs|vfat|fuseblk|devtmpfs|tmpfs"
 RSYNC_SKIP_COMPRESS_LIST=7z/aac/avi/bz2/deb/flv/gz/iso/jpeg/jpg/mkv/mov/m4a/mp2/mp3/mp4/mpeg/mpg/oga/ogg/ogm/ogv/webm/rpm/tbz/tgz/z/zip
 
 sudo -k
