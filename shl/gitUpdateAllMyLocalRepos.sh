@@ -3,7 +3,7 @@
 gitUpdateAllMyLocalRepos ()
 {
 	local find="$(which find)"
-	echo $OSTYPE | grep --color=auto -q android && local osFamily=Android || local osFamily=$(uname -s)
+	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
 	[ $osFamily = Darwin ] && find=gfind
 	local dir=""
 	$find ~ -maxdepth 2 -type d -name .git | while read dir; do
