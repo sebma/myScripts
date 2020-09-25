@@ -16,11 +16,11 @@ if [ -n "$initPath" ];then
 	initPath=$(which $initPath) #Needed for gentoo and maybe others
 	set -o pipefail
 	systemType=$($strings $initPath | egrep -o "upstart|sysvinit|systemd" | $head -1 || echo unknown)
+	set +o pipefail
 else
 	exit 1
 fi
 
-set +o pipefail
 if [ $systemType = systemd ];then
 	if systemctl 2>&1 | grep -q "systemctl: error while loading shared libraries:";then
 		mount -v /usr || exit
