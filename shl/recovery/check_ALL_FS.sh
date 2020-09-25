@@ -22,8 +22,13 @@ fi
 
 set +o pipefail
 if [ $systemType = systemd ];then
+	if systemctl 2>&1 | grep -q "systemctl: error while loading shared libraries:";then
+		mount -v /usr || exit
+	fi
 	currentTarget=$(systemctl -t target | $egrep -o '^(emergency|rescue|graphical|multi-user|recovery|friendly-recovery).target')
+	mount | grep -wq /usr && umount -v -l /usr
 	echo $currentTarget | $egrep -q "(recovery|rescue).target" || { echo "=> You must reboot in recovery|rescue mode to run $0." >&2 && exit 3; }
+	sleep 1
 elif [ $systemType = upstart ];then
 	runlevelNum=$($runlevel | $awk '{printf$NF}')
 fi
