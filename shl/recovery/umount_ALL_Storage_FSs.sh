@@ -10,10 +10,17 @@ fi
 
 [ $USER != root ] && echo "=> ERROR [$0] You must run $0 as root." >&2 && exit 2
 
-initPath=$(\ps -p 1 -o cmd= | $cut -d" " -f1)
-set -o pipefail
-systemType=$($strings $initPath | egrep -o "upstart|sysvinit|systemd" | $head -1 || echo unknown)
-set +o pipefail
+ps --help 2>&1 | $grep -q "error while loading shared libraries" && ps="busybox ps" || ps=$(which ps)
+initPath=$($ps -e -o comm= -o pid= | $grep "  *1$" | $cut -d" " -f1)
+if [ -n "$initPath" ];then
+	initPath=$(which $initPath) #Needed for gentoo and maybe others
+	set -o pipefail
+	systemType=$($strings $initPath | egrep -o "upstart|sysvinit|systemd" | $head -1 || echo unknown)
+	set +o pipefail
+else
+	exit 1
+fi
+
 if [ $systemType = systemd ];then
 	currentTarget=$(systemctl -t target | $egrep -o '^(emergency|rescue|graphical|multi-user|recovery|friendly-recovery).target')
 	echo $currentTarget | $egrep -q "(recovery|rescue).target" || { echo "=> You must reboot in recovery|rescue mode to run $0." >&2 && exit 3; }
