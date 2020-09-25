@@ -11,8 +11,16 @@ else # Si /usr n'est pas accessible, on utilise les applets busybox
 fi
 
 function systemType {
-	local initPath=$(\ps -p 1 -o cmd= | $cut -d" " -f1)
-	initPath=$(which $initPath) #For gentoo and maybe others
-	$strings $initPath | $egrep -o "upstart|sysvinit|systemd" | $head -1
+	local ps=unset
+	ps --help 2>&1 | $grep -q "error while loading shared libraries" && ps="busybox ps" || ps=$(which ps)
+	local initPath=$($ps -e -o comm= -o pid= | $grep "  *1$" | $cut -d" " -f1)
+	if [ -n "$initPath" ];then
+		initPath=$(which $initPath) #Needed for gentoo and maybe others
+		$strings $initPath | $egrep -o "upstart|sysvinit|systemd" | $head -1
+	else
+		echo unknown
+		exit 1
+	fi
 }
+
 systemType
