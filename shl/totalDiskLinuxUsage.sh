@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+df -T | sort | egrep -vi "tmpfs|efi|vfat|fuse|squashfs" | awk 'BEGIN{printf "sudo du -cxsk / "}{printf $NF" "}' | sh | awk '/\<total\>/{print$1/1024^2" GiB"}'
