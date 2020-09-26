@@ -10,6 +10,8 @@ kde-window-manager-active
 kde-window-manager-common
 kwin-style-crystal
 kwin-style-qtcurve
+libpython3.7-minimal
+libpython3.8-minimal
 linssid
 mesa-vdpau-drivers-lts-xenial
 neofetch
