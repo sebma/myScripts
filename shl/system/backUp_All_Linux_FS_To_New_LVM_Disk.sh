@@ -52,7 +52,7 @@ sync
 test -d $destinationRootDir/etc/ || sudo mkdir -v $destinationRootDir/etc/
 
 grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || sed "s/$sourceEFI_UUID/$destinationEFI_UUID/" /etc/fstab | sed "s,$sourceVG_Or_Disk,$destinationVG," | sudo tee $destinationRootDir/etc/fstab
-sudo chroot $destinationRootDir $(which bash) -xc "mount -av"
+sudo chroot $destinationRootDir $(which bash) -xc "mount -av" # Does not mount any other filesystems than / ?
 echo
 set -x
 df -PTh | grep $destinationRootDir
