@@ -7,7 +7,7 @@ RSYNC_SKIP_COMPRESS_LIST=7z/aac/avi/bz2/deb/flv/gz/iso/jpeg/jpg/mkv/mov/m4a/mp2/
 find=$(which find)
 rsync=$(which rsync)
 rsyncOptions="-h -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST -utr"
-filesystemsList=$(df -T | egrep -vw "/media|/tmp" | awk "/$fsRegExp/"'{print$NF}' | sort -u | paste -sd' ')
+filesystemsList=$(df -T | egrep -vw "/media|/mnt|/tmp" | awk "/$fsRegExp/"'{print$NF}' | sort -u | paste -sd' ')
 echo "=> filesystemsList=\"$filesystemsList\""
 echo
 echo "=> rsyncOptions=\"$rsyncOptions\""
@@ -16,7 +16,7 @@ if sudo true;then
 	time for dir in $filesystemsList
 	do
 		printf "=> dir = $dir "
-		fsType=$(mount | grep "$dir " | awk '{print$5}')
+		fsType=$(mount | grep -vw /mnt | grep "$dir " | awk '{print$5}')
 		printf "=> fsType = <$fsType> "
 		findOutput=$(sudo $find $dir -xdev -printf "%y %n %S %p\n" 2>/dev/null)
 		fileTypes=$(echo "$findOutput" | cut -c1  | sort -u | paste -sd" ")
