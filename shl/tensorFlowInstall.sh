@@ -67,7 +67,7 @@ function main {
 						if ! grep $cudaRepoURL /etc/apt/sources.list /etc/apt/sources.list.d/*
 						then
 							echo deb $cudaRepoURL / | sudo tee /etc/apt/sources.list.d/cuda.list
-							keyIDsList="$(LANG=C sudo apt update 2>&1 | awk '/NO_PUBKEY/{print $NF}' | sort -u | tr '\n' ' ')"
+							keyIDsList="$(LANG=C sudo apt update 2>&1 | awk '/NO_PUBKEY/{print $NF}' | sort -u | paste -sd ' ')"
 							test -n "$keyIDsList" && sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $keyIDsList
 							$updateRepo
 						fi
