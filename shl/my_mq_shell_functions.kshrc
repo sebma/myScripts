@@ -38,7 +38,7 @@ set +x
   done
 }
 
-#alias lsqm='dspmq | sed "s/[()]/ /g" | awk "/Running/{print \$2}" | tr "\n" " ";echo'
+#alias lsqm='dspmq | sed "s/[()]/ /g" | awk "/Running/{print \$2}" | paste -sd" ";echo'
 lsqm() {
   local queueManager=$1
   local runmqsc=$(sudo su - $mqmUser -c "which runmqsc")
@@ -47,7 +47,7 @@ lsqm() {
     echo "Usage: $FUNCNAME [ <QueueManager> ]" >&2
     echo "=> You must choose a queue manager among the following :" >&2
     echo
-    dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | tr "\n" " "
+    dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | paste -sd" "
     echo
     return 1
   }
@@ -64,7 +64,7 @@ channelstatus() {
     echo "Usage: $FUNCNAME [ <QueueManager> ]" >&2
     echo "=> You must choose a queue manager among the following :" >&2
     echo
-    dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | tr "\n" " "
+    dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | paste -sd" "
     echo
     return 1
   }
@@ -86,7 +86,7 @@ lschannels() {
         echo "=> ERROR The channel $channelName does not belong to $queueManager." >&2
         echo "=> You must choose another queue manager among the following :" >&2
         echo
-        dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | tr "\n" " "
+        dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | paste -sd" "
         echo
         return $errCode
       }
@@ -103,7 +103,7 @@ lschannels() {
     echo "Usage: $FUNCNAME <QueueManager> [ <ChannelName> ]" >&2
     echo "=> You must choose a queue manager among the following :" >&2
     echo
-    dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | tr "\n" " "
+    dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | paste -sd" "
     echo
     return 1
   }
@@ -122,7 +122,7 @@ lsq() {
         echo "=> ERROR The queue $queueName does not belong to $queueManager." >&2
         echo "=> You must choose another queue manager among the following :" >&2
         echo
-        dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | tr "\n" " "
+        dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | paste -sd" "
         echo
   return $errCode
       }
@@ -138,7 +138,7 @@ lsq() {
     echo "Usage: $FUNCNAME <QueueManager> [ <QueueName> ]" >&2
     echo "=> You must choose a queue manager among the following :" >&2
     echo
-    dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | tr "\n" " "
+    dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | paste -sd" "
     echo
     return 1
   }
@@ -157,7 +157,7 @@ lsqa() {
         echo "=> ERROR The queue $queueName does not belong to $queueManager." >&2
         echo "=> You must choose another queue manager among the following :" >&2
         echo
-        dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | tr "\n" " "
+        dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | paste -sd" "
         echo
         return $errCode
       }
@@ -173,7 +173,7 @@ lsqa() {
     echo "Usage: $FUNCNAME <QueueManager> [ <QueueName> ]" >&2
     echo "=> You must choose a queue manager among the following :" >&2
     echo
-    dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | tr "\n" " "
+    dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | paste -sd" "
     echo
     return 1
   }
@@ -192,7 +192,7 @@ lsql() {
         echo "=> ERROR The queue $queueName does not belong to $queueManager." >&2
         echo "=> You must choose another queue manager among the following :" >&2
         echo
-        dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | tr "\n" " "
+        dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | paste -sd" "
         echo
         return $errCode
       }
@@ -208,7 +208,7 @@ lsql() {
     echo "Usage: $FUNCNAME <QueueManager> [ <QueueName> ]" >&2
     echo "=> You must choose a queue manager among the following :" >&2
     echo
-    dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | tr "\n" " "
+    dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | paste -sd" "
     echo
     return 1
   }
@@ -227,7 +227,7 @@ lsqr() {
         echo "=> ERROR The queue $queueName does not belong to $queueManager." >&2
         echo "=> You must choose another queue manager among the following :" >&2
         echo
-        dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | tr "\n" " "
+        dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | paste -sd" "
         echo
         return $errCode
       }
@@ -243,7 +243,7 @@ lsqr() {
     echo "Usage: $FUNCNAME <QueueManager> [ <QueueName> ]" >&2
     echo "=> You must choose a queue manager among the following :" >&2
     echo
-    dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | tr "\n" " "
+    dspmq | sed "s/[()]/ /g" | awk '/Running/{print $2}' | paste -sd" "
     echo
     return 1
   }
