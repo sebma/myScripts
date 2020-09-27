@@ -45,7 +45,7 @@ test -d $destinationRootDir/etc/ || sudo mkdir -v $destinationRootDir/etc/
 
 grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || sed "s/$sourceEFI_UUID/$destinationEFI_UUID/" /etc/fstab | sed "s,$sourceVG_Or_Disk,$destinationVG," | sudo tee $destinationRootDir/etc/fstab
 
-for sourceDir in $(echo $sourceFilesystemsList | tr " " "\n" | grep -vw /)
+for sourceDir in $(echo $sourceFilesystemsList | sed "s,/ \| /$,,g")
 do
 	echo "=> sourceDir = $sourceDir"
 	sourceFSType=$(mount | grep "$sourceDir " | awk '{print$5}')
