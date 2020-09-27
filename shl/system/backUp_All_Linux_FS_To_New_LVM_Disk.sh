@@ -10,5 +10,6 @@ destinationDisk=$1
 destinationPVPartition=$(sudo fdisk $destinationDisk -l | awk '/Linux LVM/{print$1}')
 #destinationVG=$(sudo pvdisplay -C $destinationPVPartition -o vg_name | awk 'END{print$1}')
 destinationVG=$(sudo pvs $destinationPVPartition -o vg_name | awk 'END{print$1}')
-destinationLVs=$(sudo lvs $destinationVG -o lv_name | awk 'FNR>1{printf$1" "}')
-echo "=> destinationLVs = $destinationLVs"
+destinationLVList=$(sudo lvs $destinationVG -o lv_name | awk 'FNR>1{printf$1" "}')
+echo "=> destinationLVList = $destinationLVList"
+sourcePartitionList=
