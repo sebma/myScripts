@@ -44,7 +44,7 @@ test -d $destinationRootDir/etc/ || sudo mkdir -v $destinationRootDir/etc/
 
 grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || sed "s/$sourceEFI_UUID/$destinationEFI_UUID/" /etc/fstab | sed "s,$sourceVG_Or_Disk,$destinationVG," | sudo tee $destinationRootDir/etc/fstab
 
-for sourceDir in $sourceFilesystemsList
+for sourceDir in $(echo $sourceFilesystemsList | tr " " "\n" | grep -vw /)
 do
 	echo "=> sourceDir = $sourceDir"
 	sourceFSType=$(mount | grep "$sourceDir " | awk '{print$5}')
@@ -58,7 +58,7 @@ do
 #	echo "=> copyCommand = $copyCommand"
 #	echo $copyCommand -r $sourceDir $destinationDir/
 done
-#for i in dev dev/pts proc sys ; do sudo mount --bind /$i $destinationRootDir/$i ; done
+#for i in dev dev/pts proc sys ; do sudo mount -v --bind /$i $destinationRootDir/$i ; done
 #sudo chroot $destinationRootDir/ "$(which grub-install) $destinationDisk"
 #sudo chroot $destinationRootDir/ "$(which update-grub)"
 #sudo umount -v $destinationRootDir/{sys,proc,dev/pts,dev,}
