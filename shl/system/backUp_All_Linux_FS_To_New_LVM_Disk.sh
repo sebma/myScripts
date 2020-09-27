@@ -6,6 +6,7 @@ if [ $# != 1 ];then
 	exit 1
 fi
 
+set -o nounset
 df=$(which df)
 destinationDisk=$1
 destinationPVPartition=$(sudo fdisk $destinationDisk -l | awk '/Linux LVM/{print$1}')
@@ -40,4 +41,4 @@ test -d $destinationDir/ || sudo mkdir -v $destinationDir/
 #sudo $cp2ext234 -r -x / $destinationDir/
 test -d $destinationDir/etc/ || sudo mkdir -v $destinationDir/etc/
 
-grep -q $destinationVG $destinationDir/etc/fstab || sed "s/$sourceEFI_UUID/$destinationEFI_UUID/" /etc/fstab | sed "s,$sourceVG_Or_Disk,$destinationVG," | sudo tee $destinationDir/etc/fstab
+grep -q $destinationVG $destinationDir/etc/fstab 2>/dev/null || sed "s/$sourceEFI_UUID/$destinationEFI_UUID/" /etc/fstab | sed "s,$sourceVG_Or_Disk,$destinationVG," | sudo tee $destinationDir/etc/fstab
