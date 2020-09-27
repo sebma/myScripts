@@ -7,10 +7,10 @@ RSYNC_SKIP_COMPRESS_LIST=7z/aac/avi/bz2/deb/flv/gz/iso/jpeg/jpg/mkv/mov/m4a/mp2/
 find=$(which find)
 rsync=$(which rsync)
 rsyncOptions="-h -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST -utr"
-filesystemsList=$(df -T | egrep -vw "/media|/tmp" | awk "/$fsRegExp/"'{print$NF}' | sort -u | tr "\n" " ")
-echo "=> filesystemsList = $filesystemsList"
+filesystemsList=$(df -T | egrep -vw "/media|/tmp" | awk "/$fsRegExp/"'{print$NF}' | sort -u | paste -sd' ')
+echo "=> filesystemsList=\"$filesystemsList\""
 echo
-echo "=> rsyncOptions = $rsyncOptions"
+echo "=> rsyncOptions=\"$rsyncOptions\""
 echo
 if sudo true;then
 	time for dir in $filesystemsList
@@ -43,7 +43,7 @@ if sudo true;then
 #			rsyncAdditionalOptions+=" --size-only"
 			rsyncAdditionalOptions+=" --modify-window=1" # i.e https://unix.stackexchange.com/a/461881/135038
 		fi
-		echo "rsyncAdditionalOptions = $rsyncAdditionalOptions"
+		echo " rsyncAdditionalOptions=\"$rsyncAdditionalOptions\""
 		echo
 	done
 fi
