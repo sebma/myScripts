@@ -42,10 +42,11 @@ cp2FAT32="$rsync --modify-window=1"
 destinationRootDir=/mnt/destinationVGDir
 test -d $destinationRootDir/ || sudo mkdir -v $destinationRootDir/
 echo
-echo sudo mount -v /dev/$destinationVG/$(echo $destinationLVList | tr " " "\n" | grep root) $destinationRootDir/
+sudo mount -v /dev/$destinationVG/$(echo $destinationLVList | tr " " "\n" | grep root) $destinationRootDir/
 set -x
 time sudo $cp2ext234 -r -x / $destinationRootDir/
 set +x
+sync
 test -d $destinationRootDir/etc/ || sudo mkdir -v $destinationRootDir/etc/
 
 grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || sed "s/$sourceEFI_UUID/$destinationEFI_UUID/" /etc/fstab | sed "s,$sourceVG_Or_Disk,$destinationVG," | sudo tee $destinationRootDir/etc/fstab
@@ -66,7 +67,8 @@ do
 	echo
 #	echo "=> copyCommand = $copyCommand"
 	set -x
-#	echo $copyCommand -r $sourceDir $destinationDir/
+#	$copyCommand -r $sourceDir $destinationDir/
+	sync
 	set +x
 done
 
