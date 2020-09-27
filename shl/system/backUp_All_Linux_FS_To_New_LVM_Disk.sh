@@ -33,7 +33,7 @@ RSYNC_SKIP_COMPRESS_LIST=7z/aac/avi/bz2/deb/flv/gz/iso/jpeg/jpg/mkv/mov/m4a/mp2/
 RSYNC_EXCLUSION=$(printf -- "--exclude %s/ " /dev /sys /run /proc /mnt /media)
 echo "=> sourceFilesystemsList = $sourceFilesystemsList"
 echo
-rsync="time $(which rsync) -x -uth -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST $RSYNC_EXCLUSION"
+rsync="time $(which rsync) -x -uth -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST $RSYNC_EXCLUSION --log-file=$HOME/log/completeCopy_VG_To_SSD-$(date +%Y%m%d-%HH%M).log"
 cp2ext234="$rsync -ogpuv -lSH"
 cp2FAT32="$rsync --modify-window=1"
 destinationRootDir=/mnt/destinationVGDir
@@ -55,6 +55,7 @@ do
 		vfat) copyCommand="$cp2FAT32 -x";;
 		ext2|ext3|ext4) copyCommand="$cp2ext234 -x";;
 	esac
+	echo
 #	echo "=> copyCommand = $copyCommand"
 #	echo $copyCommand -r $sourceDir $destinationDir/
 done
