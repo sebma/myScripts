@@ -19,7 +19,7 @@ if sudo true;then
 		fsType=$(mount | grep "$dir " | awk '{print$5}')
 		printf "=> fsType = <$fsType> "
 		findOutput=$(sudo $find $dir -xdev -printf "%y %n %S %p\n" 2>/dev/null)
-		fileTypes=$(echo "$findOutput" | cut -c1  | sort -u | tr "\n" " ")
+		fileTypes=$(echo "$findOutput" | cut -c1  | sort -u | paste -sd" ")
 		printf "fileTypes = $fileTypes "
 		rsyncAdditionalOptions=""
 		if [ "$fsType" != vfat ];then
