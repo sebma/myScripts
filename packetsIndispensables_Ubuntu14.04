@@ -115,8 +115,10 @@ kscreensaver-xsavers
 kvpm
 lftp
 libgoo-canvas-perl
+libguestfs-tools
 libimage-exiftool-perl
 libjpeg-turbo-progs
+libmarblewidget
 libmodule-path-perl
 librecad
 libreoffice
@@ -133,7 +135,6 @@ lshw-gtk
 lynx
 lyricue
 marble
-libmarblewidget*
 mdns-scan
 mediainfo
 mediainfo-gui
