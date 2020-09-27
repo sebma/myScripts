@@ -42,7 +42,7 @@ cp2FAT32="$rsync --modify-window=1"
 destinationRootDir=/mnt/destinationVGDir
 test -d $destinationRootDir/ || sudo mkdir -v $destinationRootDir/
 echo
-sudo mount -v /dev/$destinationVG/$(echo $destinationLVList | tr " " "\n" | grep root) $destinationRootDir/
+sudo mount -v /dev/$destinationVG/$(echo $destinationLVList | tr " " "\n" | grep root) $destinationRootDir/ || exit
 trap 'rc=130;set +x;echo "=> Interruption trapped, logFile = <$logFile>.">&2;exit $rc' INT
 set -x
 time sudo $cp2ext234 -r -x / $destinationRootDir/
@@ -52,7 +52,11 @@ sync
 test -d $destinationRootDir/etc/ || sudo mkdir -v $destinationRootDir/etc/
 
 grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || sed "s/$sourceEFI_UUID/$destinationEFI_UUID/" /etc/fstab | sed "s,$sourceVG_Or_Disk,$destinationVG," | sudo tee $destinationRootDir/etc/fstab
-sudo chroot $destinationRootDir $(which bash) -xc "mount -av" # Does not mount any other filesystems than / ?
+
+for i in dev dev/pts proc sys ; do sudo mount -v --bind /$i $destinationRootDir/$i ; done
+
+sudo chroot /mnt/destinationVGDir/ findmnt --verify && sudo chroot $destinationRootDir mount -av # Does not mount any other filesystems than / ?
+
 echo
 set -x
 df -PTh | grep $destinationRootDir
@@ -82,7 +86,6 @@ do
 	set +x
 done
 
-for i in dev dev/pts proc sys ; do sudo mount -v --bind /$i $destinationRootDir/$i ; done
 #sudo chroot $destinationRootDir/ $(which update-grub)
 #sudo chroot $destinationRootDir/ $(which grub-install) $destinationDisk
 sudo chroot $destinationRootDir $(which bash) -xc "umount -av"
