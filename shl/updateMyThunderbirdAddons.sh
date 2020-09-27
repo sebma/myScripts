@@ -100,7 +100,7 @@ function main {
 
 	if cd $adminExtensionDir
 	then
-		extensionList="$(ls *.xpi | egrep -vi "langpack|messagingmenu|ss_ffao|textcomplete|03B08592-E5B4-45ff-A0BE-C1D975458688|5B280457-4290-40c2-9441-EA647775F824" | tr "\n" " ")"
+		extensionList="$(ls *.xpi | egrep -vi "langpack|messagingmenu|ss_ffao|textcomplete|03B08592-E5B4-45ff-A0BE-C1D975458688|5B280457-4290-40c2-9441-EA647775F824" | paste -sd" ")"
 		echo "=> extensionList = $extensionList"
 		echo
 		for currentExtension in $extensionList
