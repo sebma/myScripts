@@ -15,3 +15,6 @@ echo "=> destinationLVList = $destinationLVList"
 fsRegExp="\<(ext[234]|btrfs|f2fs|xfs|jfs|reiserfs|nilfs|hfs|vfat|fuseblk)\>"
 sourceFilesystemsList=$(df -T | egrep -vw "/media|/mnt|/tmp" | awk "/$fsRegExp/"'{print$NF}' | sort -u | paste -sd' ')
 echo "=> sourceFilesystemsList = $sourceFilesystemsList"
+rsync="time $(which rsync) -x -uth -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST $RSYNC_EXCLUSION"
+cp2ext234="$rsync -ogpuv -lSH"
+cp2FAT32="$rsync --modify-window=1"
