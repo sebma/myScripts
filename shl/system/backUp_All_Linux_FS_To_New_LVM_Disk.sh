@@ -32,19 +32,23 @@ destinationEFI_UUID=$(sudo blkid $destinationEFI_FS -o value -s UUID)
 RSYNC_SKIP_COMPRESS_LIST=7z/aac/avi/bz2/deb/flv/gz/iso/jpeg/jpg/mkv/mov/m4a/mp2/mp3/mp4/mpeg/mpg/oga/ogg/ogm/ogv/webm/rpm/tbz/tgz/z/zip
 RSYNC_EXCLUSION=$(printf -- "--exclude %s/ " /dev /sys /run /proc /mnt /media)
 echo "=> sourceFilesystemsList = $sourceFilesystemsList"
-echo
 logFile="$HOME/log/completeCopy_VG_To_SSD-$(date +%Y%m%d-%HH%M).log"
-rsync="time $(which rsync) -x -uth -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST $RSYNC_EXCLUSION --log-file=$logFile"
+rsync="$(which rsync) -x -uth -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST $RSYNC_EXCLUSION --log-file=$logFile"
 cp2ext234="$rsync -ogpuv -lSH"
 cp2FAT32="$rsync --modify-window=1"
 destinationRootDir=/mnt/destinationVGDir
 test -d $destinationRootDir/ || sudo mkdir -v $destinationRootDir/
-#sudo mount -v /dev/$destinationVG/$(echo $destinationLVList | grep root) $destinationRootDir/
-#sudo $cp2ext234 -r -x / $destinationRootDir/
+echo
+echo sudo mount -v /dev/$destinationVG/$(echo $destinationLVList | tr " " "\n" | grep root) $destinationRootDir/
+set -x
+time sudo $cp2ext234 -r -x / $destinationRootDir/
+set +x
 test -d $destinationRootDir/etc/ || sudo mkdir -v $destinationRootDir/etc/
 
 grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || sed "s/$sourceEFI_UUID/$destinationEFI_UUID/" /etc/fstab | sed "s,$sourceVG_Or_Disk,$destinationVG," | sudo tee $destinationRootDir/etc/fstab
+sudo chroot $destinationRootDir "$(which mount) -av"
 
+echo
 for sourceDir in $(echo $sourceFilesystemsList | sed "s,/ \| /$,,g")
 do
 	echo "=> sourceDir = $sourceDir"
@@ -58,9 +62,13 @@ do
 	esac
 	echo
 #	echo "=> copyCommand = $copyCommand"
+	set -x
 #	echo $copyCommand -r $sourceDir $destinationDir/
+	set +x
 done
-#for i in dev dev/pts proc sys ; do sudo mount -v --bind /$i $destinationRootDir/$i ; done
+
+for i in dev dev/pts proc sys ; do sudo mount -v --bind /$i $destinationRootDir/$i ; done
 #sudo chroot $destinationRootDir/ "$(which grub-install) $destinationDisk"
 #sudo chroot $destinationRootDir/ "$(which update-grub)"
-#sudo umount -v $destinationRootDir/{sys,proc,dev/pts,dev,}
+sudo chroot $destinationRootDir "$(which umount) -av"
+sudo umount -v $destinationRootDir/{sys,proc,dev/pts,dev,}
