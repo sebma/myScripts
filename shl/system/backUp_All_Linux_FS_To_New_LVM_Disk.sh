@@ -34,7 +34,7 @@ RSYNC_EXCLUSION=$(printf -- "--exclude %s/ " /dev /sys /run /proc /mnt /media)
 echo "=> sourceFilesystemsList = $sourceFilesystemsList"
 logFile="$HOME/log/completeCopy_VG_To_SSD-$(date +%Y%m%d-%HH%M).log"
 echo
-echo "=> logFile = $logFile"
+echo "=> logFile = <$logFile>."
 echo
 rsync="$(which rsync) -x -uth -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST $RSYNC_EXCLUSION --log-file=$logFile"
 cp2ext234="$rsync -ogpuv -lSH"
@@ -43,14 +43,19 @@ destinationRootDir=/mnt/destinationVGDir
 test -d $destinationRootDir/ || sudo mkdir -v $destinationRootDir/
 echo
 sudo mount -v /dev/$destinationVG/$(echo $destinationLVList | tr " " "\n" | grep root) $destinationRootDir/
+trap 'rc=130;set +x;echo "=> Interruption trapped, logFile = <$logFile>.">&2;exit $rc' INT
 set -x
 time sudo $cp2ext234 -r -x / $destinationRootDir/
+trap - INT
 set +x
 sync
 test -d $destinationRootDir/etc/ || sudo mkdir -v $destinationRootDir/etc/
 
 grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || sed "s/$sourceEFI_UUID/$destinationEFI_UUID/" /etc/fstab | sed "s,$sourceVG_Or_Disk,$destinationVG," | sudo tee $destinationRootDir/etc/fstab
-sudo chroot $destinationRootDir "$(which mount) -av"
+sudo chroot $destinationRootDir "
+set -x
+$(which mount) -av
+set +x"
 
 echo
 for sourceDir in $(echo $sourceFilesystemsList | sed "s,/ \| /$,,g")
@@ -66,14 +71,20 @@ do
 	esac
 	echo
 #	echo "=> copyCommand = $copyCommand"
+	trap 'rc=130;set +x;echo "=> Interruption trapped, logFile = <$logFile>.">&2;exit $rc' INT
 	set -x
 #	$copyCommand -r $sourceDir $destinationDir/
+	trap - INT
 	sync
 	set +x
 done
 
 for i in dev dev/pts proc sys ; do sudo mount -v --bind /$i $destinationRootDir/$i ; done
-#sudo chroot $destinationRootDir/ "$(which grub-install) $destinationDisk"
-#sudo chroot $destinationRootDir/ "$(which update-grub)"
-sudo chroot $destinationRootDir "$(which umount) -av"
+#sudo chroot $destinationRootDir/ $(which update-grub)
+#sudo chroot $destinationRootDir/ $(which grub-install) $destinationDisk
+sudo chroot $destinationRootDir "
+set -x
+$(which umount) -av
+set +x"
 sudo umount -v $destinationRootDir/{sys,proc,dev/pts,dev,}
+echo "=> logFile = <$logFile>."
