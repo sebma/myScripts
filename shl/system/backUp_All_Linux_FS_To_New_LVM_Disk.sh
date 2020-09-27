@@ -7,5 +7,5 @@ if [ $# != 1 ];then
 fi
 
 destinationDisk=$1
-destinationPVPartition=$(sudo fdisk $destinationDisk -l | awk -F"/| " '/Linux LVM/{print$3}')
-destinationVG=$(sudo pvs /dev/$destinationPVPartition -o vg_name | awk '!/^\s+VG\s+$/{print$1}')
+destinationPVPartition=$(sudo fdisk $destinationDisk -l | awk '/Linux LVM/{print$1}')
+destinationVG=$(sudo pvs $destinationPVPartition -o vg_name | awk 'END{print$1}')
