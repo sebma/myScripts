@@ -25,7 +25,8 @@ if sudo true;then
 		for type in $fileTypes
 		do
 			case $type in
-				b|c|p|s) echo $rsyncAdditionalOptions | grep -q "\-D" || rsyncAdditionalOptions+=" -D" ;;
+#				b|c|p|s) echo $rsyncAdditionalOptions | grep -q "\-D" || rsyncAdditionalOptions+=" -D" ;;
+				b|c) echo $rsyncAdditionalOptions | grep -q "\--devices" || rsyncAdditionalOptions+=" --devices" ;; # Cold backup : do not backup pipes'n'sockets
 				d) rsyncAdditionalOptions+=" -r" ;;
 				l) rsyncAdditionalOptions+=" -l" ;;
 				*) ;;
