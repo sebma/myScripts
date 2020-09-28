@@ -87,6 +87,8 @@ time sudo chroot $destinationRootDir/ bash <<-EOF
 	lvmetad -f &
 	update-grub
 	grub-install $destinationDisk
+	sync
+	pkill lvmetad
 EOF
 
 sudo chroot $destinationRootDir/ umount -av
