@@ -6,7 +6,6 @@ if [ $# != 1 ];then
 	exit 1
 fi
 
-set -o nounset
 df=$(which df)
 destinationDisk=$1
 destinationPVPartition=$(sudo fdisk $destinationDisk -l | awk '/Linux LVM/{print$1}')
@@ -43,10 +42,8 @@ destinationRootDir=/mnt/destinationVGDir
 test -d $destinationRootDir/ || sudo mkdir -v $destinationRootDir/
 echo
 sudo mount -v /dev/$destinationVG/$(echo $destinationLVList | tr " " "\n" | grep root) $destinationRootDir/ || exit
-trap 'rc=130;set +x;echo "=> Interruption trapped, logFile = <$logFile>.">&2;exit $rc' INT
 set -x
 time sudo $cp2ext234 -r -x / $destinationRootDir/
-trap - INT
 set +x
 sync
 test -d $destinationRootDir/etc/ || sudo mkdir -v $destinationRootDir/etc/
@@ -69,26 +66,29 @@ sourceDirList="/boot /boot/efi /usr"
 for sourceDir in $sourceDirList
 do
 	destinationDir=${destinationRootDir}$sourceDir
-	sourceFSType=$(mount | grep "$sourceDir " | awk '{print$5}')
+	sourceFSType=$(mount | grep -v $destinationRootDir | grep "$sourceDir " | awk '{print$5}')
 	echo "=> sourceDir = $sourceDir destinationDir = $destinationDir"
 	echo "=> sourceFSType = $sourceFSType"
 
 	case $sourceFSType in
 		vfat) copyCommand="$cp2FAT32 -x";;
 		ext2|ext3|ext4) copyCommand="$cp2ext234 -x";;
+		*) copyCommand=echo;;
 	esac
 
 	echo
-	trap 'rc=130;set +x;echo "=> Interruption trapped, logFile = <$logFile>.">&2;exit $rc' INT
 	set -x
-	time sudo $copyCommand -r $sourceDir $destinationDir/
-	trap - INT
+	time sudo $copyCommand -r $sourceDir/ $destinationDir/
 	set +x
 	sync
 done
 
-sudo chroot $destinationRootDir/ update-grub
-sudo chroot $destinationRootDir/ grub-install $destinationDisk
+#sudo chroot $destinationRootDir/ bash <<-EOF
+#	lvmetad -f
+#	update-grub
+#	grub-install $destinationDisk
+#EOF
+
 sync
 sudo chroot $destinationRootDir/ umount -av
 
