@@ -1,0 +1,5 @@
+@powershell "gwmi win32_operatingsystem | select -exp version"
+@powershell "[System.Environment]::OSVersion"
+@powershell "[System.Environment]::OSVersion | select VersionString"
+@powershell "[System.Environment]::OSVersion.Version"
+@powershell "[System.Environment]::OSVersion.Version.Major"
