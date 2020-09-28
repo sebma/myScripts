@@ -82,8 +82,9 @@ do
 done
 sync
 
+sudo mkdir $destinationRootDir/run
 time sudo chroot $destinationRootDir/ bash <<-EOF
-	lvmetad -f
+	lvmetad -f &
 	update-grub
 	grub-install $destinationDisk
 EOF
