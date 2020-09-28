@@ -49,7 +49,7 @@ sync
 test -d $destinationRootDir/etc/ || sudo mkdir -v $destinationRootDir/etc/
 
 grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || sed "s/$sourceEFI_UUID/$destinationEFI_UUID/" /etc/fstab | sed "s,$sourceVG_Or_Disk,$destinationVG," | sudo tee $destinationRootDir/etc/fstab
-awk '/^[^#]/{print$2}' $destinationRootDir/etc/fstab | while read dir; do test -d $dir || sudo mkdir $dir;done
+awk '/^[^#]/{print$2}' $destinationRootDir/etc/fstab | while read dir; do test -d $destinationRootDir/$dir || sudo mkdir $destinationRootDir/$dir;done
 
 for specialFS in dev dev/pts proc sys ; do test -d $destinationRootDir/$specialFS/ || sudo mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
 
