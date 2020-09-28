@@ -78,10 +78,11 @@ do
 
 	echo
 	set -x
-	time sudo $copyCommand -r $sourceDir/ $destinationDir/
+	mount | grep -q $destinationDir && time sudo $copyCommand -r $sourceDir/ $destinationDir/
 	set +x
 	sync
 done
+sync
 
 #sudo chroot $destinationRootDir/ bash <<-EOF
 #	lvmetad -f
@@ -89,8 +90,7 @@ done
 #	grub-install $destinationDisk
 #EOF
 
-sync
 sudo chroot $destinationRootDir/ umount -av
-
 sudo umount -v $destinationRootDir/{sys,proc,dev/pts,dev,usr,}
+
 echo "=> logFile = <$logFile>."
