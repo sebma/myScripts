@@ -56,12 +56,9 @@ for specialFS in dev dev/pts proc sys ; do test -d $destinationRootDir/$specialF
 sudo chroot /mnt/destinationVGDir/ findmnt --verify && sudo chroot $destinationRootDir/ mount -av
 
 echo
-set -x
 df -PTh | grep $destinationRootDir
-set +x
 echo
 
-echo
 sourceDirList=$(echo $sourceFilesystemsList | sed "s,/ \| /$,,g")
 sourceDirList="/usr"
 for sourceDir in $sourceDirList
@@ -85,11 +82,11 @@ do
 done
 sync
 
-#sudo chroot $destinationRootDir/ bash <<-EOF
-#	lvmetad -f
-#	update-grub
-#	grub-install $destinationDisk
-#EOF
+time sudo chroot $destinationRootDir/ bash <<-EOF
+	lvmetad -f
+	update-grub
+	grub-install $destinationDisk
+EOF
 
 sudo chroot $destinationRootDir/ umount -av
 sudo umount -v $destinationRootDir/{sys,proc,dev/pts,dev,usr,}
