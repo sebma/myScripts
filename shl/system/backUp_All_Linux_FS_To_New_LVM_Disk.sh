@@ -55,7 +55,7 @@ grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || sed "s/$sour
 
 for i in dev dev/pts proc sys ; do sudo mount -v --bind /$i $destinationRootDir/$i ; done
 
-sudo chroot /mnt/destinationVGDir/ findmnt --verify && sudo chroot $destinationRootDir mount -av # Does not mount any other filesystems than / ?
+sudo chroot /mnt/destinationVGDir/ findmnt --verify && sudo chroot $destinationRootDir/ mount -av
 
 echo
 set -x
@@ -64,7 +64,9 @@ set +x
 echo
 
 echo
-for sourceDir in $(echo $sourceFilesystemsList | sed "s,/ \| /$,,g")
+sourceDirList=$(echo $sourceFilesystemsList | sed "s,/ \| /$,,g")
+sourceDirList="/boot /boot/efi /usr"
+for sourceDir in $sourceDirList
 do
 	destinationDir=${destinationRootDir}$sourceDir
 	sourceFSType=$(mount | grep "$sourceDir " | awk '{print$5}')
@@ -77,18 +79,18 @@ do
 	esac
 
 	echo
-#	echo "=> copyCommand = $copyCommand"
 	trap 'rc=130;set +x;echo "=> Interruption trapped, logFile = <$logFile>.">&2;exit $rc' INT
-#	set -x
-#	$copyCommand -r $sourceDir $destinationDir/
+	set -x
+	time sudo $copyCommand -r $sourceDir $destinationDir/
 	trap - INT
-	sync
 	set +x
+	sync
 done
 
-#sudo chroot $destinationRootDir/ $(which update-grub)
-#sudo chroot $destinationRootDir/ $(which grub-install) $destinationDisk
-sudo chroot $destinationRootDir $(which bash) -xc "umount -av"
+sudo chroot $destinationRootDir/ update-grub
+sudo chroot $destinationRootDir/ grub-install $destinationDisk
+sync
+sudo chroot $destinationRootDir/ umount -av
 
-sudo umount -v $destinationRootDir/{sys,proc,dev/pts,dev,}
+sudo umount -v $destinationRootDir/{sys,proc,dev/pts,dev,usr,}
 echo "=> logFile = <$logFile>."
