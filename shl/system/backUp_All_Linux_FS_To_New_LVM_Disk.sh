@@ -50,7 +50,7 @@ test -d $destinationRootDir/etc/ || sudo mkdir -v $destinationRootDir/etc/
 
 grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || sed "s/$sourceEFI_UUID/$destinationEFI_UUID/" /etc/fstab | sed "s,$sourceVG_Or_Disk,$destinationVG," | sudo tee $destinationRootDir/etc/fstab
 
-for i in dev dev/pts proc sys ; do sudo mount -v --bind /$i $destinationRootDir/$i ; done
+for specialFS in dev dev/pts proc sys ; do test -d $destinationRootDir/$specialFS/ || mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
 
 sudo chroot /mnt/destinationVGDir/ findmnt --verify && sudo chroot $destinationRootDir/ mount -av
 
@@ -62,7 +62,7 @@ echo
 
 echo
 sourceDirList=$(echo $sourceFilesystemsList | sed "s,/ \| /$,,g")
-sourceDirList="/boot /boot/efi /usr"
+sourceDirList="/usr"
 for sourceDir in $sourceDirList
 do
 	destinationDir=${destinationRootDir}$sourceDir
