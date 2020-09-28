@@ -94,4 +94,6 @@ EOF
 sudo chroot $destinationRootDir/ umount -av
 sudo umount -v $destinationRootDir/{sys,proc,dev/pts,dev,usr,}
 
+df | grep -q $destinationRootDir || sudo grub-install /dev/sda # Restore grub just in case
+
 echo "=> logFile = <$logFile>."
