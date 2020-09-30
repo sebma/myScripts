@@ -54,7 +54,7 @@ function initScript {
 	[ $platform = x86_64 ] && arch=amd64 || arch=i386
 	LTSReleaseNumber=14.04
 	LTSReleaseName=trusty
-	tmpDir=/tmp/firefox-$UID
+	tmpDir=/tmp/firefox-$(id -u)
 	return
 }
 function main {
