@@ -14,9 +14,12 @@ distribName ()
 		fi
 	elif [ $osFamily = Darwin ]; then
 		osName="$(sw_vers -productName)"
+	elif [ $osFamily = Android ]; then
+		osName=Android
 	else
 		osName=$OSTYPE
 	fi
+
 	echo $osName
 }
 
