@@ -46,6 +46,7 @@ elif [ $distribName = arch ]; then
 			cd inxi >/dev/null 2>&1 || { git clone https://aur.archlinux.org/inxi.git;cd inxi; }
 			if git config remote.origin.url | grep -q /inxi;then
 				makepkg -si && sync && which inxi
+				cd ->/dev/null
 			else
 				git clone https://aur.archlinux.org/inxi.git
 			fi
@@ -58,6 +59,7 @@ elif [ $distribName = arch ]; then
 			if git config remote.origin.url | grep -q /hw-probe;then
 				sed -i "/^depends=/s/'edid-decode'//" PKGBUILD
 				makepkg -si && sync && which hw-probe
+				cd ->/dev/null
 			else
 				git clone https://aur.archlinux.org/hw-probe.git
 			fi
