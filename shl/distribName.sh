@@ -20,7 +20,7 @@ distribName ()
 		osName=$OSTYPE
 	fi
 
-	echo $osName
+	echo $osName | awk '{print tolower($0)}'
 }
 
 distribName
