@@ -6,7 +6,7 @@ distribName ()
 	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
 
 	if [ $osFamily = Linux ]; then
-		if which lsb_release > /dev/null; then
+		if which lsb_release >/dev/null 2>&1; then
 			osName=$(lsb_release -si)
 			[ $osName = "n/a" ] && osName=$(\sed -n "s/[\"']//g;s/^ID=//p;" /etc/os-release)
 		elif [ -s /etc/os-release ]; then
@@ -35,4 +35,32 @@ if [ $distribName = ubuntu ]; then
 	dpkg -l inxi | grep -q ^.i || sudo apt install -V inxi
 	dpkg -l hw-probe | grep -q ^.i || sudo apt install -V hw-probe
 elif [ $distribName = arch ]; then
+	if sudo echo "";then
+		sudo pacman -Sy
+		sudo pacman -Fy
+
+		which fakeroot >/dev/null 2>&1 || sudo pacman -S fakeroot
+		which strip >/dev/null 2>&1 || sudo pacman -S binutils
+
+		if ! which inxi >/dev/null 2>&1;then
+			cd inxi >/dev/null 2>&1 || { git clone https://aur.archlinux.org/inxi.git;cd inxi; }
+			if git config remote.origin.url | grep -q /inxi;then
+				makepkg -si && sync && which inxi
+			else
+				git clone https://aur.archlinux.org/inxi.git
+			fi
+		fi
+
+		which make >/dev/null 2>&1 || sudo pacman -S make
+
+		if ! which hw-probe >/dev/null 2>&1;then
+			cd hw-probe >/dev/null 2>&1 || { git clone https://aur.archlinux.org/hw-probe.git;cd hw-probe; }
+			if git config remote.origin.url | grep -q /hw-probe;then
+				sed -i "/^depends=/s/'edid-decode'//" PKGBUILD
+				makepkg -si && sync && which hw-probe
+			else
+				git clone https://aur.archlinux.org/hw-probe.git
+			fi
+		fi
+	fi
 fi
