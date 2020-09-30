@@ -1,7 +1,6 @@
 #!/usr/bin/env sh
 
-distribName ()
-{
+distribName () {
 	local osName=unknown
 	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
 
