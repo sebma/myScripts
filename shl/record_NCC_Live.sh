@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-record_Live.sh https://www.youtube.com/user/NewCreationChurch/live
+getRestrictedFilenamesFORMAT.sh 94 https://www.youtube.com/user/NewCreationChurch/live
