@@ -12,6 +12,7 @@ gitUpdateAllMyLocalRepos ()
 		\grep -w "^[[:blank:]]url" ./.git/config
 		\git pull
 		cd - > /dev/null
+		echo
 	done
 	unset dir
 }
