@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-type sudo >/dev/null 2>&1 && [ $UID != 0 ] && sudo=$(which sudo) || sudo=""
+type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && sudo=$(which sudo) || sudo=""
 #set -o nounset
 set -o errexit
 
