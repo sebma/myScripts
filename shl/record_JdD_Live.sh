@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-getRestrictedFilenamesFORMAT.sh 94 https://www.youtube.com/c/JusticedeDieuMinistry/live
+record_Live.sh https://www.youtube.com/c/JusticedeDieuMinistry/live
