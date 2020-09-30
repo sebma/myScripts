@@ -54,7 +54,7 @@ function initScript {
 	[ $platform = x86_64 ] && arch=amd64 || arch=i386
 	LTSReleaseNumber=14.04
 	LTSReleaseName=trusty
-	tmpDir=/tmp/thunderbird-$UID
+	tmpDir=/tmp/thunderbird-$(id -u)
 	return
 }
 function main {
