@@ -8,10 +8,11 @@ fi
 
 for newSudoUser
 do
-	id -un $newSudoUser 2>/dev/null || useradd -m $newSudoUser
+	id -un $newSudoUser >/dev/null 2>&1 || useradd -m $newSudoUser
 	for group in admin sudo wheel
 	do
 		grep -qw $group /etc/group && usermod -aG $group $newSudoUser
 		\sed -i "/$group ALL=(ALL) ALL/s/#[ 	]*//" /etc/sudoers
 	done
+	passwd $newSudoUser
 done
