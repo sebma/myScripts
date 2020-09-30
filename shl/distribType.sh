@@ -6,7 +6,7 @@ distribType ()
 	local distribType=unknown
 	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
 
-	distribName=$(distribName.sh | awk '{print tolower($0)}')
+	distribName=$(distribName.sh)
 
 	if [ $osFamily = Linux ]; then
 		case $distribName in
