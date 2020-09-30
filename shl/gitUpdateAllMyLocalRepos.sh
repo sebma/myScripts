@@ -9,8 +9,8 @@ gitUpdateAllMyLocalRepos ()
 	$find ~ -maxdepth 2 -type d -name .git | while read dir; do
 		cd $dir/..
 		echo "=> Updating <$dir> local repo. ..." 1>&2
-		\grep -w "^[[:blank:]]url" ./.git/config
-		\git pull
+		git config remote.origin.url
+		git pull
 		cd - > /dev/null
 		echo
 	done
