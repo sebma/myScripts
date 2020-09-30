@@ -8,6 +8,7 @@ distribName ()
 	if [ $osFamily = Linux ]; then
 		if which lsb_release > /dev/null; then
 			osName=$(lsb_release -si)
+			[ $osName = "n/a" ] && osName=$(\sed -n "s/[\"']//g;s/^ID=//p;" /etc/os-release)
 		elif [ -s /etc/os-release ]; then
 			osName=$(\sed -n "s/[\"']//g;s/^ID=//p;" /etc/os-release)
 		fi
