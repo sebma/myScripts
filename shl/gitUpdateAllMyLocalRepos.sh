@@ -9,7 +9,7 @@ gitUpdateAllMyLocalRepos ()
 	$find ~ -maxdepth 2 -type d -name .git | while read dir; do
 		cd $dir/..
 		echo "=> Updating <$dir> local repo. ..." 1>&2
-		git config remote.origin.url
+		git config --local remote.origin.url
 		git pull
 		cd - > /dev/null
 		echo
