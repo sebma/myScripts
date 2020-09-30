@@ -8,7 +8,7 @@ fi
 
 for newSudoUser
 do
-	id -un $newSudoUser || useradd -m $newSudoUser
+	id -un $newSudoUser 2>/dev/null || useradd -m $newSudoUser
 	for group in admin sudo wheel
 	do
 		grep -qw $group /etc/group && usermod -aG $group $newSudoUser
