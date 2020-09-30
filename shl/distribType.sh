@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-distribType ()
-{
+distribType () {
 	local distribName=unknown
 	local distribType=unknown
 	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
