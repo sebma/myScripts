@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-#Creation du .cache dans /tmp/$LOGNAME et pointage de ce dernier via le lien symbolique ~/.cache
+#Creation du .cache dans /tmp/$USER et pointage de ce dernier via le lien symbolique ~/.cache
 function moveCacheTo_tmp {
 	local osFamily=$(uname -s)
 	local cacheLinkName=.cache
-	local myCacheRootDir=/tmp/$LOGNAME
+	local myCacheRootDir=/tmp/$USER
 	cd $HOME
 	if [ $osFamily = Linux ] || [ $osFamily = Darwin ]
 	then
