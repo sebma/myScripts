@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 findLoopsInAllLinuxFS() {
-	type sudo >/dev/null 2>&1 && [ $UID != 0 ] && sudo=$(which sudo) || sudo=""
+	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && sudo=$(which sudo) || sudo=""
 	fsRegExp="ext[234]|btrfs|f2fs|xfs|jfs|reiserfs|nilfs"
 	if $sudo true; then
 		time for dir in $(df -T | egrep -v "/media/" | awk "/$fsRegExp/"'{print$NF}' | egrep -vw "/home|/tmp" | sort -u)
