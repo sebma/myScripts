@@ -6,7 +6,7 @@ distribType ()
 	local distribType=unknown
 	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
 
-	distribName=$(distribType.sh)
+	distribName=$(distribName.sh)
 
 	if which lsb_release > /dev/null 2>&1; then
 		distribName=$(\lsb_release -si)
