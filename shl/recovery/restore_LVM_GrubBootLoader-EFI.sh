@@ -23,10 +23,11 @@ $sudo chroot /mnt /bin/bash <<-EOF # mise a la racine du disque monte
 #	apt install grub-efi-amd64-bin -y
 	test -s /boot/grub/grub.cfg || update-grub # creation d'un nouveau fichier de configuration : grub.cfg
 	set -x
-	grub-install --target=x86_64-efi --efi-directory=/media/boot/efi /dev/sda || grub-install --force --target=x86_64-efi --efi-directory=/media/boot/efi /dev/sda        # installation de grub
+	grub-install --target=x86_64-efi --efi-directory=/media/boot/efi --removable || grub-install --force --target=x86_64-efi --efi-directory=/media/boot/efi --removable # installation de grub
 	set +x
 	sync
 	umount /media/boot/efi
+	rmdir /media/boot/efi
 	umount -av
 EOF
 $sudo umount -v /mnt/{usr,sys,proc,dev/pts,dev,}
