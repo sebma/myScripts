@@ -5,7 +5,7 @@ brewPostInstall ()
 	brew=$(which brew)
 	echo "=> Updating homebrew ..." 1>&2
 	echo 1>&2
-	time $brew update -v
+	time $brew update -v || return
 	echo 1>&2
 	echo "=> Adding missing taps ..." 1>&2
 	echo 1>&2
