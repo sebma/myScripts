@@ -2,7 +2,7 @@
 
 brewPostInstall ()
 {
-	local brew=$(which brew)
+	brew=$(which brew)
 	echo "=> Updating homebrew ..." 1>&2
 	echo 1>&2
 	time $brew update -v
