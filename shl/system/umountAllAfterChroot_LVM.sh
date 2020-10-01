@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && sudo=$(which sudo) || sudo=""
+type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo=$(which sudo) || sudo=""
 #set -o nounset
 set -o errexit
 
@@ -16,8 +16,7 @@ $sudo lvs | grep -q root || {
 }
 
 rootFSDevice=$($sudo lvs | awk '/root/{print$2"-"$1}')
-if mount | grep -q $rootFSDevice
-then
+if mount | grep -q $rootFSDevice;then
 	mnt=$(lsblk -n -o MOUNTPOINT $rootFSDevice)
 	$sudo chroot $mnt /bin/umount -av
 	$sudo umount -v $mnt/{usr,sys,proc,dev/pts,dev,}
