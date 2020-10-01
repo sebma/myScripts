@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root" && sudo=$(which sudo) || sudo=""
+type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo=$(which sudo) || sudo=""
 #set -o nounset
 set -o errexit
 
@@ -22,12 +22,12 @@ $sudo lvs | grep -q root || {
 }
 
 rootFSDevice=$($sudo lvs | awk '/root/{print$2"-"$1}')
-$sudo mkdir -p /mnt/dev/pts /mnt/proc /mnt/sys
 mount | grep -q $rootFSDevice || $sudo mount /dev/mapper/$rootFSDevice /mnt          # montage de celle-ci en remplacant le X par le bon numero de partition
-for i in dev dev/pts proc sys ; do $sudo mount --bind /$i /mnt/$i ; done
+for special in dev dev/pts proc sys ; do $sudo mkdir -pv /mnt/$special;$sudo mount -v --bind /$special /mnt/$special ; done
+
 set +o errexit
 $sudo chroot /mnt /bin/bash <<-EOF # mise a la racine du disque monte
-	mount -av                      # montage des partitions dans le chroot
+	findmnt >/dev/null && mount -av || exit                      # montage des partitions dans le chroot
 	dpkg -S x86_64-efi/modinfo.sh
 	host archive.ubuntu.com >/dev/null && apt install -V -y grub-efi-amd64-bin grub-efi-amd64-signed linux-image-generic linux-signed-image-generic
 	test -s /boot/grub/grub.cfg || update-grub # creation d'un nouveau fichier de configuration : grub.cfg
@@ -38,4 +38,4 @@ $sudo chroot /mnt /bin/bash <<-EOF # mise a la racine du disque monte
 	umount -av
 	exit
 EOF
-$sudo umount -v /mnt/sys /mnt/proc /mnt/dev/pts /mnt/dev /mnt
+$sudo umount -v /mnt/{usr,sys,proc,dev/pts,dev,}
