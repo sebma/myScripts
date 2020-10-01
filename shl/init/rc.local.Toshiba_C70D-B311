@@ -1,0 +1,47 @@
+#!/bin/sh -e
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+
+# Turn Numlock on for the TTYs:
+set -x
+set +e
+echo && {
+date
+[ -d /sys/firmware/efi ] && grub-install || grub-install /dev/sda
+sh -x /usr/local/bin/numlockTerms.sh
+echo "=> Mounted filesystems :"
+mount | grep ^/dev
+PATH=$PATH:/usr/local/bin
+echo "=> PATH = " $PATH
+mount -v /tmp
+chmod -v 1777 /tmp
+echo "=> Unmounting and recreating the </var/cache> filesystem ..." && umount -lv /var/cache && sleep 1 && mkfs.ext4 -L "/var/cache" /dev/KUbuntu_VG/var_cache
+mount -v /var/cache
+chmod -v 0777 /var/cache
+echo "=> Unmounting and recreating the </var/tmp> filesystem ...  " && umount -lv /var/tmp   && sleep 1 && mkfs.ext4 -L "/var/tmp"   /dev/KUbuntu_VG/var_tmp
+mount -v /var/tmp
+chmod -v 1777 /var/tmp
+sebUser=$(ls /home/ | grep seb)
+mkdir /var/tmp/kdecache-$sebUser
+chown -R $sebUser:$sebUser /var/tmp/kdecache-$sebUser
+ls -ld /var/tmp/kdecache-*/
+unset sebUser
+
+rm -vfr /var/cache && mkdir -vm777 /var/cache
+echo "=> Mounted filesystems :"
+mount | grep ^/dev
+} > /rc.local.log 2>&1
+set +x
+sync
+set -e
+
+exit 0
