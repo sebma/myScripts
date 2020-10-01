@@ -84,11 +84,13 @@ sync
 
 sudo mkdir $destinationRootDir/run
 time sudo chroot $destinationRootDir/ bash <<-EOF
-	lvmetad -f &
+	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
 	update-grub
-	grub-install $destinationDisk
+	[ -d /sys/firmware/efi ] && grub-install || grub-install $destinationDisk
+	if which lvmetad >/dev/null 2>&1;then
+		grep -q "use_lvmetad\s*=\s*0" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*0/use_lvmetad = 1/" /etc/lvm/lvm.conf
+	fi
 	sync
-	pkill lvmetad
 EOF
 
 sudo chroot $destinationRootDir/ umount -av
