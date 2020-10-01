@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 
-\ruby -e "$(\curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh)"
+\bash -c "$(\curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh)"
