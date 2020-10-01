@@ -15,6 +15,7 @@ brewPostInstall ()
 		$brew tap | \grep -q $tap || {
 			set -x
 			time $brew tap $tap
+			sync
 			set +x
 		}
 	done
