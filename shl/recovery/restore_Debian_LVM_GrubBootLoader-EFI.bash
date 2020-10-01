@@ -31,8 +31,9 @@ $sudo chroot /mnt /bin/bash <<-EOF # mise a la racine du disque monte
 	dpkg -S x86_64-efi/modinfo.sh
 	host archive.ubuntu.com >/dev/null && apt install -V -y grub-efi-amd64-bin grub-efi-amd64-signed linux-image-generic linux-signed-image-generic
 	test -s /boot/grub/grub.cfg || update-grub # creation d'un nouveau fichier de configuration : grub.cfg
+	mkdir -p /boot/efi
 	set -x
-	grub-install --target=x86_64-efi --efi-directory=/boot/efi $diskDeviceName || grub-install --force --target=x86_64-efi --efi-directory=/boot/efi $diskDeviceName        # installation de grub
+	grub-install --target=x86_64-efi --efi-directory=/boot/efi --removable || grub-install --force --target=x86_64-efi --efi-directory=/boot/efi --removable # installation de grub
 	set +x
 	sync
 	umount -av
