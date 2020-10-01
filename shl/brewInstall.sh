@@ -26,10 +26,8 @@ brewInstall ()
 			brew=$brewPrefix/bin/brew
 		fi
 	fi
-	if test -x $brew; then
-		source .bash_functions.brew
-		brewPostInstall
-	fi
+
+	brewPostInstall.sh
 	sync
 }
 
