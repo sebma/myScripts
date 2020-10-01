@@ -1,5 +1,8 @@
 #!/usr/bin/env sh
 
+scriptDir=$(dirname $0)
+scriptDir=$(cd $scriptDir;pwd)
+
 addpaths ()
 {
 	for path in "$@"
@@ -27,7 +30,7 @@ brewInstall ()
 		fi
 	fi
 
-	brewPostInstall.sh
+	$scriptDir/brewPostInstall.sh
 	sync
 }
 
