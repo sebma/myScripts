@@ -20,7 +20,7 @@ brewInstall ()
 	if ! which brew > /dev/null 2>&1; then
 		if groups | \egrep -wq "adm|admin|sudo|wheel"; then
 			$(which bash) -c "$(\curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)" || return
-			addpaths /usr/local/bin
+			addpaths /home/linuxbrew/.linuxbrew/bin
 			brew=$(which brew)
 		else
 			brewPrefix=$HOME/brew
