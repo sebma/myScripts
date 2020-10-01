@@ -2,7 +2,7 @@
 
 brewPostInstall ()
 {
-	type brew || return
+	type brew >/dev/null || return
 	brew=$(which brew)
 	echo "=> Updating homebrew ..." 1>&2
 	echo 1>&2
