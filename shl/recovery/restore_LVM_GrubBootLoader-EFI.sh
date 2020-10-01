@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-type sudo >/dev/null 2>&1 && sudo=$(which sudo) || sudo=""
+type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo=$(which sudo) || sudo=""
 #set -o nounset
 set -o errexit
 
@@ -11,12 +11,12 @@ $sudo lvs | grep -q root || {
 }
 
 rootFSDevice=$($sudo lvs | awk '/root/{print$2"-"$1}')
-$sudo mkdir -p /mnt/{dev/pts,proc,sys}
 mount | grep -q $rootFSDevice || $sudo mount /dev/mapper/$rootFSDevice /mnt          # montage de celle-ci en remplacant le X par le bon numero de partition
-for i in dev dev/pts proc sys ; do $sudo mount --bind /$i /mnt/$i ; done
+for special in dev dev/pts proc sys ; do $sudo mkdir -pv /mnt/$special;$sudo mount -v --bind /$special /mnt/$special ; done
+
 set +o errexit
 $sudo chroot /mnt /bin/bash <<-EOF # mise a la racine du disque monte
-	mount -av                      # montage des partitions dans le chroot
+	findmnt >/dev/null && mount -av || exit                      # montage des partitions dans le chroot
 	mkdir -p /media/boot/efi
 	mount /dev/sda1 /media/boot/efi
 	dpkg -S x86_64-efi/modinfo.sh
@@ -29,4 +29,4 @@ $sudo chroot /mnt /bin/bash <<-EOF # mise a la racine du disque monte
 	umount /media/boot/efi
 	umount -av
 EOF
-$sudo umount -v /mnt/{sys,proc,dev/pts,dev,}
+$sudo umount -v /mnt/{usr,sys,proc,dev/pts,dev,}
