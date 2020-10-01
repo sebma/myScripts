@@ -53,7 +53,7 @@ awk '/^[^#]/{print$2}' $destinationRootDir/etc/fstab | while read dir; do test -
 
 for specialFS in dev dev/pts proc sys ; do test -d $destinationRootDir/$specialFS/ || sudo mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
 
-sudo chroot /mnt/destinationVGDir/ findmnt --verify && sudo chroot $destinationRootDir/ mount -av
+sudo chroot /mnt/destinationVGDir/ findmnt >/dev/null && sudo chroot $destinationRootDir/ mount -av
 
 echo
 df -PTh | grep $destinationRootDir
@@ -94,6 +94,7 @@ EOF
 sudo chroot $destinationRootDir/ umount -av
 sudo umount -v $destinationRootDir/{sys,proc,dev/pts,dev,usr,}
 
-df | grep -q $destinationRootDir || sudo grub-install /dev/sda # Restore grub just in case
+df | grep -q $destinationRootDir
+sudo grub-install /dev/sda # Restore grub just in case
 
 echo "=> logFile = <$logFile>."
