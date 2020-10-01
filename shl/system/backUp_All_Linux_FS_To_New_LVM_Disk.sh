@@ -25,7 +25,7 @@ echo "=> sourceVG_Or_Disk = $sourceVG_Or_Disk"
 
 sourceEFI_FS=$(df | grep /boot/efi$ | cut -d" " -f1)
 sourceEFI_UUID=$(sudo blkid $sourceEFI_FS -o value -s UUID)
-destinationEFI_FS=$(sudo fdisk $destinationDisk -l | awk '/\<EFI\>/{print$1}')
+destinationEFI_FS=$(sudo gdisk $destinationDisk -l | awk "/\<EFI\>/{print$destinationDisk\$1}")
 destinationEFI_UUID=$(sudo blkid $destinationEFI_FS -o value -s UUID)
 
 RSYNC_SKIP_COMPRESS_LIST=7z/aac/avi/bz2/deb/flv/gz/iso/jpeg/jpg/mkv/mov/m4a/mp2/mp3/mp4/mpeg/mpg/oga/ogg/ogm/ogv/webm/rpm/tbz/tgz/z/zip
@@ -84,9 +84,11 @@ sync
 
 sudo mkdir $destinationRootDir/run
 time sudo chroot $destinationRootDir/ bash <<-EOF
+	efiDirectory=$(mount | awk '/\/efi /{print$3}')
+	ls $efiDirectory >/dev/null || exit
 	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
 	update-grub
-	[ -d /sys/firmware/efi ] && grub-install || grub-install $destinationDisk
+	[ -d /sys/firmware/efi ] && grub-install --efi-directory=$efiDirectory --removable || grub-install $destinationDisk
 	if which lvmetad >/dev/null 2>&1;then
 		grep -q "use_lvmetad\s*=\s*0" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*0/use_lvmetad = 1/" /etc/lvm/lvm.conf
 	fi
