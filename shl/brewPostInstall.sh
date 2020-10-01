@@ -1,11 +1,11 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 brewPostInstall ()
 {
 	brew=$(which brew)
 	echo "=> Updating homebrew ..." 1>&2
 	echo 1>&2
-	time $brew update -v || return
+	time $brew update -v
 	echo 1>&2
 	echo "=> Adding missing taps ..." 1>&2
 	echo 1>&2
