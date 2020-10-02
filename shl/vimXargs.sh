@@ -1,4 +1,3 @@
 #!/usr/bin/env sh
 
-vim "$@"
-reset
+parallel --tty -X vim "$@"
