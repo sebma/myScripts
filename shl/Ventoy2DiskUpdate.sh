@@ -13,10 +13,10 @@ Ventoy2DiskLatestGitHubReleaseURL=$(curl -s $gitHubAPIRepoURL/releases/latest | 
 ventoyLatestRelease=$(git ls-remote --tags --refs https://github.com/$gitHubUser/$gitHubRepo | awk -F/ 'END{print gensub("^v","",1,$NF)}')
 
 curl -s "$Ventoy2DiskLatestGitHubReleaseURL" | tar -C /tmp -xz
-sudo mkdir /opt/ventoy
+sudo mkdir -pv /opt/ventoy
 rsync="$(which rsync) -uth -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST"
 cp2ext234="$rsync -ogpuv -lSH"
 mv2ext234="$cp2ext234 --remove-source-files"
-sudo time $mv2ext234 -r /tmp/ventoy-$ventoyLatestRelease/* /opt/ventoy
+time sudo $mv2ext234 -r /tmp/ventoy-$ventoyLatestRelease/* /opt/ventoy
 
-$scriptDir/not_mine/Ventoy2Disk.sh -u "$@"
+sudo /opt/ventoy/Ventoy2Disk.sh -u "$@"
