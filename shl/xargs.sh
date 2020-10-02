@@ -1,3 +1,9 @@
 #!/usr/bin/env sh
 
-parallel --tty -X "$@"
+command="$1"
+shift
+if \xargs --help | grep -wq -- -o;then
+	\xargs -o $command "$@"
+else
+	parallel --tty -X $command "$@"
+fi
