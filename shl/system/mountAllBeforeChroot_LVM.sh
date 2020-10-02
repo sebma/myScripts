@@ -16,8 +16,10 @@ $sudo lvs | grep -q root || {
 }
 
 rootFSDevice=$($sudo lvs | awk '/root/{print$2"-"$1}')
-mount | grep -q $rootFSDevice || $sudo mount /dev/mapper/$rootFSDevice /mnt          # montage de celle-ci en remplacant le X par le bon numero de partition
-for special in dev dev/pts proc sys run ; do $sudo mkdir -pv /mnt/$special;$sudo mount -v --bind /$special /mnt/$special ; done
+mount | grep -q $rootFSDevice || $sudo mount /dev/mapper/$rootFSDevice /mnt # montage de celle-ci en remplacant le X par le bon numero de partition
+mkdir -pv /mnt/run && mount -t proc /proc /mnt/proc
+for special in dev dev/pts sys run ; do $sudo mkdir -pv /mnt/$special;$sudo mount -v --bind /$special /mnt/$special ; done
+
 $sudo chroot /mnt /bin/bash <<-EOF
 	mount /boot
 	[ -d /sys/firmware/efi ] && mount /boot/efi
