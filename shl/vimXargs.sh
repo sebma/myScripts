@@ -1,3 +1,7 @@
 #!/usr/bin/env sh
 
-parallel --tty -X vim "$@"
+if \xargs --help | grep -wq -- -o;then
+	\xargs -o vim "$@"
+else
+	parallel --tty -X vim "$@"
+fi
