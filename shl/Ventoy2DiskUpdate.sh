@@ -19,4 +19,4 @@ cp2ext234="$rsync -ogpuv -lSH"
 mv2ext234="$cp2ext234 --remove-source-files"
 time sudo $mv2ext234 -r /tmp/ventoy-$ventoyLatestRelease/* /opt/ventoy
 
-sudo /opt/ventoy/Ventoy2Disk.sh -u "$@"
+cd /opt/ventoy/ && sudo ./Ventoy2Disk.sh -u "$@"
