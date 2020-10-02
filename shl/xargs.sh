@@ -1,4 +1,3 @@
 #!/usr/bin/env sh
 
-xargs "$@"
-reset
+parallel --tty -X "$@"
