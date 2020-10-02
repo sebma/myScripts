@@ -20,5 +20,11 @@ do
 		$sudo mount -v --bind /$special /mnt/$special
 	}
 done
+if [ -d /sys/firmware/efi ];then
+       df /mnt/sys/firmware/efi/efivars | grep -q /mnt/sys/firmware/efi/efivars || {
+		cd /mnt/sys/firmware/efi/ && $sudo mkdir -pv efivars
+		$sudo mount -v --bind /sys/firmware/efi/efivars /mnt/sys/firmware/efi/efivars
+       }
+fi
 
 $sudo chroot "$@"
