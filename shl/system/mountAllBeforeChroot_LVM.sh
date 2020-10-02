@@ -37,10 +37,13 @@ if [ -d /sys/firmware/efi ];then
 fi
 
 $sudo chroot /mnt /bin/bash <<-EOF
-	mount /boot
-	[ -d /sys/firmware/efi ] && mount /boot/efi
-	mount /usr
-	mount /var
+	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
+	mount -v /boot
+	[ -d /sys/firmware/efi ] && mount -v /boot/efi
+	mount -v /usr
+	mount -v /var
+	rm -v /var/lib/apt/lists/lock
+	sync
 EOF
 
 $sudo chroot /mnt
