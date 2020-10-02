@@ -51,7 +51,10 @@ test -d $destinationRootDir/etc/ || sudo mkdir -v $destinationRootDir/etc/
 grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || sed "s/$sourceEFI_UUID/$destinationEFI_UUID/" /etc/fstab | sed "s,$sourceVG_Or_Disk,$destinationVG," | sudo tee $destinationRootDir/etc/fstab
 awk '/^[^#]/{print$2}' $destinationRootDir/etc/fstab | while read dir; do test -d $destinationRootDir/$dir || sudo mkdir $destinationRootDir/$dir;done
 
-for specialFS in dev dev/pts proc sys ; do test -d $destinationRootDir/$specialFS/ || sudo mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
+[ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
+$efiMode && sudo mount -v --bind /sys/firmware/efi/efivars /mnt/sys/firmware/efi/efivars
+
+for specialFS in dev dev/pts proc sys run ; do test -d $destinationRootDir/$specialFS/ || sudo mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
 
 sudo chroot /mnt/destinationVGDir/ findmnt >/dev/null && sudo chroot $destinationRootDir/ mount -av
 
@@ -84,11 +87,11 @@ sync
 
 sudo mkdir $destinationRootDir/run
 time sudo chroot $destinationRootDir/ bash <<-EOF
-	efiDirectory=$(mount | awk '/\/efi /{print$3}')
-	ls $efiDirectory >/dev/null || exit
+	[ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
+	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
 	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
 	update-grub
-	[ -d /sys/firmware/efi ] && grub-install --efi-directory=$efiDirectory --removable || grub-install $destinationDisk
+	$efiMode && efiDirectory=$(mount | awk '/\/efi /{print$3}') && grub-install --efi-directory=$efiDirectory --removable || grub-install $destinationDisk
 	if which lvmetad >/dev/null 2>&1;then
 		grep -q "use_lvmetad\s*=\s*0" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*0/use_lvmetad = 1/" /etc/lvm/lvm.conf
 	fi
@@ -96,7 +99,7 @@ time sudo chroot $destinationRootDir/ bash <<-EOF
 EOF
 
 sudo chroot $destinationRootDir/ umount -av
-sudo umount -v $destinationRootDir/{sys,proc,dev/pts,dev,usr,}
+sudo umount -v $destinationRootDir/{sys/firmware/efi/efivars,sys,proc,run,dev/pts,dev,usr,}
 
 df | grep -q $destinationRootDir
 sudo grub-install /dev/sda # Restore grub just in case
