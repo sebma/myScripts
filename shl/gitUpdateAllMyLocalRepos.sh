@@ -10,12 +10,10 @@ gitUpdateAllMyLocalRepos ()
 	$find ~ -maxdepth 2 -type d -name .git | while read dir; do
 		cd $dir/..
 		remoteRepoUrl=$(git config --local remote.origin.url)
-		test -n "$remoteRepoUrl" && echo "=> Updating <$dir> local repo. from <$remoteRepoUrl> ..." 1>&2 && git pull && sync
+		test -n "$remoteRepoUrl" && echo "=> Updating <$dir> repo. from <$remoteRepoUrl> repo. ..." 1>&2 && git pull && sync
 		cd - > /dev/null
 		echo
 	done
-	echo "=> FIN: dir = <$dir>."
-	unset dir
 }
 
 gitUpdateAllMyLocalRepos
