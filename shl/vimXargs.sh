@@ -3,5 +3,5 @@
 if \xargs --help 2>&1 | grep -wq -- -o;then
 	\xargs -o vim "$@"
 else
-	parallel --tty -X vim "$@"
+	\xargs sh -c vim' </dev/tty "$@"' whatever
 fi
