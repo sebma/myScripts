@@ -7,7 +7,7 @@ gitUpdateRepos () {
 	do
 		if cd $dir;then
 			remoteRepoUrl=$(git config --local remote.origin.url)
-			test -n "$remoteRepoUrl" && echo "=> Updating <$dir> local repo. from <$remoteRepoUrl> ..." 1>&2 && git pull && sync
+			test -n "$remoteRepoUrl" && echo "=> Updating <$dir> repo. from <$remoteRepoUrl> repo. ..." 1>&2 && git pull && sync
 			cd - >/dev/null
 		fi
 	done
