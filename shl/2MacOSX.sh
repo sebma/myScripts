@@ -21,8 +21,8 @@ case $ubuntuRelease in
 		version=v4;;
 	15.04) version=v5;;
 	15.10) version=v6;;
-	16.04) version=v7;;
-	16.10) version=v8;;
+	16.04) version=lts-v7;;
+	16.10) version=lts-v8;;
 	17.04) version=v9;;
 	17.10) version=v10;;
 	18.04|18.10) version=v1804;;
@@ -32,11 +32,12 @@ case $ubuntuRelease in
 	14.04|14.10) appList="mbuntu-y-ithemes-$version mbuntu-y-icons-$version mbuntu-y-bscreen-$version mbuntu-y-lightdm-$version slingscold indicator-synapse libreoffice-style-sifr appmenu-qt appmenu-qt5 plasma-widget-menubar";;
 	15.04) appList="mbuntu-y-ithemes-$version mbuntu-y-icons-$version slingscold mutate libreoffice-style-sifr mbuntu-y-lightdm-$version";;
 	15.10) appList="macbuntu-ithemes-$version macbuntu-icons-$version slingscold mutate plank macbuntu-plank-theme-$version libreoffice-style-sifr macbuntu-lightdm-$version macbuntu-bscreen-$version";;
-	16.04|16.10|17.04|17.10|18.04) appList="macbuntu-os-icons-lts-$version macbuntu-os-ithemes-lts-$version slingscold albert libreoffice-style-sifr plank macbuntu-os-plank-theme-lts-$version macbuntu-os-bscreen-lts-$version macbuntu-os-lightdm-lts-$version";;
-	18.10) appList="macbuntu-os-plank-theme-lts-$version slingscold albert libreoffice-style-sifr plank";;
+	16.04|16.10|17.04|17.10) appList="macbuntu-os-icons-$version macbuntu-os-ithemes-$version slingscold albert libreoffice-style-sifr plank macbuntu-os-plank-theme-$version macbuntu-os-bscreen-$version macbuntu-os-lightdm-$version";;
+	18.04) appList="macbuntu-os-icons-$version macbuntu-os-ithemes-$version slingscold albert libreoffice-style-sifr plank macbuntu-os-plank-theme-$version";; 
+	18.10) appList="macbuntu-os-plank-theme-$version slingscold albert libreoffice-style-sifr plank";;
 esac
 
 set -x
 sudo apt install -V $appList $@
-dpkg -l | grep -q ^.i.* macbuntu-os-bscreen-lts-$version && sudo dpkg-reconfigure macbuntu-os-bscreen-lts-$version
+dpkg -l | grep -q ^.i.*macbuntu-os-bscreen-lts-$version && sudo dpkg-reconfigure macbuntu-os-bscreen-lts-$version
 set +x
