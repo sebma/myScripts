@@ -40,4 +40,5 @@ esac
 set -x
 sudo apt install -V $appList $@
 dpkg -l | grep -q ^.i.*macbuntu-os-bscreen-lts-$version && sudo dpkg-reconfigure macbuntu-os-bscreen-lts-$version
+sync
 set +x
