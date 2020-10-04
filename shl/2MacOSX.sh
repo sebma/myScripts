@@ -33,7 +33,7 @@ case $ubuntuRelease in
 	15.04) appList="mbuntu-y-ithemes-$version mbuntu-y-icons-$version slingscold mutate libreoffice-style-sifr mbuntu-y-lightdm-$version";;
 	15.10) appList="macbuntu-ithemes-$version macbuntu-icons-$version slingscold mutate plank macbuntu-plank-theme-$version libreoffice-style-sifr macbuntu-lightdm-$version macbuntu-bscreen-$version";;
 	16.04|16.10|17.04|17.10) appList="macbuntu-os-icons-$version macbuntu-os-ithemes-$version slingscold albert libreoffice-style-sifr plank macbuntu-os-plank-theme-$version macbuntu-os-bscreen-$version macbuntu-os-lightdm-$version";;
-	18.04) appList="macbuntu-os-icons-$version macbuntu-os-ithemes-$version slingscold albert libreoffice-style-sifr plank macbuntu-os-plank-theme-$version";; 
+	18.04) appList="macbuntu-os-icons-$version macbuntu-os-ithemes-$version slingscold albert libreoffice-style-sifr plank macbuntu-os-plank-theme-$version";;
 	18.10) appList="macbuntu-os-plank-theme-$version slingscold albert libreoffice-style-sifr plank";;
 esac
 
