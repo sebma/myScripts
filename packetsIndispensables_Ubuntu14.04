@@ -94,6 +94,7 @@ highlight
 html-xml-utils
 htop
 ifupdown
+indicator-bluetooth
 ipcalc
 iperf
 iperf3
