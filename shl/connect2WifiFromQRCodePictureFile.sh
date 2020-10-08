@@ -15,8 +15,8 @@ then
 fi
 
 qrdecode="zbarimg -q --raw"
-bssid=$($qrdecode "$qrPictureFile" | awk -F "[:;]" '{printf$3}')
 ssid=$( $qrdecode "$qrPictureFile" | awk -F "[:;]" '{printf$3}')
+bssid=$ssid
 
 os=$(uname -s)
 if   [ $os = Linux ] || [ $os = Darwin ]
@@ -24,9 +24,11 @@ then
 	isHidden="$($qrdecode "$qrPictureFile" | grep -q ';H:true;' && echo true || echo false)"
 	if $isHidden
 	then
-		echo "=> The ssid is hidden, please type the bssid :"
-		read -p "bssid: " bssid
-		echo "=> bssid = <$bssid>"
+#		echo "=> The ssid is hidden, please type the bssid :"
+#		nmcli dev wifi list
+#		read -p "bssid: " bssid
+#		echo "=> bssid = <$bssid>"
+		:
 	else
 		:
 	fi
@@ -35,25 +37,27 @@ then
 	echo "$pass"
 	if [ -z $ssid ] || [ -z $pass ]
 	then
-		echo "=> ERROR: The <ssid> or the <pass> is an empty string." >&2
+		echo "=> ERROR: The <ssid> or the <pass> variable is an empty string." >&2
 		exit 2
 	fi
 
-	if $isHidden && [ -z $bssid ]
-	then
-		echo "=> ERROR: The <bssid> is empty." >&2
-		exit 3
-	fi
+#	if $isHidden && [ -z "$bssid" ]
+#	then
+#		echo "=> ERROR: The <bssid> is empty." >&2
+#		exit 3
+#	fi
 fi
 
 if   [ $os = Linux ]
 then
+	set -x
 	if $isHidden
 	then
-		nmcli dev wifi connect "$ssid" password "$pass" bssid $bssid name $ssid hidden yes
+		nmcli dev wifi connect "$ssid" password "$pass" name $ssid hidden yes
 	else
 		nmcli dev wifi connect "$ssid" password "$pass"
 	fi
+	set +x
 elif [ $os = Darwin ]
 then
 	interFace=$(networksetup -listallhardwareports | awk '/Wi-Fi/{found=1}/Device/&&found{print$NF;exit}')
