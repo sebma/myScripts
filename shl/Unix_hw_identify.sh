@@ -50,7 +50,7 @@ configureSudoersForGroup() {
 	}
 	id -Gn | grep -q $groupName || {
 		echo "=> Adding <$USER> in the <$groupName> group ..."
-		su -c "usermod -G $groupName $USER"
+		su -c "usermod -aG $groupName $USER"
 		echo "=> Please logoff and logon again."
 		exit
 	}
