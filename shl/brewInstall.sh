@@ -25,7 +25,7 @@ brewInstall ()
 		else
 			brewPrefix=$HOME/brew
 			git clone https://github.com/homebrew/brew $brewPrefix
-			time git clone https://github.com/homebrew/homebrew-core $brewPrefix/Library/Taps/homebrew/homebrew-core
+			time git clone https://github.com/homebrew/homebrew-core $brewPrefix/Library/Taps/Homebrew/homebrew-core
 			brew=$brewPrefix/bin/brew
 		fi
 	fi
