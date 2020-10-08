@@ -51,7 +51,7 @@ configureSudoersForGroup() {
 	}
 	id -Gn | grep -q $groupName || {
 		echo "=> Adding <$USER> in the <$groupName> group ..."
-		su -c "usermod -G $groupName $USER"
+		su -c "usermod -aG $groupName $USER"
 		echo "=> Please logoff and logon again."
 		exit
 	}
@@ -155,6 +155,10 @@ reportFile="`echo $reportFile | sed 's/ \|(\|\./_/g;s/)//g'`.txt"
 XorgFile=Xorg__$(echo $reportFile | sed 's/.txt/.log/')
 
 echo "=> Terminal : $(tput cols)x$(tput lines)" | $sudo_cmd tee "$reportFile"
+
+wifiInterface=$(iw dev 2>/dev/null | awk '/Interface/{lastInterface=$NF}END{print lastInterface}')
+test "$wifiInterface" || wifiInterface="$(iwconfig 2>/dev/null | awk '/^[^ \t]/ { if ($1 ~ /^[0-9]+:/) { lastInterface=$2 } else { lastInterface=$1 } }END{print lastInterface}')"
+
 #test -f "$reportFile" || {
 {
 	set -o errexit
@@ -181,7 +185,7 @@ echo "=> Terminal : $(tput cols)x$(tput lines)" | $sudo_cmd tee "$reportFile"
 	echo "=> Ethernet IP Address :"
 	ifconfig eth | awk -F ":| *" '/inet addr/{print $4}'
 	echo "=> Wireless connection info:"
-	$sudo_cmd iw dev wlan0 link
+	$sudo_cmd iw dev $wifiInterface link
 	echo "=> Ethernet MAC Address :"
 	test -r /sys/class/net/eth0/address && cat /sys/class/net/eth0/address || ifconfig eth | awk '/HWaddr/{print $NF}'
 	echo "=> Mainboard Name :"
