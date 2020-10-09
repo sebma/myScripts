@@ -36,7 +36,7 @@ searchPackagesFromFilePath() {
 	elif [ $distribName = arch ]; then
 		for tool
 		do
-			packagesList+="$(pacman -F /bin/$tool | awk '/ is in /{printf$4}') "
+			packagesList+="$(pacman -F /usr/bin/$tool | awk '/ is /{printf$(NF-1)}') "
 		done
 	fi
 
