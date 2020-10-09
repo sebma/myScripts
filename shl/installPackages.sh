@@ -23,21 +23,6 @@ distribName () {
 	echo $osName | awk '{print tolower($0)}'
 }
 
-updateLinuxDistribRepos() {
-	distribName=$(distribName)
-	if [ $distribName = ubuntu ]; then
-		ubuntuSources=/etc/apt/sources.list
-		for repo in main restricted universe multiverse
-		do
-			grep -q $repo $ubuntuSources || $sudo add-apt-repository $repo -y
-		done
-		$sudo apt update -V
-	elif [ $distribName = arch ]; then
-		$sudo pacman -Sy
-		$sudo pacman -Fy
-	fi
-}
-
 installPackages() {
 	packagesList="$@"
 	distribName=$(distribName)
