@@ -23,21 +23,6 @@ distribName () {
 	echo $osName | awk '{print tolower($0)}'
 }
 
-updateLinuxDistribRepos() {
-	distribName=$(distribName)
-	if [ $distribName = ubuntu ]; then
-		ubuntuSources=/etc/apt/sources.list
-		for repo in main restricted universe multiverse
-		do
-			grep -q $repo $ubuntuSources || $sudo add-apt-repository $repo -y
-		done
-		$sudo apt update -V
-	elif [ $distribName = arch ]; then
-		$sudo pacman -Sy
-		$sudo pacman -Fy
-	fi
-}
-
 searchPackages() {
 	packagesList=""
 	distribName=$(distribName)
@@ -49,7 +34,10 @@ searchPackages() {
 			packagesList+="$(apt-file search /bin/$tool | cut -d: -f1) "
 		done
 	elif [ $distribName = arch ]; then
-		:
+		for tool
+		do
+			packagesList+="$(pacman -F /bin/$tool | awk '/ is in /{printf$4}') "
+		done
 	fi
 
 	echo "$packagesList"
