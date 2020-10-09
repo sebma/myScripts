@@ -95,6 +95,7 @@ html-xml-utils
 htop
 ifupdown
 indicator-bluetooth
+input-utils
 ipcalc
 iperf
 iperf3
@@ -118,6 +119,7 @@ lftp
 libgoo-canvas-perl
 libguestfs-tools
 libimage-exiftool-perl
+libinput-tools
 libjpeg-turbo-progs
 libmarblewidget
 libmodule-path-perl
@@ -253,6 +255,7 @@ widemargin
 winff
 wireshark
 wkhtmltopdf
+xawtv
 xclip
 xfce4-mount-plugin
 xiphos
