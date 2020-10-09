@@ -23,7 +23,7 @@ distribName () {
 	echo $osName | awk '{print tolower($0)}'
 }
 
-searchPackages() {
+searchPackagesFromFilePath() {
 	packagesList=""
 	distribName=$(distribName)
 	if [ $distribName = ubuntu ] || [ $distribName = debian ]; then
@@ -43,4 +43,4 @@ searchPackages() {
 	echo "$packagesList"
 }
 
-searchPackages "$@"
+searchPackagesFromFilePath "$@"
