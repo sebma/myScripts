@@ -41,7 +41,7 @@ updateLinuxDistribRepos() {
 installPackages() {
 	packagesList="$@"
 	distribName=$(distribName)
-	if [ $distribName = ubuntu ]; then
+	if [ $distribName = ubuntu ] || [ $distribName = debian ]; then
 		$sudo apt install -V $packagesList
 	elif [ $distribName = arch ]; then
 		$sudo pacman -S $packagesList
