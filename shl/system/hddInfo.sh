@@ -42,7 +42,7 @@ diskFamily="$(echo $diskFamily | sed -E "s/[.]+$|\"//g")"
 
 logDir=$HOME/log
 mkdir -p $logDir
-logFile=$logDir/smartctl__${diskFamily}__${diskModel}.log
+logFile=$logDir/smartctl__${diskFamily}__${diskModel}-$(date +%Y%m%d-%HH%M).log
 echo
 trap 'rc=$?;set +x;echo "=> CTRL+C Interruption trapped.">&2;echo;echo "=> logFile = $logFile";exit $rc' INT
 
