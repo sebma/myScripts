@@ -31,7 +31,7 @@ searchPackagesFromFilePath() {
 		$sudo apt-file update
 		for tool
 		do
-			packagesList+="$(apt-file search /bin/$tool | cut -d: -f1) "
+			packagesList+="$(apt-file -x search "/bin/$tool" | cut -d: -f1) "
 		done
 	elif [ $distribName = arch ]; then
 		for tool
