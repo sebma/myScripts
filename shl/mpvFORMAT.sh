@@ -7,7 +7,7 @@ funcName=${scriptBaseName/.$scriptExtension/}
 
 unset -f mpvFORMAT
 mpvFORMAT() {
-	locat format="$1"
+	local format="$1"
 	local mpvConfigFile="$HOME/.config/mpv/mpv.conf"
 	shift
 	if grep -q "\[$format\]" "$mpvConfigFile";then
