@@ -7,9 +7,14 @@ funcName=${scriptBaseName/.$scriptExtension/}
 
 unset -f mpvFORMAT
 mpvFORMAT() {
-	local format="$1"
+	local mpv="$(which mpv 2>/dev/null)"
+	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
+	[ $osFamily = Linux ] && [ -c /dev/fb0 ] && tty | egrep -q "/dev/tty[0-9]+" && local mpvDefaultOptions="--vo=drm" && local mplayerDefaultOptions="--vo=fbdev2"
+	alias mpv="LANG=en_US.utf8 $mpv $mpvDefaultOptions"
 	local mpvConfigFile="$HOME/.config/mpv/mpv.conf"
+	local format="$1"
 	shift
+
 	if grep -q "\[$format\]" "$mpvConfigFile";then
 		mpv --profile="$format" "$@"
 	else
