@@ -1,13 +1,28 @@
 #!/usr/bin/env bash
 
-function mpvSD { 
-    local formats="18 webm sd http-480 best"
-    local formatsRegExp=$(echo $formats | sed "s/ /|/g")
-    for url in "$@"
-    do
-        format=$($(which youtube-dl) -F $url | awk "/$formatsRegExp/"'{exit}END{print $1}')
-        $(which mpv) --ytdl-format $format $url
-    done
+LANG=C.UTF-8
+scriptBaseName=${0/*\//}
+scriptExtension=${0/*./}
+funcName=${scriptBaseName/.$scriptExtension/}
+
+unset -f mpvFORMAT
+mpvFORMAT() {
+	locat format="$1"
+	local mpvConfigFile="$HOME/.config/mpv/mpv.conf"
+	shift
+	if grep -q "\[$format\]" "$mpvConfigFile";then
+		mpv --profile="$format" "$@"
+	else
+		mpv --ytdl-format="$format" "$@"
+	fi
 }
 
-mpvSD $@
+mpvLD() { mpvFORMAT ld "$@"; }
+mpvVLD() { mpvFORMAT vld "$@"; }
+mpvSD() { mpvFORMAT sd "$@"; }
+mpvFSD() { mpvFORMAT fsd "$@"; }
+mpvHD() { mpvFORMAT hd "$@"; }
+mpvFHD() { mpvFORMAT fhd "$@"; }
+mpvBEST() { mpvFORMAT best "$@"; }
+
+$funcName "$@"
