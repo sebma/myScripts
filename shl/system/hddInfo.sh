@@ -80,7 +80,7 @@ blue=$(tput setaf 4)
 		$sudo smartctl -l xerror $diskDevice | grep Error:
 		echo $normal
 	fi
-	which hddparm >/dev/null 2>&1 && echo "=> hdparm info for $diskFamily model $diskModel on $diskDevice :" && $sudo hdparm -I $diskDevice
+	which hdparm >/dev/null 2>&1 && echo "=> hdparm info for $diskFamily model $diskModel on $diskDevice :" && $sudo hdparm -I $diskDevice
 #	echo "=> Printing all SMART and non-SMART information about the $diskFamily model $diskModel on $diskDevice :"
 #	echo
 #	$sudo smartctl $allInformation $diskDevice
