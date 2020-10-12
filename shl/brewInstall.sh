@@ -17,16 +17,24 @@ brewInstall ()
 {
 	brew=undefined
 	brewPrefix=undefined
+	osFamily=undefined
+	$(which bash) -c 'echo $OSTYPE' | grep -q android && osFamily=Android || osFamily=$(uname -s)
 	if ! which brew > /dev/null 2>&1; then
-		if groups | \egrep -wq "adm|admin|sudo|wheel"; then
-			$(which bash) -c "$(\curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)" || return
+		if [ $osFamily = Linux ]
+			if groups | \egrep -wq "adm|admin|sudo|wheel"; then
+				$(which bash) -c "$(\curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)" || return
+				addpaths /home/linuxbrew/.linuxbrew/bin
+				brew=$(which brew)
+			else
+				brewPrefix=$HOME/brew
+				git clone https://github.com/homebrew/brew $brewPrefix
+				time git clone https://github.com/homebrew/homebrew-core $brewPrefix/Library/Taps/homebrew/homebrew-core
+				brew=$brewPrefix/bin/brew
+			fi
+		elif [ $osFamily = Darwin ]
+			$(which zsh) -c "$(\curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)" || return
 			addpaths /home/linuxbrew/.linuxbrew/bin
 			brew=$(which brew)
-		else
-			brewPrefix=$HOME/brew
-			git clone https://github.com/homebrew/brew $brewPrefix
-			time git clone https://github.com/homebrew/homebrew-core $brewPrefix/Library/Taps/homebrew/homebrew-core
-			brew=$brewPrefix/bin/brew
 		fi
 	fi
 
