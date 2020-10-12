@@ -31,7 +31,7 @@ brewInstall ()
 				time git clone https://github.com/homebrew/homebrew-core $brewPrefix/Library/Taps/homebrew/homebrew-core
 				brew=$brewPrefix/bin/brew
 			fi
-		elif [ $osFamily = Darwin ]
+		elif [ $osFamily = Darwin ]; then
 			$(which zsh) -c "$(\curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)" || return
 			addpaths /home/linuxbrew/.linuxbrew/bin
 			brew=$(which brew)
