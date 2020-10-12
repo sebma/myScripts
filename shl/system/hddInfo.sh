@@ -32,12 +32,15 @@ else
 	allInformation=-a
 fi
 
-diskModel="$($sudo smartctl -i $diskDevice |  awk '/Model:/{gsub("/","_");for(i=4;i<NF;++i)printf $i"_";print$i}')"
-test -z $diskModel && diskModel="$($sudo smartctl -i $diskDevice |  awk '/Model:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
+smartctlDiskInfo="$($sudo smartctl -i $diskDevice)"
+which hdparm >/dev/null 2>&1 && hdparmDiskInfo="$($sudo hdparm -i $diskDevice)" && hdparmDiskMoreInfo="$($sudo hdparm -I $diskDevice)"
+diskModel="$(echo "$smartctlDiskInfo" |  awk '/Model:/{gsub("/","_");for(i=4;i<NF;++i)printf $i"_";print$i}')"
+test -z $diskModel && diskModel="$(echo "$smartctlDiskInfo" |  awk '/Model:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
+test -z $diskModel && which hdparm >/dev/null 2>&1 && diskModel="$(echo "$hdparmDiskInfo" | awk -F'[=,]' '/Model=/{print$2}')"
 test -z $diskModel && echo "=> ERROR : Could not infer diskModel." 2>/dev/null && exit 2
 
-diskFamily="$($sudo smartctl -i $diskDevice |  awk '/Family:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
-test -z $diskFamily && diskFamily="$($sudo smartctl -i $diskDevice |  awk '/Model:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
+diskFamily="$(echo "$smartctlDiskInfo" |  awk '/Family:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
+test -z $diskFamily && diskFamily="$(echo "$smartctlDiskInfo" |  awk '/Model:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
 diskFamily="$(echo $diskFamily | sed -E "s/[.]+$|\"//g")"
 
 logDir=$HOME/log
@@ -58,12 +61,13 @@ blue=$(tput setaf 4)
 	printf $blue$bold
 	echo "=> $diskFamily model $diskModel is a $deviceType drive."
 	echo $normal
-	$sudo smartctl -i $diskDevice
+	echo "$smartctlDiskInfo"
 	echo
 	test $deviceType = SSD && $sudo smartctl -l ssd $diskDevice && echo
 	echo "=> Enabling SMART on $diskFamily model $diskModel on $diskDevice ..."
 	echo
 	$sudo smartctl --smart=on --offlineauto=on --saveauto=on $diskDevice >/dev/null
+
 	if ! sudo smartctl -l error $diskDevice | grep -q No.Errors;then
 		echo "=> Error counter log pages for reads, write and verifies on $diskFamily model $diskModel on $diskDevice ..."
 		echo
@@ -80,7 +84,9 @@ blue=$(tput setaf 4)
 		$sudo smartctl -l xerror $diskDevice | grep Error:
 		echo $normal
 	fi
-	which hdparm >/dev/null 2>&1 && echo "=> hdparm info for $diskFamily model $diskModel on $diskDevice :" && $sudo hdparm -I $diskDevice
+
+	which hdparm >/dev/null 2>&1 && echo "=> hdparm info for $diskFamily model $diskModel on $diskDevice :" && echo "$hdparmDiskMoreInfo"
+
 #	echo "=> Printing all SMART and non-SMART information about the $diskFamily model $diskModel on $diskDevice :"
 #	echo
 #	$sudo smartctl $allInformation $diskDevice
