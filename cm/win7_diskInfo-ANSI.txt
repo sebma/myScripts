@@ -1,0 +1,73 @@
+
+$ diskpart -s diskInfo.dpt 
+
+Microsoft DiskPart version 6.1.7601
+Copyright (C) 1999-2008 Microsoft Corporation.
+Sur l'ordinateur : MININT-QN82AAB
+
+DISKPART>
+  Disk ###  Status         Size     Free     Dyn  Gpt
+  --------  -------------  -------  -------  ---  ---
+  Disk 0    Online          931 GB   456 GB        *
+
+  Partition ###   Type              Size     Offset
+  -------------   ----------------  -------  --------
+  Partition 1     Primary             19 G    1024 K 
+  Partition 2     Primary            255 G      19 G 
+  Partition 3     System             550 M     275 G 
+  Partition 4     Primary            199 G     275 G 
+
+  Volume ###   Ltr  Nom          Fs     Type        Size     Status     Info
+  ----------   ---  -----------  -----  ----------  -------  ---------  --------
+  Volume 0      E   GSP1RMCHPXF  UDF    DVD-ROM     3102 M   Healthy               
+  Volume 1          PQSERVICE    NTFS   Partition     19 G   Healthy               
+  Volume 2      C   Windows7     NTFS   Partition    255 G   Healthy               
+  Volume 3      D   Donnees      NTFS   Partition    199 G   Healthy               
+  Volume 4          EFI_SYSTEMP  FAT32  Partition    550 M   Healthy    System  
+  Volume 5      F                       Removable        0 o  0 media            
+  Volume 6      G   MULTISYSTEM  FAT32  Removable      43 G   Healthy               
+
+$ del diskInfo.dpt 
+
+$ echo.
+
+
+$ bcdedit
+
+Windows Boot Manager
+--------------------
+identifier              {bootmgr}
+device                  partition=\Device\HarddiskVolume3
+path                    \EFI\Microsoft\Boot\bootmgfw.efi
+description             Windows Boot Manager
+locale                  en-us
+inherit                 {globalsettings}
+default                 {default}
+resumeobject            {e0e194f6-21df-11e9-9f00-de2495574b25}
+displayorder            {default}
+toolsdisplayorder       {memdiag}
+timeout                 30
+
+Windows Boot Loader
+-------------------
+identifier              {default}
+device                  partition=C:
+path                    \Windows\system32\winload.efi
+description             Windows 7
+locale                  en-us
+inherit                 {bootloadersettings}
+osdevice                partition=C:
+systemroot              \Windows
+resumeobject            {e0e194f6-21df-11e9-9f00-de2495574b25}
+nx                      OptIn
+detecthal               Yes
+
+$ bootrec /ScanOs
+Scanning all disks for Windows installations.
+
+Please wait, since this may take a while...
+
+Successfully scanned Windows installations.
+Total identified Windows installations: 0
+The operation completed successfully.
+
