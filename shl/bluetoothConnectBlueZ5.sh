@@ -50,7 +50,7 @@ pactl list modules | grep -q module-bluetooth-discover || pactl load-module modu
 deviceRegExp=$(sed "s/ /./g" <<< "$deviceRegExp")
 if echo "$deviceList" | grep -q "$deviceRegExp"; then {
 	deviceHW=$(echo "$deviceList" | awk /^Device.*$deviceRegExp/'{print$2}' | sort -u)
-	cat<<-EOF | bluetoothctl -a
+	cat<<-EOF | bluetoothctl
 	select $bluetoothControllerMACAddress
 	power on
 	default-agent
