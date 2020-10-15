@@ -14,21 +14,22 @@ function moveAudioToBluetoothSink {
 
 	bluetoothDeviceMacAddr=$(echo | bluetoothctl 2>/dev/null | awk "/Device.*($bluetoothDeviceMacAddr|$bluetoothDeviceName)/"'{print$4;exit}')
 	if [ -n "$bluetoothDeviceMacAddr" ];then
-		bluetoothDeviceMacAddrPACTLString=$(echo $bluetoothDeviceMacAddr | sed s/:/_/g)
+		bluetoothDevicePACTLMacAddr=$(echo $bluetoothDeviceMacAddr | sed s/:/_/g)
 		! pactl list sinks short >/dev/null 2>&1 && test "$SSH_CONNECTION" && pax11publish -r
-		bluetoothSinkVisible=$(pactl list sinks short | grep -q $bluetoothDeviceMacAddrPACTLString && echo true || echo false)
+		bluetoothSinkVisible=$(pactl list sinks short | grep -q $bluetoothDevicePACTLMacAddr && echo true || echo false)
 		if [ $bluetoothSinkVisible = true ];then
 			echo "=> BEFORE :"
 			pactl list sink-inputs short
-			[ $(pactl list sink-inputs short | wc -l) -gt 1 ] && set -x
 
-			sink_output=$(pactl list sinks short | awk "/$bluetoothDeviceMacAddrPACTLString/"'{printf$1}')
+			sink_output=$(pactl list sinks short | awk "/$bluetoothDevicePACTLMacAddr/"'{printf$1}')
 			echo "=> sink_output = $sink_output"
 			pactl list sink-inputs short | awk '/protocol-native.c/{print$1}' | while read sink_input
 			do
 				pactl move-sink-input $sink_input $sink_output
 			done
-			pactl suspend-sink bluez_sink.$bluetoothDeviceMacAddrPACTLString 0
+
+			bluetoothDevicePACTLString=$(pactl list sinks short | awk "/bluez_sink.$bluetoothDevicePACTLMacAddr/"'{print$2}')
+			pactl suspend-sink $bluetoothDevicePACTLString 0
 
 			echo "=> AFTER :"
 			pactl list sink-inputs short
