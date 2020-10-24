@@ -91,11 +91,11 @@ grep -q $destinationEFI_UUID $destinationRootDir/etc/fstab 2>/dev/null || sudo s
 echo "=> Creation des points de montage dans $destinationRootDir/ ..."
 awk '/^[^#]/{print substr($2,2)}' $destinationRootDir/etc/fstab | while read dir; do test -d $destinationRootDir/$dir || sudo mkdir -p -v $destinationRootDir/$dir;done
 
-echo "=> Montage de /proc a part ..."
-sudo mount -v -t proc proc $destinationRootDir/proc
+#echo "=> Montage de /proc a part ..."
+#sudo mount -v -t proc proc $destinationRootDir/proc
 
 echo "=> Binding des specialFS de /dev ..."
-for specialFS in dev dev/pts sys run ; do test -d $destinationRootDir/$specialFS/ || sudo mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
+for specialFS in dev dev/pts proc sys run ; do test -d $destinationRootDir/$specialFS/ || sudo mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
 $efiMode && sudo mkdir -p -v $destinationRootDir/sys/firmware/efi/efivars && sudo mount -v --bind /sys/firmware/efi/efivars $destinationRootDir/sys/firmware/efi/efivars
 
 echo "=> Montage via chroot de toutes les partitions de $destinationRootDir/etc/fstab ..."
@@ -143,9 +143,7 @@ time sudo chroot $destinationRootDir/ <<-EOF
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
 	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
 	update-grub
-	$efiMode && efiDirectory=$(mount | awk '/\/efi /{print$3}')
-	echo "=> efiDirectory = <$efiDirectory>"
-	test -n "$efiDirectory" && grub-install --efi-directory=$efiDirectory --removable || grub-install $destinationDisk
+	$efiMode && grub-install --efi-directory=$(mount | awk '/\/efi /{print$3}') --removable || grub-install $destinationDisk
 	if which lvmetad >/dev/null 2>&1;then
 		grep -q "use_lvmetad\s*=\s*0" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*0/use_lvmetad = 1/" /etc/lvm/lvm.conf
 	fi
