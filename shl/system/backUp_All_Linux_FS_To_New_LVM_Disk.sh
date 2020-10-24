@@ -88,16 +88,15 @@ grep -q $destinationEFI_UUID $destinationRootDir/etc/fstab 2>/dev/null || sudo s
 echo "=> Creation des points de montage dans $destinationRootDir/ ..."
 awk '/^[^#]/{print substr($2,2)}' $destinationRootDir/etc/fstab | while read dir; do test -d $destinationRootDir/$dir || sudo mkdir -p -v $destinationRootDir/$dir;done
 
+echo "=> Montage de /proc a part ..."
+sudo mount -v -t proc proc $destinationVGDir/proc
+
 echo "=> Binding des specialFS de /dev ..."
-for specialFS in dev dev/pts proc sys run ; do test -d $destinationRootDir/$specialFS/ || sudo mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
+for specialFS in dev dev/pts sys run ; do test -d $destinationRootDir/$specialFS/ || sudo mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
 $efiMode && sudo mkdir -p -v $destinationRootDir/sys/firmware/efi/efivars && sudo mount -v --bind /sys/firmware/efi/efivars $destinationRootDir/sys/firmware/efi/efivars
 
 echo "=> Montage via chroot de toutes les partitions de $destinationRootDir/etc/fstab ..."
 sudo chroot $destinationRootDir/ findmnt >/dev/null && sudo chroot $destinationRootDir/ mount -av || exit
-
-time sudo chroot $destinationRootDir/ mount | awk '/\/efi /{print$3}'
-
-unmoutALLFSInChroot "$destinationRootDir";exit
 
 trap 'rc=127;set +x;echo "=> $scriptBaseName: CTRL+C Interruption trapped.">&2;unmoutALLFSInChroot "$destinationRootDir";exit $rc' INT
 
@@ -132,7 +131,10 @@ do
 done
 sync
 
+set +o nounset
+set -o | grep unset
 time sudo chroot $destinationRootDir/ bash -x <<-EOF
+	set -o | grep unset
 	[ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
 	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
