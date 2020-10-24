@@ -16,6 +16,13 @@ fi
 set -o nounset
 set -o pipefail
 
+echo "=> Remove cache for all users ..."
+\ls /home/ | grep -v lost+found/ | while read user
+do
+	sudo -u $user rm -fr /home/$user/.cache
+	sudo -u $user mkdir -v /home/$user/.cache
+done
+
 # Le "grep" est la pour forcer le code retour a "1" si il y a pas de LVM
 destinationPVPartition=$(sudo fdisk $destinationDisk -l | grep 'Linux LVM' | awk '/Linux LVM/{print$1}') || exit
 destinationVG=$(sudo pvs $destinationPVPartition -o vg_name | awk 'END{print$1}')
@@ -63,15 +70,25 @@ time sudo $cp2ext234 -r -x / $destinationRootDir/
 sync
 test -d $destinationRootDir/etc/ || sudo mkdir -v $destinationRootDir/etc/
 
-grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || sed "s/$sourceEFI_UUID/$destinationEFI_UUID/" /etc/fstab | sed "s,$sourceVG_Or_Disk,$destinationVG," | sudo tee $destinationRootDir/etc/fstab
-awk '/^[^#]/{print substr($2,2)}' $destinationRootDir/etc/fstab | while read dir; do test -d $destinationRootDir/$dir || sudo mkdir -p -v $destinationRootDir/$dir;done
+grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || sudo sed -i "s,$sourceVG_Or_Disk,$destinationVG," $destinationRootDir/etc/fstab
+grep -q $destinationEFI_UUID $destinationRootDir/etc/fstab 2>/dev/null || sudo sed -i "s/$sourceEFI_UUID/$destinationEFI_UUID/" $destinationRootDir/etc/fstab
 
 [ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
+
+echo "=> Creation des points de montage dans $destinationRootDir/ ..."
+awk '/^[^#]/{print substr($2,2)}' $destinationRootDir/etc/fstab | while read dir; do test -d $destinationRootDir/$dir || sudo mkdir -p -v $destinationRootDir/$dir;done
+
+echo "=> Binding des specialFS de /dev ..."
+for specialFS in dev dev/pts proc sys run ; do test -d $destinationRootDir/$specialFS/ || sudo mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
 $efiMode && sudo mkdir -p -v $destinationRootDir/sys/firmware/efi/efivars && sudo mount -v --bind /sys/firmware/efi/efivars $destinationRootDir/sys/firmware/efi/efivars
 
-for specialFS in dev dev/pts proc sys run ; do test -d $destinationRootDir/$specialFS/ || sudo mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
-
+echo "=> Montage via chroot de toutes les partitions de $destinationRootDir/etc/fstab ..."
 sudo chroot $destinationRootDir/ findmnt >/dev/null && sudo chroot $destinationRootDir/ mount -av || exit
+
+time sudo chroot $destinationRootDir/ bash -x <<-EOF
+	mount | awk '/\/efi /{print$3}'
+EOF
+unmoutALLFSInChroot "$destinationRootDir";exit
 
 trap 'rc=127;set +x;echo "=> $scriptBaseName: CTRL+C Interruption trapped.">&2;unmoutALLFSInChroot "$destinationRootDir";exit $rc' INT
 
@@ -106,7 +123,6 @@ do
 done
 sync
 
-sudo mkdir $destinationRootDir/run
 time sudo chroot $destinationRootDir/ bash -x <<-EOF
 	[ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
@@ -124,6 +140,9 @@ unmoutALLFSInChroot() {
 	echo "=> umounting all FS in <$destRootDIR> ..."
 	sudo chroot $destRootDIR/ umount -av
 	sudo umount -v $destRootDIR/{sys/firmware/efi/efivars,sys,proc,run,dev/pts,dev,usr,}
+	sudo umount -v $destRootDIR/sys/firmware/efi/efivars $destRootDIR/sys
+	sleep 1
+	sudo umount -v $destRootDIR
 }
 
 unmoutALLFSInChroot "$destinationRootDir"
