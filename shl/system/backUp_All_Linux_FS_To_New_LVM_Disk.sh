@@ -15,19 +15,16 @@ fi
 set -o errexit
 set -o nounset
 set -o pipefail
-destinationPVPartition=$(sudo fdisk $destinationDisk -l | awk '/Linux LVM/{print$1}') || exit
-set +o pipefail
-#destinationVG=$(sudo pvdisplay -C $destinationPVPartition -o vg_name | awk 'END{print$1}')
+
+# Le "grep" est la pour forcer le code retour a "1" si il y a pas de LVM
+destinationPVPartition=$(sudo fdisk $destinationDisk -l | grep 'Linux LVM' | awk '/Linux LVM/{print$1}') || exit
 destinationVG=$(sudo pvs $destinationPVPartition -o vg_name | awk 'END{print$1}')
 destinationLVList=$(sudo lvs $destinationVG -o lv_name | awk 'FNR>1{print$1}' | sort -u | paste -sd' ')
 
 df=$(which df)
-fsRegExp="\<(ext[234]|btrfs|f2fs|xfs|jfs|reiserfs|nilfs|hfs|vfat|fuseblk)\>"
-sourceFilesystemsList=$($df -T | egrep -vw "/media|/mnt|/tmp" | awk "/$fsRegExp/"'{print$NF}' | sort -u | paste -sd' ')
 usrSourceFS=$($df /usr | awk '!/^Filesystem/{print$1}')
 isLVM=$(lsblk -n $usrSourceFS -o TYPE | grep -qw lvm && echo yes || echo no)
 
-echo "=> destinationLVList = $destinationLVList"
 echo "=> isLVM = $isLVM"
 echo "=> usrSourceFS = $usrSourceFS"
 
@@ -36,7 +33,9 @@ echo "=> sourceVG_Or_Disk = $sourceVG_Or_Disk"
 
 sourceEFI_FS=$(df | grep /boot/efi$ | cut -d" " -f1)
 sourceEFI_UUID=$(sudo blkid $sourceEFI_FS -o value -s UUID)
-destinationEFI_FS=$(sudo gdisk $destinationDisk -l | awk "/\<EFI\>/{print\"$destinationDisk\"\$1}")
+# Le "grep" est la pour forcer le code retour a "1" si il y a pas de EFI
+#destinationEFI_FS=$(sudo fdisk $destinationDisk -l | grep -w 'EFI' | awk "/\<EFI\>/{print\$1}") || exit
+destinationEFI_FS=$(sudo gdisk $destinationDisk -l | grep -w 'EFI' | awk "/\<EFI\>/{print\"$destinationDisk\"\$1}") || exit
 destinationEFI_UUID=$(sudo blkid $destinationEFI_FS -o value -s UUID) || exit
 
 echo "=> sourceEFI_FS = $sourceEFI_FS"
@@ -44,14 +43,14 @@ echo "=> sourceEFI_UUID = $sourceEFI_UUID"
 echo "=> destinationEFI_FS = $destinationEFI_FS"
 echo "=> destinationEFI_UUID = $destinationEFI_UUID"
 
-RSYNC_SKIP_COMPRESS_LIST=7z/aac/avi/bz2/deb/flv/gz/iso/jpeg/jpg/mkv/mov/m4a/mp2/mp3/mp4/mpeg/mpg/oga/ogg/ogm/ogv/webm/rpm/tbz/tgz/z/zip
-RSYNC_EXCLUSION=$(printf -- "--exclude %s/ " /dev /sys /run /proc /mnt /media)
-
-echo "=> sourceFilesystemsList = $sourceFilesystemsList"
 logFile="$HOME/log/completeCopy_VG_To_SSD-$(date +%Y%m%d-%HH%M).log"
 echo
 echo "=> logFile = <$logFile>."
 echo
+
+RSYNC_SKIP_COMPRESS_LIST=7z/aac/avi/bz2/deb/flv/gz/iso/jpeg/jpg/mkv/mov/m4a/mp2/mp3/mp4/mpeg/mpg/oga/ogg/ogm/ogv/webm/rpm/tbz/tgz/z/zip
+RSYNC_EXCLUSION=$(printf -- "--exclude %s/ " /dev /sys /run /proc /mnt /media)
+
 rsync="$(which rsync) -x -uth -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST $RSYNC_EXCLUSION --log-file=$logFile"
 cp2ext234="$rsync -ogpuv -lSH"
 cp2FAT32="$rsync --modify-window=1"
@@ -75,12 +74,17 @@ for specialFS in dev dev/pts proc sys run ; do test -d $destinationRootDir/$spec
 
 sudo chroot /mnt/destinationVGDir/ findmnt >/dev/null && sudo chroot $destinationRootDir/ mount -av
 
+trap 'rc=127;set +x;echo "=> $scriptBaseName: CTRL+C Interruption trapped.">&2;unmoutALLFSInChroot "$destinationRootDir";exit $rc' INT
 echo
 df -PTh | grep $destinationRootDir
 echo
 
+fsRegExp="\<(ext[234]|btrfs|f2fs|xfs|jfs|reiserfs|nilfs|hfs|vfat|fuseblk)\>"
+sourceFilesystemsList=$($df -T | egrep -vw "/media|/mnt|/tmp" | awk "/$fsRegExp/"'{print$NF}' | sort -u | paste -sd' ')
+echo "=> sourceFilesystemsList = $sourceFilesystemsList"
+
 sourceDirList=$(echo $sourceFilesystemsList | sed "s,/ \| /$,,g")
-sourceDirList="/usr"
+#sourceDirList="/usr"
 for sourceDir in $sourceDirList
 do
 	destinationDir=${destinationRootDir}$sourceDir
@@ -115,8 +119,15 @@ time sudo chroot $destinationRootDir/ bash -x <<-EOF
 	sync
 EOF
 
-sudo chroot $destinationRootDir/ umount -av
-sudo umount -v $destinationRootDir/{sys/firmware/efi/efivars,sys,proc,run,dev/pts,dev,usr,}
+unmoutALLFSInChroot() {
+	local destRootDIR="$1"
+	echo "=> umounting all FS in <$destRootDIR> ..."
+	sudo chroot $destRootDIR/ umount -av
+	sudo umount -v $destRootDIR/{sys/firmware/efi/efivars,sys,proc,run,dev/pts,dev,usr,}
+}
+
+unmoutALLFSInChroot "$destinationRootDir"
+trap - INT
 
 $df | grep -q $destinationRootDir
 echo "=> Restore grub in /dev/sda just in case ..."
