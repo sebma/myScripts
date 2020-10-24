@@ -137,10 +137,10 @@ sync
 set +o nounset
 time sudo chroot $destinationRootDir/ <<-EOF
 	set -x
-	[ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
 	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
-	update-grub
+#	update-grub
+	[ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
 	$efiMode && grub-install --removable --efi-directory=$(mount | awk '/\/efi /{print$3}') || grub-install $destinationDisk
 	if which lvmetad >/dev/null 2>&1;then
 		grep -q "use_lvmetad\s*=\s*0" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*0/use_lvmetad = 1/" /etc/lvm/lvm.conf
