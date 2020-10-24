@@ -25,4 +25,9 @@ fi
 
 deviceType=$(test $(</sys/block/${diskDevice/*\//}/queue/rotational) = 0 && echo SSD || echo HDD)
 
+if [ $deviceType != SSD ];then
+	echo "[$scriptBaseName] => ERROR: $diskDevice is not a SSD."
+	exit 1
+fi
+
 echo "=> deviceType = $deviceType"
