@@ -12,7 +12,7 @@ if ! [ -b $destinationDisk ];then
 	exit 2
 fi
 
-set -o errexit
+#set -o errexit
 set -o nounset
 set -o pipefail
 
@@ -71,9 +71,10 @@ $efiMode && sudo mkdir -p -v $destinationRootDir/sys/firmware/efi/efivars && sud
 
 for specialFS in dev dev/pts proc sys run ; do test -d $destinationRootDir/$specialFS/ || sudo mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
 
-sudo chroot $destinationRootDir/ findmnt >/dev/null && sudo chroot $destinationRootDir/ mount -av
+sudo chroot $destinationRootDir/ findmnt >/dev/null && sudo chroot $destinationRootDir/ mount -av || exit
 
 trap 'rc=127;set +x;echo "=> $scriptBaseName: CTRL+C Interruption trapped.">&2;unmoutALLFSInChroot "$destinationRootDir";exit $rc' INT
+
 echo
 df -PTh | grep $destinationRootDir
 echo
@@ -130,6 +131,6 @@ trap - INT
 
 $df | grep -q $destinationRootDir
 echo "=> Restore grub in /dev/sda just in case ..."
-sudo grub-install /dev/sda
+$efiMode && efiDirectory=$(mount | awk '/\/efi /{print$3}') && sudo grub-install --efi-directory=$efiDirectory --removable || sudo grub-install /dev/sda
 
 echo "=> logFile = <$logFile>."
