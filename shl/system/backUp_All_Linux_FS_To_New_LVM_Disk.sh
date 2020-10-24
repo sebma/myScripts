@@ -48,6 +48,7 @@ echo "=> usrSourceFS = $usrSourceFS"
 
 [ $isLVM = yes ] && sourceVG_Or_Disk=$(echo $usrSourceFS | sed "s,/dev/\|mapper.|,,g;s,[/-].*,,") || sourceVG_Or_Disk=$($df | grep /boot/efi | awk '{print gensub(".$","",1,$1)}')
 echo "=> sourceVG_Or_Disk = $sourceVG_Or_Disk"
+echo "=> destinationVG = $destinationVG"
 
 sourceEFI_FS=$(df | grep /boot/efi$ | cut -d" " -f1)
 sourceEFI_UUID=$(sudo blkid $sourceEFI_FS -o value -s UUID)
@@ -101,6 +102,11 @@ $efiMode && sudo mkdir -p -v $destinationRootDir/sys/firmware/efi/efivars && sud
 echo "=> Montage via chroot de toutes les partitions de $destinationRootDir/etc/fstab ..."
 sudo chroot $destinationRootDir/ findmnt >/dev/null && sudo chroot $destinationRootDir/ mount -av || exit
 
+sourceBootDevice=$(df | grep $sourceVG_Or_Disk | awk '/\/boot$/{print$1}')
+destinationBootDevice=$(df | grep $destinationVG | awk '/\/boot$/{print$1}')
+echo "=> sourceBootDevice = $sourceBootDevice"
+echo "=> destinationBootDevice = $destinationBootDevice"
+
 trap 'rc=127;set +x;echo "=> $scriptBaseName: CTRL+C Interruption trapped.">&2;unmoutALLFSInChroot "$destinationRootDir";exit $rc' INT
 
 echo
@@ -134,12 +140,16 @@ do
 done
 sync
 
+set -x
 set +o nounset
+srcGrubBootLVMID=$(sudo grub-probe --target=compatibility_hint --device $sourceBootDevice)
+dstGrubBootLVMID=$(sudo grub-probe --target=compatibility_hint --device $destinationBootDevice)
 time sudo chroot $destinationRootDir/ <<-EOF
 	set -x
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
 	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
-#	update-grub
+	update-grub
+	sed -i "s,$srcGrubBootLVMID,$dstGrubBootLVMID,g" /boot/grub/grub.cfg
 	[ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
 	$efiMode && grub-install --removable --efi-directory=$(mount | awk '/\/efi /{print$3}') || grub-install $destinationDisk
 	if which lvmetad >/dev/null 2>&1;then
