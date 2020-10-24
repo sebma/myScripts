@@ -3,8 +3,7 @@
 scriptBaseName=${0##*/}
 #set -o errexit
 set -o nounset
-type smartctl >/dev/null || exit
-sudo=$(which sudo 2>/dev/null)
+type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo=$(which sudo) || sudo=""
 diskDevice=""
 os=$(uname -s)
 
@@ -31,3 +30,5 @@ if [ $deviceType != SSD ];then
 fi
 
 echo "=> deviceType = $deviceType"
+#grep -q noatime /etc/fstab || $sudo sed -i "/^\/dev/s/defaults/defaults,noatime/" /etc/fstab
+grep -q noatime /etc/fstab || $sudo sed -i "s/defaults/defaults,noatime/" /etc/fstab
