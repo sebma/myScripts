@@ -145,7 +145,6 @@ do
 done
 sync
 
-set -x
 set +o nounset
 srcGrubBootLVMID=$(sudo grub-probe --target=compatibility_hint --device $sourceBootDevice)
 dstGrubBootLVMID=$(sudo grub-probe --target=compatibility_hint --device $destinationBootDevice)
