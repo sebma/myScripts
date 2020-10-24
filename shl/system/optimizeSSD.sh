@@ -42,12 +42,16 @@ fi
 if [ -s /etc/cron.weekly/fstrim ];then
 	echo "[$scriptBaseName] => INFO: FSTRIM is already enabled :"
 	echo
+	set -x
 	cat /etc/cron.weekly/fstrim
 elif [ -s /lib/systemd/system/fstrim.timer ];then
 	echo "[$scriptBaseName] => INFO: FSTRIM is already enabled :"
 	echo
+	set -x
 	cat /lib/systemd/system/fstrim.timer
 	cat /lib/systemd/system/fstrim.service
 else
 	echo "[$scriptBaseName] => WARNING: FSTRIM is not enabled."
 fi
+
+set +x
