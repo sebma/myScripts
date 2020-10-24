@@ -135,10 +135,8 @@ done
 sync
 
 set +o nounset
-set -o | grep unset
 time sudo chroot $destinationRootDir/ <<-EOF
 	set -x
-	set -o | grep unset
 	[ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
 	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
@@ -149,6 +147,7 @@ time sudo chroot $destinationRootDir/ <<-EOF
 	fi
 	sync
 EOF
+set -o nounset
 
 unmoutALLFSInChroot "$destinationRootDir"
 trap - INT
