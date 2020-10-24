@@ -85,9 +85,8 @@ $efiMode && sudo mkdir -p -v $destinationRootDir/sys/firmware/efi/efivars && sud
 echo "=> Montage via chroot de toutes les partitions de $destinationRootDir/etc/fstab ..."
 sudo chroot $destinationRootDir/ findmnt >/dev/null && sudo chroot $destinationRootDir/ mount -av || exit
 
-time sudo chroot $destinationRootDir/ bash -x <<-EOF
-	mount | awk '/\/efi /{print$3}'
-EOF
+time sudo chroot $destinationRootDir/ mount | awk '/\/efi /{print$3}'
+
 unmoutALLFSInChroot "$destinationRootDir";exit
 
 trap 'rc=127;set +x;echo "=> $scriptBaseName: CTRL+C Interruption trapped.">&2;unmoutALLFSInChroot "$destinationRootDir";exit $rc' INT
