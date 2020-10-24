@@ -167,7 +167,6 @@ unmoutALLFSInChroot "$destinationRootDir"
 trap - INT
 
 $df | grep -q $destinationRootDir
-echo
 
 echo "=> Restore grub in /dev/sda just in case ..."
 $efiMode && efiDirectory=$(mount | awk '/\/efi /{print$3}') && sudo grub-install --efi-directory=$efiDirectory --removable || sudo grub-install /dev/sda
