@@ -138,8 +138,8 @@ do
 	esac
 
 	echo
-
 	mount | grep -q $destinationDir && time sudo $copyCommand -r $sourceDir/ $destinationDir/
+	echo
 #	set +x
 	sync
 done
