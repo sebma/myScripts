@@ -77,6 +77,7 @@ destinationRootDir=/mnt/destinationVGDir
 echo "=> Montage de la partition root dans $destinationRootDir/ ..."
 test -d $destinationRootDir/ || sudo mkdir -v $destinationRootDir/
 sudo mount -v /dev/$destinationVG/$(echo $destinationLVList | tr " " "\n" | grep root) $destinationRootDir/ || exit
+echo
 
 echo "=> Copie des fichiers de la partition / dans $destinationRootDir/ ..."
 time sudo $cp2ext234 -r -x / $destinationRootDir/
@@ -97,9 +98,11 @@ awk '/^[^#]/{print substr($2,2)}' $destinationRootDir/etc/fstab | while read dir
 echo "=> Binding des specialFS de /dev ..."
 for specialFS in dev dev/pts proc sys run ; do test -d $destinationRootDir/$specialFS/ || sudo mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
 $efiMode && sudo mkdir -p -v $destinationRootDir/sys/firmware/efi/efivars && sudo mount -v --bind /sys/firmware/efi/efivars $destinationRootDir/sys/firmware/efi/efivars
+echo
 
 echo "=> Montage via chroot de toutes les partitions de $destinationRootDir/etc/fstab ..."
 sudo chroot $destinationRootDir/ findmnt >/dev/null && sudo chroot $destinationRootDir/ mount -av || exit
+echo
 
 sourceBootDevice=$($df | grep $sourceVG_Or_Disk | awk '/\/boot$/{print$1}')
 destinationBootDevice=$($df | grep $destinationVG | awk '/\/boot$/{print$1}')
