@@ -6,17 +6,28 @@ if [ $# != 1 ];then
 	exit 1
 fi
 
-df=$(which df)
 destinationDisk=$1
-destinationPVPartition=$(sudo fdisk $destinationDisk -l | awk '/Linux LVM/{print$1}')
+if ! [ -b $destinationDisk ];then
+	echo "[$scriptBaseName] => ERROR: <$destinationDisk> is not a block special device." >&2
+	exit 2
+fi
+
+set -o errexit
+set -o nounset
+set -o pipefail
+destinationPVPartition=$(sudo fdisk $destinationDisk -l | awk '/Linux LVM/{print$1}') || exit
+set +o pipefail
 #destinationVG=$(sudo pvdisplay -C $destinationPVPartition -o vg_name | awk 'END{print$1}')
 destinationVG=$(sudo pvs $destinationPVPartition -o vg_name | awk 'END{print$1}')
 destinationLVList=$(sudo lvs $destinationVG -o lv_name | awk 'FNR>1{print$1}' | sort -u | paste -sd' ')
-echo "=> destinationLVList = $destinationLVList"
+
+df=$(which df)
 fsRegExp="\<(ext[234]|btrfs|f2fs|xfs|jfs|reiserfs|nilfs|hfs|vfat|fuseblk)\>"
-sourceFilesystemsList=$(df -T | egrep -vw "/media|/mnt|/tmp" | awk "/$fsRegExp/"'{print$NF}' | sort -u | paste -sd' ')
+sourceFilesystemsList=$($df -T | egrep -vw "/media|/mnt|/tmp" | awk "/$fsRegExp/"'{print$NF}' | sort -u | paste -sd' ')
 usrSourceFS=$($df /usr | awk '!/^Filesystem/{print$1}')
 isLVM=$(lsblk -n $usrSourceFS -o TYPE | grep -qw lvm && echo yes || echo no)
+
+echo "=> destinationLVList = $destinationLVList"
 echo "=> isLVM = $isLVM"
 echo "=> usrSourceFS = $usrSourceFS"
 
@@ -25,11 +36,17 @@ echo "=> sourceVG_Or_Disk = $sourceVG_Or_Disk"
 
 sourceEFI_FS=$(df | grep /boot/efi$ | cut -d" " -f1)
 sourceEFI_UUID=$(sudo blkid $sourceEFI_FS -o value -s UUID)
-destinationEFI_FS=$(sudo gdisk $destinationDisk -l | awk "/\<EFI\>/{print$destinationDisk\$1}")
-destinationEFI_UUID=$(sudo blkid $destinationEFI_FS -o value -s UUID)
+destinationEFI_FS=$(sudo gdisk $destinationDisk -l | awk "/\<EFI\>/{print\"$destinationDisk\"\$1}")
+destinationEFI_UUID=$(sudo blkid $destinationEFI_FS -o value -s UUID) || exit
+
+echo "=> sourceEFI_FS = $sourceEFI_FS"
+echo "=> sourceEFI_UUID = $sourceEFI_UUID"
+echo "=> destinationEFI_FS = $destinationEFI_FS"
+echo "=> destinationEFI_UUID = $destinationEFI_UUID"
 
 RSYNC_SKIP_COMPRESS_LIST=7z/aac/avi/bz2/deb/flv/gz/iso/jpeg/jpg/mkv/mov/m4a/mp2/mp3/mp4/mpeg/mpg/oga/ogg/ogm/ogv/webm/rpm/tbz/tgz/z/zip
 RSYNC_EXCLUSION=$(printf -- "--exclude %s/ " /dev /sys /run /proc /mnt /media)
+
 echo "=> sourceFilesystemsList = $sourceFilesystemsList"
 logFile="$HOME/log/completeCopy_VG_To_SSD-$(date +%Y%m%d-%HH%M).log"
 echo
@@ -86,7 +103,7 @@ done
 sync
 
 sudo mkdir $destinationRootDir/run
-time sudo chroot $destinationRootDir/ bash <<-EOF
+time sudo chroot $destinationRootDir/ bash -x <<-EOF
 	[ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
 	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
@@ -101,7 +118,8 @@ EOF
 sudo chroot $destinationRootDir/ umount -av
 sudo umount -v $destinationRootDir/{sys/firmware/efi/efivars,sys,proc,run,dev/pts,dev,usr,}
 
-df | grep -q $destinationRootDir
-sudo grub-install /dev/sda # Restore grub just in case
+$df | grep -q $destinationRootDir
+echo "=> Restore grub in /dev/sda just in case ..."
+sudo grub-install /dev/sda
 
 echo "=> logFile = <$logFile>."
