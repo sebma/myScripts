@@ -50,7 +50,7 @@ echo "=> usrSourceFS = $usrSourceFS"
 echo "=> sourceVG_Or_Disk = $sourceVG_Or_Disk"
 echo "=> destinationVG = $destinationVG"
 
-sourceEFI_FS=$(df | grep /boot/efi$ | cut -d" " -f1)
+sourceEFI_FS=$($df | grep /boot/efi$ | cut -d" " -f1)
 sourceEFI_UUID=$(sudo blkid $sourceEFI_FS -o value -s UUID)
 # Le "grep" est la pour forcer le code retour a "1" si il y a pas de EFI
 #destinationEFI_FS=$(sudo fdisk $destinationDisk -l | grep -w 'EFI' | awk "/\<EFI\>/{print\$1}") || exit
@@ -104,17 +104,18 @@ sudo chroot $destinationRootDir/ findmnt >/dev/null && sudo chroot $destinationR
 
 sourceBootDevice=$($df | grep $sourceVG_Or_Disk | awk '/\/boot$/{print$1}')
 destinationBootDevice=$($df | grep $destinationVG | awk '/\/boot$/{print$1}')
-sourceRootDeviceBaseName=$($df / | awk -F"[/ ]" '{print$4}')
-destinationRootDeviceBaseName=$($df $destinationRootDir | awk -F"[/ ]" '{print$4}')
+sourceRootDeviceBaseName=$($df / | awk -F"[/ ]" '{printf$4}')
+destinationRootDeviceBaseName=$($df $destinationRootDir | awk -F"[/ ]" '{printf$4}')
 echo "=> sourceBootDevice = $sourceBootDevice"
 echo "=> destinationBootDevice = $destinationBootDevice"
-echo "=> sourceRootDeviceBaseName = $sourceRootDeviceBaseName"
-echo "=> destinationRootDeviceBaseName = $destinationRootDeviceBaseName"
+echo "=> sourceRootDeviceBaseName = <$sourceRootDeviceBaseName>"
+echo "=> destinationRootDeviceBaseName = <$destinationRootDeviceBaseName>"
+echo
 
 trap 'rc=127;set +x;echo "=> $scriptBaseName: CTRL+C Interruption trapped.">&2;unmoutALLFSInChroot "$destinationRootDir";exit $rc' INT
 
-echo
-df -PTh | grep $destinationRootDir
+echo "=> Liste des filesystem montes dans $destinationRootDir/"
+$df -PTh | grep $destinationRootDir
 echo
 
 fsRegExp="\<(ext[234]|btrfs|f2fs|xfs|jfs|reiserfs|nilfs|hfs|vfat|fuseblk)\>"
