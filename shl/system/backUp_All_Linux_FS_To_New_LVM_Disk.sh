@@ -58,14 +58,13 @@ destinationRootDir=/mnt/destinationVGDir
 test -d $destinationRootDir/ || sudo mkdir -v $destinationRootDir/
 echo
 sudo mount -v /dev/$destinationVG/$(echo $destinationLVList | tr " " "\n" | grep root) $destinationRootDir/ || exit
-set -x
+#set -x
 time sudo $cp2ext234 -r -x / $destinationRootDir/
-set +x
 sync
 test -d $destinationRootDir/etc/ || sudo mkdir -v $destinationRootDir/etc/
 
 grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || sed "s/$sourceEFI_UUID/$destinationEFI_UUID/" /etc/fstab | sed "s,$sourceVG_Or_Disk,$destinationVG," | sudo tee $destinationRootDir/etc/fstab
-awk '/^[^#]/{print$2}' $destinationRootDir/etc/fstab | while read dir; do test -d $destinationRootDir/$dir || sudo mkdir $destinationRootDir/$dir;done
+awk '/^[^#]/{print substr($2,2)}' $destinationRootDir/etc/fstab | while read dir; do test -d $destinationRootDir/$dir || sudo mkdir -p -v $destinationRootDir/$dir;done
 
 [ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
 $efiMode && sudo mount -v --bind /sys/firmware/efi/efivars /mnt/sys/firmware/efi/efivars
@@ -101,7 +100,7 @@ do
 	echo
 	set -x
 	mount | grep -q $destinationDir && time sudo $copyCommand -r $sourceDir/ $destinationDir/
-	set +x
+#	set +x
 	sync
 done
 sync
