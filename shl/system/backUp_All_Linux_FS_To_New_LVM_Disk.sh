@@ -89,7 +89,7 @@ echo "=> Creation des points de montage dans $destinationRootDir/ ..."
 awk '/^[^#]/{print substr($2,2)}' $destinationRootDir/etc/fstab | while read dir; do test -d $destinationRootDir/$dir || sudo mkdir -p -v $destinationRootDir/$dir;done
 
 echo "=> Montage de /proc a part ..."
-sudo mount -v -t proc proc $destinationVGDir/proc
+sudo mount -v -t proc proc $destinationRootDir/proc
 
 echo "=> Binding des specialFS de /dev ..."
 for specialFS in dev dev/pts sys run ; do test -d $destinationRootDir/$specialFS/ || sudo mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
