@@ -102,10 +102,14 @@ $efiMode && sudo mkdir -p -v $destinationRootDir/sys/firmware/efi/efivars && sud
 echo "=> Montage via chroot de toutes les partitions de $destinationRootDir/etc/fstab ..."
 sudo chroot $destinationRootDir/ findmnt >/dev/null && sudo chroot $destinationRootDir/ mount -av || exit
 
-sourceBootDevice=$(df | grep $sourceVG_Or_Disk | awk '/\/boot$/{print$1}')
-destinationBootDevice=$(df | grep $destinationVG | awk '/\/boot$/{print$1}')
+sourceBootDevice=$($df | grep $sourceVG_Or_Disk | awk '/\/boot$/{print$1}')
+destinationBootDevice=$($df | grep $destinationVG | awk '/\/boot$/{print$1}')
+sourceRootDeviceBaseName=$($df / | awk -F"[/ ]" '{print$4}')
+destinationRootDeviceBaseName=$($df $destinationRootDir | awk -F"[/ ]" '{print$4}')
 echo "=> sourceBootDevice = $sourceBootDevice"
 echo "=> destinationBootDevice = $destinationBootDevice"
+echo "=> sourceRootDeviceBaseName = $sourceRootDeviceBaseName"
+echo "=> destinationRootDeviceBaseName = $destinationRootDeviceBaseName"
 
 trap 'rc=127;set +x;echo "=> $scriptBaseName: CTRL+C Interruption trapped.">&2;unmoutALLFSInChroot "$destinationRootDir";exit $rc' INT
 
@@ -150,6 +154,7 @@ time sudo chroot $destinationRootDir/ <<-EOF
 	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
 	update-grub
 	sed -i "s,$srcGrubBootLVMID,$dstGrubBootLVMID,g" /boot/grub/grub.cfg
+	sed -i "s,$sourceRootDeviceBaseName,$destinationRootDeviceBaseName,g" /boot/grub/grub.cfg
 	[ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
 	$efiMode && grub-install --removable --efi-directory=$(mount | awk '/\/efi /{print$3}') || grub-install $destinationDisk
 	if which lvmetad >/dev/null 2>&1;then
