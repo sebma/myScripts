@@ -29,6 +29,25 @@ if [ $deviceType != SSD ];then
 	exit 1
 fi
 
-echo "=> deviceType = $deviceType"
-#grep -q noatime /etc/fstab || $sudo sed -i "/^\/dev/s/defaults/defaults,noatime/" /etc/fstab
-grep -q noatime /etc/fstab || $sudo sed -i "s/defaults/defaults,noatime/" /etc/fstab
+echo "[$scriptBaseName] => INFO: deviceType = $deviceType"
+if grep -q noatime /etc/fstab;then
+	echo "[$scriptBaseName] => INFO: noatime is already enabled"
+else
+	echo "[$scriptBaseName] => INFO: Enabling noatime ..."
+#	$sudo sed -i "/^\/dev/s/defaults/defaults,noatime/" /etc/fstab
+	$sudo sed -i "s/defaults/defaults,noatime/" /etc/fstab
+	echo "[$scriptBaseName] => INFO: DONE. You need to reboot."
+fi
+
+if [ -s /etc/cron.weekly/fstrim ];then
+	echo "[$scriptBaseName] => INFO: FSTRIM is already enabled :"
+	echo
+	cat /etc/cron.weekly/fstrim
+elif [ -s /lib/systemd/system/fstrim.timer ];then
+	echo "[$scriptBaseName] => INFO: FSTRIM is already enabled :"
+	echo
+	cat /lib/systemd/system/fstrim.timer
+	cat /lib/systemd/system/fstrim.service
+else
+	echo "[$scriptBaseName] => WARNING: FSTRIM is not enabled."
+fi
