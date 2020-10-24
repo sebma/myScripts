@@ -67,11 +67,11 @@ grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || sed "s/$sour
 awk '/^[^#]/{print substr($2,2)}' $destinationRootDir/etc/fstab | while read dir; do test -d $destinationRootDir/$dir || sudo mkdir -p -v $destinationRootDir/$dir;done
 
 [ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
-$efiMode && sudo mount -v --bind /sys/firmware/efi/efivars /mnt/sys/firmware/efi/efivars
+$efiMode && sudo mkdir -p -v $destinationRootDir/sys/firmware/efi/efivars && sudo mount -v --bind /sys/firmware/efi/efivars $destinationRootDir/sys/firmware/efi/efivars
 
 for specialFS in dev dev/pts proc sys run ; do test -d $destinationRootDir/$specialFS/ || sudo mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
 
-sudo chroot /mnt/destinationVGDir/ findmnt >/dev/null && sudo chroot $destinationRootDir/ mount -av
+sudo chroot $destinationRootDir/ findmnt >/dev/null && sudo chroot $destinationRootDir/ mount -av
 
 trap 'rc=127;set +x;echo "=> $scriptBaseName: CTRL+C Interruption trapped.">&2;unmoutALLFSInChroot "$destinationRootDir";exit $rc' INT
 echo
