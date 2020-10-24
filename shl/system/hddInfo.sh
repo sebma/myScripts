@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
+scriptBaseName=${0##*/}
 #set -o errexit
 set -o nounset
 type smartctl >/dev/null || exit
-sudo=$(which sudo 2>/dev/null)
+type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo=$(which sudo) || sudo=""
 diskDevice=""
 os=$(uname -s)
 
@@ -13,7 +14,7 @@ then
 	[ $os = Darwin ] && diskDevice=disk0
 else
 	[ "$1" = "-h" ] && {
-		echo "=> Usage: $0 [disk device name]" >&2
+		echo "=> Usage: $scriptBaseName [disk device name]" >&2
 		exit 1
 	} || diskDevice=$1
 fi
