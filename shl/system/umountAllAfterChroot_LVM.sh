@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+scriptBaseName=${0##*/}
+if [ $# != 1 ];then
+	echo "=> $scriptBaseName rootFSDevice" >&2
+	exit 1
+fi
+
 type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo=$(which sudo) || sudo=""
 #set -o nounset
 set -o errexit
@@ -15,10 +21,12 @@ $sudo lvs | grep -q root || {
 	$sudo lvscan
 }
 
-rootFSDevice=$($sudo lvs | awk '/root/{print$2"-"$1}')
+
+#rootFSDevice=$($sudo lvs | awk '/root/{print$2"-"$1}')
+rootFSDevice=$1
 if mount | grep -q $rootFSDevice;then
 	mnt=$(lsblk -n -o MOUNTPOINT /dev/mapper/$rootFSDevice)
-#	df -ah | grep $mnt && $sudo chroot $mnt /bin/umount -av
+	df -ah | grep $mnt && $sudo chroot $mnt /bin/umount -av
 	$sudo umount -v $mnt/{usr,sys/firmware/efi/efivars,sys,proc,dev/pts,dev,run,}
 	df -ah | grep $mnt
 fi
