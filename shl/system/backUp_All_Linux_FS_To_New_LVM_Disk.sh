@@ -20,10 +20,9 @@ unmoutALLFSInChroot() {
 	local destRootDIR="$1"
 	echo "=> umounting all FS in <$destRootDIR> ..."
 	sudo chroot $destRootDIR/ umount -av
+	echo
 	sudo umount -v $destRootDIR/{sys/firmware/efi/efivars,sys,proc,run,dev/pts,dev,usr,}
-	sudo umount -v $destRootDIR/sys/firmware/efi/efivars $destRootDIR/sys
-	sleep 1
-	sudo umount -v $destRootDIR
+	echo
 }
 
 echo "=> Remove cache for all users ..."
@@ -168,7 +167,10 @@ unmoutALLFSInChroot "$destinationRootDir"
 trap - INT
 
 $df | grep -q $destinationRootDir
+echo
+
 echo "=> Restore grub in /dev/sda just in case ..."
 $efiMode && efiDirectory=$(mount | awk '/\/efi /{print$3}') && sudo grub-install --efi-directory=$efiDirectory --removable || sudo grub-install /dev/sda
+echo
 
 echo "=> logFile = <$logFile>."
