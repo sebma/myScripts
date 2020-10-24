@@ -162,6 +162,7 @@ time sudo chroot $destinationRootDir/ <<-EOF
 	sync
 EOF
 set -o nounset
+echo
 
 unmoutALLFSInChroot "$destinationRootDir"
 trap - INT
