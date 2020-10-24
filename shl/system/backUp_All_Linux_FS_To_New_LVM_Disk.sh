@@ -16,8 +16,18 @@ fi
 set -o nounset
 set -o pipefail
 
+unmoutALLFSInChroot() {
+	local destRootDIR="$1"
+	echo "=> umounting all FS in <$destRootDIR> ..."
+	sudo chroot $destRootDIR/ umount -av
+	sudo umount -v $destRootDIR/{sys/firmware/efi/efivars,sys,proc,run,dev/pts,dev,usr,}
+	sudo umount -v $destRootDIR/sys/firmware/efi/efivars $destRootDIR/sys
+	sleep 1
+	sudo umount -v $destRootDIR
+}
+
 echo "=> Remove cache for all users ..."
-\ls /home/ | grep -v lost+found/ | while read user
+\ls /home/ | grep -v lost+found | while read user
 do
 	sudo -u $user rm -fr /home/$user/.cache
 	sudo -u $user mkdir -v /home/$user/.cache
@@ -133,16 +143,6 @@ time sudo chroot $destinationRootDir/ bash -x <<-EOF
 	fi
 	sync
 EOF
-
-unmoutALLFSInChroot() {
-	local destRootDIR="$1"
-	echo "=> umounting all FS in <$destRootDIR> ..."
-	sudo chroot $destRootDIR/ umount -av
-	sudo umount -v $destRootDIR/{sys/firmware/efi/efivars,sys,proc,run,dev/pts,dev,usr,}
-	sudo umount -v $destRootDIR/sys/firmware/efi/efivars $destRootDIR/sys
-	sleep 1
-	sudo umount -v $destRootDIR
-}
 
 unmoutALLFSInChroot "$destinationRootDir"
 trap - INT
