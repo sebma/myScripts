@@ -30,8 +30,9 @@ echo "=> Remove cache for all users ..."
 \ls /home/ | grep -v lost+found | while read user
 do
 	sudo -u $user rm -fr /home/$user/.cache
-	sudo -u $user mkdir -v /home/$user/.cache
+	sudo -u $user mkdir /home/$user/.cache
 done
+echo
 
 # Le "grep" est la pour forcer le code retour a "1" si il y a pas de LVM
 destinationPVPartition=$(sudo fdisk $destinationDisk -l | grep 'Linux LVM' | awk '/Linux LVM/{print$1}') || exit
@@ -71,14 +72,16 @@ RSYNC_EXCLUSION=$(printf -- "--exclude %s/ " /dev /sys /run /proc /mnt /media)
 rsync="$(which rsync) -x -uth -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST $RSYNC_EXCLUSION --log-file=$logFile"
 cp2ext234="$rsync -ogpuv -lSH"
 cp2FAT32="$rsync --modify-window=1"
+
 destinationRootDir=/mnt/destinationVGDir
+echo "=> Montage de la partition root dans $destinationRootDir/ ..."
 test -d $destinationRootDir/ || sudo mkdir -v $destinationRootDir/
-echo
 sudo mount -v /dev/$destinationVG/$(echo $destinationLVList | tr " " "\n" | grep root) $destinationRootDir/ || exit
-#set -x
+
+echo "=> Copie des fichiers de la partition / dans $destinationRootDir/ ..."
 time sudo $cp2ext234 -r -x / $destinationRootDir/
 sync
-test -d $destinationRootDir/etc/ || sudo mkdir -v $destinationRootDir/etc/
+echo
 
 grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || sudo sed -i "s,$sourceVG_Or_Disk,$destinationVG," $destinationRootDir/etc/fstab
 grep -q $destinationEFI_UUID $destinationRootDir/etc/fstab 2>/dev/null || sudo sed -i "s/$sourceEFI_UUID/$destinationEFI_UUID/" $destinationRootDir/etc/fstab
@@ -124,7 +127,7 @@ do
 	esac
 
 	echo
-	set -x
+
 	mount | grep -q $destinationDir && time sudo $copyCommand -r $sourceDir/ $destinationDir/
 #	set +x
 	sync
@@ -133,13 +136,16 @@ sync
 
 set +o nounset
 set -o | grep unset
-time sudo chroot $destinationRootDir/ bash -x <<-EOF
+time sudo chroot $destinationRootDir/ <<-EOF
+	set -x
 	set -o | grep unset
 	[ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
 	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
 	update-grub
-	$efiMode && efiDirectory=$(mount | awk '/\/efi /{print$3}') && grub-install --efi-directory=$efiDirectory --removable || grub-install $destinationDisk
+	$efiMode && efiDirectory=$(mount | awk '/\/efi /{print$3}')
+	echo "=> efiDirectory = <$efiDirectory>"
+	test -n "$efiDirectory" && grub-install --efi-directory=$efiDirectory --removable || grub-install $destinationDisk
 	if which lvmetad >/dev/null 2>&1;then
 		grep -q "use_lvmetad\s*=\s*0" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*0/use_lvmetad = 1/" /etc/lvm/lvm.conf
 	fi
