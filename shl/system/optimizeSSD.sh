@@ -50,6 +50,7 @@ elif [ -s /lib/systemd/system/fstrim.timer ];then
 	set -x
 	cat /lib/systemd/system/fstrim.timer
 	cat /lib/systemd/system/fstrim.service
+	systemctl status fstrim.timer
 else
 	echo "[$scriptBaseName] => WARNING: FSTRIM is not enabled."
 fi
