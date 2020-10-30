@@ -29,7 +29,7 @@ if [ $deviceType != SSD ];then
 	exit 1
 fi
 
-echo "[$scriptBaseName] => INFO: deviceType = $deviceType"
+echo "[$scriptBaseName] => INFO: deviceType($diskDevice) = $deviceType"
 if grep -q noatime /etc/fstab;then
 	echo "[$scriptBaseName] => INFO: noatime is already enabled"
 else
