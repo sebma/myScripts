@@ -27,9 +27,10 @@ deviceType=$(test $(</sys/block/${diskDevice/*\//}/queue/rotational) = 0 && echo
 if [ $deviceType != SSD ];then
 	echo "[$scriptBaseName] => ERROR: $diskDevice is not a SSD."
 	exit 1
+else
+	echo "[$scriptBaseName] => INFO: $diskDevice is a $deviceType."
 fi
 
-echo "[$scriptBaseName] => INFO: deviceType($diskDevice) = $deviceType"
 if grep -q noatime /etc/fstab;then
 	echo "[$scriptBaseName] => INFO: noatime is already enabled"
 else
