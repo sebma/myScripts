@@ -41,17 +41,21 @@ destinationVG=$(sudo pvs $destinationPVPartition -o vg_name | awk 'END{print$1}'
 destinationLVList=$(sudo lvs $destinationVG -o lv_name | awk 'FNR>1{print$1}' | sort -u | paste -sd' ')
 
 df=$(which df)
-usrSourceFS=$($df /usr | awk '!/^Filesystem/{print$1}')
+usrSourceFS=$(findmnt -n -c -o SOURCE /usr)
 isLVM=$(lsblk -n $usrSourceFS -o TYPE | grep -qw lvm && echo yes || echo no)
+if [ $isLVM = no ];then
+	sourceVG_Or_Disk=$(findmnt -n -c -o SOURCE /boot/efi | sed "s/.$//")
+	echo "[$scriptBaseName] => ERROR : You must use LVM." >&2
+	exit 3
+fi
 
 echo "=> isLVM = $isLVM"
 echo "=> usrSourceFS = $usrSourceFS"
 
-[ $isLVM = yes ] && sourceVG_Or_Disk=$(echo $usrSourceFS | sed "s,/dev/\|mapper.|,,g;s,[/-].*,,") || sourceVG_Or_Disk=$($df | grep /boot/efi | awk '{print gensub(".$","",1,$1)}')
+sourceVG_Or_Disk=$(echo $usrSourceFS | awk -F"[/-]" '{print$4}')
 echo "=> sourceVG_Or_Disk = $sourceVG_Or_Disk"
 echo "=> destinationVG = $destinationVG"
-
-sourceEFI_FS=$($df | grep /boot/efi$ | cut -d" " -f1)
+sourceEFI_FS=$(findmnt -n -c -o SOURCE /boot/efi)
 sourceEFI_UUID=$(sudo blkid $sourceEFI_FS -o value -s UUID)
 # Le "grep" est la pour forcer le code retour a "1" si il y a pas de EFI
 #destinationEFI_FS=$(sudo fdisk $destinationDisk -l | grep -w 'EFI' | awk "/\<EFI\>/{print\$1}") || exit
@@ -103,13 +107,14 @@ $efiMode && sudo mkdir -p -v $destinationRootDir/sys/firmware/efi/efivars && sud
 echo
 
 echo "=> Montage via chroot de toutes les partitions de $destinationRootDir/etc/fstab ..."
-sudo chroot $destinationRootDir/ findmnt >/dev/null && sudo chroot $destinationRootDir/ mount -av || exit
+#sudo chroot $destinationRootDir/ findmnt >/dev/null && sudo chroot $destinationRootDir/ mount -av || exit
+sudo chroot $destinationRootDir/ findmnt -s >/dev/null && sudo chroot $destinationRootDir/ mount -av || exit
 echo
 
-sourceBootDevice=$($df | grep $sourceVG_Or_Disk | awk '/\/boot$/{print$1}')
-destinationBootDevice=$($df | grep $destinationVG | awk '/\/boot$/{print$1}')
-sourceRootDeviceBaseName=$($df / | awk -F"[/ ]" '{printf$4}')
-destinationRootDeviceBaseName=$($df $destinationRootDir | awk -F"[/ ]" '{printf$4}')
+sourceBootDevice=$(findmnt -n -c -o SOURCE /boot)
+destinationBootDevice=$(findmnt -n -c -o SOURCE $destinationRootDir/boot)
+sourceRootDeviceBaseName=$(findmnt -n -c -o SOURCE / | awk -F"[/ ]" '{printf$4}')
+destinationRootDeviceBaseName=$(findmnt -n -c -o SOURCE $destinationRootDir | awk -F"[/ ]" '{printf$4}')
 echo "=> sourceBootDevice = $sourceBootDevice"
 echo "=> destinationBootDevice = $destinationBootDevice"
 echo "=> sourceRootDeviceBaseName = <$sourceRootDeviceBaseName>"
@@ -172,7 +177,7 @@ echo
 unmoutALLFSInChroot "$destinationRootDir"
 trap - INT
 
-$df | grep -q $destinationRootDir
+$df -PTh | grep -q $destinationRootDir
 
 echo "=> Restore grub in /dev/sda just in case ..."
 $efiMode && efiDirectory=$(mount | awk '/\/efi /{print$3}') && sudo grub-install --efi-directory=$efiDirectory --removable || sudo grub-install /dev/sda
