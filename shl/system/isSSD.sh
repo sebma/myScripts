@@ -22,6 +22,10 @@ if ! echo $diskDevice | grep -q /dev/; then
     diskDevice=/dev/$diskDevice
 fi
 
-deviceType=$(test $(</sys/block/${diskDevice/*\//}/queue/rotational) = 0 && echo SSD || echo HDD)
-
-echo "[$scriptBaseName] => INFO: $diskDevice is a $deviceType."
+isSSD=$(test $(</sys/block/${diskDevice/*\//}/queue/rotational) = 0 && echo true || echo false)
+if $isSSD;then
+	echo "[$scriptBaseName] => INFO: $diskDevice is a SSD."
+else
+	echo "[$scriptBaseName] => ERROR: $diskDevice is not a SSD."
+	exit 1
+fi
