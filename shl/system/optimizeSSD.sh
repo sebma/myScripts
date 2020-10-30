@@ -7,8 +7,16 @@ type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|a
 diskDevice=""
 os=$(uname -s)
 
-[ $os = Linux  ] && diskDevice=sda
-[ $os = Darwin ] && diskDevice=disk0
+if [ $# = 0 ]
+then
+	[ $os = Linux  ] && diskDevice=sda
+	[ $os = Darwin ] && diskDevice=disk0
+else
+	[ "$1" = "-h" ] && {
+		echo "=> Usage: $scriptBaseName [disk device name]" >&2
+		exit 1
+	} || diskDevice=$1
+fi
 
 if ! echo $diskDevice | grep -q /dev/; then
     diskDevice=/dev/$diskDevice
@@ -20,6 +28,19 @@ if $isSSD;then
 else
 	echo "[$scriptBaseName] => ERROR: $diskDevice is not a SSD."
 	exit 1
+fi
+
+rootDevice=$(findmnt -n -c / -o SOURCE)
+if echo $rootDevice | grep -q /dev/mapper/;then
+	rootVG=$(echo $rootDevice | cut -d- -f1)
+	rootDisk=$(sudo vgs --noheadings $rootVG -o pv_name | sed "s/ *//g")
+else
+	rootDisk=$rootDevice
+fi
+
+if ! echo $rootDisk | grep -q $diskDevice;then
+	echo "[$scriptBaseName] => ERROR: The root partition is not on $diskDevice."
+	exit 2
 fi
 
 if grep -q noatime /etc/fstab;then
