@@ -33,7 +33,7 @@ fi
 rootDevice=$(findmnt -n -c / -o SOURCE)
 if echo $rootDevice | grep -q /dev/mapper/;then
 	rootVG=$(echo $rootDevice | cut -d- -f1)
-	rootDisk=$(sudo vgs --noheadings $rootVG -o pv_name | sed "s/ *//g")
+	rootDisk=$(sudo vgs --noheadings $rootVG -o pv_name | tr -d " ")
 else
 	rootDisk=$rootDevice
 fi
