@@ -75,6 +75,7 @@ fslint
 gawk
 gdebi
 gdebi-core
+gdisk
 geany
 git-man
 gitso
