@@ -42,15 +42,19 @@ fi
 espPartition=$disk$espPartitionNumber
 espFS=/mnt/$(basename $espPartition)
 
-#$sudo parted -s $disk mkpart '"EFI System Partition"' fat32 1 550
+cat <<-EOF | $sudo parted $disk
+	print
+#	mkpart "EFI System" fat32 1M 550M
+	set $espPartitionNumber boot on
+	set $espPartitionNumber esp on
+	set $espPartitionNumber hidden on
+	name $espPartitionNumber "EFI System"
+	print
+EOF
+
+#printf "C\n$espPartitionNumber\nEFI System\nW\nY\n" | $sudo gdisk $disk
 #$sudo mkfs.fat -F32 $espPartition
-$sudo dosfslabel $espPartition "SYSTEM"
-$sudo parted -s $disk set $espPartitionNumber boot on
-$sudo parted -s $disk set $espPartitionNumber esp on
-$sudo parted -s $disk set $espPartitionNumber hidden on
-$sudo parted -s $disk name $espPartitionNumber '"EFI System Partition"'
-printf "C\n$espPartitionNumber\nEFI System\nW\nY\n" | $sudo gdisk $disk
-$sudo parted -s $disk print
+$sudo dosfslabel $espPartition "EFI_System"
 
 $sudo mkdir -p $espFS
 $sudo mount $espPartition $espFS
