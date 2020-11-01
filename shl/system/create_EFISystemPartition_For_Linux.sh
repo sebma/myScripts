@@ -33,7 +33,7 @@ espPartition=$disk$espPartitionNumber
 espFS=/mnt/$(basename $espPartition)
 
 if ! $sudo gdisk -l $disk | grep -qw EF00;then
-	cat<<-EOF | $sudo parted $disk
+	cat <<-EOF | $sudo parted $disk
 		print
 		mkpart "EFI System" fat32 1M 256M
 		set $espPartitionNumber boot on
@@ -42,7 +42,13 @@ if ! $sudo gdisk -l $disk | grep -qw EF00;then
 		print
 	EOF
 
-	$sudo mkfs.fat -v -n EFI_SYSTEM -F32 $espPartition
+	sleep 1
+	if [ -b $espPartition ];then
+		$sudo mkfs.fat -v -n EFI_SYSTEM -F32 $espPartition
+	else
+		echo "=> ERROR: Device $espPartition not created." >&2
+		exit 3
+	fi
 	echo
 else
 	echo "=> INFO : The ESP partition already exits." >&2
