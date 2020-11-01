@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
-youtube_dl=$(which youtube-dl)
-url="$1"
-#url="$($youtube_dl --get-filename -o '%(webpage_url)s' --playlist-items 1 "$url")"
-echo "$url"
+function ytdlGetLiveURL {
+	local youtube_dl=$(which youtube-dl)
+	local url="$1"
+	set -o pipefail
+	url="$($youtube_dl -j --playlist-items 1 "$url" | jq -r .webpage_url || echo "$url")"
+	set +o pipefail
+	echo "$url"
+}
+
+ytdlGetLiveURL "$1"
