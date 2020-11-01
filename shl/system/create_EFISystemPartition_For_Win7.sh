@@ -42,18 +42,19 @@ fi
 espPartition=$disk$espPartitionNumber
 espFS=/mnt/$(basename $espPartition)
 
-cat <<-EOF | $sudo parted $disk
-	print
-#	mkpart "EFI System" fat32 1M 550M
-	set $espPartitionNumber boot on
-	set $espPartitionNumber esp on
-	set $espPartitionNumber hidden on
-	name $espPartitionNumber "EFI System"
-	print
-EOF
+if ! $sudo gdisk -l $disk | grep -qw EF00;then
+	$sudo sgdisk -n $espPartitionNumber:0:+512M -t $espPartitionNumber:EF00 -c $espPartitionNumber:"EFI System" $disk
+	$sudo gdisk -l $disk
 
-#printf "C\n$espPartitionNumber\nEFI System\nW\nY\n" | $sudo gdisk $disk
-#$sudo mkfs.fat -F32 $espPartition
+	if [ -b $espPartition ];then
+		$sudo mkfs.fat -v -n EFI_SYSTEM -F32 $espPartition
+	else
+		echo "=> ERROR: Device $espPartition not created." >&2
+		exit 3
+	fi
+	echo
+fi
+
 $sudo dosfslabel $espPartition "EFI_System"
 
 $sudo mkdir -p $espFS
