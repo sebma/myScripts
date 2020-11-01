@@ -42,7 +42,8 @@ if ! $sudo gdisk -l $disk | grep -qw EF00;then
 		print
 	EOF
 
-	$sudo mkfs.fat -n EFI_SYSTEM -F32 $espPartition
+	$sudo mkfs.fat -v -n EFI_SYSTEM -F32 $espPartition
+	echo
 else
 	echo "=> INFO : The ESP partition already exits." >&2
 #	exit 3
