@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
+scriptBaseName=${0##*/}
 set -o errexit
 set -o nounset
 
 type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo=$(which sudo) || sudo=""
 if [ $# != 1 ]
 then
-        echo "=> Usage : $(basename $0) win7ESPBootFiles.zip" >&2
+        echo "=> Usage : $scriptBaseName win7ESPBootFiles.zip" >&2
         exit -1
 fi
 
