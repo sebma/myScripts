@@ -52,6 +52,18 @@ fi
 $sudo mkdir -p $espFS
 $sudo mount -v $espPartition $espFS
 
+logFile="$HOME/log/copyEFI_System_Partition_to_$(basename $disk)__$(date +%Y%m%d-%HH%M).log"
+echo
+echo "=> logFile = <$logFile>."
+echo
+
+RSYNC_SKIP_COMPRESS_LIST=7z/aac/avi/bz2/deb/flv/gz/iso/jpeg/jpg/mkv/mov/m4a/mp2/mp3/mp4/mpeg/mpg/oga/ogg/ogm/ogv/webm/rpm/tbz/tgz/z/zip
+RSYNC_EXCLUSION=$(printf -- "--exclude %s/ " /dev /sys /run /proc /mnt /media)
+rsync="$(which rsync) -x -uth -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST $RSYNC_EXCLUSION --log-file=$logFile"
+
+cp2FAT32="$rsync --modify-window=1"
+
+$sudo $cp2FAT32 -r /boot/efi/ $espFS/
 sync
 $sudo umount -v $espPartition
 $sudo rmdir $espFS
