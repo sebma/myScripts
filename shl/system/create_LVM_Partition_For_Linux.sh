@@ -36,19 +36,17 @@ diskModelName=$(sudo smartctl -i $disk | awk '/Device Model:/{$1=$2="";gsub("  "
 diskSerialNumber=$(sudo smartctl -i $disk | awk '/Serial Number:/{$1=$2="";gsub("  ","");gsub(" ","_");print}')
 
 if ! $sudo gdisk -l $disk | grep -qw 8E00;then
-	set -o pipefail
-	cat <<-EOF | $sudo parted $disk
-	print
-	mkpart $diskModelName-$diskSerialNumber ext2 256MB -1
-	set $lvmPartitionNumber lvm on
-	print
-	EOF
+#	cat <<-EOF | $sudo parted $disk
+#	print
+#	mkpart $diskModelName-$diskSerialNumber ext2 256MB -1
+#	set $lvmPartitionNumber lvm on
+#	print
+#	EOF
 
-	test $? != 0 && exit
-	set +o pipefail
+	$sudo sgdisk -n $lvmPartitionNumber:0:0 -t $lvmPartitionNumber:8E00 -c $lvmPartitionNumber:$diskModelName-$diskSerialNumber $disk
+	$sudo gdisk -l $disk
 
 	echo
-	sleep 1
 	if [ -b $lvmPartition ];then
 		$sudo pvcreate -v $lvmPartition
 	else
