@@ -33,16 +33,9 @@ espPartition=$disk$espPartitionNumber
 espFS=/mnt/$(basename $espPartition)
 
 if ! $sudo gdisk -l $disk | grep -qw EF00;then
-	cat <<-EOF | $sudo parted $disk
-		print
-		mkpart "EFI System" fat32 1M 256M
-		set $espPartitionNumber boot on
-		set $espPartitionNumber esp on
-		set $espPartitionNumber hidden on
-		print
-	EOF
+	$sudo sgdisk -n $espPartitionNumber:0:+260M -t $espPartitionNumber:EF00 -c $espPartitionNumber:"EFI System" $disk
+	$sudo gdisk -l $disk
 
-	sleep 1
 	if [ -b $espPartition ];then
 		$sudo mkfs.fat -v -n EFI_SYSTEM -F32 $espPartition
 	else
