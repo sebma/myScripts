@@ -30,7 +30,7 @@ brewInstall ()
 				cd $brewPrefix
 				git clone https://github.com/homebrew/brew
 #				time git clone https://github.com/homebrew/homebrew-core ./Library/Taps/homebrew/homebrew-core
-				time $brewPrefix/bin/brew update
+				time $brewPrefix/bin/brew tab homebrew/core
 				cd - >/dev/null
 			fi
 		elif [ $osFamily = Darwin ]; then
