@@ -7,9 +7,6 @@ brewPortableInstall ()
 {
 	brew=undefined
 	brewPrefix=undefined
-	osFamily=undefined
-	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo=$(which sudo) || sudo=""
-	$(which bash) -c 'echo $OSTYPE' | grep -q android && osFamily=Android || osFamily=$(uname -s)
 	if ! which brew > /dev/null 2>&1; then
 		git --help >/dev/null || return
 		brewPrefix=$HOME/.linuxbrew
