@@ -38,7 +38,7 @@ if [ -n "$chrootMntPoint" ];then
 	test -d $chrootMntPoint/boot/efi && mount | grep -q "$chrootMntPoint/.*/efi " && $sudo $umount $chrootMntPoint/boot/efi
 #	[ $isLVM = true ] && rootFS_VG=$(sudo lvs --noheadings  -o vg_name $rootFSDevice) && $sudo $umount /dev/$rootFS_VG/*
 	$df | grep $chrootMntPoint/  | awk '{print$1}' | xargs -rt $sudo $umount
-	$df -a | grep $chrootMntPoint/ || $sudo $umount $chrootMntPoint/{usr,sys/firmware/efi/efivars,sys,proc,dev/pts,dev,run,}
+	$df | grep $chrootMntPoint/ || $sudo $umount $chrootMntPoint/{usr,sys/firmware/efi/efivars,sys,proc,dev/pts,dev,run,}
 	$sudo $umount $chrootMntPoint
 	$df -ah | grep $chrootMntPoint
 fi
