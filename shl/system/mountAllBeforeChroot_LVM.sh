@@ -56,7 +56,7 @@ $sudo chroot $chrootMntPoint /bin/bash <<-EOF
 	[ -d /sys/firmware/efi ] && mount -v /boot/efi
 	mount -v /usr
 	mount -v /var
-	rm -v /var/lib/apt/lists/lock
+	[ -e /var/lib/apt/lists/lock ] && rm -v /var/lib/apt/lists/lock
 	sync
 EOF
 
