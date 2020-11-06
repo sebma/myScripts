@@ -26,8 +26,9 @@ $sudo lvs | grep -q root || {
 #rootFSDevice=/dev/mapper/$rootFSDevice
 
 rootFSDevice=$1
-if mount | grep -q $rootFSDevice;then
-	chrootMntPoint=$(lsblk -n -o MOUNTPOINT $rootFSDevice)
+#isLVM=$(lsblk -n -o TYPE $rootFSDevice | grep -wq lvm && echo true || echo false)
+chrootMntPoint=$(lsblk -n -o MOUNTPOINT $rootFSDevice)
+if [ -n "$chrootMntPoint" ];then
 #	df -ah | grep $chrootMntPoint && $sudo chroot $chrootMntPoint /bin/umount -av
 	$sudo umount -v $chrootMntPoint/{usr,sys/firmware/efi/efivars,sys,proc,dev/pts,dev,run,}
 	$sudo umount -v $chrootMntPoint/*
