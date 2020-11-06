@@ -3,8 +3,7 @@
 scriptDir=$(dirname $0)
 scriptDir=$(cd $scriptDir;pwd)
 
-brewPortableInstall ()
-{
+brewPortableInstall () {
 	brew=undefined
 	brewPrefix=undefined
 	if ! which brew > /dev/null 2>&1; then
