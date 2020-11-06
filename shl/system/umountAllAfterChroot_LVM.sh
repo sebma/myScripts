@@ -40,5 +40,5 @@ if [ -n "$chrootMntPoint" ];then
 	$df | grep $chrootMntPoint/ || $sudo $umount $chrootMntPoint/{usr,sys/firmware/efi/efivars,sys,proc,dev/pts,dev,run,}
 	set +x
 	echo "=> Remaining mounted filesystems in $chrootMntPoint :"
-	$df -ah | grep $chrootMntPoint
+	$df -ah | grep $chrootMntPoint || $sudo rmdir $chrootMntPoint
 fi
