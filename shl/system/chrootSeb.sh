@@ -9,21 +9,25 @@ do
 	echo $PATH | grep -wq $path || export PATH=$path:$PATH
 done
 
-df /mnt/proc | grep -q /mnt/proc || {
-	$sudo mkdir -pv /mnt/proc
-	$sudo mount -v -t proc /proc /mnt/proc
+chrootMntPoint=/mnt/chroot
+$sudo mkdir -p $chrootMntPoint
+df $chrootMntPoint/proc | grep -q $chrootMntPoint/proc || {
+	$sudo mkdir -pv $chrootMntPoint/proc
+	$sudo mount -v -t proc /proc $chrootMntPoint/proc
 }
+
 for special in dev dev/pts sys run
 do
-	df /mnt/$special | grep -q /mnt/$special || {
-		$sudo mkdir -pv /mnt/$special
-		$sudo mount -v --bind /$special /mnt/$special
+	df $chrootMntPoint/$special | grep -q $chrootMntPoint/$special || {
+		$sudo mkdir -pv $chrootMntPoint/$special
+		$sudo mount -v --bind /$special $chrootMntPoint/$special
 	}
 done
+
 if [ -d /sys/firmware/efi ];then
-       df /mnt/sys/firmware/efi/efivars | grep -q /mnt/sys/firmware/efi/efivars || {
-		cd /mnt/sys/firmware/efi/ && $sudo mkdir -pv efivars
-		$sudo mount -v --bind /sys/firmware/efi/efivars /mnt/sys/firmware/efi/efivars
+       df $chrootMntPoint/sys/firmware/efi/efivars | grep -q $chrootMntPoint/sys/firmware/efi/efivars || {
+		cd $chrootMntPoint/sys/firmware/efi/ && $sudo mkdir -pv efivars
+		$sudo mount -v --bind /sys/firmware/efi/efivars $chrootMntPoint/sys/firmware/efi/efivars
        }
 fi
 
