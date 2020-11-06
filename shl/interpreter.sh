@@ -1,10 +1,9 @@
-#!/usr/bin/env ksh
+#!/usr/bin/env zsh
 
 get_interpreter() {
-	typeset scriptPID=$$
-	typeset interpreter=`ps -o pid,args | awk "/$$/&&!/awk/"'{gsub("^/.*/","",$2);print $2}'`
-	echo       $interpreter  
+	interpreter=$(ps -o args= $$ | awk '{gsub("^/.*/","",$1);print $1}')
+	echo $interpreter  
 }
 
-interpreter=`get_interpreter`
+interpreter=$(get_interpreter)
 echo "=> interpreter = <$interpreter>"
