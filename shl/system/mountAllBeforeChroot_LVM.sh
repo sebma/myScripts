@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo="$(which sudo) -H" || sudo=""
+type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo=$(which sudo) || sudo=""
 #set -o nounset
 set -o errexit
 
@@ -60,4 +60,5 @@ $sudo chroot $chrootMntPoint /bin/bash <<-EOF
 	sync
 EOF
 
+test -n "$sudo" && sudo="$sudo -H" # Pour eviter que le .profile de $USER ne soit lance
 $sudo chroot $chrootMntPoint
