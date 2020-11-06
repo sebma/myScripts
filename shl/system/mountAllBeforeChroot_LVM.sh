@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo=$(which sudo) || sudo=""
+type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo="$(which sudo) -H" || sudo=""
 #set -o nounset
 set -o errexit
 
@@ -50,7 +50,7 @@ if [ -d /sys/firmware/efi ];then
        }
 fi
 
-$sudo -H chroot $chrootMntPoint /bin/bash <<-EOF
+$sudo chroot $chrootMntPoint /bin/bash <<-EOF
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
 	mount -v /boot
 	[ -d /sys/firmware/efi ] && mount -v /boot/efi
@@ -60,4 +60,4 @@ $sudo -H chroot $chrootMntPoint /bin/bash <<-EOF
 	sync
 EOF
 
-$sudo -H chroot $chrootMntPoint
+$sudo chroot $chrootMntPoint
