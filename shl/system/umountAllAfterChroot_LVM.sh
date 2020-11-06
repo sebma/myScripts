@@ -7,7 +7,7 @@ if [ $# != 1 ];then
 fi
 
 type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo=$(which sudo) || sudo=""
-#set -o nounset
+set -o nounset
 set -o errexit
 
 for path in /sbin /bin /usr/sbin /usr/bin
@@ -25,17 +25,20 @@ $sudo lvs | grep -q root || {
 #rootFSDevice=$($sudo lvs | awk '/root/{print$2"-"$1}')
 #rootFSDevice=/dev/mapper/$rootFSDevice
 
+fsTypesList="$(printf "ext%d " $(seq 2 4))btrfs f2fs xfs jfs reiserfs nilfs hfs vfat fuseblk"
 rootFSDevice=$1
 isLVM=$(lsblk -n -o TYPE $rootFSDevice | grep -wq lvm && echo true || echo false)
 umount="umount -v"
 chrootMntPoint=$(lsblk -n -o MOUNTPOINT $rootFSDevice)
 df=$(which df)
+
 if [ -n "$chrootMntPoint" ];then
 #	$df -ah | grep $chrootMntPoint && $sudo chroot $chrootMntPoint $umount -a
-	test -d $chrootMntPoint/boot/efi && $sudo $umount $chrootMntPoint/boot/efi
-#	[ $isLVM = true ] && rootFS_VG=$(sudo lvs --noheadings  -o vg_name $rootFSDevice) && $sudo $umount /dev/$rootFS_VG/*
 	set -x
-	$df | grep $chrootMntPoint  | awk '{$1=$2=$3=$4=$5="";print}' | xargs $umount
-	$sudo $umount $chrootMntPoint/{usr,sys/firmware/efi/efivars,sys,proc,dev/pts,dev,run,}
+	test -d $chrootMntPoint/boot/efi && mount | grep -q "$chrootMntPoint/.*/efi " && $sudo $umount $chrootMntPoint/boot/efi
+#	[ $isLVM = true ] && rootFS_VG=$(sudo lvs --noheadings  -o vg_name $rootFSDevice) && $sudo $umount /dev/$rootFS_VG/*
+	$df | grep $chrootMntPoint/  | awk '{print$1}' | xargs -rt $sudo $umount
+	$df -a | grep $chrootMntPoint/ || $sudo $umount $chrootMntPoint/{usr,sys/firmware/efi/efivars,sys,proc,dev/pts,dev,run,}
+	$sudo $umount $chrootMntPoint
 	$df -ah | grep $chrootMntPoint
 fi
