@@ -22,6 +22,7 @@ df /mnt/proc | grep -q /mnt/proc || {
 	$sudo mkdir -pv /mnt/proc
 	$sudo mount -v -t proc /proc /mnt/proc
 }
+
 for special in dev dev/pts sys run
 do
 	df /mnt/$special | grep -q /mnt/$special || {
@@ -29,6 +30,7 @@ do
 		$sudo mount -v --bind /$special /mnt/$special
 	}
 done
+
 if [ -d /sys/firmware/efi ];then
        df /mnt/sys/firmware/efi/efivars | grep -q /mnt/sys/firmware/efi/efivars || {
 		cd /mnt/sys/firmware/efi/ && $sudo mkdir -pv efivars
