@@ -1,20 +1,29 @@
-#!/usr/bin/env bash
+#!/usr/bin/env ksh
+
+interpreter=$(ps -o args= $$ | awk '{print gensub("^/.*/","",1,$1)}')
+
+if [ $interpreter = bash ] || [ $interpreter = zsh ] || [ $interpreter = sh ];then
+	local=local
+else
+	local=typeset
+fi
 
 brewPostInstall ()
 {
 	type brew >/dev/null || return
-	brew=$(which brew)
+	$local brew=$(which brew)
 	echo "=> Updating homebrew ..." 1>&2
 	echo 1>&2
-	time $brew update -v
+	bash -c "time $brew update -v"
+	sync
 	echo 1>&2
 	echo "=> Adding missing taps ..." 1>&2
 	echo 1>&2
-	time for tap in homebrew/core homebrew/services homebrew/cask homebrew/cask-versions homebrew/cask-drivers homebrew/cask-fonts buo/cask-upgrade
+	for tap in homebrew/core homebrew/services homebrew/cask homebrew/cask-versions homebrew/cask-drivers homebrew/cask-fonts buo/cask-upgrade
 	do
 		$brew tap | \grep -q $tap || {
 			set -x
-			time $brew tap $tap
+			bash -c "time $brew tap $tap"
 			sync
 			set +x
 		}
