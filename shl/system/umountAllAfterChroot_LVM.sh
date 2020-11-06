@@ -27,10 +27,12 @@ $sudo lvs | grep -q root || {
 
 rootFSDevice=$1
 #isLVM=$(lsblk -n -o TYPE $rootFSDevice | grep -wq lvm && echo true || echo false)
+umount="umount -v"
 chrootMntPoint=$(lsblk -n -o MOUNTPOINT $rootFSDevice)
 if [ -n "$chrootMntPoint" ];then
-#	df -ah | grep $chrootMntPoint && $sudo chroot $chrootMntPoint /bin/umount -av
-	$sudo umount -v $chrootMntPoint/{usr,sys/firmware/efi/efivars,sys,proc,dev/pts,dev,run,}
-	$sudo umount -v $chrootMntPoint/*
+#	df -ah | grep $chrootMntPoint && $sudo chroot $chrootMntPoint $umount -a
+	test -d $chrootMntPoint/boot/efi && $sudo $umount $chrootMntPoint/boot/efi
+	$sudo $umount $chrootMntPoint/*
+	$sudo $umount $chrootMntPoint/{usr,sys/firmware/efi/efivars,sys,proc,dev/pts,dev,run,}
 	df -ah | grep $chrootMntPoint
 fi
