@@ -4,6 +4,13 @@ type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|a
 #set -o nounset
 set -o errexit
 
+if [ $# != 1 ];then
+	echo "=> $0 rootFSDevice" >&2
+	exit 1
+else
+	rootFSDevice=$1
+fi
+
 for path in /sbin /bin /usr/sbin /usr/bin
 do
 	echo $PATH | grep -wq $path || export PATH=$path:$PATH
@@ -15,17 +22,13 @@ $sudo lvs | grep -q root || {
 	$sudo lvscan
 }
 
-if [ $# != 1 ];then
-	rootFSDevice=$1
-fi
-
 #rootFSDevice=$($sudo lvs | awk '/root/{print$2"-"$1}')
 #rootFSDevice=/dev/mapper/$rootFSDevice
 
 chrootMntPoint=/mnt/chroot
 $sudo mkdir -p $chrootMntPoint
 
-mount | grep -q $rootFSDevice || $sudo $rootFSDevice $chrootMntPoint # montage de celle-ci en remplacant le X par le bon numero de partition
+mount | grep -q $rootFSDevice || $sudo mount $rootFSDevice $chrootMntPoint # montage de celle-ci en remplacant le X par le bon numero de partition
 
 df $chrootMntPoint/proc | grep -q $chrootMntPoint/proc || {
 	$sudo mkdir -pv $chrootMntPoint/proc
