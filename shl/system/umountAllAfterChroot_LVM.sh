@@ -38,6 +38,7 @@ if [ -n "$chrootMntPoint" ];then
 #	[ $isLVM = true ] && rootFS_VG=$(sudo lvs --noheadings  -o vg_name $rootFSDevice) && $sudo $umount /dev/$rootFS_VG/*
 	$df | grep $chrootMntPoint/  | awk '{print$1}' | xargs -r $sudo $umount
 	$df | grep $chrootMntPoint/ || $sudo $umount $chrootMntPoint/{usr,sys/firmware/efi/efivars,sys,proc,dev/pts,dev,run,}
+	set +x
 	echo "=> Remaining mounted filesystems in $chrootMntPoint :"
 	$df -ah | grep $chrootMntPoint
 fi
