@@ -3,8 +3,7 @@
 scriptDir=$(dirname $0)
 scriptDir=$(cd $scriptDir;pwd)
 
-brewInstall ()
-{
+brewInstall () {
 	brew=undefined
 	brewPrefix=undefined
 	osFamily=undefined
