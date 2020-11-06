@@ -23,10 +23,13 @@ $sudo lvs | grep -q root || {
 
 
 #rootFSDevice=$($sudo lvs | awk '/root/{print$2"-"$1}')
+#rootFSDevice=/dev/mapper/$rootFSDevice
+
 rootFSDevice=$1
 if mount | grep -q $rootFSDevice;then
-	mnt=$(lsblk -n -o MOUNTPOINT /dev/mapper/$rootFSDevice)
-#	df -ah | grep $mnt && $sudo chroot $mnt /bin/umount -av
-	$sudo umount -v $mnt/{usr,sys/firmware/efi/efivars,sys,proc,dev/pts,dev,run,}
-	df -ah | grep $mnt
+	chrootMntPoint=$(lsblk -n -o MOUNTPOINT $rootFSDevice)
+#	df -ah | grep $chrootMntPoint && $sudo chroot $chrootMntPoint /bin/umount -av
+	$sudo umount -v $chrootMntPoint/{usr,sys/firmware/efi/efivars,sys,proc,dev/pts,dev,run,}
+	$sudo umount -v $chrootMntPoint/*
+	df -ah | grep $chrootMntPoint
 fi
