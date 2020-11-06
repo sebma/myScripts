@@ -50,7 +50,7 @@ if [ -d /sys/firmware/efi ];then
        }
 fi
 
-$sudo chroot $chrootMntPoint /bin/bash <<-EOF
+$sudo -H chroot $chrootMntPoint /bin/bash <<-EOF
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
 	mount -v /boot
 	[ -d /sys/firmware/efi ] && mount -v /boot/efi
@@ -60,4 +60,4 @@ $sudo chroot $chrootMntPoint /bin/bash <<-EOF
 	sync
 EOF
 
-$sudo chroot $chrootMntPoint
+$sudo -H chroot $chrootMntPoint
