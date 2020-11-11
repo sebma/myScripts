@@ -16,24 +16,24 @@ TeXLiveInstall () {
 			tar xzf install-tl-unx.tar.gz
 			if cd $texLiveDIR;then
 				if groups | \egrep -wq "adm|admin|sudo|root|wheel"; then
-					sudo ./install-tl -scheme scheme-small
+					time sudo ./install-tl -scheme scheme-small
 					texlivePrefix=/usr/local/texlive/$texLiveVersion
+					tlmgr=$texlivePrefix/bin/$arch-${osFamily,,}/tlmgr
 				else
-					./install-tl -scheme scheme-small
+					time ./install-tl -scheme scheme-small
 					texlivePrefix=$HOME/.texlive$texLiveVersion
+					tlmgr="$texlivePrefix/bin/$arch-${osFamily,,}/tlmgr --usermode"
+					$tlmgr init-usertree
 				fi
 				cd - >/dev/null
 			fi
-#			rm -fr install-tl-unx.tar.gz ./$texLiveDIR/
+			rm -fr install-tl-unx.tar.gz ./$texLiveDIR/
 		elif [ $osFamily = Darwin ]; then
-			:
+			: # TO DO
 		fi
 
 #		echo $PATH | grep -q $texlivePrefix || export PATH=$texlivePrefix/bin:$PATH
 	fi
-#	groups | \egrep -wq "adm|admin|sudo|root|wheel" && tlmgr=tlmgr || tlmgr="$(which tlmgr) --usermode"
-
-#	$scriptDir/TeXLivePostInstall.sh
 }
 
 TeXLiveInstall "$@"
