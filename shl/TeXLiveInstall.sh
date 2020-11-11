@@ -12,7 +12,7 @@ TeXLiveInstall () {
 			$wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 			texLiveDIR=$(tar tf install-tl-unx.tar.gz | awk -F/ '/\/$/{print$(NF-1);exit}')
 			texLiveFullVersion=$(tar tf install-tl-unx.tar.gz | awk -F"[/-]" '/\/$/{print$(NF-1);exit}')
-			texLiveVersion=$(echo $texLiveVersion | cut -c -4)
+			texLiveVersion=$(echo $texLiveFullVersion | cut -c -4)
 			tar xzf install-tl-unx.tar.gz
 			if cd $texLiveDIR;then
 				if groups | \egrep -wq "adm|admin|sudo|root|wheel"; then
