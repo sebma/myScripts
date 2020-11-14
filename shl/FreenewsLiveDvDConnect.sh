@@ -13,8 +13,6 @@ case $Distrib in
   Gentoo)
     echo La distrib est une Gentoo
     lspci | grep -Eiq "atheros.*(802.11|wireless)" && {
-      #lsmod | grep -q ath_hal || insmod /lib/modules/`uname -r`/net/ath_hal.ko
-      #lsmod | grep -q ath_pci || insmod /lib/modules/`uname -r`/net/ath_pci.ko
       set -x
       lsmod | grep -q ath_pci || modprobe ath_pci 2>/dev/null || ( depmod -a && modprobe ath_pci )
       set +x
@@ -24,19 +22,10 @@ case $Distrib in
   Debian|Ubuntu)
     echo La distrib est une Debian/Ubuntu
     lspci | grep -Eiq "atheros.*(802.11|wireless)" && {
-      #lsmod | grep -q ath_hal || sudo insmod /lib/modules/`uname -r`/kernel/drivers/net/ath_hal.ko
-      #lsmod | grep -q ath_pci || sudo insmod /lib/modules/`uname -r`/kernel/drivers/net/ath_pci.ko
-      #lsmod | grep -q ath_hal || sudo insmod /lib/modules/`uname -r`/volatile/ath_hal.ko
-      #lsmod | grep -q ath_pci || sudo insmod /lib/modules/`uname -r`/madwifi/ath_pci.ko
       set -x
       lsmod | grep -q ath_pci || sudo modprobe ath_pci 2>/dev/null || ( sudo depmod -a && sudo modprobe ath_pci )
       set +x
 
-      #sudo insmod /lib/modules/`uname -r`/kernel/net/ieee80211/ieee80211_crypt.ko
-      #sudo insmod /lib/modules/`uname -r`/kernel/net/ieee80211/ieee80211_crypt_tkip.ko
-      #sudo insmod /lib/modules/`uname -r`/kernel/net/ieee80211/ieee80211_crypt_wep.ko
-      #sudo insmod /lib/modules/`uname -r`/kernel/net/ieee80211/ieee80211_crypt_ccmp.ko
-      #sudo insmod /lib/modules/`uname -r`/kernel/net/ieee80211/ieee80211.ko
     }
   break
   ;;
@@ -75,8 +64,7 @@ echo "=> DEBUG: modinfo ath_pci $(modinfo ath_pci)\n" >> $(dirname $0)/wpa_suppl
 
 grep -q "psk=....*" $WPA_CONFIG && {
 #	sudo sh -xc "/etc/init.d/wpa-ifupdown start"
-	sudo wpa_supplicant -w -dd -i wifi0 -c $WPA_CONFIG -Dmadwifi >> $(dirname $0)/wpa_supplicant.log 2>&1
-#	sudo wpa_supplicant -w -dd -i $IFace -c $WPA_CONFIG -Dmadwifi >> $(dirname $0)/wpa_supplicant.log 2>&1
+	sudo wpa_supplicant -w -dd -i $IFace -c $WPA_CONFIG -Dmadwifi >> $(dirname $0)/wpa_supplicant.log 2>&1
 	sync
 #	cat /etc/wpa_supplicant/wpa_supplicant.conf
 #	sudo chmod 700 $WPA_CONFIG
