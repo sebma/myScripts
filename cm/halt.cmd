@@ -1,1 +1,1 @@
-@psshutdown -k -t 0 %*
+@shutdown -s -f -t 0
