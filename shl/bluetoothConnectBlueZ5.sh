@@ -57,10 +57,12 @@ if echo "$deviceList" | grep -q "$deviceRegExp"; then {
 	pairable on
 	pair $deviceHW
 	connect $deviceHW
-	info $deviceHW
-	quit
 EOF
-	sleep 5
+
+	timeout=5s
+	echo "=> Sleeping $timeout to let $1 finishing connecting to $HOSTNAME ..."
+	sleep $timeout
+	echo info $deviceHW | bluetoothctl | grep -v UUID:
 
 	$scriptDir/moveAudio2BlueToothSink.sh $deviceHW
 } else {
