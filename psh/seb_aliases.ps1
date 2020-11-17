@@ -2,4 +2,4 @@
 "np","notepad","","ReadOnly, AllScope"
 "unzip","expand-archive","","ReadOnly, AllScope"
 "grep","findstr","","ReadOnly, AllScope"
-"","ex","","ReadOnly, AllScope"
+#"","ex","","ReadOnly, AllScope"
