@@ -1,4 +1,5 @@
 # Whatever
+Set-PSDebug -Trace 1
 $arch = (gwmi win32_processor).AddressWidth
 openSSHLatestVersion = "v8.1.0.0p1-Beta"
 $url = "https://github.com/PowerShell/Win32-OpenSSH/releases/download/"+$openSSHLatestVersion+"/OpenSSH-Win"+$arch".zip"
