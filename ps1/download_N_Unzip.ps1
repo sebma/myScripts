@@ -1,3 +1,4 @@
+Set-PSDebug -Trace 1
 $url="$1"
 $OutFile=basename "$url"
 $sslTlsProtocols = [Net.ServicePointManager]::SecurityProtocol
