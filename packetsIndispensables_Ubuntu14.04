@@ -12,6 +12,7 @@ apcalc
 apt-file
 apt-rdepends
 apt-src
+apt-transport-https
 aptitude
 aptitude-doc-en
 apvlv
@@ -251,6 +252,7 @@ w3m-img
 wajig
 wavemon
 webp
+wget
 whiptail
 whohas
 whois
