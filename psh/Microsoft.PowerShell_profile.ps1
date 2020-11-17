@@ -1,9 +1,7 @@
 # $HOME/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1
-set-alias vi "$env:ProgramFiles/Git/usr/bin/vim.exe"
-
 Import-Alias $HOME/seb_aliases.ps1
-
-Set-Alias rc Edit-PowershellProfile
+Set-Alias vi "$env:ProgramFiles/Git/usr/bin/vim.exe"
+Set-Alias  ex
 
 function Prompt
 {
@@ -14,11 +12,6 @@ function Prompt
     Write-Host "PSv$PSHVersion " -NoNewline -ForegroundColor DarkGreen
     Write-Host ("" + $mywd + ">") -NoNewline -ForegroundColor Green
     return " "
-}
-
-function Edit-PowershellProfile
-{
-    notepad $Profile
 }
 
 function ex{exit}
