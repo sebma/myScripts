@@ -172,6 +172,7 @@ ovmf
 pacpl
 pandoc
 pavucontrol
+pcregrep
 pdf2svg
 pdftk
 perl-doc
