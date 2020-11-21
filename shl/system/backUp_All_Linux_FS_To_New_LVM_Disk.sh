@@ -80,8 +80,8 @@ cp2ext234="$rsync -ogpuv -lSH"
 cp2FAT32="$rsync --modify-window=1"
 
 destinationRootDir=/mnt/destinationVGDir
-echo "=> Montage de la partition root dans $destinationRootDir/ ..."
 test -d $destinationRootDir/ || sudo mkdir -v $destinationRootDir/
+echo "=> Montage de la partition root dans $destinationRootDir/ ..."
 sudo mount -v /dev/$destinationVG/$(echo $destinationLVList | tr " " "\n" | grep root) $destinationRootDir/ || exit
 echo
 
@@ -90,19 +90,19 @@ time sudo $cp2ext234 -r -x / $destinationRootDir/
 sync
 echo
 
+[ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
+
 grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || sudo sed -i "s,$sourceVG_Or_Disk,$destinationVG," $destinationRootDir/etc/fstab
 grep -q $destinationEFI_UUID $destinationRootDir/etc/fstab 2>/dev/null || sudo sed -i "s/$sourceEFI_UUID/$destinationEFI_UUID/" $destinationRootDir/etc/fstab
-
-[ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
 
 echo "=> Creation des points de montage dans $destinationRootDir/ ..."
 awk '/^[^#]/{print substr($2,2)}' $destinationRootDir/etc/fstab | while read dir; do test -d $destinationRootDir/$dir || sudo mkdir -p -v $destinationRootDir/$dir;done
 
-#echo "=> Montage de /proc a part ..."
-#sudo mount -v -t proc proc $destinationRootDir/proc
+echo "=> Montage de /proc a part ..."
+sudo mount -v -t proc proc $destinationRootDir/proc
 
 echo "=> Binding des specialFS de /dev ..."
-for specialFS in dev dev/pts proc sys run ; do test -d $destinationRootDir/$specialFS/ || sudo mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
+for specialFS in dev dev/pts run sys; do test -d $destinationRootDir/$specialFS/ || sudo mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
 $efiMode && sudo mkdir -p -v $destinationRootDir/sys/firmware/efi/efivars && sudo mount -v --bind /sys/firmware/efi/efivars $destinationRootDir/sys/firmware/efi/efivars
 echo
 
