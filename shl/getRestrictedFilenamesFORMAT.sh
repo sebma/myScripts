@@ -54,6 +54,7 @@ getRestrictedFilenamesFORMAT () {
 	local thumbnailExtension=null
 	local artworkFileName=null
 	local tool=null
+	local debug="set +x"
 	local undebug="set +x"
 
 	for tool in ffmpeg grep ffprobe jq;do
@@ -94,9 +95,7 @@ getRestrictedFilenamesFORMAT () {
 		sld=$(echo $fqdn | awk -F '.' '{print $(NF-1)}')
 		case $sld in
 #			facebook) siteVideoFormat=$(echo $initialSiteVideoFormat+m4a | \sed -E "s/^(\(?)\w+/\1bestvideo/g") ;;
-			*)
-				siteVideoFormat=$initialSiteVideoFormat
-			;;
+			*) siteVideoFormat=$initialSiteVideoFormat ;;
 		esac
 		formats=( $(echo $siteVideoFormat | \sed "s/,/ /g") )
 
@@ -105,7 +104,10 @@ getRestrictedFilenamesFORMAT () {
 		youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__$domainStringForFilename.%(ext)s"
 
 		jsonResults=null
-		jsonResults=$(time command youtube-dl --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j -- "$url" 2>$errorLogFile | $jq -r .)
+		ytdlExtraOptions=( "${ytdlInitialOptions[@]}" )
+		echo "$url" | grep -q /live$ && ytdlExtraOptions+=( --playlist-items 1 )
+
+		jsonResults=$(time command youtube-dl --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
 		formatsIDs=( $(echo "$jsonResults" | $jq -r .format_id | awk '!seen[$0]++') ) # Remove duplicate lines i.e: https://stackoverflow.com/a/1444448/5649639
 		echo
 
@@ -153,7 +155,6 @@ getRestrictedFilenamesFORMAT () {
 				fi
 			fi
 
-			ytdlExtraOptions=( "${ytdlInitialOptions[@]}" )
 			echo $formatString | $grep -v '+' | $grep -q "audio only" && ytdlExtraOptions+=( -x )
 
 			if echo "${ytdlExtraOptions[@]}" | $grep -qw -- "-x";then
