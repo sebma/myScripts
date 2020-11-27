@@ -15,7 +15,7 @@ mount | grep -q $rootFSDevice || $sudo mount -o subvol=@ /dev/mapper/$rootFSDevi
 for special in dev dev/pts proc sys ; do $sudo mkdir -pv /mnt/$special;$sudo mount -v --bind /$special /mnt/$special ; done
 
 set +o errexit
-$sudo chroot /mnt /bin/bash <<-EOF
+$sudo chroot /mnt $SHELL <<-EOF
 	findmnt >/dev/null && mount -av || exit
 	cp -puv /usr/lib/grub/x86_64-efi/*.mod /boot/grub/x86_64-efi/
 	sync
