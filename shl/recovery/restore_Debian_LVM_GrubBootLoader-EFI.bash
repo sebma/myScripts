@@ -26,7 +26,7 @@ mount | grep -q $rootFSDevice || $sudo mount /dev/mapper/$rootFSDevice /mnt     
 for special in dev dev/pts proc sys ; do $sudo mkdir -pv /mnt/$special;$sudo mount -v --bind /$special /mnt/$special ; done
 
 set +o errexit
-$sudo chroot /mnt /bin/bash <<-EOF # mise a la racine du disque monte
+$sudo chroot /mnt $SHELL <<-EOF # mise a la racine du disque monte
 	findmnt >/dev/null && mount -av || exit                      # montage des partitions dans le chroot
 	dpkg -S x86_64-efi/modinfo.sh
 	host archive.ubuntu.com >/dev/null && apt install -V -y grub-efi-amd64-bin grub-efi-amd64-signed linux-image-generic linux-signed-image-generic
