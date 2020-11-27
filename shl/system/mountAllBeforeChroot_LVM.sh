@@ -50,7 +50,7 @@ if [ -d /sys/firmware/efi ];then
        }
 fi
 
-$sudo chroot $chrootMntPoint /bin/bash <<-EOF
+$sudo chroot $chrootMntPoint $SHELL <<-EOF
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
 	mount -v /boot
 	[ -d /sys/firmware/efi ] && mount -v /boot/efi
@@ -61,4 +61,4 @@ $sudo chroot $chrootMntPoint /bin/bash <<-EOF
 EOF
 
 test -n "$sudo" && sudo="$sudo -H" # Pour eviter que le .profile de $USER ne soit lance
-$sudo chroot $chrootMntPoint
+$sudo chroot $chrootMntPoint $SHELL
