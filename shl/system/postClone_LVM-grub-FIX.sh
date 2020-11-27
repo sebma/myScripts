@@ -26,7 +26,7 @@ set +x
 mount | grep -q $rootFS_LV || $sudo mount -v /dev/mapper/$rootFS_LV /mnt          # montage de celle-ci en remplacant le X par le bon numero de partition
 for special in dev dev/pts proc sys ; do $sudo mkdir -pv /mnt/$special;$sudo mount -v --bind /$special /mnt/$special ; done
 
-$sudo chroot /mnt /bin/bash <<-EOF # mise a la racine du disque monte
+$sudo chroot /mnt $SHELL <<-EOF # mise a la racine du disque monte
 	findmnt >/dev/null && mount -av || exit
 	update-grub
 #	grub-install /dev/sdd
