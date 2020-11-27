@@ -28,7 +28,7 @@ mount | grep -q $rootFSDevice || $sudo mount /dev/mapper/$rootFSDevice /mnt     
 for special in dev dev/pts proc sys ; do $sudo mkdir -pv /mnt/$special;$sudo mount -v --bind /$special /mnt/$special ; done
 
 set +o errexit
-$sudo chroot /mnt /bin/bash <<-EOF # mise a la racine du disque monte
+$sudo chroot /mnt $SHELL <<-EOF # mise a la racine du disque monte
 	mv -v /etc/fstab /etc/fstab.BACKUP
 	sed "/\<1$/s/^/#/" /etc/fstab.BACKUP > /etc/fstab # On ne recheckera pas le root filesystem
 	sync
