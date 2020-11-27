@@ -157,7 +157,7 @@ sync
 set +o nounset
 srcGrubBootLVMID=$(sudo grub-probe --target=compatibility_hint --device $sourceBootDevice)
 dstGrubBootLVMID=$(sudo grub-probe --target=compatibility_hint --device $destinationBootDevice)
-time sudo chroot $destinationRootDir/ <<-EOF
+time sudo chroot $destinationRootDir/ $SHELL <<-EOF
 	set -x
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
 	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
