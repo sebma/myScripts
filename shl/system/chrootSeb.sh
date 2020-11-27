@@ -31,4 +31,4 @@ if [ -d /sys/firmware/efi ];then
        }
 fi
 
-$sudo chroot "$@"
+$sudo chroot "$@" $SHELL
