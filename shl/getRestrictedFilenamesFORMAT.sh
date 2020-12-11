@@ -130,7 +130,7 @@ getRestrictedFilenamesFORMAT () {
 			isLIVE=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).is_live")
 
 			# To create an M3U file
-			IFS=$'\n' read -d "" duration webpage_url title <<< $(echo "$jsonResults"  | $jq -r ".duration, .webpage_url, .title")
+			IFS=$'\n' read -d "" duration webpage_url title <<< $(echo "$jsonResults"  | $jq -r '.duration, .webpage_url, .title')
 			duration=$($grep '^[0-9]*' <<< $duration || echo -1)
 
 			test -n "$playlistFileName" && printf "#EXTINF:$duration,$title\n$webpage_url\n" >> "$playlistFileName"
