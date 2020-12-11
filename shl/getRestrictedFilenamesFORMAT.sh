@@ -130,7 +130,7 @@ getRestrictedFilenamesFORMAT () {
 			isLIVE=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).is_live")
 
 			# To create an M3U file
-			read title duration webpage_url <<< $(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")) | .title, .duration, .webpage_url")
+			IFS=$'\n' read -d "" duration webpage_url title <<< $(echo "$jsonResults"  | $jq -r ".duration, .webpage_url, .title")
 			duration=$($grep '^[0-9]*' <<< $duration || echo -1)
 
 			test -n "$playlistFileName" && printf "#EXTINF:$duration,$title\n$webpage_url\n" >> "$playlistFileName"
@@ -142,7 +142,7 @@ getRestrictedFilenamesFORMAT () {
 			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -qs "$thumbnailURL" | file -bi - | awk -F ';' '{sub(".*/","",$1);print gensub("jpeg","jpg",1,$1)}')
 			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/.$extension/.$thumbnailExtension}
 
-			[ "$debug" ] && echo "=> chosenFormatID = <$chosenFormatID>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> artworkFileName = <$artworkFileName>  firstAudioStreamCodecName = <$firstAudioStreamCodecName>" && echo
+			[ "$debug" ] && echo "=> chosenFormatID = <$chosenFormatID>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> artworkFileName = <$artworkFileName>  firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url> title = <$title> duration = <$duration>" && echo
 
 			if [ $thumbnailerName = AtomicParsley ] && ! \curl -qs "$thumbnailURL" | file -b - | $grep -q JFIF;then #Because of https://bitbucket.org/wez/atomicparsley/issues/63
 				if \curl -qs "$thumbnailURL" -o "$artworkFileName.tmp";then
@@ -167,6 +167,7 @@ getRestrictedFilenamesFORMAT () {
 
 			[ "$debug" ] && echo "=> newFileName = <$newFileName>" && echo
 
+			[ $isLIVE = true ] && url="$webpage_url"
 			echo "=> Downloading <$url> using the <$chosenFormatID> $sld format ..."
 			echo
 
