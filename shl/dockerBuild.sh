@@ -15,7 +15,7 @@ dockerBuild () {
 		return 1
 	fi
 
-	time docker build -t "$imageName" -f "$dockerFile" "$dir" "$@" && docker images "$imageName"
+	time docker build -t "$imageName" -f "$dockerFile" "$dir" "$@" && docker images "$imageName" && echo "=> docker run -it --rm $imageName"
 	return $?
 }
 
