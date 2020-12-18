@@ -11,11 +11,12 @@ dockerBuild () {
 	elif [ $# = 3 ];then
 		shift 3
 	elif [ $# -lt 2 ];then
-		echo "=> $FUNCNAME imageName dockerFile [dir = .]" >&2
-		return 1
+		echo "[$FUNCNAME] => INFO: Usage: imageName dockerFile [dir = .]" >&2
+		return -1
 	fi
 
-	time docker build -t "$imageName" -f "$dockerFile" "$dir" "$@" && echo && docker images "$imageName" && echo && echo "=> docker run -it --rm $imageName"
+	( [ ! -f "$dockerFile" ] || [ ! -d "$dir" ] ) && echo "[$FUNCNAME] => ERROR: <$dockerFile> or <$dir> does not exits.">&2 && return 1
+	time docker build -t "$imageName" -f "$dockerFile" "$dir" "$@" && echo && docker images "$imageName" && echo && echo "=> docker run -it -h pc1 --rm $imageName"
 	return $?
 }
 
