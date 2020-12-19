@@ -1,8 +1,10 @@
 #!/usr/bin/env sh
 
-os ()
-{
-	bash -c 'echo $OSTYPE' | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
+os() {
+	local OSTYPE=$(bash -c 'echo $OSTYPE')
+	local osFamily=unknown
+
+	echo $OSTYPE | grep -q android && osFamily=Android || osFamily=$(uname -s)
 	case $osFamily in
 		Darwin)
 			sw_vers > /dev/null 2>&1 && echo $(sw_vers -productName) $(sw_vers -productVersion) || system_profiler SPSoftwareDataType || defaults read /System/Library/CoreServices/SystemVersion ProductVersion
