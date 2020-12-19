@@ -1,6 +1,7 @@
 #aapt
 #aide
 #blueman
+#gns3-gui
 #google-android-build-tools-installer
 #lyricue
 #openlp
@@ -80,8 +81,8 @@ geany
 git-man
 gitso
 gmic
+gnome-session-flashback
 gnome-terminal
-#gns3-gui
 gnuplot-qt
 gparted
 gpm
@@ -194,6 +195,7 @@ remake
 rename
 rlwrap
 screen
+sddm-theme-breeze
 sdparm
 smart-notifier
 smartmontools
