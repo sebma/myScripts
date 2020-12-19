@@ -1,15 +1,16 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 distribName () {
+	local OSTYPE=$(bash -c 'echo $OSTYPE')
 	local osName=unknown
 	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
 
 	if [ $osFamily = Linux ]; then
 		if which lsb_release >/dev/null 2>&1; then
-			osName=$(lsb_release -si)
-			[ $osName = "n/a" ] && osName=$(\sed -n "s/[\"']//g;s/^ID=//p;" /etc/os-release)
+			osName=$(lsb_release -si | awk '{print tolower($0)}')
+			[ $osName = "n/a" ] && osName=$(source /etc/os-release && echo $ID)
 		elif [ -s /etc/os-release ]; then
-			osName=$(\sed -n "s/[\"']//g;s/^ID=//p;" /etc/os-release)
+			osName=$(source /etc/os-release && echo $ID)
 		fi
 	elif [ $osFamily = Darwin ]; then
 		osName="$(sw_vers -productName)"
@@ -23,6 +24,7 @@ distribName () {
 }
 
 distribType () {
+	local OSTYPE=$(bash -c 'echo $OSTYPE')
 	local distribName=unknown
 	local distribType=unknown
 	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
