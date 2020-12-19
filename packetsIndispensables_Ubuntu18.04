@@ -82,6 +82,7 @@ geany
 git-man
 gitso
 gmic
+gnome-session-flashback
 gnome-terminal
 gnome-translate
 gnome-web-photo
@@ -211,6 +212,7 @@ remake
 rename
 rlwrap
 screen
+sddm-theme-breeze
 sdparm
 shutter
 smart-notifier
