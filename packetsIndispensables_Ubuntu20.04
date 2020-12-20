@@ -106,6 +106,7 @@ ipython3
 isomaster
 jhead
 jq
+kde-plasma-desktop
 kde-window-manager
 kdegraphics-thumbnailers
 keepass2
@@ -171,6 +172,7 @@ pidgin
 pidgin-sipe
 pkg-config
 plasma-wallpapers-addons
+plasma-widgets-addons
 pmount
 ppa-purge
 pulseaudio-module-bluetooth
