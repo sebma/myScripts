@@ -105,7 +105,7 @@ echo "=> Montage de /run a part ..."
 sudo mount -v -t tmpfs tmpfs $destinationRootDir/run
 
 echo "=> Binding des specialFS de /dev ..."
-for specialFS in dev dev/pts run sys; do test -d $destinationRootDir/$specialFS/ || sudo mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
+for specialFS in dev dev/pts sys; do test -d $destinationRootDir/$specialFS/ || sudo mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
 $efiMode && sudo mkdir -p -v $destinationRootDir/sys/firmware/efi/efivars && sudo mount -v --bind /sys/firmware/efi/efivars $destinationRootDir/sys/firmware/efi/efivars
 echo
 
