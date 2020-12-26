@@ -157,11 +157,15 @@ do
 done
 sync
 
+dnsSERVER=$(host -v something.unknown | awk -F "[ #]" '/Received /{print$5}' | uniq | grep -q 127.0.0 && ( nmcli -f IP4.DNS,IP6.DNS dev list || nmcli -f IP4.DNS,IP6.DNS dev show ) 2>/dev/null | awk '/DNS/{print$NF}')
+
 set +o nounset
 srcGrubBootLVMID=$(sudo grub-probe --target=compatibility_hint --device $sourceBootDevice)
 dstGrubBootLVMID=$(sudo grub-probe --target=compatibility_hint --device $destinationBootDevice)
 time sudo chroot $destinationRootDir/ $SHELL <<-EOF
 	set -x
+	cp /etc/resolv.conf /etc/resolv.conf.back
+	echo nameserver $dnsSERVER > /etc/resolv.conf
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
 	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
 	update-grub
