@@ -29,7 +29,8 @@ set +o errexit
 $sudo chroot /mnt $SHELL <<-EOF # mise a la racine du disque monte
 	findmnt >/dev/null && mount -av || exit                      # montage des partitions dans le chroot
 	dpkg -S x86_64-efi/modinfo.sh
-	host archive.ubuntu.com >/dev/null && apt install -V -y grub-efi-amd64-bin grub-efi-amd64-signed linux-image-generic linux-signed-image-generic
+	mokutil --sb-state >/dev/null 2>&1 && apt install -V -y grub-efi-amd64-signed
+	host archive.ubuntu.com >/dev/null && apt install -V -y grub-efi-amd64-bin linux-image-generic linux-signed-image-generic
 	test -s /boot/grub/grub.cfg || update-grub # creation d'un nouveau fichier de configuration : grub.cfg
 	mkdir -p /boot/efi
 	set -x
