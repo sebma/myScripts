@@ -80,6 +80,7 @@ cp2ext234="$rsync -ogpuv -lSH"
 cp2FAT32="$rsync --modify-window=1"
 
 destinationRootDir=/mnt/destinationVGDir
+
 test -d $destinationRootDir/ || sudo mkdir -v $destinationRootDir/
 rootPartitionDevice=/dev/$destinationVG/$(echo $destinationLVList | tr " " "\n" | grep root)
 echo "=> Montage de la partition root dans $destinationRootDir/ ..."
