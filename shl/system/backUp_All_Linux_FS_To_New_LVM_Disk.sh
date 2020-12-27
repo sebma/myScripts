@@ -116,9 +116,11 @@ echo "=> Creation des points de montage dans $destinationRootDir/ ..."
 awk '/^[^#]/{print substr($2,2)}' $destinationRootDir/etc/fstab | while read dir; do test -d $destinationRootDir/$dir || sudo mkdir -p -v $destinationRootDir/$dir;done
 
 echo "=> Montage de /proc a part ..."
+[ -d $destinationRootDir/proc ] || mkdir -v $destinationRootDir/proc
 sudo mount -v -t proc proc $destinationRootDir/proc
 
 echo "=> Montage de /run a part ..."
+[ -d $destinationRootDir/run ] || mkdir -v $destinationRootDir/run
 sudo mount -v -t tmpfs tmpfs $destinationRootDir/run
 
 echo "=> Binding des specialFS de /dev ..."
@@ -126,14 +128,9 @@ for specialFS in dev dev/pts sys; do test -d $destinationRootDir/$specialFS/ || 
 $efiMode && sudo mkdir -p -v $destinationRootDir/sys/firmware/efi/efivars && sudo mount -v --bind /sys/firmware/efi/efivars $destinationRootDir/sys/firmware/efi/efivars
 echo
 
+findmnt $destinationRootDir/usr >/dev/null || sudo mount -v $usrPartitionDevice $destinationRootDir/usr
 echo "=> Montage via chroot de toutes les partitions de $destinationRootDir/etc/fstab ..."
-#sudo chroot $destinationRootDir/ findmnt >/dev/null && sudo chroot $destinationRootDir/ mount -av || exit
-if sudo chroot $destinationRootDir/ busybox mount /usr;then
-	sudo chroot $destinationRootDir/ findmnt -s >/dev/null && sudo chroot $destinationRootDir/ mount -av || exit
-else
-	echo "[$0] ERROR : Could not mount destinationRootDir/usr."
-	exit 1
-fi
+sudo chroot $destinationRootDir/ findmnt -s >/dev/null && sudo chroot $destinationRootDir/ mount -av || exit
 echo
 
 sourceBootDevice=$(findmnt -n -c -o SOURCE /boot)
