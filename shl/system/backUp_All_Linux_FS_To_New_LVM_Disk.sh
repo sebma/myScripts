@@ -102,7 +102,7 @@ if ! findmnt $destinationRootDir/usr >/dev/null;then
 fi
 echo
 
-echo "=> Copie du repertoire lib partition /usr dans $destinationRootDir/usr ..."
+echo "=> Copie du repertoire lib de la partition /usr dans $destinationRootDir/usr ..."
 time sudo $cp2ext234 -r -x /usr/lib $destinationRootDir/usr/
 sync
 echo
@@ -128,9 +128,10 @@ for specialFS in dev dev/pts sys; do test -d $destinationRootDir/$specialFS/ || 
 $efiMode && sudo mkdir -p -v $destinationRootDir/sys/firmware/efi/efivars && sudo mount -v --bind /sys/firmware/efi/efivars $destinationRootDir/sys/firmware/efi/efivars
 echo
 
-findmnt $destinationRootDir/usr >/dev/null || sudo mount -v $usrPartitionDevice $destinationRootDir/usr
 echo "=> Montage via chroot de toutes les partitions de $destinationRootDir/etc/fstab ..."
-sudo chroot $destinationRootDir/ findmnt -s >/dev/null && sudo chroot $destinationRootDir/ mount -av || exit
+sudo chroot $destinationRootDir/ $SHELL <<-EOF
+	busybox mount -a 2>&1 >/dev/null | busybox awk '/No such file or directory/{print$5}' | busybox xargs -r mkdir -pv
+EOF
 echo
 
 sourceBootDevice=$(findmnt -n -c -o SOURCE /boot)
