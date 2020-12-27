@@ -83,8 +83,10 @@ destinationRootDir=/mnt/destinationVGDir
 
 test -d $destinationRootDir/ || sudo mkdir -v $destinationRootDir/
 rootPartitionDevice=/dev/$destinationVG/$(echo $destinationLVList | tr " " "\n" | grep root)
-echo "=> Montage de la partition root dans $destinationRootDir/ ..."
-sudo mount -v $rootPartitionDevice $destinationRootDir/ || exit
+if ! findmnt $destinationRootDir >/dev/null;then
+	echo "=> Montage de la partition root dans $destinationRootDir/ ..."
+	sudo mount -v $rootPartitionDevice $destinationRootDir/ || exit
+fi
 echo
 
 echo "=> Copie des fichiers de la partition / dans $destinationRootDir/ ..."
@@ -94,8 +96,10 @@ echo
 
 test -d $destinationRootDir/usr || sudo mkdir -v $destinationRootDir/usr
 usrPartitionDevice=$(awk '/\s\/usr\s/{printf$1}' $destinationRootDir/etc/fstab)
-echo "=> Montage de la partition $usrPartitionDevice  dans $destinationRootDir/usr ..."
-sudo mount -v $usrPartitionDevice $destinationRootDir/usr || exit
+if ! findmnt $destinationRootDir/usr >/dev/null;then
+	echo "=> Montage de la partition $usrPartitionDevice  dans $destinationRootDir/usr ..."
+	sudo mount -v $usrPartitionDevice $destinationRootDir/usr || exit
+fi
 echo
 
 echo "=> Copie du repertoire lib partition /usr dans $destinationRootDir/usr ..."
