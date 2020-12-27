@@ -111,7 +111,7 @@ echo
 
 echo "=> Montage via chroot de toutes les partitions de $destinationRootDir/etc/fstab ..."
 #sudo chroot $destinationRootDir/ findmnt >/dev/null && sudo chroot $destinationRootDir/ mount -av || exit
-sudo chroot $destinationRootDir/ findmnt -s >/dev/null && sudo chroot $destinationRootDir/ mount -av || exit
+sudo chroot $destinationRootDir/ findmnt -s >/dev/null && sudo chroot $destinationRootDir/ 'busybox mount /usr && mount -av' || exit
 echo
 
 sourceBootDevice=$(findmnt -n -c -o SOURCE /boot)
@@ -131,7 +131,8 @@ $df -PTh | grep $destinationRootDir
 echo
 
 fsRegExp="\<(ext[234]|btrfs|f2fs|xfs|jfs|reiserfs|nilfs|hfs|vfat|fuseblk)\>"
-sourceFilesystemsList=$($df -T | egrep -vw "/media|/mnt|/tmp" | awk "/$fsRegExp/"'{print$NF}' | sort -u | paste -sd' ')
+#sourceFilesystemsList=$($df -T | egrep -vw "/media|/mnt|/tmp" | awk "/$fsRegExp/"'{print$NF}' | sort -u | paste -sd' ')
+sourceFilesystemsList=$($df -T | egrep -vw "/media|/mnt|/tmp|/home|/.q" | awk "/$fsRegExp/"'{print$NF}' | sort -u | paste -sd' ')
 echo "=> sourceFilesystemsList = $sourceFilesystemsList"
 
 sourceDirList=$(echo $sourceFilesystemsList | sed "s,/ \| /$,,g")
