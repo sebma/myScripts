@@ -90,6 +90,11 @@ time sudo $cp2ext234 -r -x / $destinationRootDir/
 sync
 echo
 
+echo "=> Copie des fichiers de la partition /usr dans $destinationRootDir/usr ..."
+time sudo $cp2ext234 -r -x /usr $destinationRootDir/usr
+sync
+echo
+
 [ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
 
 grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || sudo sed -i "s,$sourceVG_Or_Disk,$destinationVG," $destinationRootDir/etc/fstab
