@@ -111,7 +111,7 @@ echo
 
 echo "=> Montage via chroot de toutes les partitions de $destinationRootDir/etc/fstab ..."
 #sudo chroot $destinationRootDir/ findmnt >/dev/null && sudo chroot $destinationRootDir/ mount -av || exit
-sudo chroot $destinationRootDir/ findmnt -s >/dev/null && sudo chroot $destinationRootDir/ 'busybox mount /usr && mount -av' || exit
+sudo chroot $destinationRootDir/ 'busybox mount /usr && findmnt -s >/dev/null' && sudo chroot $destinationRootDir/ 'busybox mount /usr && mount -av' || exit
 echo
 
 sourceBootDevice=$(findmnt -n -c -o SOURCE /boot)
