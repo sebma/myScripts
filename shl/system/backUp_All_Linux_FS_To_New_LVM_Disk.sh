@@ -131,7 +131,7 @@ echo
 
 echo "=> Montage via chroot de toutes les partitions de $destinationRootDir/etc/fstab ..."
 sudo chroot $destinationRootDir/ $SHELL <<-EOF
-	busybox mount -a 2>&1 >/dev/null | busybox awk '/No such file or directory/{print$5}' | busybox xargs -r mkdir -pv
+	busybox mount -a 2>&1 >/dev/null | busybox awk '/No such file or directory/{print\$5}' | busybox xargs -r mkdir -pv
 EOF
 echo
 
@@ -179,7 +179,7 @@ do
 done
 sync
 
-dnsSERVER=$(host -v something.unknown | awk -F "[ #]" '/Received /{print$5}' | uniq | grep -q 127.0.0 && ( nmcli -f IP4.DNS,IP6.DNS dev list || nmcli -f IP4.DNS,IP6.DNS dev show ) 2>/dev/null | awk '/DNS/{print$NF}')
+dnsSERVER=$(host -v something.unknown | awk -F "[ #]" '/Received /{print$5}' | uniq | grep -q 127.0.0 && ( nmcli -f IP4.DNS,IP6.DNS dev list || nmcli -f IP4.DNS,IP6.DNS dev show ) 2>/dev/null | awk '/IP4.DNS/{printf$NF}')
 
 set +o nounset
 srcGrubBootLVMID=$(sudo grub-probe --target=compatibility_hint --device $sourceBootDevice)
