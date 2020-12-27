@@ -21,7 +21,7 @@ set -o pipefail
 unmoutALLFSInChroot() {
 	local destRootDIR="$1"
 	echo "=> umounting all FS in <$destRootDIR> ..."
-	sudo chroot $destRootDIR/ umount -av
+	sudo chroot $destRootDIR/ busybox umount -a
 	echo
 	sudo umount -v $destRootDIR/{sys/firmware/efi/efivars,sys,proc,run,dev/pts,dev,usr,}
 	echo
