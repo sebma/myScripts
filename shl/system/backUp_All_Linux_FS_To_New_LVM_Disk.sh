@@ -111,7 +111,12 @@ echo
 
 echo "=> Montage via chroot de toutes les partitions de $destinationRootDir/etc/fstab ..."
 #sudo chroot $destinationRootDir/ findmnt >/dev/null && sudo chroot $destinationRootDir/ mount -av || exit
-sudo chroot $destinationRootDir/ 'busybox mount /usr && findmnt -s >/dev/null' && sudo chroot $destinationRootDir/ 'busybox mount /usr && mount -av' || exit
+if sudo chroot $destinationRootDir/ busybox mount /usr;then
+	sudo chroot $destinationRootDir/ findmnt -s >/dev/null && sudo chroot $destinationRootDir/ mount -av || exit
+else
+	echo "[$0] ERROR : Could not mount destinationRootDir/usr."
+	exit 1
+fi
 echo
 
 sourceBootDevice=$(findmnt -n -c -o SOURCE /boot)
