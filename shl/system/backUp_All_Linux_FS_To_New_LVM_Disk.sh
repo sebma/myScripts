@@ -90,8 +90,8 @@ time sudo $cp2ext234 -r -x / $destinationRootDir/
 sync
 echo
 
-echo "=> Copie des fichiers de la partition /usr dans $destinationRootDir/usr ..."
-time sudo $cp2ext234 -r -x /usr $destinationRootDir/usr
+echo "=> Copie du repertoire lib partition /usr dans $destinationRootDir/usr ..."
+time sudo $cp2ext234 -r -x /usr/lib $destinationRootDir/usr/
 sync
 echo
 
