@@ -97,13 +97,14 @@ echo
 test -d $destinationRootDir/usr || sudo mkdir -v $destinationRootDir/usr
 usrPartitionDevice=$(awk '/\s\/usr\s/{printf$1}' $destinationRootDir/etc/fstab)
 if ! findmnt $destinationRootDir/usr >/dev/null;then
-	echo "=> Montage de la partition $usrPartitionDevice  dans $destinationRootDir/usr ..."
-	sudo mount -v $usrPartitionDevice $destinationRootDir/usr || exit
+#	echo "=> Montage de la partition $usrPartitionDevice  dans $destinationRootDir/usr ..."
+#	sudo mount -v $usrPartitionDevice $destinationRootDir/usr || exit
+	:
 fi
 echo
 
-echo "=> Copie du repertoire lib de la partition /usr dans $destinationRootDir/usr ..."
-time sudo $cp2ext234 -r -x /usr/lib $destinationRootDir/usr/
+#echo "=> Copie du repertoire lib de la partition /usr dans $destinationRootDir/usr ..."
+#time sudo $cp2ext234 -r -x /usr/lib $destinationRootDir/usr/
 sync
 echo
 
