@@ -37,8 +37,8 @@ echo
 
 # Le "grep" est la pour forcer le code retour a "1" si il y a pas de LVM
 destinationPVPartition=$($sudo fdisk $destinationDisk -l | grep 'Linux LVM' | awk '/Linux LVM/{print$1}') || exit
-destinationVG=$($sudo pvs $destinationPVPartition -o vg_name | awk 'END{print$1}')
-destinationLVList=$($sudo lvs $destinationVG -o lv_name | awk 'FNR>1{print$1}' | sort -u | paste -sd' ')
+destinationVG=$($sudo \pvs $destinationPVPartition -o vg_name --noheadings)
+destinationLVList=$($sudo \lvs $destinationVG -o lv_name --noheadings | awk '{print$1}' | sort | paste -sd' ')
 
 df=$(which df)
 usrSourceFS=$(findmnt -n -c -o SOURCE /usr)
@@ -47,13 +47,14 @@ if [ $isLVM = no ];then
 	sourceVG_Or_Disk=$(findmnt -n -c -o SOURCE /boot/efi | sed "s/.$//")
 	echo "[$scriptBaseName] => ERROR : You must use LVM." >&2
 	exit 3
+else
+	sourceVG=$(sudo \lvs --noheadings -o vg_name $usrSourceFS)
 fi
 
 echo "=> isLVM = $isLVM"
 echo "=> usrSourceFS = $usrSourceFS"
 
-sourceVG_Or_Disk=$(echo $usrSourceFS | awk -F"[/-]" '{print$4}')
-echo "=> sourceVG_Or_Disk = $sourceVG_Or_Disk"
+echo "=> sourceVG = $sourceVG"
 echo "=> destinationVG = $destinationVG"
 sourceEFI_FS=$(findmnt -n -c -o SOURCE /boot/efi)
 sourceEFI_UUID=$($sudo blkid $sourceEFI_FS -o value -s UUID)
@@ -110,7 +111,7 @@ echo
 
 [ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
 
-grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || $sudo sed -i "s,$sourceVG_Or_Disk,$destinationVG," $destinationRootDir/etc/fstab
+grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || $sudo sed -i "s,$sourceVG,$destinationVG," $destinationRootDir/etc/fstab
 grep -q $destinationEFI_UUID $destinationRootDir/etc/fstab 2>/dev/null || $sudo sed -i "s/$sourceEFI_UUID/$destinationEFI_UUID/" $destinationRootDir/etc/fstab
 
 echo "=> Creation des points de montage dans $destinationRootDir/ ..."
@@ -179,11 +180,17 @@ do
 done
 sync
 
+set +o pipefail
 dnsSERVER=$(host -v something.unknown | awk -F "[ #]" '/Received /{print$5}' | uniq | grep -q 127.0.0 && ( nmcli -f IP4.DNS,IP6.DNS dev list || nmcli -f IP4.DNS,IP6.DNS dev show ) 2>/dev/null | awk '/IP4.DNS/{printf$NF}')
 
 set +o nounset
-srcGrubBootLVMID=$($sudo grub-probe --target=compatibility_hint --device $sourceBootDevice)
-dstGrubBootLVMID=$($sudo grub-probe --target=compatibility_hint --device $destinationBootDevice)
+srcVG_UUID=$($sudo \vgs --noheadings -o uuid $sourceVG)
+dstVG_UUID=$($sudo \vgs --noheadings -o uuid $destinationVG)
+srcBootLV_UUID=$(sudo \lvs --noheadings -o uuid $sourceBootDevice)
+dstBootLV_UUID=$(sudo \lvs --noheadings -o uuid $destinationBootDevice)
+srcGrubBootLVMID=lvmid/$srcVG_UUID/$srcBootLV_UUID
+dstGrubBootLVMID=lvmid/$dstVG_UUID/$dstBootLV_UUID
+
 time $sudo chroot $destinationRootDir/ $SHELL <<-EOF
 	set -x
 	cp /etc/resolv.conf /etc/resolv.conf.back
