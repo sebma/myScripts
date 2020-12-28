@@ -57,11 +57,11 @@ if [ -d /sys/firmware/efi ];then
 fi
 
 $sudo chroot $chrootMntPoint $SHELL <<-EOF
-	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
-	mount -v /boot
-	[ -d /sys/firmware/efi ] && mount -v /boot/efi
-	mount -v /usr
-	mount -v /var
+	mount >/dev/null 2>&1 && mount="mount -v" || mount="busybox mount -v"
+	$mount /usr
+	$mount | grep " / " | grep -q rw || $mount -o remount,rw /
+	$mount -av
+	[ -d /sys/firmware/efi ] && $mount /boot/efi
 	[ -e /var/lib/apt/lists/lock ] && rm -v /var/lib/apt/lists/lock
 	sync
 EOF
