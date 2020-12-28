@@ -35,7 +35,13 @@ df $chrootMntPoint/proc | grep -q $chrootMntPoint/proc || {
 	$sudo mount -v -t proc /proc $chrootMntPoint/proc
 }
 
-for special in dev dev/pts sys run
+df $chrootMntPoint/run | grep -q $chrootMntPoint/run || {
+	test -d $chrootMntPoint/run || $sudo mkdir -v $chrootMntPoint/run
+	$sudo mount -v -t tmpfs tmpfs $destinationRootDir/run
+}
+
+#for special in dev dev/pts sys run
+for special in dev dev/pts sys
 do
 	df $chrootMntPoint/$special | grep -q $chrootMntPoint/$special || {
 		$sudo mkdir -pv $chrootMntPoint/$special
