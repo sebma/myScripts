@@ -28,7 +28,7 @@ $sudo lvs | grep -q root || {
 chrootMntPoint=/mnt/chroot
 $sudo mkdir -p $chrootMntPoint
 
-mount | grep -q $rootFSDevice || $sudo mount $rootFSDevice $chrootMntPoint # montage de celle-ci en remplacant le X par le bon numero de partition
+mount | grep -q $rootFSDevice || $sudo mount -v $rootFSDevice $chrootMntPoint # montage de celle-ci en remplacant le X par le bon numero de partition
 
 df $chrootMntPoint/proc | grep -q $chrootMntPoint/proc || {
 	test -d $chrootMntPoint/proc || $sudo mkdir -v $chrootMntPoint/proc
