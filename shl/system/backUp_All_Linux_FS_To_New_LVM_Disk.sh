@@ -104,8 +104,8 @@ if ! findmnt $destinationRootDir/usr >/dev/null;then
 fi
 echo
 
-#echo "=> Copie du repertoire lib de la partition /usr dans $destinationRootDir/usr ..."
-#time $sudo $cp2ext234 -r -x /usr/lib $destinationRootDir/usr/
+echo "=> Copie du repertoire lib de la partition /usr dans $destinationRootDir/usr ..."
+time $sudo $cp2ext234 -r -x /usr/lib $destinationRootDir/usr/
 sync
 echo
 
