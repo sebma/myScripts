@@ -31,7 +31,7 @@ $sudo mkdir -p $chrootMntPoint
 mount | grep -q $rootFSDevice || $sudo mount $rootFSDevice $chrootMntPoint # montage de celle-ci en remplacant le X par le bon numero de partition
 
 df $chrootMntPoint/proc | grep -q $chrootMntPoint/proc || {
-	$sudo mkdir -pv $chrootMntPoint/proc
+	test -d $chrootMntPoint/proc || $sudo mkdir -v $chrootMntPoint/proc
 	$sudo mount -v -t proc /proc $chrootMntPoint/proc
 }
 
