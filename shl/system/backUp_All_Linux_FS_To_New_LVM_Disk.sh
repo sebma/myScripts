@@ -21,24 +21,24 @@ set -o pipefail
 unmoutALLFSInChroot() {
 	local destRootDIR="$1"
 	echo "=> umounting all FS in <$destRootDIR> ..."
-	sudo chroot $destRootDIR/ busybox umount -a
+	$sudo chroot $destRootDIR/ busybox umount -a
 	echo
-	sudo umount -v $destRootDIR/{sys/firmware/efi/efivars,sys,proc,run,dev/pts,dev,usr,}
+	$sudo umount -v $destRootDIR/{sys/firmware/efi/efivars,sys,proc,run,dev/pts,dev,usr,}
 	echo
 }
 
 echo "=> Remove cache for all users ..."
 \ls /home/ | grep -v lost+found | while read user
 do
-	sudo -u $user rm -fr /home/$user/.cache
-	sudo -u $user mkdir /home/$user/.cache
+	$sudo -u $user rm -fr /home/$user/.cache
+	$sudo -u $user mkdir /home/$user/.cache
 done
 echo
 
 # Le "grep" est la pour forcer le code retour a "1" si il y a pas de LVM
-destinationPVPartition=$(sudo fdisk $destinationDisk -l | grep 'Linux LVM' | awk '/Linux LVM/{print$1}') || exit
-destinationVG=$(sudo pvs $destinationPVPartition -o vg_name | awk 'END{print$1}')
-destinationLVList=$(sudo lvs $destinationVG -o lv_name | awk 'FNR>1{print$1}' | sort -u | paste -sd' ')
+destinationPVPartition=$($sudo fdisk $destinationDisk -l | grep 'Linux LVM' | awk '/Linux LVM/{print$1}') || exit
+destinationVG=$($sudo pvs $destinationPVPartition -o vg_name | awk 'END{print$1}')
+destinationLVList=$($sudo lvs $destinationVG -o lv_name | awk 'FNR>1{print$1}' | sort -u | paste -sd' ')
 
 df=$(which df)
 usrSourceFS=$(findmnt -n -c -o SOURCE /usr)
@@ -56,11 +56,11 @@ sourceVG_Or_Disk=$(echo $usrSourceFS | awk -F"[/-]" '{print$4}')
 echo "=> sourceVG_Or_Disk = $sourceVG_Or_Disk"
 echo "=> destinationVG = $destinationVG"
 sourceEFI_FS=$(findmnt -n -c -o SOURCE /boot/efi)
-sourceEFI_UUID=$(sudo blkid $sourceEFI_FS -o value -s UUID)
+sourceEFI_UUID=$($sudo blkid $sourceEFI_FS -o value -s UUID)
 # Le "grep" est la pour forcer le code retour a "1" si il y a pas de EFI
-#destinationEFI_FS=$(sudo fdisk $destinationDisk -l | grep -w 'EFI' | awk "/\<EFI\>/{print\$1}") || exit
-destinationEFI_FS=$(sudo gdisk $destinationDisk -l | grep -w 'EFI' | awk "/\<EFI\>/{print\"$destinationDisk\"\$1}") || exit
-destinationEFI_UUID=$(sudo blkid $destinationEFI_FS -o value -s UUID) || exit
+#destinationEFI_FS=$($sudo fdisk $destinationDisk -l | grep -w 'EFI' | awk "/\<EFI\>/{print\$1}") || exit
+destinationEFI_FS=$($sudo gdisk $destinationDisk -l | grep -w 'EFI' | awk "/\<EFI\>/{print\"$destinationDisk\"\$1}") || exit
+destinationEFI_UUID=$($sudo blkid $destinationEFI_FS -o value -s UUID) || exit
 
 echo "=> sourceEFI_FS = $sourceEFI_FS"
 echo "=> sourceEFI_UUID = $sourceEFI_UUID"
@@ -81,56 +81,56 @@ cp2FAT32="$rsync --modify-window=1"
 
 destinationRootDir=/mnt/destinationVGDir
 
-test -d $destinationRootDir/ || sudo mkdir -v $destinationRootDir/
+test -d $destinationRootDir/ || $sudo mkdir -v $destinationRootDir/
 rootPartitionDevice=/dev/$destinationVG/$(echo $destinationLVList | tr " " "\n" | grep root)
 if ! findmnt $destinationRootDir >/dev/null;then
 	echo "=> Montage de la partition root dans $destinationRootDir/ ..."
-	sudo mount -v $rootPartitionDevice $destinationRootDir/ || exit
+	$sudo mount -v $rootPartitionDevice $destinationRootDir/ || exit
 fi
 echo
 
 echo "=> Copie des fichiers de la partition / dans $destinationRootDir/ ..."
-time sudo $cp2ext234 -r -x / $destinationRootDir/
+time $sudo $cp2ext234 -r -x / $destinationRootDir/
 sync
 echo
 
-test -d $destinationRootDir/usr || sudo mkdir -v $destinationRootDir/usr
+test -d $destinationRootDir/usr || $sudo mkdir -v $destinationRootDir/usr
 usrPartitionDevice=$(awk '/\s\/usr\s/{printf$1}' $destinationRootDir/etc/fstab)
 if ! findmnt $destinationRootDir/usr >/dev/null;then
 #	echo "=> Montage de la partition $usrPartitionDevice  dans $destinationRootDir/usr ..."
-#	sudo mount -v $usrPartitionDevice $destinationRootDir/usr || exit
+#	$sudo mount -v $usrPartitionDevice $destinationRootDir/usr || exit
 	:
 fi
 echo
 
 #echo "=> Copie du repertoire lib de la partition /usr dans $destinationRootDir/usr ..."
-#time sudo $cp2ext234 -r -x /usr/lib $destinationRootDir/usr/
+#time $sudo $cp2ext234 -r -x /usr/lib $destinationRootDir/usr/
 sync
 echo
 
 [ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
 
-grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || sudo sed -i "s,$sourceVG_Or_Disk,$destinationVG," $destinationRootDir/etc/fstab
-grep -q $destinationEFI_UUID $destinationRootDir/etc/fstab 2>/dev/null || sudo sed -i "s/$sourceEFI_UUID/$destinationEFI_UUID/" $destinationRootDir/etc/fstab
+grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || $sudo sed -i "s,$sourceVG_Or_Disk,$destinationVG," $destinationRootDir/etc/fstab
+grep -q $destinationEFI_UUID $destinationRootDir/etc/fstab 2>/dev/null || $sudo sed -i "s/$sourceEFI_UUID/$destinationEFI_UUID/" $destinationRootDir/etc/fstab
 
 echo "=> Creation des points de montage dans $destinationRootDir/ ..."
-awk '/^[^#]/{print substr($2,2)}' $destinationRootDir/etc/fstab | while read dir; do test -d $destinationRootDir/$dir || sudo mkdir -p -v $destinationRootDir/$dir;done
+awk '/^[^#]/{print substr($2,2)}' $destinationRootDir/etc/fstab | while read dir; do test -d $destinationRootDir/$dir || $sudo mkdir -p -v $destinationRootDir/$dir;done
 
 echo "=> Montage de /proc a part ..."
 [ -d $destinationRootDir/proc ] || mkdir -v $destinationRootDir/proc
-sudo mount -v -t proc proc $destinationRootDir/proc
+$sudo mount -v -t proc proc $destinationRootDir/proc
 
 echo "=> Montage de /run a part ..."
 [ -d $destinationRootDir/run ] || mkdir -v $destinationRootDir/run
-sudo mount -v -t tmpfs tmpfs $destinationRootDir/run
+$sudo mount -v -t tmpfs tmpfs $destinationRootDir/run
 
 echo "=> Binding des specialFS de /dev ..."
-for specialFS in dev dev/pts sys; do test -d $destinationRootDir/$specialFS/ || sudo mkdir $destinationRootDir/$specialFS/; sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
-$efiMode && sudo mkdir -p -v $destinationRootDir/sys/firmware/efi/efivars && sudo mount -v --bind /sys/firmware/efi/efivars $destinationRootDir/sys/firmware/efi/efivars
+for specialFS in dev dev/pts sys; do test -d $destinationRootDir/$specialFS/ || $sudo mkdir $destinationRootDir/$specialFS/; $sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
+$efiMode && $sudo mkdir -p -v $destinationRootDir/sys/firmware/efi/efivars && $sudo mount -v --bind /sys/firmware/efi/efivars $destinationRootDir/sys/firmware/efi/efivars
 echo
 
 echo "=> Montage via chroot de toutes les partitions de $destinationRootDir/etc/fstab ..."
-sudo chroot $destinationRootDir/ $SHELL <<-EOF
+$sudo chroot $destinationRootDir/ $SHELL <<-EOF
 	busybox mount -a 2>&1 >/dev/null | busybox awk '/No such file or directory/{print\$5}' | busybox xargs -r mkdir -pv
 EOF
 echo
@@ -172,7 +172,7 @@ do
 	esac
 
 	echo
-	mount | grep -q $destinationDir && time sudo $copyCommand -r $sourceDir/ $destinationDir/
+	mount | grep -q $destinationDir && time $sudo $copyCommand -r $sourceDir/ $destinationDir/
 	echo
 #	set +x
 	sync
@@ -182,9 +182,9 @@ sync
 dnsSERVER=$(host -v something.unknown | awk -F "[ #]" '/Received /{print$5}' | uniq | grep -q 127.0.0 && ( nmcli -f IP4.DNS,IP6.DNS dev list || nmcli -f IP4.DNS,IP6.DNS dev show ) 2>/dev/null | awk '/IP4.DNS/{printf$NF}')
 
 set +o nounset
-srcGrubBootLVMID=$(sudo grub-probe --target=compatibility_hint --device $sourceBootDevice)
-dstGrubBootLVMID=$(sudo grub-probe --target=compatibility_hint --device $destinationBootDevice)
-time sudo chroot $destinationRootDir/ $SHELL <<-EOF
+srcGrubBootLVMID=$($sudo grub-probe --target=compatibility_hint --device $sourceBootDevice)
+dstGrubBootLVMID=$($sudo grub-probe --target=compatibility_hint --device $destinationBootDevice)
+time $sudo chroot $destinationRootDir/ $SHELL <<-EOF
 	set -x
 	cp /etc/resolv.conf /etc/resolv.conf.back
 	echo nameserver $dnsSERVER > /etc/resolv.conf
@@ -209,7 +209,7 @@ trap - INT
 $df -PTh | grep -q $destinationRootDir
 
 echo "=> Restore grub in /dev/sda just in case ..."
-$efiMode && efiDirectory=$(mount | awk '/\/efi /{print$3}') && sudo grub-install --efi-directory=$efiDirectory --removable || sudo grub-install /dev/sda
+$efiMode && efiDirectory=$(mount | awk '/\/efi /{print$3}') && $sudo grub-install --efi-directory=$efiDirectory --removable || $sudo grub-install /dev/sda
 echo
 
 echo "=> logFile = <$logFile>."
