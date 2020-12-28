@@ -37,7 +37,7 @@ df $chrootMntPoint/proc | grep -q $chrootMntPoint/proc || {
 
 df $chrootMntPoint/run | grep -q $chrootMntPoint/run || {
 	test -d $chrootMntPoint/run || $sudo mkdir -v $chrootMntPoint/run
-	$sudo mount -v -t tmpfs tmpfs $destinationRootDir/run
+	$sudo mount -v -t tmpfs tmpfs $chrootMntPoint/run
 }
 
 #for special in dev dev/pts sys run
