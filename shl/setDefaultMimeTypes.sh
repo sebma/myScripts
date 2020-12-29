@@ -2,10 +2,10 @@
 
 #PDF Documents and others
 which evince >/dev/null 2>&1 && {
-	imageFileTypes=".pdf"
-	imageMimeTypes="$(mimetype -b $imageFileTypes | sort -u | xargs)"
-	echo "=> Association des fichiers $imageFileTypes qui s'ouvriront desormais avec <evince>."
-	time -p xdg-mime default evince.desktop $imageMimeTypes
+	documentFileTypes=".pdf"
+	documentMimeTypes="$(mimetype -b $documentFileTypes | sort -u | xargs)"
+	echo "=> Association des fichiers $documentFileTypes qui s'ouvriront desormais avec <evince>."
+	time -p xdg-mime default evince.desktop $documentMimeTypes
 	echo "=> Fait."
 }
 
