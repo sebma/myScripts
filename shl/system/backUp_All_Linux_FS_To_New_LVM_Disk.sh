@@ -178,7 +178,6 @@ do
 #	set +x
 	sync
 done
-sync
 
 #set +o pipefail
 #dnsSERVER=$(host -v something.unknown | awk -F "[ #]" '/Received /{print$5}' | uniq | grep -q 127.0.0 && ( nmcli -f IP4.DNS,IP6.DNS dev list || nmcli -f IP4.DNS,IP6.DNS dev show ) 2>/dev/null | awk '/IP4.DNS/{printf$NF}')
@@ -218,6 +217,7 @@ $df -PTh | grep -q $destinationRootDir
 
 echo "=> Restore grub in /dev/sda just in case ..."
 $efiMode && efiDirectory=$(mount | awk '/\/efi /{print$3}') && $sudo grub-install --efi-directory=$efiDirectory --removable || $sudo grub-install /dev/sda
+sync
 echo
 
 echo "=> logFile = <$logFile>."
