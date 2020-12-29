@@ -30,7 +30,7 @@ unmoutALLFSInChroot() {
 echo "=> Remove cache for all users ..."
 \ls /home/ | grep -v lost+found | while read user
 do
-	$sudo -u $user rm -fr /home/$user/.cache
+	$sudo rm -fr /home/$user/.cache
 	$sudo -u $user mkdir /home/$user/.cache
 done
 echo
