@@ -21,7 +21,7 @@ set -o pipefail
 unmoutALLFSInChroot() {
 	local destRootDIR="$1"
 	echo "=> umounting all FS in <$destRootDIR> ..."
-	$sudo chroot $destRootDIR/ busybox umount -a
+	$sudo chroot $destRootDIR/ umount -av
 	echo
 	$sudo umount -v $destRootDIR/{sys/firmware/efi/efivars,sys,proc,run,dev/pts,dev,usr,}
 	echo
@@ -184,16 +184,17 @@ set +o pipefail
 dnsSERVER=$(host -v something.unknown | awk -F "[ #]" '/Received /{print$5}' | uniq | grep -q 127.0.0 && ( nmcli -f IP4.DNS,IP6.DNS dev list || nmcli -f IP4.DNS,IP6.DNS dev show ) 2>/dev/null | awk '/IP4.DNS/{printf$NF}')
 
 set +o nounset
-srcVG_UUID=$($sudo \vgs --noheadings -o uuid $sourceVG)
-dstVG_UUID=$($sudo \vgs --noheadings -o uuid $destinationVG)
-srcBootLV_UUID=$(sudo \lvs --noheadings -o uuid $sourceBootDevice)
-dstBootLV_UUID=$(sudo \lvs --noheadings -o uuid $destinationBootDevice)
+srcVG_UUID=$($sudo \vgs --noheadings -o uuid $sourceVG | awk '{printf$1}')
+dstVG_UUID=$($sudo \vgs --noheadings -o uuid $destinationVG | awk '{printf$1}')
+srcBootLV_UUID=$(sudo \lvs --noheadings -o uuid $sourceBootDevice | awk '{printf$1}')
+dstBootLV_UUID=$(sudo \lvs --noheadings -o uuid $destinationBootDevice | awk '{printf$1}')
 srcGrubBootLVMID=lvmid/$srcVG_UUID/$srcBootLV_UUID
 dstGrubBootLVMID=lvmid/$dstVG_UUID/$dstBootLV_UUID
 
 time $sudo chroot $destinationRootDir/ $SHELL <<-EOF
 	set -x
-	cp /etc/resolv.conf /etc/resolv.conf.back
+	df -PTht ext4
+	cp -puv /etc/resolv.conf /etc/resolv.conf.back
 	echo nameserver $dnsSERVER > /etc/resolv.conf
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
 	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
