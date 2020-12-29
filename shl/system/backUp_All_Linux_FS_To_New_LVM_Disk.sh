@@ -33,7 +33,7 @@ do
 	$sudo rm -fr /home/$user/.cache
 	$sudo -u $user mkdir /home/$user/.cache
 done
-echo
+echo "=> Done."
 
 # Le "grep" est la pour forcer le code retour a "1" si il y a pas de LVM
 destinationPVPartition=$($sudo fdisk $destinationDisk -l | grep 'Linux LVM' | awk '/Linux LVM/{print$1}') || exit
@@ -48,7 +48,7 @@ if [ $isLVM = no ];then
 	echo "[$scriptBaseName] => ERROR : You must use LVM." >&2
 	exit 3
 else
-	sourceVG=$(sudo \lvs --noheadings -o vg_name $usrSourceFS)
+	sourceVG=$(sudo \lvs --noheadings -o vg_name $usrSourceFS | awk '{printf$1}')
 fi
 
 echo "=> isLVM = $isLVM"
@@ -192,10 +192,7 @@ srcGrubBootLVMID=lvmid/$srcVG_UUID/$srcBootLV_UUID
 dstGrubBootLVMID=lvmid/$dstVG_UUID/$dstBootLV_UUID
 
 time $sudo chroot $destinationRootDir/ $SHELL <<-EOF
-	set -x
-	df -PTht ext4
-	df -PTh /boot/efi
-#	cp -puv /etc/resolv.conf /etc/resolv.conf.back
+#	mv -v /etc/resolv.conf /etc/resolv.conf.back
 #	echo nameserver $dnsSERVER > /etc/resolv.conf
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
 	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
@@ -203,7 +200,9 @@ time $sudo chroot $destinationRootDir/ $SHELL <<-EOF
 	grep -q $dstGrubBootLVMID /boot/grub/grub.cfg || sed -i "s,$srcGrubBootLVMID,$dstGrubBootLVMID,g" /boot/grub/grub.cfg
 	grep -q $destinationRootDeviceBaseName /boot/grub/grub.cfg || sed -i "s,$sourceRootDeviceBaseName,$destinationRootDeviceBaseName,g" /boot/grub/grub.cfg
 	[ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
+	set -x
 	$efiMode && grub-install --removable --efi-directory=$(mount | awk '/\/efi /{print$3}') || grub-install $destinationDisk
+	set +x
 	if which lvmetad >/dev/null 2>&1;then
 		grep -q "use_lvmetad\s*=\s*0" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*0/use_lvmetad = 1/" /etc/lvm/lvm.conf
 	fi
