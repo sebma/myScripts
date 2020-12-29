@@ -194,6 +194,7 @@ dstGrubBootLVMID=lvmid/$dstVG_UUID/$dstBootLV_UUID
 time $sudo chroot $destinationRootDir/ $SHELL <<-EOF
 	set -x
 	df -PTht ext4
+	df -PTh /boot/efi
 	cp -puv /etc/resolv.conf /etc/resolv.conf.back
 	echo nameserver $dnsSERVER > /etc/resolv.conf
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
