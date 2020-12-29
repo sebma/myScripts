@@ -180,8 +180,8 @@ do
 done
 sync
 
-set +o pipefail
-dnsSERVER=$(host -v something.unknown | awk -F "[ #]" '/Received /{print$5}' | uniq | grep -q 127.0.0 && ( nmcli -f IP4.DNS,IP6.DNS dev list || nmcli -f IP4.DNS,IP6.DNS dev show ) 2>/dev/null | awk '/IP4.DNS/{printf$NF}')
+#set +o pipefail
+#dnsSERVER=$(host -v something.unknown | awk -F "[ #]" '/Received /{print$5}' | uniq | grep -q 127.0.0 && ( nmcli -f IP4.DNS,IP6.DNS dev list || nmcli -f IP4.DNS,IP6.DNS dev show ) 2>/dev/null | awk '/IP4.DNS/{printf$NF}')
 
 set +o nounset
 srcVG_UUID=$($sudo \vgs --noheadings -o uuid $sourceVG | awk '{printf$1}')
@@ -195,8 +195,8 @@ time $sudo chroot $destinationRootDir/ $SHELL <<-EOF
 	set -x
 	df -PTht ext4
 	df -PTh /boot/efi
-	cp -puv /etc/resolv.conf /etc/resolv.conf.back
-	echo nameserver $dnsSERVER > /etc/resolv.conf
+#	cp -puv /etc/resolv.conf /etc/resolv.conf.back
+#	echo nameserver $dnsSERVER > /etc/resolv.conf
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
 	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
 	update-grub
