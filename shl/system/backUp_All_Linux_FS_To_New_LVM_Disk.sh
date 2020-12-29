@@ -78,6 +78,7 @@ RSYNC_EXCLUSION=$(printf -- "--exclude %s/ " /dev /sys /run /proc /mnt /media)
 rsync="$(which rsync) -x -uth -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST $RSYNC_EXCLUSION --log-file=$logFile"
 
 cp2ext234="$rsync -ogpuv -lSH"
+cp2ext234Partition="$rsync -ogpuv -lSH -x -r"
 cp2FAT32="$rsync --modify-window=1"
 
 destinationRootDir=/mnt/destinationVGDir
@@ -98,8 +99,8 @@ echo
 test -d $destinationRootDir/usr || $sudo mkdir -v $destinationRootDir/usr
 usrPartitionDevice=$(awk '/\s\/usr\s/{printf$1}' $destinationRootDir/etc/fstab)
 if ! findmnt $destinationRootDir/usr >/dev/null;then
-#	echo "=> Montage de la partition $usrPartitionDevice  dans $destinationRootDir/usr ..."
-#	$sudo mount -v $usrPartitionDevice $destinationRootDir/usr || exit
+	echo "=> Montage de la partition $usrPartitionDevice  dans $destinationRootDir/usr ..."
+	$sudo busybox mount -v $usrPartitionDevice $destinationRootDir/usr || exit
 	:
 fi
 echo
@@ -153,8 +154,7 @@ $df -PTh | grep $destinationRootDir
 echo
 
 fsRegExp="\<(ext[234]|btrfs|f2fs|xfs|jfs|reiserfs|nilfs|hfs|vfat|fuseblk)\>"
-#sourceFilesystemsList=$($df -T | egrep -vw "/media|/mnt|/tmp" | awk "/$fsRegExp/"'{print$NF}' | sort -u | paste -sd' ')
-sourceFilesystemsList=$($df -T | egrep -vw "/media|/mnt|/tmp|/home|/.q" | awk "/$fsRegExp/"'{print$NF}' | sort -u | paste -sd' ')
+sourceFilesystemsList=$($df -T | egrep -vw "/media|/mnt|/tmp" | awk "/$fsRegExp/"'{print$NF}' | sort -u | paste -sd' ')
 echo "=> sourceFilesystemsList = $sourceFilesystemsList"
 
 sourceDirList=$(echo $sourceFilesystemsList | sed "s,/ \| /$,,g")
