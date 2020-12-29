@@ -40,6 +40,7 @@ df $chrootMntPoint/run | grep -q $chrootMntPoint/run || {
 	$sudo mount -v -t tmpfs tmpfs $chrootMntPoint/run
 }
 
+set -x
 #for special in dev dev/pts sys run
 for special in dev dev/pts sys
 do
@@ -48,6 +49,7 @@ do
 		$sudo mount -v --bind /$special $chrootMntPoint/$special
 	}
 done
+set +x
 
 if [ -d /sys/firmware/efi ];then
        df $chrootMntPoint/sys/firmware/efi/efivars | grep -q $chrootMntPoint/sys/firmware/efi/efivars || {
@@ -56,14 +58,19 @@ if [ -d /sys/firmware/efi ];then
        }
 fi
 
+#$sudo chroot $chrootMntPoint $SHELL <<-EOF
+#	mount >/dev/null 2>&1 && mount="mount -v" || mount="busybox mount -v"
+#	$mount /usr
+#	$mount | grep " / " | grep -q rw || $mount -o remount,rw /
+#	$mount -av
+#	[ -d /sys/firmware/efi ] && $mount /boot/efi
+#	[ -e /var/lib/apt/lists/lock ] && rm -v /var/lib/apt/lists/lock
+#	sync
+#EOF
+
 $sudo chroot $chrootMntPoint $SHELL <<-EOF
 	mount >/dev/null 2>&1 && mount="mount -v" || mount="busybox mount -v"
-	$mount /usr
-	$mount | grep " / " | grep -q rw || $mount -o remount,rw /
-	$mount -av
-	[ -d /sys/firmware/efi ] && $mount /boot/efi
-	[ -e /var/lib/apt/lists/lock ] && rm -v /var/lib/apt/lists/lock
-	sync
+	$mount | grep -q "/usr " || $mount -v /usr
 EOF
 
 test -n "$sudo" && sudo="$sudo -H" # Pour eviter que le .profile de $USER ne soit lance
