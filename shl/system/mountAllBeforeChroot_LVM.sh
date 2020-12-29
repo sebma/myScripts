@@ -58,19 +58,11 @@ if [ -d /sys/firmware/efi ];then
        }
 fi
 
-#$sudo chroot $chrootMntPoint $SHELL <<-EOF
-#	mount >/dev/null 2>&1 && mount="mount -v" || mount="busybox mount -v"
-#	$mount /usr
-#	$mount | grep " / " | grep -q rw || $mount -o remount,rw /
-#	$mount -av
-#	[ -d /sys/firmware/efi ] && $mount /boot/efi
-#	[ -e /var/lib/apt/lists/lock ] && rm -v /var/lib/apt/lists/lock
-#	sync
-#EOF
+#test -e /var/lib/apt/lists/lock && rm -v /var/lib/apt/lists/lock && sync
 
+$sudo chroot $chrootMntPoint mount >/dev/null 2>&1 && mount="mount -v" || mount="busybox mount -v"
 $sudo chroot $chrootMntPoint $SHELL <<-EOF
-	mount >/dev/null 2>&1 && mount="mount -v" || mount="busybox mount -v"
-	$mount | grep -q "/usr " || $mount -v /usr
+	$mount | grep -q "/usr " || $mount /usr
 EOF
 
 test -n "$sudo" && sudo="$sudo -H" # Pour eviter que le .profile de $USER ne soit lance
