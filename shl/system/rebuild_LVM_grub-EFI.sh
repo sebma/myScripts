@@ -24,7 +24,7 @@ $sudo chroot /mnt $SHELL <<-EOF # mise a la racine du disque monte
 	if $efiMode
 	then
 		mkdir -p /boot/efi
-		grub-install --target=x86_64-efi --efi-directory=/boot/efi --removable || grub-install --force --target=x86_64-efi --efi-directory=/boot/efi # installation de grub
+		grub-install --target=x86_64-efi --efi-directory=/boot/efi --removable || grub-install --force --target=x86_64-efi --efi-directory=/boot/efi --removable # installation de grub
 	else
 		grub-install $diskDevice || grub-install --force $diskDevice # installation de grub sur le MBR
 	fi

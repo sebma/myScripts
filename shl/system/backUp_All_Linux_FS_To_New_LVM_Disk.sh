@@ -200,7 +200,8 @@ time $sudo chroot $destinationRootDir/ $SHELL <<-EOF
 	grep -q $destinationRootDeviceBaseName /boot/grub/grub.cfg || sed -i "s,$sourceRootDeviceBaseName,$destinationRootDeviceBaseName,g" /boot/grub/grub.cfg
 	[ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
 	set -x
-	$efiMode && grub-install --removable --efi-directory=$(mount | awk '/\/efi /{print$3}') || grub-install $destinationDisk
+	$efiMode && grub-install --removable --efi-directory=$(mount | awk '/\/efi /{print$3}')
+	$efiMode || grub-install $destinationDisk
 	set +x
 	if which lvmetad >/dev/null 2>&1;then
 		grep -q "use_lvmetad\s*=\s*0" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*0/use_lvmetad = 1/" /etc/lvm/lvm.conf
