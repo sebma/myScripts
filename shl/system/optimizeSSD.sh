@@ -44,7 +44,7 @@ if ! echo $rootDisk | grep -q $diskDevice;then
 fi
 
 if grep -q noatime /etc/fstab;then
-	echo "[$scriptBaseName] => INFO: noatime is already enabled"
+	echo "[$scriptBaseName] => INFO: noatime is already enabled in </etc/fstab>."
 else
 	echo "[$scriptBaseName] => INFO: Enabling noatime ..."
 #	$sudo sed -i "/^\/dev/s/defaults/defaults,noatime/" /etc/fstab
@@ -53,17 +53,15 @@ else
 fi
 
 if [ -s /etc/cron.weekly/fstrim ];then
-	echo "[$scriptBaseName] => INFO: FSTRIM is already enabled :"
+	echo "[$scriptBaseName] => INFO: FSTRIM is already enabled in </etc/cron.weekly/fstrim>."
 	echo
-	set -x
-	cat /etc/cron.weekly/fstrim
 elif [ -s /lib/systemd/system/fstrim.timer ];then
 	echo "[$scriptBaseName] => INFO: FSTRIM is already enabled :"
 	echo
-	set -x
-	cat /lib/systemd/system/fstrim.timer
-	cat /lib/systemd/system/fstrim.service
-	systemctl status fstrim.timer
+	systemctl status fstrim.timer fstrim.service
+	echo
+	echo "=> To view more details type :"
+	echo systemctl cat fstrim.timer fstrim.service
 else
 	echo "[$scriptBaseName] => WARNING: FSTRIM is not enabled."
 fi
