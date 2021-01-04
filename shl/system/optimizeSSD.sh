@@ -46,10 +46,10 @@ fi
 if grep -q noatime /etc/fstab;then
 	echo "[$scriptBaseName] => INFO: noatime is already enabled in </etc/fstab>."
 else
-	echo "[$scriptBaseName] => INFO: Enabling noatime ..."
+	echo "[$scriptBaseName] => INFO: Enabling noatime in </etc/fstab> ..."
 #	$sudo sed -i "/^\/dev/s/defaults/defaults,noatime/" /etc/fstab
 	$sudo sed -i "s/defaults/defaults,noatime/" /etc/fstab
-	echo "[$scriptBaseName] => INFO: DONE. You need to reboot."
+	echo "[$scriptBaseName] => WARNING: DONE. You need to reboot or remount all partitions manually with the command 'mount -o remount,noatime /mount_point_path'."
 fi
 
 if [ -s /etc/cron.weekly/fstrim ];then
