@@ -12,7 +12,8 @@ function moveAudioToBluetoothSink {
 		*) bluetoothDeviceName=$firstArg;;
 	esac
 
-	bluetoothDeviceMacAddr=$(echo devices | bluetoothctl 2>/dev/null | awk "/Device.*($bluetoothDeviceMacAddr|$bluetoothDeviceName)/"'{print$2;exit}')
+	[ "$bluetoothDeviceMacAddr" = null ] && bluetoothDeviceMacAddr=$(echo devices | bluetoothctl 2>/dev/null | awk "/Device.*($bluetoothDeviceMacAddr|$bluetoothDeviceName)/"'{printf$4;exit}')
+
 	if [ -n "$bluetoothDeviceMacAddr" ];then
 		bluetoothDevicePACTLMacAddr=$(echo $bluetoothDeviceMacAddr | sed s/:/_/g)
 		! pactl list sinks short >/dev/null 2>&1 && test "$SSH_CONNECTION" && pax11publish -r
