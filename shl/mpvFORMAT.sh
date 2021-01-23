@@ -16,9 +16,9 @@ mpvFORMAT() {
 	shift
 
 	if grep -q "\[$format\]" "$mpvConfigFile";then
-		LANG=en_US.utf8 nohup $mpv --profile="$format" "$@"
+		LANG=en_US.utf8 nohup $mpv --profile="$format" "$@" &
 	else
-		LANG=en_US.utf8 nohup $mpv --ytdl-format="$format" "$@"
+		LANG=en_US.utf8 nohup $mpv --ytdl-format="$format" "$@" &
 	fi
 }
 
