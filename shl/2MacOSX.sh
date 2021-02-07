@@ -10,7 +10,7 @@ esac
 
 for ppa in $ppaList
 do
-	grep -q $ppa /etc/apt/sources.list.d/*.list || sudo add-apt-repository -y ppa:$ppa
+	awk -F "[ /]" '/^deb .*launchpad.net/{print"ppa:"$5"/"$6}' /etc/apt/sources.list.d/*.list | grep -q $ppa || sudo add-apt-repository -y ppa:$ppa
 done
 time sudo apt update
 
