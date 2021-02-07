@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 from __future__ import print_function
 
 import os
@@ -7,7 +7,7 @@ import json
 import struct
 import subprocess
 
-VERSION = '7.2.3'
+VERSION = '7.1b2'
 
 try:
 	sys.stdin.buffer
@@ -62,10 +62,12 @@ def install():
 		'type': 'stdio',
 	}
 	locations = {
-		'chrome': os.path.join(home_path, 'Library', 'Application Support', 'Google', 'Chrome', 'NativeMessagingHosts'),
-		'chromium': os.path.join(home_path, 'Library', 'Application Support', 'Chromium', 'NativeMessagingHosts'),
-		'firefox': os.path.join(home_path, 'Library', 'Application Support', 'Mozilla', 'NativeMessagingHosts'),
-		'thunderbird': os.path.join(home_path, 'Library', 'Application Support', 'Thunderbird', 'NativeMessagingHosts'),
+		'brave': os.path.join(home_path, '.config', 'BraveSoftware', 'Brave-Browser', 'NativeMessagingHosts'),
+		'chrome': os.path.join(home_path, '.config', 'google-chrome', 'NativeMessagingHosts'),
+		'chromium': os.path.join(home_path, '.config', 'chromium', 'NativeMessagingHosts'),
+		'firefox': os.path.join(home_path, '.mozilla', 'native-messaging-hosts'),
+		'firefox-esr': os.path.join(home_path, '.mozilla', 'native-messaging-hosts'),
+		'palemoon': os.path.join(home_path, '.moonchild productions', 'native-messaging-hosts'),
 	}
 	filename = 'open_with.json'
 
@@ -75,7 +77,7 @@ def install():
 				os.mkdir(location)
 
 			browser_manifest = manifest.copy()
-			if browser in ['firefox', 'thunderbird']:
+			if browser == 'firefox':
 				browser_manifest['allowed_extensions'] = ['openwith@darktrojan.net']
 			else:
 				browser_manifest['allowed_origins'] = [
@@ -89,30 +91,62 @@ def install():
 				)
 
 
+def _read_desktop_file(path):
+	with open(path, 'r') as desktop_file:
+		current_section = None
+		name = None
+		command = None
+		for line in desktop_file:
+			if line[0] == '[':
+				current_section = line[1:-2]
+			if current_section != 'Desktop Entry':
+				continue
+
+			if line.startswith('Name='):
+				name = line[5:].strip()
+			elif line.startswith('Exec='):
+				command = line[5:].strip()
+
+		return {
+			'name': name,
+			'command': command
+		}
+
+
 def find_browsers():
 	apps = [
+		'brave',
+		'brave-browser',
+		'brave-browser-dev',
 		'Chrome',
 		'Chromium',
+		'chromium-browser',
+		'firefox',
 		'Firefox',
+		'firefox-esr',
+		'Firefox ESR',
 		'Google Chrome',
+		'google-chrome',
+		'opera',
 		'Opera',
-		'Safari',
+		'palemoon',
+		'Pale Moon',
 		'SeaMonkey',
+		'seamonkey',
 	]
 	paths = [
-		os.path.join(os.getenv('HOME'), 'Applications'),
-		'/Applications',
+		os.path.join(os.getenv('HOME'), '.local/share/applications'),
+		'/usr/local/share/applications',
+		'/usr/share/applications'
 	]
+	suffix = '.desktop'
 
 	results = []
 	for p in paths:
 		for a in apps:
-			fp = os.path.join(p, a) + '.app'
+			fp = os.path.join(p, a) + suffix
 			if os.path.exists(fp):
-				results.append({
-					'name': a,
-					'command': '"%s.app"' % os.path.join(p, a)
-				})
+				results.append(_read_desktop_file(fp))
 	return results
 
 
@@ -134,11 +168,7 @@ def listen():
 					os.environ[k] = ''
 
 		devnull = open(os.devnull, 'w')
-		if receivedMessage[0].endswith('.app'):
-			command = ['/usr/bin/open', '-a'] + receivedMessage
-		else:
-			command = receivedMessage
-		subprocess.Popen(command, stdout=devnull, stderr=devnull)
+		subprocess.Popen(receivedMessage, stdout=devnull, stderr=devnull)
 		sendMessage(None)
 
 
