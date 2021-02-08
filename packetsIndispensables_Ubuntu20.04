@@ -57,7 +57,6 @@ dh-make
 diatheke # command line bible browsing and search tool
 dkms
 dlocate
-mlocate
 dpkg-repack
 efibootmgr
 efivar
@@ -107,13 +106,17 @@ ipython3
 isomaster
 jhead
 jq
+kaccounts-integration
 kde-plasma-desktop
 kde-window-manager
 kdegraphics-thumbnailers
 keepass2
 keepassx
 kid3-cli
+kinfocenter
 kpcli
+kscreen
+kwin-common
 lftp
 libguestfs-tools
 libimage-exiftool-perl
@@ -145,6 +148,7 @@ minitube
 mksh
 mkvtoolnix
 mkvtoolnix-gui
+mlocate
 mokutil
 moreutils
 most
@@ -173,8 +177,11 @@ perlconsole
 pidgin
 pidgin-sipe
 pkg-config
+plasma-desktop
+plasma-pa
 plasma-wallpapers-addons
 plasma-widgets-addons
+plasma-workspace
 pmount
 ppa-purge
 pulseaudio-module-bluetooth
