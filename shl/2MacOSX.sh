@@ -46,8 +46,8 @@ set +x
 sync
 
 case $ubuntuRelease in
-	16.*) cairoDockPkgList="cairo-dock cairo-dock-core cairo-dock-data cairo-dock-plug-ins cairo-dock-plug-ins-data cairo-dock-plug-ins-dbus-interface-python cairo-dock-plug-ins-integration" ;;
-	18.*|20.*) cairoDockPkgList="cairo-dock cairo-dock-alsamixer-plug-in cairo-dock-animated-icons-plug-in cairo-dock-cairo-penguin-plug-in cairo-dock-clipper-plug-in cairo-dock-clock-plug-in cairo-dock-core cairo-dock-dbus-plug-in cairo-dock-desklet-rendering-plug-in cairo-dock-dialog-rendering-plug-in cairo-dock-dnd2share-plug-in cairo-dock-drop-indicator-plug-in cairo-dock-dustbin-plug-in cairo-dock-folders-plug-in cairo-dock-gmenu-plug-in cairo-dock-icon-effect-plug-in cairo-dock-illusion-plug-in cairo-dock-impulse-plug-in cairo-dock-keyboard-indicator-plug-in cairo-dock-logout-plug-in cairo-dock-mail-plug-in cairo-dock-messaging-menu-plug-in cairo-dock-motion-blur-plug-in cairo-dock-musicplayer-plug-in cairo-dock-netspeed-plug-in cairo-dock-plug-in-data cairo-dock-plug-ins cairo-dock-powermanager-plug-in cairo-dock-quick-browser-plug-in cairo-dock-recent-events-plug-in cairo-dock-remote-control-plug-in cairo-dock-rendering-plug-in cairo-dock-rssreader-plug-in cairo-dock-shortcuts-plug-in cairo-dock-showdesktop-plug-in cairo-dock-showmouse-plug-in cairo-dock-slider-plug-in cairo-dock-stack-plug-in cairo-dock-switcher-plug-in cairo-dock-system-monitor-plug-in cairo-dock-systray-plug-in cairo-dock-terminal-plug-in cairo-dock-tomboy-plug-in cairo-dock-toons-plug-in cairo-dock-weather-plug-in cairo-dock-wifi-plug-in cairo-dock-xgamma-plug-in" ;;
+	16.*) cairoDockPkgList="cairo-dock cairo-dock-plug-ins cairo-dock-plug-ins-data" ;;
+	18.*|20.*) cairoDockPkgList="cairo-dock cairo-dock-plug-ins cairo-dock-plug-in-data";;
 esac
 sudo apt install -V $cairoDockPkgList
 sync
