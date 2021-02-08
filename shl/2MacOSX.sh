@@ -10,9 +10,9 @@ esac
 
 for ppa in $ppaList
 do
-	awk -F "[ /]" '/^deb .*launchpad.net/{print"ppa:"$5"/"$6}' /etc/apt/sources.list.d/*.list | grep -q $ppa || sudo add-apt-repository -y ppa:$ppa
+	awk -F "[ /]" '/^deb .*launchpad.net/{print"ppa:"$5"/"$6}' /etc/apt/sources.list.d/*.list | grep -q $ppa || sudo add-apt-repository -y ppa:$ppa -u
 done
-time sudo apt update
+apt-cache show slingscold >/dev/null 2>&1 || time sudo apt update
 
 case $ubuntuRelease in
 	14.04|14.10)
