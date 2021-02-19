@@ -7,6 +7,11 @@ function moveAudioToHDMI {
 
 	hdmiOutputPattern='\.hdmi-stereo\>'
 	sink_output=$(pactl list sinks short | awk "/$hdmiOutputPattern/"'{printf$1}')
+	if [ -z "$sink_output" ];then
+		echo "=> Restarting pulseaudio server ..." >&2
+		pulseaudio --kill && pgrep -a pulseaudio
+		sink_output=$(pactl list sinks short | awk "/$hdmiOutputPattern/"'{printf$1}')
+	fi
 	echo "=> sink_output = $sink_output"
 	pactl list sink-inputs short | awk '/protocol-native.c/{print$1}' | while read sink_input
 	do
