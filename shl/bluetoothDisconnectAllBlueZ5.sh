@@ -34,4 +34,4 @@ do
 	set +x
 done
 
-$dirName/moveAudio2HDMI.sh
+echo $HOSTNAME | egrep -qi B206 && $dirName/moveAudio2HDMI.sh || $dirName/moveAudio2AnalogStereo.sh
