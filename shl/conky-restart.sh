@@ -5,7 +5,7 @@ restart_conky() {
 	do
 		sleep 1
 	done
-	\pgrep conky && \killall -SIGUSR1 conky || conky -d
+	\pgrep conky >/dev/null && \killall -SIGUSR1 conky || conky -d
 }
 
 restart_conky "$@"
