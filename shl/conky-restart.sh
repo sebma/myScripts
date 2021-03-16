@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 restart_conky() {
-	while ! \pgrep plasma-desktop >/dev/null
+	while ! \pgrep kwin >/dev/null
 	do
 		sleep 1
 	done
