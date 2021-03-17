@@ -21,6 +21,7 @@ apt-transport-https
 aptitude
 aptitude-doc-en
 apvlv
+archivemount
 aria2
 arp-scan
 ascii
