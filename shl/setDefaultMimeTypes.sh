@@ -29,7 +29,7 @@ which file-roller >/dev/null 2>&1 && {
 
 #Ouvrir les fichiers documents avec LibreOffice
 which libreoffice >/dev/null 2>&1 && {
-	documentFileTypes=".doc .docx .sxw .odt .xls .xlsx .sxc .ods .ppt .pps .pptx .ppsx .sxi .odp .rtf"
+	documentFileTypes=".doc .docx .sxw .odt .xls .xlsm .xlsx .sxc .ods .ppt .pps .pptx .ppsx .sxi .odp .rtf"
 	documentMimeTypes="$(mimetype -b $documentFileTypes | sort -u | xargs)"
 	echo "=> Association des fichiers $documentFileTypes qui s'ouvriront desormais avec <libreoffice>..."
 	time -p xdg-mime default libreoffice-startcenter.desktop $documentMimeTypes
