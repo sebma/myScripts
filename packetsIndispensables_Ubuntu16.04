@@ -58,6 +58,7 @@ dh-make
 diatheke # command line bible browsing and search tool
 dkms
 dlocate
+doublecmd-qt
 dpkg-repack
 efibootmgr
 efivar
