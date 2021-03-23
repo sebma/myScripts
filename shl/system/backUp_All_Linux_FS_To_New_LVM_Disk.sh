@@ -116,7 +116,9 @@ sync
 echo
 
 grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || $sudo sed -i "s,$sourceVG,$destinationVG," $destinationRootDir/etc/fstab
-[ $efiMode = true ] && grep -q $destinationEFI_UUID $destinationRootDir/etc/fstab 2>/dev/null || $sudo sed -i "s/$sourceEFI_UUID/$destinationEFI_UUID/" $destinationRootDir/etc/fstab
+if $efiMode;then
+	grep -q $destinationEFI_UUID $destinationRootDir/etc/fstab 2>/dev/null || $sudo sed -i "s/$sourceEFI_UUID/$destinationEFI_UUID/" $destinationRootDir/etc/fstab
+fi
 
 echo "=> Creation des points de montage dans $destinationRootDir/ ..."
 awk '/^[^#]/{print substr($2,2)}' $destinationRootDir/etc/fstab | while read dir; do test -d $destinationRootDir/$dir || $sudo mkdir -p -v $destinationRootDir/$dir;done
