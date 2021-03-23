@@ -56,17 +56,22 @@ echo "=> usrSourceFS = $usrSourceFS"
 
 echo "=> sourceVG = $sourceVG"
 echo "=> destinationVG = $destinationVG"
-sourceEFI_FS=$(findmnt -n -c -o SOURCE /boot/efi)
-sourceEFI_UUID=$($sudo blkid $sourceEFI_FS -o value -s UUID)
-# Le "grep" est la pour forcer le code retour a "1" si il y a pas de EFI
-#destinationEFI_FS=$($sudo fdisk $destinationDisk -l | grep -w 'EFI' | awk "/\<EFI\>/{print\$1}") || exit
-destinationEFI_FS=$($sudo gdisk $destinationDisk -l | grep -w 'EFI' | awk "/\<EFI\>/{print\"$destinationDisk\"\$1}") || exit
-destinationEFI_UUID=$($sudo blkid $destinationEFI_FS -o value -s UUID) || exit
 
-echo "=> sourceEFI_FS = $sourceEFI_FS"
-echo "=> sourceEFI_UUID = $sourceEFI_UUID"
-echo "=> destinationEFI_FS = $destinationEFI_FS"
-echo "=> destinationEFI_UUID = $destinationEFI_UUID"
+[ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
+
+if $efiMode;then
+	sourceEFI_FS=$(findmnt -n -c -o SOURCE /boot/efi)
+	sourceEFI_UUID=$($sudo blkid $sourceEFI_FS -o value -s UUID)
+	# Le "grep" est la pour forcer le code retour a "1" si il y a pas de EFI
+	#destinationEFI_FS=$($sudo fdisk $destinationDisk -l | grep -w 'EFI' | awk "/\<EFI\>/{print\$1}") || exit
+	destinationEFI_FS=$($sudo gdisk $destinationDisk -l | grep -w 'EFI' | awk "/\<EFI\>/{print\"$destinationDisk\"\$1}") || exit
+	destinationEFI_UUID=$($sudo blkid $destinationEFI_FS -o value -s UUID) || exit
+
+	echo "=> sourceEFI_FS = $sourceEFI_FS"
+	echo "=> sourceEFI_UUID = $sourceEFI_UUID"
+	echo "=> destinationEFI_FS = $destinationEFI_FS"
+	echo "=> destinationEFI_UUID = $destinationEFI_UUID"
+fi
 
 logFile="$HOME/log/completeCopy_VG_To_SSD-$(date +%Y%m%d-%HH%M).log"
 echo
@@ -110,10 +115,8 @@ time $sudo $cp2ext234 -r -x /usr/lib $destinationRootDir/usr/
 sync
 echo
 
-[ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
-
 grep -q $destinationVG $destinationRootDir/etc/fstab 2>/dev/null || $sudo sed -i "s,$sourceVG,$destinationVG," $destinationRootDir/etc/fstab
-grep -q $destinationEFI_UUID $destinationRootDir/etc/fstab 2>/dev/null || $sudo sed -i "s/$sourceEFI_UUID/$destinationEFI_UUID/" $destinationRootDir/etc/fstab
+[ $efiMode = true ] && grep -q $destinationEFI_UUID $destinationRootDir/etc/fstab 2>/dev/null || $sudo sed -i "s/$sourceEFI_UUID/$destinationEFI_UUID/" $destinationRootDir/etc/fstab
 
 echo "=> Creation des points de montage dans $destinationRootDir/ ..."
 awk '/^[^#]/{print substr($2,2)}' $destinationRootDir/etc/fstab | while read dir; do test -d $destinationRootDir/$dir || $sudo mkdir -p -v $destinationRootDir/$dir;done
