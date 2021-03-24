@@ -165,7 +165,7 @@ echo "=> Copie de tous les filesystem ..." | tee -a "$logFile"
 fsRegExp="\<(ext[234]|btrfs|f2fs|xfs|jfs|reiserfs|nilfs|hfs|vfat|fuseblk)\>"
 sourceFilesystemsList=$($df -T | egrep -vw "/media|/mnt|/tmp" | awk "/$fsRegExp/"'{print$NF}' | sort -u)
 sourceDirList=$sourceFilesystemsList
-sourceDirList=$(echo "$sourceDirList" | egrep -v "/datas|/home|/iso")
+#sourceDirList=$(echo "$sourceDirList" | egrep -v "/datas|/home|/iso")
 sourceDirList=$(echo "$sourceDirList" | paste -sd' ' | sed "s,/ \| /$,,g")
 echo "=> sourceDirList= <$sourceDirList>"
 test -z "$sourceDirList" && { unmoutALLFSInDestination "$destinationRootDir";exit; } | tee -a "$logFile"
