@@ -18,10 +18,10 @@ type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|a
 set -o nounset
 set -o pipefail
 
-unmoutALLFSInChroot() {
+unmoutALLFSInDestination() {
 	local destRootDIR="$1"
 	echo "=> umounting all FS in <$destRootDIR> ..."
-	$sudo chroot $destRootDIR/ umount -av
+	[ -f $destRootDIR$(which chroot) ] && $sudo chroot $destRootDIR/ umount -av
 	echo
 	$sudo umount -v $destRootDIR/{sys/firmware/efi/efivars,sys,proc,run,dev/pts,dev,usr,}
 	echo
@@ -92,7 +92,7 @@ test -d $destinationRootDir/ || $sudo mkdir -v $destinationRootDir/
 rootPartitionDevice=/dev/$destinationVG/$(echo $destinationLVList | tr " " "\n" | grep root)
 if ! findmnt $destinationRootDir >/dev/null;then
 	echo "=> Montage de la partition root dans $destinationRootDir/ ..."
-	$sudo mount -v $rootPartitionDevice $destinationRootDir/ || exit
+	$sudo mount -v $rootPartitionDevice $destinationRootDir/ || { unmoutALLFSInDestination "$destinationRootDir";exit 1; }
 fi
 echo
 
@@ -105,8 +105,7 @@ test -d $destinationRootDir/usr || $sudo mkdir -v $destinationRootDir/usr
 usrPartitionDevice=$(awk '/\s\/usr\s/{printf$1}' $destinationRootDir/etc/fstab)
 if ! findmnt $destinationRootDir/usr >/dev/null;then
 	echo "=> Montage de la partition $usrPartitionDevice  dans $destinationRootDir/usr ..."
-	$sudo busybox mount -v $usrPartitionDevice $destinationRootDir/usr || exit
-	:
+	$sudo busybox mount -v $usrPartitionDevice $destinationRootDir/usr || { unmoutALLFSInDestination "$destinationRootDir";exit 1; }
 fi
 echo
 
@@ -125,10 +124,12 @@ awk '/^[^#]/{print substr($2,2)}' $destinationRootDir/etc/fstab | while read dir
 
 echo "=> Montage de /proc a part ..."
 [ -d $destinationRootDir/proc ] || mkdir -v $destinationRootDir/proc
+[ -d $destinationRootDir/proc ] || { unmoutALLFSInDestination "$destinationRootDir";exit 1; }
 $sudo mount -v -t proc proc $destinationRootDir/proc
 
 echo "=> Montage de /run a part ..."
 [ -d $destinationRootDir/run ] || mkdir -v $destinationRootDir/run
+[ -d $destinationRootDir/run ] || { unmoutALLFSInDestination "$destinationRootDir";exit 1; }
 $sudo mount -v -t tmpfs tmpfs $destinationRootDir/run
 
 echo "=> Binding des specialFS de /dev ..."
@@ -152,7 +153,7 @@ echo "=> sourceRootDeviceBaseName = <$sourceRootDeviceBaseName>"
 echo "=> destinationRootDeviceBaseName = <$destinationRootDeviceBaseName>"
 echo
 
-trap 'rc=127;set +x;echo "=> $scriptBaseName: CTRL+C Interruption trapped.">&2;unmoutALLFSInChroot "$destinationRootDir";exit $rc' INT
+trap 'rc=127;set +x;echo "=> $scriptBaseName: CTRL+C Interruption trapped.">&2;unmoutALLFSInDestination "$destinationRootDir";exit $rc' INT
 
 echo "=> Liste des filesystem montes dans $destinationRootDir/"
 $df -PTh | grep $destinationRootDir
@@ -163,6 +164,8 @@ sourceFilesystemsList=$($df -T | egrep -vw "/media|/mnt|/tmp" | awk "/$fsRegExp/
 echo "=> sourceFilesystemsList = $sourceFilesystemsList"
 
 sourceDirList=$(echo $sourceFilesystemsList | sed "s,/ \| /$,,g")
+#sourceDirList=$(echo $sourceFilesystemsList | egrep -v "/datas|home")
+echo "=> sourceDirList= $sourceDirList"
 #sourceDirList="/usr"
 for sourceDir in $sourceDirList
 do
@@ -216,7 +219,7 @@ EOF
 set -o nounset
 echo
 
-unmoutALLFSInChroot "$destinationRootDir"
+unmoutALLFSInDestination "$destinationRootDir"
 trap - INT
 
 $df -PTh | grep -q $destinationRootDir
