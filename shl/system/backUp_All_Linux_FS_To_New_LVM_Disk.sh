@@ -16,6 +16,7 @@ if ! [ -b $destinationDisk ];then
 	exit 2
 fi
 
+df=$(which df)
 type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo=$(which sudo) || sudo=""
 
 #set -o errexit
@@ -44,21 +45,19 @@ destinationPVPartition=$($sudo fdisk $destinationDisk -l | grep 'Linux LVM' | aw
 destinationVG=$($sudo \pvs $destinationPVPartition -o vg_name --noheadings | awk '{printf$1}')
 destinationLVList=$($sudo \lvs $destinationVG -o lv_name --noheadings --sort lv_name | awk '{printf$1" "}')
 
-df=$(which df)
 usrSourceFS=$(findmnt -n -c -o SOURCE /usr)
 isLVM=$(lsblk -n $usrSourceFS -o TYPE | grep -qw lvm && echo yes || echo no)
 if [ $isLVM = no ];then
-	sourceVG_Or_Disk=$(findmnt -n -c -o SOURCE /boot/efi | sed "s/.$//")
 	echo "[$scriptBaseName] => ERROR : You must use LVM." >&2
+	echo "[$scriptBaseName] => ERROR : You must use LVM." | tee -a "$logFile"
 	exit 3
-else
-	sourceVG=$(sudo \lvs --noheadings -o vg_name $usrSourceFS | awk '{printf$1}')
-fi | tee -a "$logFile"
+fi
+
+sourceVG=$(sudo \lvs --noheadings -o vg_name $usrSourceFS | awk '{printf$1}')
 
 {
 echo "=> isLVM = $isLVM"
 echo "=> usrSourceFS = $usrSourceFS"
-
 echo "=> sourceVG = $sourceVG"
 echo "=> destinationVG = $destinationVG"
 } | tee -a "$logFile"
@@ -183,9 +182,8 @@ do
 	esac
 
 	echo
-	mount | grep -q $destinationDir && time $sudo $copyCommand -r $sourceDir/ $destinationDir/
+	mount | grep -w $destinationDir && time $sudo $copyCommand -r $sourceDir/ $destinationDir/
 	echo
-#	set +x
 	sync
 done | tee -a "$logFile"
 
