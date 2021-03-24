@@ -166,7 +166,7 @@ sourceDirList=$sourceFilesystemsList
 #sourceDirList=$(echo "$sourceDirList" | egrep -v "/datas|/home")
 sourceDirList=$(echo "$sourceDirList" | paste -sd' ' | sed "s,/ \| /$,,g")
 echo "=> sourceDirList= <$sourceDirList>"
-test -z "$sourceDirList" && unmoutALLFSInDestination "$destinationRootDir";exit
+test -z "$sourceDirList" && { unmoutALLFSInDestination "$destinationRootDir";exit; }
 for sourceDir in $sourceDirList
 do
 	destinationDir=${destinationRootDir}$sourceDir
