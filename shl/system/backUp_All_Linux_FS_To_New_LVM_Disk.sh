@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
 
 scriptBaseName=${0##*/}
+logFile="$HOME/log/$scriptBaseName-$(date +%Y%m%d-%HH%M).log"
+
 if [ $# != 1 ];then
 	echo "=> $scriptBaseName destinationDisk" >&2
+	echo "=> $scriptBaseName destinationDisk" | tee -a "$logFile"
 	exit 1
 fi
 
 destinationDisk=$1
 if ! [ -b $destinationDisk ];then
 	echo "[$scriptBaseName] => ERROR: <$destinationDisk> is not a block special device." >&2
+	echo "[$scriptBaseName] => ERROR: <$destinationDisk> is not a block special device." | tee -a "$logFile"
 	exit 2
 fi
 
@@ -32,7 +36,7 @@ echo "=> Remove cache for all users ..."
 do
 	$sudo rm -fr /home/$user/.cache
 	$sudo -u $user mkdir /home/$user/.cache
-done
+done | tee -a "$logFile"
 echo "=> Done."
 
 # Le "grep" est la pour forcer le code retour a "1" si il y a pas de LVM
@@ -49,16 +53,17 @@ if [ $isLVM = no ];then
 	exit 3
 else
 	sourceVG=$(sudo \lvs --noheadings -o vg_name $usrSourceFS | awk '{printf$1}')
-fi
+fi | tee -a "$logFile"
 
+{
 echo "=> isLVM = $isLVM"
 echo "=> usrSourceFS = $usrSourceFS"
 
 echo "=> sourceVG = $sourceVG"
 echo "=> destinationVG = $destinationVG"
+} | tee -a "$logFile"
 
 [ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
-
 if $efiMode;then
 	sourceEFI_FS=$(findmnt -n -c -o SOURCE /boot/efi)
 	sourceEFI_UUID=$($sudo blkid $sourceEFI_FS -o value -s UUID)
@@ -71,16 +76,13 @@ if $efiMode;then
 	echo "=> sourceEFI_UUID = $sourceEFI_UUID"
 	echo "=> destinationEFI_FS = $destinationEFI_FS"
 	echo "=> destinationEFI_UUID = $destinationEFI_UUID"
-fi
+fi | tee -a "$logFile"
 
-logFile="$HOME/log/completeCopy_VG_To_SSD-$(date +%Y%m%d-%HH%M).log"
-echo
-echo "=> logFile = <$logFile>."
-echo
-
+rsyncLogFile="$HOME/log/completeCopy_VG_To_SSD-$(date +%Y%m%d-%HH%M).log"
+touch "$rsyncLogFile"
 RSYNC_SKIP_COMPRESS_LIST=7z/aac/avi/bz2/deb/flv/gz/iso/jpeg/jpg/mkv/mov/m4a/mp2/mp3/mp4/mpeg/mpg/oga/ogg/ogm/ogv/webm/rpm/tbz/tgz/z/zip
 RSYNC_EXCLUSION=$(printf -- "--exclude %s/ " /dev /sys /run /proc /mnt /media)
-rsync="$(which rsync) -x -uth -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST $RSYNC_EXCLUSION --log-file=$logFile"
+rsync="$(which rsync) -x -uth -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST $RSYNC_EXCLUSION --log-file=$rsyncLogFile"
 
 cp2ext234="$rsync -ogpuv -lSH"
 cp2ext234Partition="$rsync -ogpuv -lSH -x -r"
@@ -93,10 +95,10 @@ rootPartitionDevice=/dev/$destinationVG/$(echo $destinationLVList | tr " " "\n" 
 if ! findmnt $destinationRootDir >/dev/null;then
 	echo "=> Montage de la partition root dans $destinationRootDir/ ..."
 	$sudo mount -v $rootPartitionDevice $destinationRootDir/ || { unmoutALLFSInDestination "$destinationRootDir";exit; }
-fi
+fi | tee -a "$logFile"
 echo
 
-echo "=> Copie des fichiers de la partition / dans $destinationRootDir/ ..."
+echo "=> Copie des fichiers de la partition / dans $destinationRootDir/ ..." | tee -a "$logFile"
 time $sudo $cp2ext234 -r -x / $destinationRootDir/
 sync
 echo
@@ -106,10 +108,10 @@ usrPartitionDevice=$(awk '/\s\/usr\s/{printf$1}' $destinationRootDir/etc/fstab)
 if ! findmnt $destinationRootDir/usr >/dev/null;then
 	echo "=> Montage de la partition $usrPartitionDevice  dans $destinationRootDir/usr ..."
 	$sudo busybox mount -v $usrPartitionDevice $destinationRootDir/usr || { unmoutALLFSInDestination "$destinationRootDir";exit; }
-fi
+fi | tee -a "$logFile"
 echo
 
-echo "=> Copie du repertoire lib de la partition /usr dans $destinationRootDir/usr ..."
+echo "=> Copie du repertoire lib de la partition /usr dans $destinationRootDir/usr ..." | tee -a "$logFile"
 time $sudo $cp2ext234 -r -x /usr/lib $destinationRootDir/usr/
 sync
 echo
@@ -119,23 +121,23 @@ if $efiMode;then
 	grep -q $destinationEFI_UUID $destinationRootDir/etc/fstab 2>/dev/null || $sudo sed -i "s/$sourceEFI_UUID/$destinationEFI_UUID/" $destinationRootDir/etc/fstab
 fi
 
-echo "=> Creation des points de montage dans $destinationRootDir/ ..."
+echo "=> Creation des points de montage dans $destinationRootDir/ ..." | tee -a "$logFile"
 awk '/^[^#]/{print substr($2,2)}' $destinationRootDir/etc/fstab | while read dir; do test -d $destinationRootDir/$dir || $sudo mkdir -p -v $destinationRootDir/$dir;done
 
-echo "=> Montage de /proc a part ..."
+echo "=> Montage de /proc a part ..." | tee -a "$logFile"
 [ -d $destinationRootDir/proc ] || $sudo mkdir -v $destinationRootDir/proc
 $sudo mount -v -t proc proc $destinationRootDir/proc
 
-echo "=> Montage de /run a part ..."
+echo "=> Montage de /run a part ..." | tee -a "$logFile"
 [ -d $destinationRootDir/run ] || $sudo mkdir -v $destinationRootDir/run
 $sudo mount -v -t tmpfs tmpfs $destinationRootDir/run
 
-echo "=> Binding des specialFS de /dev ..."
-for specialFS in dev dev/pts sys; do test -d $destinationRootDir/$specialFS/ || $sudo mkdir $destinationRootDir/$specialFS/; $sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done
-$efiMode && $sudo mkdir -p -v $destinationRootDir/sys/firmware/efi/efivars && $sudo mount -v --bind /sys/firmware/efi/efivars $destinationRootDir/sys/firmware/efi/efivars
+echo "=> Binding des specialFS de /dev ..." | tee -a "$logFile"
+for specialFS in dev dev/pts sys; do test -d $destinationRootDir/$specialFS/ || $sudo mkdir $destinationRootDir/$specialFS/; $sudo mount -v --bind /$specialFS $destinationRootDir/$specialFS ; done | tee -a "$logFile"
+$efiMode && $sudo mkdir -p -v $destinationRootDir/sys/firmware/efi/efivars && $sudo mount -v --bind /sys/firmware/efi/efivars $destinationRootDir/sys/firmware/efi/efivars | tee -a "$logFile"
 echo
 
-echo "=> Montage via chroot de toutes les partitions de $destinationRootDir/etc/fstab ..."
+echo "=> Montage via chroot de toutes les partitions de $destinationRootDir/etc/fstab ..." | tee -a "$logFile"
 $sudo chroot $destinationRootDir/ $SHELL <<-EOF
 	busybox mount -a 2>&1 >/dev/null | busybox awk '/No such file or directory/{print\$5}' | busybox xargs -r mkdir -pv
 EOF
@@ -145,28 +147,28 @@ sourceBootDevice=$(findmnt -n -c -o SOURCE /boot)
 destinationBootDevice=$(findmnt -n -c -o SOURCE $destinationRootDir/boot)
 sourceRootDeviceBaseName=$(findmnt -n -c -o SOURCE / | awk -F"[/ ]" '{printf$4}')
 destinationRootDeviceBaseName=$(findmnt -n -c -o SOURCE $destinationRootDir | awk -F"[/ ]" '{printf$4}')
+{
 echo "=> sourceBootDevice = $sourceBootDevice"
 echo "=> destinationBootDevice = $destinationBootDevice"
 echo "=> sourceRootDeviceBaseName = <$sourceRootDeviceBaseName>"
 echo "=> destinationRootDeviceBaseName = <$destinationRootDeviceBaseName>"
 echo
+} | tee -a "$logFile"
 
 trap 'rc=127;set +x;echo "=> $scriptBaseName: CTRL+C Interruption trapped.">&2;unmoutALLFSInDestination "$destinationRootDir";exit $rc' INT
 
-echo "=> Liste des filesystem montes dans $destinationRootDir/"
+echo "=> Liste des filesystem montes dans $destinationRootDir/" | tee -a "$logFile"
 $df -PTh | grep $destinationRootDir
 echo
 
+echo "=> Copie de tous les filesystem ..." | tee -a "$logFile"
 fsRegExp="\<(ext[234]|btrfs|f2fs|xfs|jfs|reiserfs|nilfs|hfs|vfat|fuseblk)\>"
 sourceFilesystemsList=$($df -T | egrep -vw "/media|/mnt|/tmp" | awk "/$fsRegExp/"'{print$NF}' | sort -u)
-#echo "=> sourceFilesystemsList = $sourceFilesystemsList"
-
-echo "=> Copie de tous les filesystem ..."
 sourceDirList=$sourceFilesystemsList
-#sourceDirList=$(echo "$sourceDirList" | egrep -v "/datas|/home")
+sourceDirList=$(echo "$sourceDirList" | egrep -v "/datas|/home|/iso")
 sourceDirList=$(echo "$sourceDirList" | paste -sd' ' | sed "s,/ \| /$,,g")
 echo "=> sourceDirList= <$sourceDirList>"
-test -z "$sourceDirList" && { unmoutALLFSInDestination "$destinationRootDir";exit; }
+test -z "$sourceDirList" && { unmoutALLFSInDestination "$destinationRootDir";exit; } | tee -a "$logFile"
 for sourceDir in $sourceDirList
 do
 	destinationDir=${destinationRootDir}$sourceDir
@@ -185,7 +187,7 @@ do
 	echo
 #	set +x
 	sync
-done
+done | tee -a "$logFile"
 
 #set +o pipefail
 #dnsSERVER=$(host -v something.unknown | awk -F "[ #]" '/Received /{print$5}' | uniq | grep -q 127.0.0 && ( nmcli -f IP4.DNS,IP6.DNS dev list || nmcli -f IP4.DNS,IP6.DNS dev show ) 2>/dev/null | awk '/IP4.DNS/{printf$NF}')
@@ -219,14 +221,15 @@ EOF
 set -o nounset
 echo
 
-unmoutALLFSInDestination "$destinationRootDir"
+unmoutALLFSInDestination "$destinationRootDir" | tee -a "$logFile"
 trap - INT
 
 $df -PTh | grep -q $destinationRootDir
 
-echo "=> Restore grub in /dev/sda just in case ..."
+echo "=> Restore grub in /dev/sda just in case ..." | tee -a "$logFile"
 $efiMode && efiDirectory=$(mount | awk '/\/efi /{print$3}') && $sudo grub-install --efi-directory=$efiDirectory --removable || $sudo grub-install /dev/sda
 sync
 echo
 
+echo "=> rsyncLogFile = <$rsyncLogFile>."
 echo "=> logFile = <$logFile>."
