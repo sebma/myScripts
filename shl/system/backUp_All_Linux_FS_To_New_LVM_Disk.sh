@@ -50,8 +50,8 @@ destinationLVList=$($sudo \lvs $destinationVG -o lv_name --noheadings --sort lv_
 usrSourceFS=$(findmnt -n -c -o SOURCE /usr)
 isLVM=$(lsblk -n $usrSourceFS -o TYPE | grep -qw lvm && echo yes || echo no)
 if [ $isLVM = no ];then
-	echo "[$scriptBaseName] => ERROR : You must use LVM." >&2
-	echo "[$scriptBaseName] => ERROR : You must use LVM." | tee -a "$logFile"
+	echo "[$scriptBaseName] => ERROR : Source disk must use LVM." >&2
+	echo "[$scriptBaseName] => ERROR : Source disk must use LVM." | tee -a "$logFile"
 	exit 3
 fi
 
