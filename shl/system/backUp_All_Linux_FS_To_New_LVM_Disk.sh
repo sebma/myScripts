@@ -201,6 +201,9 @@ dstGrubBootLVMID=lvmid/$dstVG_UUID/$dstBootLV_UUID
 time $sudo chroot $destinationRootDir/ $SHELL <<-EOF
 #	mv -v /etc/resolv.conf /etc/resolv.conf.back
 #	echo nameserver $dnsSERVER > /etc/resolv.conf
+	isSSD=$(test $(</sys/block/${destinationDisk/*\//}/queue/rotational) = 0 && echo true || echo false)
+	echo "=> isSSD = $isSSD"
+	$isSSD && echo "=> $destinationDisk is a SSD, enabling noatime in /etc/fstab ..." && sed -i "s/defaults/defaults,noatime/" /etc/fstab
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
 	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf && sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
 	echo "=> Updating grub ..."
