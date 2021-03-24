@@ -6,6 +6,8 @@ if [ $# != 1 ];then
 	exit 1
 fi
 
+lsblk $1 >/dev/null || exit
+
 type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo=$(which sudo) || sudo=""
 set -o nounset
 
