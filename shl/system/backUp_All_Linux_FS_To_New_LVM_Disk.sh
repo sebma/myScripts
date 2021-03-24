@@ -25,6 +25,8 @@ set -o pipefail
 
 unmoutALLFSInDestination() {
 	local destRootDIR="$1"
+	echo "=> Syncing data ..."
+	sync
 	echo "=> umounting all FS in <$destRootDIR> ..."
 	[ -f $destRootDIR$(which chroot) ] && $sudo chroot $destRootDIR/ umount -av
 	echo
@@ -156,15 +158,15 @@ echo
 
 trap 'rc=127;set +x;echo "=> $scriptBaseName: CTRL+C Interruption trapped.">&2;unmoutALLFSInDestination "$destinationRootDir";exit $rc' INT
 
+fsRegExp="\<(ext[234]|btrfs|f2fs|xfs|jfs|reiserfs|nilfs|hfs|vfat|fuseblk)\>"
 echo "=> Liste des filesystem montes dans $destinationRootDir/" | tee -a "$logFile"
-$df -PTh | grep $destinationRootDir
+$df -PTh | awk "/$fsRegExp/" | egrep "$destinationRootDir"
 echo
 
 echo "=> Copie de tous les filesystem ..." | tee -a "$logFile"
-fsRegExp="\<(ext[234]|btrfs|f2fs|xfs|jfs|reiserfs|nilfs|hfs|vfat|fuseblk)\>"
 sourceFilesystemsList=$($df -T | egrep -vw "/media|/mnt|/tmp" | awk "/$fsRegExp/"'{print$NF}' | sort -u)
 sourceDirList=$sourceFilesystemsList
-#sourceDirList=$(echo "$sourceDirList" | egrep -v "/datas|/home|/iso")
+sourceDirList=$(echo "$sourceDirList" | egrep -v "/datas|/home|/iso")
 sourceDirList=$(echo "$sourceDirList" | paste -sd' ' | sed "s,/ \| /$,,g")
 echo "=> sourceDirList= <$sourceDirList>"
 test -z "$sourceDirList" && { unmoutALLFSInDestination "$destinationRootDir";exit; } | tee -a "$logFile"
@@ -172,8 +174,7 @@ for sourceDir in $sourceDirList
 do
 	destinationDir=${destinationRootDir}$sourceDir
 	sourceFSType=$(mount | grep -v $destinationRootDir | grep "$sourceDir " | awk '{print$5}')
-	echo "=> sourceDir = $sourceDir destinationDir = $destinationDir"
-	echo "=> sourceFSType = $sourceFSType"
+	echo "=> sourceDir = $sourceDir destinationDir = $destinationDir sourceFSType = $sourceFSType"
 
 	case $sourceFSType in
 		vfat) copyCommand="$cp2FAT32 -x";;
@@ -182,7 +183,7 @@ do
 	esac
 
 	echo
-	mount | grep -w $destinationDir && time $sudo $copyCommand -r $sourceDir/ $destinationDir/
+	mount | grep "$destinationDir\s" && time $sudo $copyCommand -r $sourceDir/ $destinationDir/
 	echo
 	sync
 done | tee -a "$logFile"
@@ -202,17 +203,23 @@ time $sudo chroot $destinationRootDir/ $SHELL <<-EOF
 #	mv -v /etc/resolv.conf /etc/resolv.conf.back
 #	echo nameserver $dnsSERVER > /etc/resolv.conf
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
-	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
+	grep "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf
+	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf && sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
+	echo
+	grep "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf
+	echo "=> Updating grub ..."
 	update-grub
 	grep -q $dstGrubBootLVMID /boot/grub/grub.cfg || sed -i "s,$srcGrubBootLVMID,$dstGrubBootLVMID,g" /boot/grub/grub.cfg
 	grep -q $destinationRootDeviceBaseName /boot/grub/grub.cfg || sed -i "s,$sourceRootDeviceBaseName,$destinationRootDeviceBaseName,g" /boot/grub/grub.cfg
 	[ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
+	echo "=> Installing grub ..."
 	set -x
 	$efiMode && grub-install --removable --efi-directory=$(mount | awk '/\/efi /{print$3}')
 	$efiMode || grub-install $destinationDisk
 	set +x
 	if which lvmetad >/dev/null 2>&1;then
 		grep -q "use_lvmetad\s*=\s*0" /etc/lvm/lvm.conf || sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*0/use_lvmetad = 1/" /etc/lvm/lvm.conf
+		grep "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf
 	fi
 	sync
 EOF
