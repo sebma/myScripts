@@ -162,13 +162,16 @@ echo "=> destinationRootDeviceBaseName = <$destinationRootDeviceBaseName>"
 echo
 } | tee -a "$logFile"
 
-trap 'rc=127;set +x;echo "=> $scriptBaseName: CTRL+C Interruption trapped.">&2;unmoutALLFSInDestination "$destinationRootDir";exit $rc' INT
-
 fsRegExp="\<(ext[234]|btrfs|f2fs|xfs|jfs|reiserfs|nilfs|hfs|vfat|fuseblk)\>"
 echo "=> Liste des filesystem montes dans $destinationRootDir/" | tee -a "$logFile"
-$df -PTh | awk "/$fsRegExp/" | egrep "$destinationRootDir"
+if which dfc >/dev/null 2>&1;then
+	dfc -TW
+else
+	$df -PTh
+fi | awk "/$fsRegExp/" | egrep "$destinationRootDir" | tee -a "$logFile"
 echo
 
+trap 'rc=127;set +x;echo "=> $scriptBaseName: CTRL+C Interruption trapped.">&2;unmoutALLFSInDestination "$destinationRootDir";exit $rc' INT
 echo "=> Copie de tous les filesystem ..." | tee -a "$logFile"
 sourceFilesystemsList=$($df -T | egrep -vw "/media|/mnt|/tmp" | awk "/$fsRegExp/"'{print$NF}' | sort -u)
 sourceDirList=$sourceFilesystemsList
