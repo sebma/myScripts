@@ -123,13 +123,11 @@ echo "=> Creation des points de montage dans $destinationRootDir/ ..."
 awk '/^[^#]/{print substr($2,2)}' $destinationRootDir/etc/fstab | while read dir; do test -d $destinationRootDir/$dir || $sudo mkdir -p -v $destinationRootDir/$dir;done
 
 echo "=> Montage de /proc a part ..."
-[ -d $destinationRootDir/proc ] || mkdir -v $destinationRootDir/proc
-[ -d $destinationRootDir/proc ] || { unmoutALLFSInDestination "$destinationRootDir";exit 1; }
+[ -d $destinationRootDir/proc ] || $sudo mkdir -v $destinationRootDir/proc
 $sudo mount -v -t proc proc $destinationRootDir/proc
 
 echo "=> Montage de /run a part ..."
-[ -d $destinationRootDir/run ] || mkdir -v $destinationRootDir/run
-[ -d $destinationRootDir/run ] || { unmoutALLFSInDestination "$destinationRootDir";exit 1; }
+[ -d $destinationRootDir/run ] || $sudo mkdir -v $destinationRootDir/run
 $sudo mount -v -t tmpfs tmpfs $destinationRootDir/run
 
 echo "=> Binding des specialFS de /dev ..."
