@@ -166,7 +166,7 @@ echo
 echo "=> Copie de tous les filesystem ..." | tee -a "$logFile"
 sourceFilesystemsList=$($df -T | egrep -vw "/media|/mnt|/tmp" | awk "/$fsRegExp/"'{print$NF}' | sort -u)
 sourceDirList=$sourceFilesystemsList
-sourceDirList=$(echo "$sourceDirList" | egrep -v "/datas|/home|/iso")
+#sourceDirList=$(echo "$sourceDirList" | egrep -v "/datas|/home|/iso")
 sourceDirList=$(echo "$sourceDirList" | paste -sd' ' | sed "s,/ \| /$,,g")
 echo "=> sourceDirList= <$sourceDirList>"
 test -z "$sourceDirList" && { unmoutALLFSInDestination "$destinationRootDir";exit; } | tee -a "$logFile"
@@ -183,7 +183,7 @@ do
 	esac
 
 	echo
-	mount | grep "$destinationDir\s" && time $sudo $copyCommand -r $sourceDir/ $destinationDir/
+	mount | grep -q "$destinationDir\s" && time $sudo $copyCommand -r $sourceDir/ $destinationDir/
 	echo
 	sync
 done | tee -a "$logFile"
