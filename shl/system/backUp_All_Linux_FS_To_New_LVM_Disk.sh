@@ -182,7 +182,6 @@ do
 		*) copyCommand=echo;;
 	esac
 
-	echo
 	mount | grep -q "$destinationDir\s" && time $sudo $copyCommand -r $sourceDir/ $destinationDir/
 	echo
 	sync
