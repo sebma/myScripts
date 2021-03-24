@@ -42,11 +42,6 @@ do
 done | tee -a "$logFile"
 echo "=> Done."
 
-# Le "grep" est la pour forcer le code retour a "1" si il y a pas de LVM
-destinationPVPartition=$($sudo fdisk $destinationDisk -l | grep 'Linux LVM' | awk '/Linux LVM/{print$1}') || exit
-destinationVG=$($sudo \pvs $destinationPVPartition -o vg_name --noheadings | awk '{printf$1}')
-destinationLVList=$($sudo \lvs $destinationVG -o lv_name --noheadings --sort lv_name | awk '{printf$1" "}')
-
 usrSourceFS=$(findmnt -n -c -o SOURCE /usr)
 isLVM=$(lsblk -n $usrSourceFS -o TYPE | grep -qw lvm && echo yes || echo no)
 if [ $isLVM = no ];then
@@ -56,6 +51,17 @@ if [ $isLVM = no ];then
 fi
 
 sourceVG=$(sudo \lvs --noheadings -o vg_name $usrSourceFS | awk '{printf$1}')
+
+if ! $sudo fdisk $destinationDisk -l | grep 'Linux LVM';then
+	echo "[$scriptBaseName] => ERROR : Destination disk must use LVM." >&2
+	echo "[$scriptBaseName] => ERROR : Destination disk must use LVM." | tee -a "$logFile"
+	exit 4
+fi
+
+# Le "grep" est la pour forcer le code retour a "1" si il y a pas de LVM
+destinationPVPartition=$($sudo fdisk $destinationDisk -l | grep 'Linux LVM' | awk '/Linux LVM/{print$1}')
+destinationVG=$($sudo \pvs $destinationPVPartition -o vg_name --noheadings | awk '{printf$1}')
+destinationLVList=$($sudo \lvs $destinationVG -o lv_name --noheadings --sort lv_name | awk '{printf$1" "}')
 
 {
 echo "=> isLVM = $isLVM"
