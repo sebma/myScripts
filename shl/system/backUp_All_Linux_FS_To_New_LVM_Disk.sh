@@ -212,7 +212,7 @@ time $sudo chroot $destinationRootDir/ $SHELL <<-EOF
 #	echo nameserver $dnsSERVER > /etc/resolv.conf
 	mount | grep " / " | grep -q rw || mount -v -o remount,rw /
 	grep -q "use_lvmetad\s*=\s*1" /etc/lvm/lvm.conf && sed -i "/^\s*use_lvmetad/s/use_lvmetad\s*=\s*1/use_lvmetad = 0/" /etc/lvm/lvm.conf
-	echo "=> Updating grub ..."
+	echo "=> Updating grub.cfg ..."
 	update-grub
 	grep -q $dstGrubBootLVMID /boot/grub/grub.cfg || sed -i "s,$srcGrubBootLVMID,$dstGrubBootLVMID,g" /boot/grub/grub.cfg
 	grep -q $destinationRootDeviceBaseName /boot/grub/grub.cfg || sed -i "s,$sourceRootDeviceBaseName,$destinationRootDeviceBaseName,g" /boot/grub/grub.cfg
