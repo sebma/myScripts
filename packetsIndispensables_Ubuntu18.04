@@ -124,6 +124,7 @@ keepassx
 kffmpegthumbnailer
 kid3-cli
 kinfocenter
+kmix
 kpcli
 kscreen
 kscreensaver-xsavers
@@ -203,6 +204,7 @@ plasma-workspace
 pmount
 ppa-purge
 pulseaudio-module-bluetooth
+pulsemixer
 putty
 pv
 pwgen
