@@ -117,6 +117,7 @@ keepass2
 keepassx
 kid3-cli
 kinfocenter
+kmix
 kpcli
 kscreen
 kwin-common
@@ -190,6 +191,7 @@ plasma-workspace
 pmount
 ppa-purge
 pulseaudio-module-bluetooth
+pulsemixer
 putty
 pv
 pwgen
