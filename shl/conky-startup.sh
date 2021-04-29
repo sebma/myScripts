@@ -1,3 +1,3 @@
-sleep 30s
+sleep 20s
 killall conky
 conky -d
