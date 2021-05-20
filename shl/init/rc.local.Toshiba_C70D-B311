@@ -16,7 +16,7 @@ set -x
 set +e
 echo && {
 date
-[ -d /sys/firmware/efi ] && grub-install || grub-install /dev/sda
+[ -d /sys/firmware/efi ] && efiDirectory=$(mount | awk '/\/efi /{print$3}') && grub-install --removable --efi-directory=$efiDirectory || grub-install /dev/sda
 sh -x /usr/local/bin/numlockTerms.sh
 echo "=> Mounted filesystems :"
 mount | grep ^/dev
