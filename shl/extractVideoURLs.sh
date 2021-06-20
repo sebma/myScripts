@@ -22,6 +22,11 @@ function extractVideoURLs {
 		elif [ $sld = youtube ];then
 			urlPrefix=$urlBase
 			\curl -qs "$url" | grep -w video | grep -oP 'href="\K/[^/][^ &"]+' | uniq | sed "s|^|$urlPrefix|"
+		elif [ $domain = ok.ru ];then
+			tmpFile=$(mktemp)
+			\wget -qkO $tmpFile "$url"
+			cat $tmpFile | grep -oP "\Khttps?://ok.ru/video/\d+" | uniq
+			rm -f $tmpFile
 		else
 			:
 		fi
