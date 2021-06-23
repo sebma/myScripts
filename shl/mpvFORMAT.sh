@@ -14,12 +14,16 @@ mpvFORMAT() {
 	local mpvConfigFile="$HOME/.config/mpv/mpv.conf"
 	local format="$1"
 	shift
-	test "$SSH_CONNECTION" && export DISPLAY=:0
+
+	# Si on lance mpv via un ssh sur le PC b206, alors on ne forward pas l'affichage
+	if [ "$SSH_CONNECTION" ];then
+		hostname | grep -qi b206$ && DISPLAY=:0 
+	fi
 
 	if grep -q "\[$format\]" "$mpvConfigFile";then
-		LANG=en_US.utf8 nohup $mpv --profile="$format" "$@" &
+		LANG=en_US.utf8 DISPLAY=$DISPLAY nohup $mpv --profile="$format" "$@" &
 	else
-		LANG=en_US.utf8 nohup $mpv --ytdl-format="$format" "$@" &
+		LANG=en_US.utf8 DISPLAY=$DISPLAY nohup $mpv --ytdl-format="$format" "$@" &
 	fi
 }
 
