@@ -14,6 +14,7 @@ mpvFORMAT() {
 	local mpvConfigFile="$HOME/.config/mpv/mpv.conf"
 	local format="$1"
 	shift
+	test "$SSH_CONNECTION" && export DISPLAY=:0
 
 	if grep -q "\[$format\]" "$mpvConfigFile";then
 		LANG=en_US.utf8 nohup $mpv --profile="$format" "$@" &
