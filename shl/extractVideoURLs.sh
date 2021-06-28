@@ -13,7 +13,7 @@ function extractVideoURLs {
 			echo "$url" | \grep -q /playlist || apiUrl="$(echo "$url" | sed "s|$fqdn|$fqdn/user|" )"
 			apiUrl="${apiUrl/www/api}"
 			echo "$url" | \grep -q /videos$ || apiUrl="$apiUrl/videos"
-			echo "=> apiUrl = $apiUrl"
+			echo "=> apiUrl = $apiUrl" 1>&2
 			\curl -qs "$apiUrl" | jq -r '"'$urlPrefix/'"+.list[].id'
 		elif [ $sld = vimeo ];then
 			urlPrefix=$urlBase
