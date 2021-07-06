@@ -16,7 +16,8 @@ dockerBuild () {
 	fi
 
 	( [ ! -f "$dockerFile" ] || [ ! -d "$dir" ] ) && echo "[$FUNCNAME] => ERROR: <$dockerFile> or <$dir> does not exits.">&2 && return 1
-	time docker build -t "$imageName" -f "$dockerFile" "$dir" "$@" && echo && docker images "$imageName" && echo && echo "=> docker run -it -h pc1 --rm $imageName"
+	set -x
+	time docker build --no-cache -t "$imageName" -f "$dockerFile" "$dir" "$@" && echo && docker images "$imageName" && echo && echo "=> docker run -it -h pc1 --rm $imageName"
 	return $?
 }
 
