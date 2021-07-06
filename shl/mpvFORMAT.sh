@@ -7,8 +7,13 @@ funcName=${scriptBaseName/.$scriptExtension/}
 
 unset -f mpvFORMAT
 mpvFORMAT() {
-	if [ $# = 1 ];then
-		echo "=> Usage: $FUNCNAME [format] [mpvArguments] videoFileOrURL" 1>&2
+	if [ $scriptBaseName = mpvFORMAT.sh ] && [ $# = 0 ];then
+		echo "=> Usage: $scriptBaseName format [mpvArguments] videoFileOrURL" 1>&2
+		return 1
+	fi
+
+	if [ $scriptBaseName != mpvFORMAT.sh ] && [ $# = 1 ];then
+		echo "=> Usage: $scriptBaseName [mpvArguments] videoFileOrURL" 1>&2
 		return 1
 	fi
 
