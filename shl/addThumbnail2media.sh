@@ -5,13 +5,13 @@ addThumbnail2media() {
 	echo $1 | \grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
 
 	if [ $# != 2 ];then
-		echo "=> Usage: $FUNCNAME [-v] mediaFile artworkFile" 1>&2
+		echo "=> Usage: $FUNCNAME [-v] artworkFile mediaFile" 1>&2
 		exit 1
 	fi
 
 	echo $scriptOptions | \grep -q -- "-v" && debug="set -x"
-	local fileName="$1"
-	local artworkFileName="$2"
+	local artworkFileName="$1"
+	local fileName="$2"
 
 	local ffmpeg="$(which ffmpeg)"
 	local ffprobe="$(which ffprobe)"
@@ -80,6 +80,7 @@ addThumbnail2media() {
 			downloadOK=0
 		fi
 		touch -r $timestampFileRef "$fileName" && \rm $timestampFileRef
+		chmod -w "$fileName"
 	fi
 }
 
