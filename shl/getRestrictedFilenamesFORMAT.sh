@@ -455,7 +455,7 @@ function getRestrictedFilenamesFHD {
 function getRestrictedFilenamesHD {
 	local height=720
 	local other_Formats=hd/high
-	local possibleFormats="bestvideo[ext=mp4][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
+	local possibleFormats="22/bestvideo[ext=mp4][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
 	getRestrictedFilenamesFORMAT "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
 function getRestrictedFilenamesHQ {
@@ -473,7 +473,7 @@ function getRestrictedFilenamesFSD {
 function getRestrictedFilenamesSD {
 	local height=360
 	local other_Formats=low/sd/std
-	local possibleFormats="bestvideo[ext=mp4][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
+	local possibleFormats="18/bestvideo[ext=mp4][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
 	getRestrictedFilenamesFORMAT "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
 function getRestrictedFilenamesLD {
