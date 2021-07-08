@@ -32,8 +32,8 @@ function extractVideoURLs {
 		fi | while read videoHtmlURL
 		do
 			printf "$videoHtmlURL # "
-			\curl -Ls "$videoHtmlURL" | pup --charset utf8 'title text{}'
-		done | \recode html..latin9
+			\curl -Ls "$videoHtmlURL" | pup --charset utf8 'title text{}' | \recode html..latin9
+		done
 	done
 }
 
