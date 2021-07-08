@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 function moveAudioToHDMI {
+	! pidof pulseaudio >/dev/null && echo "=> Pulseaudio is down, restarting Pulseaudio ..." && pulseaudio --start --log-target=syslog
+
 	echo "=> BEFORE :"
 	! pactl list sinks short >/dev/null 2>&1 && test "$SSH_CONNECTION" && pax11publish -r
 	pactl list sink-inputs short
