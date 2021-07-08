@@ -38,7 +38,6 @@ getRestrictedFilenamesFORMAT () {
 	local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__%(extractor)s.%(ext)s"
 	local thumbnailerName=$(basename $(which AtomicParsley 2>/dev/null || which ffmpeg 2>/dev/null))
 	local thumbnailerExecutable=$(which $thumbnailerName 2>/dev/null)
-	local retCode=-1
 	local ffmpegNormalLogLevel=repeat+error
 	local ffmpegInfoLogLevel=repeat+info
 	local ffmpegLogLevel=$ffmpegNormalLogLevel
@@ -298,7 +297,7 @@ addURL2mp4Metadata() {
 	local fileName=$2
 	if which mp4tags >/dev/null 2>&1;then
 		local timestampFileRef=$(mktemp) && touch -r "$fileName" $timestampFileRef
-		echo "[mp4tags] Adding '$url' to '$fileName' metadata"
+		echo "[mp4tags] Adding '$url' to '$fileName' description metadata"
 		mp4tags -m "$url" "$fileName"
 		local codeRet=$?
 		touch -r $timestampFileRef "$fileName" && \rm $timestampFileRef
@@ -327,9 +326,9 @@ addURL2mp4Metadata() {
 		metadataURLFieldName=PURL
 	fi
 
-	echo "[ffmpeg] Adding '$url' to '$fileName' metadata"
+	echo "[ffmpeg] Adding '$url' to '$fileName' description metadata"
 	$ffmpeg -loglevel $ffmpegLogLevel -i "$fileName" -map 0 -c copy -metadata $metadataURLFieldName="$url" "$outputVideo"
-	retCode=$?
+	local retCode=$?
 	[ $retCode = 0 ] && sync && touch -r "$fileName" "$outputVideo" && \mv -f "$outputVideo" "$fileName"
 }
 function addSubtitles2media {
@@ -396,6 +395,7 @@ addThumbnail2media() {
 	local latestVideoStreamCodecName=$(echo $ffprobeJSON_File_Info | $jq -r '[ .streams[] | select(.codec_type=="video") ][-1].codec_name')
 
 	local major_brand=$(echo $ffprobeJSON_File_Info | $jq -r .format.tags.major_brand)
+	local retCode=0
 
 	[ "$debug" ] && echo "=> videoContainer = <$videoContainer>  latestVideoStreamCodecName = <$latestVideoStreamCodecName> major_brand = <$major_brand>" && echo
 
