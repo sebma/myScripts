@@ -4,7 +4,15 @@
 [ $BASH_VERSINFO -lt 4 ] && echo "=> [WARNING] BASH_VERSINFO = $BASH_VERSINFO then continuing in bash4 ..." && exec bash4 $0 "$@"
 
 set_colors() {
-	[ $BASH_VERSINFO -ge 4 ] && declare -Ag colors=( [red]=$(tput setaf 1) [green]=$(tput setaf 2) [blue]=$(tput setaf 4) [cyan]=$(tput setaf 6) [yellow]=$(tput setaf 11) [yellowOnRed]=$(tput setaf 11)$(tput setab 1) [greenOnBlue]=$(tput setaf 2)$(tput setab 4) [yellowOnBlue]=$(tput setaf 11)$(tput setab 4) [cyanOnBlue]=$(tput setaf 6)$(tput setab 4) [whiteOnBlue]=$(tput setaf 7)$(tput setab 4) [redOnGrey]=$(tput setaf 1)$(tput setab 7) [blueOnGrey]=$(tput setaf 4)$(tput setab 7) )
+	local normal=$(tput sgr0)
+	if [ $BASH_VERSINFO -ge 4 ];then
+		export escapeChar=$'\e'
+		export blinkOff=${escapeChar}'[25m'
+		declare -Ag effects=( [bold]=$(tput bold) [dim]=$(tput dim) [italics]=$(tput sitm) [underlined]=$(tput smul) [blink]=$(tput blink) [reverse]=$(tput rev) [hidden]=$(tput invis) [blinkOff]=$blinkOff )
+		declare -Ag colors=( [red]=$(tput setaf 1) [green]=$(tput setaf 2) [blue]=$(tput setaf 4) [cyan]=$(tput setaf 6) [yellow]=$(tput setaf 11) [yellowOnRed]=$(tput setaf 11)$(tput setab 1) [greenOnBlue]=$(tput setaf 2)$(tput setab 4) [yellowOnBlue]=$(tput setaf 11)$(tput setab 4) [cyanOnBlue]=$(tput setaf 6)$(tput setab 4) [whiteOnBlue]=$(tput setaf 7)$(tput setab 4) [redOnGrey]=$(tput setaf 1)$(tput setab 7) [blueOnGrey]=$(tput setaf 4)$(tput setab 7) )
+	else
+		export escapeChar=$'\033'
+	fi
 }
 
 LANG=C.UTF-8
@@ -17,7 +25,6 @@ getRestrictedFilenamesFORMAT () {
 	trap 'rc=127;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;exit $rc' INT
 
 	set_colors
-	local normal=$(tput sgr0)
 
 	if [ $# -le 1 ];then
 		echo "=> [$FUNCNAME] Usage : $scriptBaseName initialSiteVideoFormat url1 url2 ..." 1>&2
@@ -168,7 +175,7 @@ getRestrictedFilenamesFORMAT () {
 			[ "$debug" ] && echo "=> newFileName = <$newFileName>" && echo
 
 			[ $isLIVE = true ] && url="$webpage_url"
-			echo "=> Downloading <$url> using the <$chosenFormatID> $sld format ..."
+			echo "=> Downloading <$url> using the <${effects[bold]}${colors[blue]}$chosenFormatID$normal> $sld format ..."
 			echo
 
 			ytdlExtraOptions+=( --add-metadata --prefer-ffmpeg --restrict-filenames --embed-subs --write-auto-sub --sub-lang='en,fr,es,de' )
