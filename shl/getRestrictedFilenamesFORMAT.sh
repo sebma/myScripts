@@ -233,9 +233,10 @@ getRestrictedFilenamesFORMAT () {
 			if [ $downloadOK = 0 ]; then
 				ffprobeJSON_File_Info=$($ffprobe -v error -show_format -show_streams -print_format json "$fileName")
 				videoContainer=$(echo $ffprobeJSON_File_Info | $jq -r .format.format_name | cut -d, -f1)
+				videoContainersList=$(echo $ffprobeJSON_File_Info | $jq -r .format.format_name)
 
 				if [ $videoContainer = mov ];then
-					addURL2mp4Metadata "$fileName" "$url"
+					addURL2mp4Metadata "$url" "$fileName"
 					subTitleExtension=vtt
 				elif [ $videoContainer = matroska ];then
 					subTitleExtension=srt
@@ -289,12 +290,20 @@ getAudioExtension () {
 }
 addURL2mp4Metadata() {
 	if [ $# != 2 ];then
-		echo "=> Usage: $FUNCNAME mediaFile url" 1>&2
+		echo "=> Usage: $FUNCNAME url mediaFile" 1>&2
 		exit 1
 	fi
 
-	local fileName=$1
-	local url=$2
+	local url=$1
+	local fileName=$2
+	if which mp4tags >/dev/null 2>&1;then
+		local timestampFileRef=$(mktemp) && touch -r "$fileName" $timestampFileRef
+		mp4tags -m "$url" "$fileName"
+		local codeRet=$?
+		touch -r $timestampFileRef "$fileName" && \rm $timestampFileRef
+		return $codeRet
+	fi
+
 	local extension="${fileName/*./}"
 	local outputVideo="${fileName/.$extension/_NEW.$extension}"
 
