@@ -32,7 +32,11 @@ function extractVideoURLs {
 		fi | while read videoHtmlURL
 		do
 			printf "$videoHtmlURL # "
-			\curl -Ls "$videoHtmlURL" | pup --charset utf8 'title text{}' | \recode html..latin9
+			if which xidel> /dev/null; then
+				xidel -s -e //title "$videoHtmlURL"
+			elif which pup> /dev/null; then
+				\curl -Ls "$videoHtmlURL" | pup --charset utf8 'title text{}'
+			fi | \recode html..latin9
 		done
 	done
 }
