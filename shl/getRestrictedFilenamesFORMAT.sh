@@ -311,33 +311,35 @@ addURL2mp4Metadata() {
 		touch -r $timestampFileRef "$fileName" && \rm $timestampFileRef
 		return $codeRet
 	fi
+	if ! which mp4tags >/dev/null 2>&1;then
 
-	local extension="${fileName/*./}"
-	local outputVideo="${fileName/.$extension/_NEW.$extension}"
+		local extension="${fileName/*./}"
+		local outputVideo="${fileName/.$extension/_NEW.$extension}"
 
-	local ffmpeg="$(which ffmpeg)"
-	local ffprobe="$(which ffprobe)"
-	ffmpeg+=" -hide_banner"
-	ffprobe+=" -hide_banner"
-	local jq="$(which jq)"
+		local ffmpeg="$(which ffmpeg)"
+		local ffprobe="$(which ffprobe)"
+		ffmpeg+=" -hide_banner"
+		ffprobe+=" -hide_banner"
+		local jq="$(which jq)"
 
-	local ffmpegNormalLogLevel=repeat+error
-	local ffmpegInfoLogLevel=repeat+info
-	local ffmpegLogLevel=$ffmpegNormalLogLevel
+		local ffmpegNormalLogLevel=repeat+error
+		local ffmpegInfoLogLevel=repeat+info
+		local ffmpegLogLevel=$ffmpegNormalLogLevel
 
-	local ffprobeJSON_File_Info=$($ffprobe -v error -show_format -show_streams -print_format json "$fileName")
-	local videoContainer=$(echo $ffprobeJSON_File_Info | $jq -r .format.format_name | cut -d, -f1)
+		local ffprobeJSON_File_Info=$($ffprobe -v error -show_format -show_streams -print_format json "$fileName")
+		local videoContainer=$(echo $ffprobeJSON_File_Info | $jq -r .format.format_name | cut -d, -f1)
 
-	if [ $videoContainer = mov ] || [ $videoContainer = mp3 ];then
-		metadataURLFieldName=description
-	elif [ $videoContainer = matroska ];then
-		metadataURLFieldName=PURL
+		if [ $videoContainer = mov ] || [ $videoContainer = mp3 ];then
+			metadataURLFieldName=description
+		elif [ $videoContainer = matroska ];then
+			metadataURLFieldName=PURL
+		fi
+
+		echo "[ffmpeg] Adding '$url' to '$fileName' description metadata"
+		$ffmpeg -loglevel $ffmpegLogLevel -i "$fileName" -map 0 -c copy -metadata $metadataURLFieldName="$url" "$outputVideo"
+		local retCode=$?
+		[ $retCode = 0 ] && sync && touch -r "$fileName" "$outputVideo" && \mv -f "$outputVideo" "$fileName"
 	fi
-
-	echo "[ffmpeg] Adding '$url' to '$fileName' description metadata"
-	$ffmpeg -loglevel $ffmpegLogLevel -i "$fileName" -map 0 -c copy -metadata $metadataURLFieldName="$url" "$outputVideo"
-	local retCode=$?
-	[ $retCode = 0 ] && sync && touch -r "$fileName" "$outputVideo" && \mv -f "$outputVideo" "$fileName"
 }
 function addSubtitles2media {
 	local inputVideo=$1
