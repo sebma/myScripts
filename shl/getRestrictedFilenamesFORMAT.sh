@@ -310,9 +310,7 @@ addURL2mp4Metadata() {
 		local codeRet=$?
 		touch -r $timestampFileRef "$fileName" && \rm $timestampFileRef
 		return $codeRet
-	fi
-	if ! which mp4tags >/dev/null 2>&1;then
-
+	else
 		local extension="${fileName/*./}"
 		local outputVideo="${fileName/.$extension/_NEW.$extension}"
 
