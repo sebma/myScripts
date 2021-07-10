@@ -146,12 +146,12 @@ getRestrictedFilenamesFORMAT () {
 
 			thumbnailExtension=$(echo "${thumbnailURL/*\//}" | awk -F"[.]" '{print$2}')
 			thumbnailExtension="${thumbnailExtension/\?*/}"
-			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -qs "$thumbnailURL" | file -bi - | awk -F ';' '{sub(".*/","",$1);print gensub("jpeg","jpg",1,$1)}')
-			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/.$extension/.$thumbnailExtension}
+			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -Lqs "$thumbnailURL" | file -bi - | awk -F ';' '{sub(".*/","",$1);print gensub("jpeg","jpg",1,$1)}')
+			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/%.$extension/.$thumbnailExtension}
 
-			[ "$debug" ] && echo "=> chosenFormatID = <$chosenFormatID>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> artworkFileName = <$artworkFileName>  firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url> title = <$title> duration = <$duration>" && echo
+			[ "$debug" ] && echo "=> chosenFormatID = <$chosenFormatID>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName>  firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url> title = <$title> duration = <$duration>" && echo
 
-			if [ $thumbnailerName = AtomicParsley ] && ! \curl -qs "$thumbnailURL" | file -b - | $grep -q JFIF;then #Because of https://bitbucket.org/wez/atomicparsley/issues/63
+			if [ $thumbnailerName = AtomicParsley ] && ! \curl -Lqs "$thumbnailURL" | file -b - | $grep -q JFIF;then #Because of https://bitbucket.org/wez/atomicparsley/issues/63
 				if \curl -qs "$thumbnailURL" -o "$artworkFileName.tmp";then
 					echo "=> Converting <$artworkFileName> to JPEG JFIF for AtomicParsley ..."
 					echo
