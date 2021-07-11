@@ -7,7 +7,15 @@ function extractVideoURLs {
 		fqdn=$(echo "$url" | cut -d/ -f3)
 		domain=$(echo $fqdn | awk -F. '{print$(NF-1)"."$NF}')
 		sld=$(echo $fqdn | awk -F. '{print $(NF-1)}') # Second level domain
-		if [ $sld = dailymotion ];then
+		if [[ "$url" =~ ^[./] ]] || [[ "$url" =~ ^[^/]+$ ]];then # If it is a local file
+			localFile="$url"
+			domain=ok.ru # A AUTOMATISER
+			urlPrefix=https://$domain
+			case $domain in
+				ok.ru) grep -oP "/video/\d+" "$localFile" | uniq | sed "s|^|$urlPrefix|" ;;
+				*) ;;
+			esac
+		elif [ $sld = dailymotion ];then
 			urlPrefix=${urlBase}/video
 			apiUrl="$url"
 			echo "$url" | \grep -q /playlist || apiUrl="$(echo "$url" | sed "s|$fqdn|$fqdn/user|" )"
