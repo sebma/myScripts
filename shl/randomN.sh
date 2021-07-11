@@ -10,7 +10,6 @@ randomN ()
 	local b=$((2**15-1))
 	test "$N" -gt $b && {
 		echo "=> [$FUNCNAME] ERROR: N must be lower than 2^15" 1>&2
-		echo 0
 		return 2
 	}
 	local n=$RANDOM
