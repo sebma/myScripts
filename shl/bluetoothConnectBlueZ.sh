@@ -43,10 +43,12 @@ if which bluetoothctl >/dev/null 2>&1; then
 	}
 	fi
 	
-	command locate -r /module-bluetooth-discover.so$ | grep -q /module-bluetooth-discover.so$ || {
+	echo "=> Checking if <module-bluetooth-discover.so> is installed ..."
+	time command locate -r /module-bluetooth-discover.so$ | grep -q /module-bluetooth-discover.so$ || {
     	echo "=> ERROR: The <module-bluetooth-discover.so> needs to be installed." >&2
 	    exit 5
 	}
+	echo "=> Done."
 
 	pactl list modules | grep -q module-bluetooth-discover || pactl load-module module-bluetooth-discover
 
