@@ -8,19 +8,20 @@ function extractVideoURLs {
 		domain=$(echo $fqdn | awk -F. '{print$(NF-1)"."$NF}')
 		sld=$(echo $fqdn | awk -F. '{print $(NF-1)}') # Second level domain
 		echo "=> Counting urls from <$url>..." >&2
-		if [[ "$url" =~ ^[./] ]] || [[ "$url" =~ ^[^/]+$ ]];then # If it is a local file
+		time if [[ "$url" =~ ^[./] ]] || [[ "$url" =~ ^[^/]+$ ]];then # If it is a local file
 			localFile="$url"
 			domain=ok.ru # A AUTOMATISER
 			urlPrefix=https://$domain
 			case $domain in
 				ok.ru)
-					time i=$(grep -oP "/video/\d+" "$localFile" | uniq | wc -l)
-					echo "=> Extracting $i urls from <$url>..." >&2
-					grep -oP "/video/\d+" "$localFile" | uniq | sed "s|^|$urlPrefix|"
+					time extractedURLs="$(grep -oP "/video/\d+" "$localFile" | uniq | sed "s|^|$urlPrefix|")"
+					i=$(echo "$extractedURLs" | wc -l)
+					echo "=> Extracted $i urls from <$url>." >&2
+					echo "=> Resolving titles from urls..." >&2
+					echo "$extractedURLs"
 				;;
 				*) ;;
 			esac
-			echo "=> Resolving titles from urls..." >&2
 		elif [ $sld = dailymotion ];then
 			urlPrefix=${urlBase}/video
 			apiUrl="$url"
@@ -57,4 +58,4 @@ function extractVideoURLs {
 	done
 }
 
-extractVideoURLs "$@"
+time extractVideoURLs "$@"
