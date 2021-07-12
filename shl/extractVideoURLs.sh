@@ -16,7 +16,7 @@ function extractVideoURLs {
 				ok.ru)
 					time i=$(grep -oP "/video/\d+" "$localFile" | uniq | wc -l)
 					echo "=> Extracting $i urls from <$url>..." >&2
-					time grep -oP "/video/\d+" "$localFile" | uniq | sed "s|^|$urlPrefix|"
+					grep -oP "/video/\d+" "$localFile" | uniq | sed "s|^|$urlPrefix|"
 				;;
 				*) ;;
 			esac
@@ -50,7 +50,8 @@ function extractVideoURLs {
 				xidel -s -e //title "$videoHtmlURL"
 			elif which pup> /dev/null; then
 				\curl -Ls "$videoHtmlURL" | pup --charset utf8 'title text{}'
-			fi | \recode html..latin9
+#			fi | \recode html..latin9
+			fi
 		done
 #		echo;echo "=> DONE: Extracted $i urls from $url." >&2
 	done
