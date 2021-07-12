@@ -14,12 +14,13 @@ function extractVideoURLs {
 			urlPrefix=https://$domain
 			case $domain in
 				ok.ru)
-					i=$(grep -oP "/video/\d+" "$localFile" | uniq | wc -l)
+					time i=$(grep -oP "/video/\d+" "$localFile" | uniq | wc -l)
 					echo "=> Extracting $i urls from <$url>..." >&2
-					grep -oP "/video/\d+" "$localFile" | uniq | sed "s|^|$urlPrefix|"
+					time grep -oP "/video/\d+" "$localFile" | uniq | sed "s|^|$urlPrefix|"
 				;;
 				*) ;;
 			esac
+			echo "=> Resolving titles from urls..." >&2
 		elif [ $sld = dailymotion ];then
 			urlPrefix=${urlBase}/video
 			apiUrl="$url"
