@@ -12,7 +12,11 @@ function extractVideoURLs {
 			domain=ok.ru # A AUTOMATISER
 			urlPrefix=https://$domain
 			case $domain in
-				ok.ru) grep -oP "/video/\d+" "$localFile" | uniq | sed "s|^|$urlPrefix|" ;;
+				ok.ru)
+					i=$(grep -oP "/video/\d+" "$localFile" | uniq | wc -l)
+					echo "=> Extracting $i urls from $url..." >&2
+					grep -oP "/video/\d+" "$localFile" | uniq | sed "s|^|$urlPrefix|"
+				;;
 				*) ;;
 			esac
 		elif [ $sld = dailymotion ];then
@@ -46,6 +50,7 @@ function extractVideoURLs {
 				\curl -Ls "$videoHtmlURL" | pup --charset utf8 'title text{}'
 			fi | \recode html..latin9
 		done
+#		echo;echo "=> DONE: Extracted $i urls from $url." >&2
 	done
 }
 
