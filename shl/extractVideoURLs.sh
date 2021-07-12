@@ -51,7 +51,6 @@ function extractVideoURLs {
 				xidel -s -e //title "$videoHtmlURL"
 			elif which pup> /dev/null; then
 				\curl -Ls "$videoHtmlURL" | pup --charset utf8 'title text{}'
-#			fi | \recode html..latin9
 			fi
 		done
 #		echo >&2;echo "=> DONE: Extracted $i urls from $url." >&2
