@@ -7,7 +7,7 @@ function extractVideoURLs {
 		fqdn=$(echo "$url" | cut -d/ -f3)
 		domain=$(echo $fqdn | awk -F. '{print$(NF-1)"."$NF}')
 		sld=$(echo $fqdn | awk -F. '{print $(NF-1)}') # Second level domain
-		echo "=> Counting urls from $url..." >&2
+		echo "=> Counting urls from <$url>..." >&2
 		if [[ "$url" =~ ^[./] ]] || [[ "$url" =~ ^[^/]+$ ]];then # If it is a local file
 			localFile="$url"
 			domain=ok.ru # A AUTOMATISER
@@ -15,7 +15,7 @@ function extractVideoURLs {
 			case $domain in
 				ok.ru)
 					i=$(grep -oP "/video/\d+" "$localFile" | uniq | wc -l)
-					echo "=> Extracting $i urls from $url..." >&2
+					echo "=> Extracting $i urls from <$url>..." >&2
 					grep -oP "/video/\d+" "$localFile" | uniq | sed "s|^|$urlPrefix|"
 				;;
 				*) ;;
