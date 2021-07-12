@@ -53,7 +53,7 @@ function extractVideoURLs {
 #			fi | \recode html..latin9
 			fi
 		done
-#		echo;echo "=> DONE: Extracted $i urls from $url." >&2
+#		echo >&2;echo "=> DONE: Extracted $i urls from $url." >&2
 	done
 }
 
