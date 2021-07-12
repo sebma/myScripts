@@ -1,9 +1,15 @@
 #!/usr/bin/env bash
 
-urlsFile="$1"
+scriptBaseName=${0/*\//}
 test $# = 0 && {
-	echo "=> Usage: $(basename $0) urlsFile" >&2
+	echo "=> Usage: $scriptBaseName urlsFile" >&2
 	exit 1
+}
+
+urlsFile="$1"
+test -s "$urlsFile" || {
+	echo "=> [$scriptBaseName] ERROR : The file <$urlsFile> does not exist or is empty" >&2
+	exit 2
 }
 
 echo "#EXTM3U"
