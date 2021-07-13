@@ -41,7 +41,8 @@ if [ $# = 0 ]; then {
 fi
 
 echo "=> Checking if <module-bluetooth-discover.so> is installed ..."
-time command locate -r /module-bluetooth-discover.so$ | grep -q /module-bluetooth-discover.so$ || {
+pulseaudioVersion=$(pulseaudio --version | awk '{printf$2}')
+test -f /usr/lib/pulse-$pulseaudioVersion/modules/module-bluetooth-discover.so || {
 	echo "=> ERROR: The <module-bluetooth-discover.so> needs to be installed." >&2
 	exit 5
 }
