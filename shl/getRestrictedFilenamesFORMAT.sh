@@ -105,14 +105,13 @@ getRestrictedFilenamesFORMAT () {
 		esac
 		formats=( $(echo $siteVideoFormat | \sed "s/,/ /g") )
 
-		echo "=> Fetching the generated destination filename(s) for \"$url\" ..."
 		errorLogFile="youtube-dl_errors_$$.log"
 		youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__$domainStringForFilename.%(ext)s"
-
 		jsonResults=null
 		ytdlExtraOptions=( "${ytdlInitialOptions[@]}" )
 		echo "$url" | grep -q /live$ && ytdlExtraOptions+=( --playlist-items 1 )
 
+		printf "=> Fetching the generated destination filename(s) for \"$url\" with youtube-dl at %s ...\s" "$(LC_MESSAGES=en date)"
 		jsonResults=$(time command youtube-dl --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
 		formatsIDs=( $(echo "$jsonResults" | $jq -r .format_id | awk '!seen[$0]++') ) # Remove duplicate lines i.e: https://stackoverflow.com/a/1444448/5649639
 		echo
