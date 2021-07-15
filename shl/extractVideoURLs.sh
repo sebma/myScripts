@@ -39,6 +39,8 @@ function extractVideoURLs {
 		elif [ $sld = youtube ];then
 			urlPrefix=$urlBase
 			\curl -qs "$url" | grep -w video | grep -oP 'href="\K/[^/][^ &"]+' | uniq | sed "s|^|$urlPrefix|"
+		elif [ $sld = preachub ];then
+			\curl -Lqs "$url" | pup ".pm-pl-list-thumb a attr{href}"
 		elif [ $domain = ok.ru ];then
 			tmpFile=$(mktemp)
 			\wget -qkO $tmpFile "$url"
