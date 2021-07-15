@@ -111,7 +111,7 @@ getRestrictedFilenamesFORMAT () {
 		ytdlExtraOptions=( "${ytdlInitialOptions[@]}" )
 		echo "$url" | grep -q /live$ && ytdlExtraOptions+=( --playlist-items 1 )
 
-		printf "=> Fetching the generated destination filename(s) for \"$url\" with youtube-dl at %s ...\s" "$(LC_MESSAGES=en date)"
+		printf "=> Fetching the generated destination filename(s) for \"$url\" with youtube-dl at %s ...\n" "$(LC_MESSAGES=en date)"
 		jsonResults=$(time command youtube-dl --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
 		formatsIDs=( $(echo "$jsonResults" | $jq -r .format_id | awk '!seen[$0]++') ) # Remove duplicate lines i.e: https://stackoverflow.com/a/1444448/5649639
 		echo
