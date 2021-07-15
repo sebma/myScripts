@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-function extractVideoURLs {
+function extractVideoURLsFromWebPage {
 	local tmpFile=$(mktemp)
 	local displayTitles=false
 
@@ -77,4 +77,4 @@ function extractVideoURLs {
 	done
 }
 
-time extractVideoURLs "$@"
+time extractVideoURLsFromWebPage "$@"
