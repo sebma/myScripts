@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 
 function extractVideoURLs {
+	local tmpFile=$(mktemp)
+	local displayTitles=false
+
+	[ $# != 0 ] && [ "$1" = "-h" ] && {
+		echo "=> Usage $FUNCNAME [-t] url1 url2 url3 ..." >&2
+		return 1
+	}
+
+	[ $# != 0 ] && [ "$1" = "-t" ] && shift && displayTitles=true
+
 	for url
 	do
 		urlBase=$(echo "$url" | cut -d/ -f1-3)
@@ -48,16 +58,22 @@ function extractVideoURLs {
 			rm -f $tmpFile
 		else
 			:
-		fi | while read videoHtmlURL
-		do
-			printf "$videoHtmlURL # "
-			if which xidel> /dev/null; then
-				xidel -s -e //title "$videoHtmlURL"
-			elif which pup> /dev/null; then
-				\curl -Ls "$videoHtmlURL" | pup --charset utf8 'title text{}'
-			fi
-		done
-#		echo >&2;echo "=> DONE: Extracted $i urls from $url." >&2
+		fi > $tmpFile
+
+		if ! $displayTitles;then
+			cat $tmpFile
+		else
+			cat $tmpFile | while read videoHtmlURL
+			do
+				printf "$videoHtmlURL # "
+				if which xidel> /dev/null; then
+					xidel -s -e //title "$videoHtmlURL"
+				elif which pup> /dev/null; then
+					\curl -qLs "$videoHtmlURL" | pup --charset utf8 'title text{}'
+				fi
+			done
+#			echo >&2;echo "=> DONE: Extracted $i urls from $url." >&2
+		fi
 	done
 }
 
