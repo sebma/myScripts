@@ -8,6 +8,8 @@ function extractVideoURLs {
 		domain=$(echo $fqdn | awk -F. '{print$(NF-1)"."$NF}')
 		sld=$(echo $fqdn | awk -F. '{print $(NF-1)}') # Second level domain
 		echo "=> Counting urls from <$url>..." >&2
+		echo "=> Done." >&2
+
 		time if [[ "$url" =~ ^[./] ]] || [[ "$url" =~ ^[^/]+$ ]];then # If it is a local file
 			localFile="$url"
 			domain=ok.ru # A AUTOMATISER
