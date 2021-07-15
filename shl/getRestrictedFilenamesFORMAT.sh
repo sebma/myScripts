@@ -153,10 +153,11 @@ getRestrictedFilenamesFORMAT () {
 			if [ $thumbnailerName = AtomicParsley ] && ! \curl -Lqs "$thumbnailURL" | file -b - | $grep -q JFIF;then #Because of https://bitbucket.org/wez/atomicparsley/issues/63
 				if \curl -qs "$thumbnailURL" -o "$artworkFileName.tmp";then
 					echo "=> Converting <$artworkFileName> to JPEG JFIF for AtomicParsley ..."
-					echo
-					convert -verbose "$artworkFileName.tmp" "$artworkFileName" && rm -f "$artworkFileName.tmp"
-					echo
+#					convert "$artworkFileName.tmp" "$artworkFileName" && rm -f "$artworkFileName.tmp"
 					echo "=> Done."
+					echo
+					[ "$debug" ] && file "$artworkFileName"
+					[ "$debug" ] && ls -l --time-style=+'%Y-%m-%d %T' "$artworkFileName"
 					echo
 				fi
 			fi
