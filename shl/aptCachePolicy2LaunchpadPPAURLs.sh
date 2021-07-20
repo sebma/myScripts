@@ -15,7 +15,8 @@ aptCachePolicy2LaunchpadPPAURLs ()
 	do
 		aptCachePolicyOutPut=$(apt-cache policy $pkg)
 		if echo $aptCachePolicyOutPut | grep -q launchpad.net;then
-			echo "$aptCachePolicyOutPut" | awk -F: '/^[^ ]+:/{printf$1}/Installed:/{printf$2}'
+			printf "$pkg "
+			echo "$aptCachePolicyOutPut" | awk '/Installed:/{printf$2}'
 			echo "$aptCachePolicyOutPut" | awk "/launchpad.net.*$arch Packages/"'{print$2}' | awk -F/ 'BEGIN{OFS=FS}{printf " ppa:"$4"/"$5" ";sub("ppa.","",$3);$4="~"$4"/+archive";tmp=$5;$5=$6;$6=tmp;print}'
 		fi
 	done | column -t
