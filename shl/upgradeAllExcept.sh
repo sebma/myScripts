@@ -13,11 +13,15 @@ function upgradeAllBut {
 
 	echo "=> packagesToBeUpgraded = <$packagesToBeUpgraded>"
 	echo
-	test -n "$packagesToBeUpgraded" && sudo screen -L $apt install -V $packagesToBeUpgraded
+	if test -n "$packagesToBeUpgraded";then
+		if [ -n "$SSH_CONNECTION" ] && which screen >/dev/null 2>&1;then
+			sudo screen -L $apt install -V $packagesToBeUpgraded
+		else
+			sudo $apt install -V $packagesToBeUpgraded
+		fi
+	fi
 	sync
-	set +x
 }
-
 function main {
 	set -- ${@%/*}  # Remove trailing "/distrib" from all arguments
 	local os=$(uname -s)
