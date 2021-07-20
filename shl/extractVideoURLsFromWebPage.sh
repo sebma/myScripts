@@ -6,14 +6,13 @@ function extractVideoURLsFromWebPage {
 		return 1
 	}
 
-	for url
+	time for url
 	do
 		urlBase=$(echo "$url" | cut -d/ -f1-3)
 		fqdn=$(echo "$url" | cut -d/ -f3)
 		domain=$(echo $fqdn | awk -F. '{print$(NF-1)"."$NF}')
 		sld=$(echo $fqdn | awk -F. '{print $(NF-1)}') # Second level domain
-		echo "=> Counting urls from <$url>..." >&2
-		echo "=> Done." >&2
+		echo "=> Extracting urls from <$url>..." >&2
 
 		time if [[ "$url" =~ ^[./] ]] || [[ "$url" =~ ^[^/]+$ ]];then # If it is a local file
 			localFile="$url"
@@ -57,4 +56,4 @@ function extractVideoURLsFromWebPage {
 	done
 }
 
-time extractVideoURLsFromWebPage "$@"
+extractVideoURLsFromWebPage "$@"
