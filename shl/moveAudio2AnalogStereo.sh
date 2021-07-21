@@ -10,6 +10,7 @@ function moveAudioToAnalogStereo {
 	analogStereoOutputPattern='\.analog-stereo\>'
 	sink_output=$(pactl list sinks short | awk "/$analogStereoOutputPattern/"'{printf$1}')
 	echo "=> sink_output = $sink_output"
+
 	pactl list sink-inputs short | awk '/protocol-native.c/{print$1}' | while read sink_input
 	do
 		pactl move-sink-input $sink_input $sink_output
