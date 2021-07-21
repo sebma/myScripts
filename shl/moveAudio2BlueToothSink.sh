@@ -26,13 +26,14 @@ function moveAudioToBluetoothSink {
 
 			sink_output=$(pactl list sinks short | awk "/$bluetoothDevicePACTLMacAddr/"'{printf$1}')
 			echo "=> sink_output = $sink_output"
+
 			pactl list sink-inputs short | awk '/protocol-native.c/{print$1}' | while read sink_input
 			do
 				pactl move-sink-input $sink_input $sink_output
 			done
 
-			bluetoothDevicePACTLString=$(pactl list sinks short | awk "/bluez_sink.$bluetoothDevicePACTLMacAddr/"'{print$2}')
-			pactl suspend-sink $bluetoothDevicePACTLString 0
+#			bluetoothDevicePACTLString=$(pactl list sinks short | awk "/bluez_sink.$bluetoothDevicePACTLMacAddr/"'{print$2}')
+#			pactl suspend-sink $bluetoothDevicePACTLString 0
 
 			echo "=> AFTER :"
 			pactl list sink-inputs short
