@@ -4,6 +4,7 @@ urlOfVideo ()
 {
 	local ffprobe="command ffprobe -hide_banner"
 	local format_name=unknown
+	local protocolRegExp="(https?|ftps?|s?ftp)://"
 	for video in "$@"
 	do
 		format_name="$(videoFormat $video)"
@@ -19,7 +20,8 @@ urlOfVideo ()
 			;;
 		esac
 		[ $# -gt 1 ] && printf "=> video = $video\t url = "
-		$ffprobe -v error -show_entries format_tags=$tag -of default=noprint_wrappers=1:nokey=1 "$video"
+		url=$($ffprobe -v error -show_entries format_tags=$tag -of default=noprint_wrappers=1:nokey=1 "$video" | egrep "$protocolRegExp")
+		echo $url
 	done
 }
 videoFormat ()
