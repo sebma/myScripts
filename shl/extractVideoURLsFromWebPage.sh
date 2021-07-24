@@ -16,7 +16,7 @@ function extractVideoURLsFromWebPage {
 
 		time if [[ "$url" =~ ^[./] ]] || [[ "$url" =~ ^[^/]+$ ]];then # If it is a local file
 			localFile="$url"
-			domain=ok.ru # A AUTOMATISER
+			domain=$(cat "$localFile" | pup 'meta[property=og:url] attr{content}' | awk -F/ '{print$3}')
 			urlPrefix=https://$domain
 			case $domain in
 				ok.ru)
