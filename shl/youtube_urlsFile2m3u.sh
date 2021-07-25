@@ -12,6 +12,6 @@ echo "#EXTM3U"
 time awk '{print$1}' $urlsFile | uniq | while read url
 do
 	printf "#EXTINF:-1,"
-	\curl -Ls $url | awk -F'"' /og:title/'{print$4}'
+	\curl -Ls $url | pup 'head title text{}'
 	echo $url
 done
