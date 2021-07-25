@@ -1,4 +1,8 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-#grep -v EXTM3U "$@" | awk -F"," '/EXTINF/{$1="";title=$0}/^(https?|s?ftps?|ssh):/{url=$0;print url" #"title}'
+[ $# = 0 ] || [ $1 = -h ] && {
+	echo "=> Usage: ${0/*\//} m3uFile" 1>&2
+	exit 1
+}
+
 tail -n +2 "$@" | tac | \sed -E 'N;s/\n#EXTINF:-1,/ # /' | tac
