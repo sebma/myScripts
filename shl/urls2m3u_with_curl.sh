@@ -16,7 +16,7 @@ echo "#EXTM3U" | \recode ..utf-8
 time awk '!/^($|#)/{print$1}' $urlsFile | uniq | while read url
 do
 	printf "#EXTINF:-1," | \recode ..utf-8
-	title=$(\curl -qLs $url | pup --charset utf8 'title text{}')
+	title=$(\curl -qLs $url | pup --charset utf8 'head title text{}')
 	echo $title | \recode ..utf-8
 	echo $url | \recode ..utf-8
 done
