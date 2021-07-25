@@ -13,7 +13,7 @@ do
 		videoID=$(\curl -qLs "$url" | pup 'meta[property=og:description] attr{content}' | awk -F'[[ ]' '{print$2}')
 		videoFileName=$(echo $videoTitle | sed 's/ /_/g').mp4
 		set -x
-		youtube-dl --ignore-config -co "$videoFileName" $peterAdamJPV_BaseURL/pop/popJW.php?nc=$videoID
+		youtube-dl --ignore-config -co "$videoFileName" $peterAdamJPV_BaseURL/pop/popJW.php?nc=$videoID && chmod -w "$videoFileName"
 		set +x
 	else
 		echo "=> Only <$peterAdamJPV_BaseURL/viewitem.php> url types are supported." >&2
