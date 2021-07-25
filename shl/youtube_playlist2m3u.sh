@@ -7,13 +7,14 @@ fi
 
 youtubePlayListURL="$1"
 youtubeFQDN=http://youtu.be
+ytdlnoconfig="youtube-dl --ignore-config"
 
 export LANG=fr_FR.UTF-8
 echo "#EXTM3U"
-time command youtube-dl --get-id $youtubePlayListURL | uniq | while read youtubeID
+time $ytdlnoconfig --ignore-errors --flat-playlist -j "$youtubePlayListURL" | jq -r .id | uniq | while read youtubeID
 do
 	url=$youtubeFQDN/$youtubeID
 	printf "#EXTINF:-1,"
-	\curl -Ls $url | awk -F'"' /og:title/'{print$4}'
+	\curl -Ls $url | pup 'head title text{}'
 	echo $url
 done
