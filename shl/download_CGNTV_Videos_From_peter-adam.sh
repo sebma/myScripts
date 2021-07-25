@@ -5,18 +5,19 @@
 	exit 1
 }
 
+peterAdamJPV_BaseURL=http://www.peter-adam.com/jpv
 for url
 do
-	if echo "$url" | grep -q www.peter-adam.com/jpv/viewitem.php;then
+	if echo "$url" | grep -q $peterAdamJPV_BaseURL/viewitem.php;then
 		videoTitle=$(\curl -qLs "$url" | pup 'meta[property=og:title] attr{content}')
 		videoFileName=$(echo $videoTitle | sed 's/ /_/g').mp4
 		videoID=$(\curl -qLs "$url" | pup 'meta[property=og:description] attr{content}' | awk -F'[[ ]' '{print$2}')
-		videoDirectURL=$(youtube-dl --ignore-config --no-warnings -g http://www.peter-adam.com/jpv/pop/popJW.php?nc=$videoID)
+		videoDirectURL=$(youtube-dl --ignore-config --no-warnings -g $peterAdamJPV_BaseURL/pop/popJW.php?nc=$videoID)
 		set -x
-		wget -cO "$videoFileName" "$videoDirectURL"
+		wget --no-config -cO "$videoFileName" "$videoDirectURL"
 		set +x
 	else
-		echo "=> Only <www.peter-adam.com/jpv/viewitem.php> url types are supported." >&2
+		echo "=> Only <$peterAdamJPV_BaseURL/viewitem.php> url types are supported." >&2
 		continue
 	fi
 done
