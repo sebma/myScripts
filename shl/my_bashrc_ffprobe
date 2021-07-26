@@ -119,7 +119,7 @@ alias viewder="\openssl x509 -noout -text -inform DER -in"
 alias wavemon="\lxterminal -e wavemon &"
 alias wget="\wget -c --content-disposition"
 alias xclock="\xclock -digital -update 1"
-alias xfree="\xterm -geometry 73x5 -e watch -n2 free -om &"
+alias xfree="\xterm -geometry 73x5 -e watch -n2 free -m &"
 alias xprop='\xprop WM_CLASS _NET_WM_PID WM_ICON_NAME'
 alias xterm="\xterm -sb -fn 9x15"
 #AUDIO DECODE
