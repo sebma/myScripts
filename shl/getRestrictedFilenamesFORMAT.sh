@@ -150,10 +150,10 @@ getRestrictedFilenamesFORMAT () {
 
 			[ "$debug" ] && echo "=> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName>  firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url> title = <$title> duration = <$duration>" && echo
 
-			if [ $thumbnailerName = AtomicParsley ] && \curl -Lqs "$thumbnailURL" | file -b - | $grep -q JFIF;then #Because of https://bitbucket.org/wez/atomicparsley/issues/63
+			if [ $thumbnailerName = AtomicParsley ] && ! \curl -Lqs "$thumbnailURL" | file -b - | $grep -q JFIF;then #Because of https://bitbucket.org/wez/atomicparsley/issues/63
 				if \curl -qs "$thumbnailURL" -o "$artworkFileName.tmp";then
 					echo "=> Converting <$artworkFileName> to JPEG JFIF for AtomicParsley ..."
-#					convert "$artworkFileName.tmp" "$artworkFileName" && rm -f "$artworkFileName.tmp"
+					convert "$artworkFileName.tmp" "$artworkFileName" && rm -f "$artworkFileName.tmp"
 					echo "=> Done."
 					echo
 					[ "$debug" ] && file "$artworkFileName"
