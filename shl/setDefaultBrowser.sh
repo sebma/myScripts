@@ -13,6 +13,9 @@ echo "=> Corresponding desktopFile = $desktopFile"
 echo "=> Association des protocoles http et https avec $desktopFile ..."
 echo "=> xdg-mime default $desktopFile x-scheme-handler/http x-scheme-handler/https ..."
 xdg-mime default $desktopFile x-scheme-handler/http x-scheme-handler/https
+echo "=> xdg-mime default $desktopFile text/html ..."
+xdg-mime default $desktopFile text/html
+xdg-mime query default text/html
 echo "=> Verification de l'ouverture des protocoles http et https par <$defaultBrowser> ..."
 xdg-mime query default x-scheme-handler/http
 xdg-mime query default x-scheme-handler/https
