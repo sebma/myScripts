@@ -169,7 +169,7 @@ getRestrictedFilenamesFORMAT () {
 
 			[ "$debug" ] && echo "=> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName>  firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url> title = <$title> duration = <$duration>" && echo
 
-			if [ $thumbnailerName = AtomicParsley ] && ! (\curl -Lqs "$thumbnailURL" | file -b - | $grep -q JFIF);then #Because of https://bitbucket.org/wez/atomicparsley/issues/63
+			if [ $thumbnailerName = AtomicParsley ] && ! (\curl -Lqs "$thumbnailURL" | file -b - | $grep -q JPEG.*JFIF);then #Because of https://bitbucket.org/wez/atomicparsley/issues/63
 				echo "${effects[bold]}${colors[blue]}=> WARNING: The remote thumbnail is not JFIF compliant, downloading it to convert it to JPEG JFIF ...$normal"
 				if \curl -qs "$thumbnailURL" -o "$artworkFileName.tmp";then
 					echo "=> Converting <$artworkFileName> to JPEG JFIF for AtomicParsley ..."
