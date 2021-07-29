@@ -142,7 +142,7 @@ links2
 lsdvd
 lshw-gtk
 lynx
-man2html
+man2html-base
 marble # globe planet terre
 marble-qt # globe and map widget (no KDE dependencies)
 mdns-scan
