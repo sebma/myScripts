@@ -36,10 +36,13 @@ getRestrictedFilenamesFORMAT () {
 	local youtube_dl="eval LANG=C.UTF-8 command youtube-dl" # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
 	local translate=cat
 	local siteVideoFormat downloadOK=-1 extension fqdn fileSizeOnFS=0 remoteFileSize=0
+	local protocol=https
 	local -i i=0
 	local -i j=0
 	local isLIVE=false
 	local jsonResults=null
+	local channel_id=null
+	local channel_url=null
 	local metadataURLFieldName=description
 	local embedThumbnail="--write-thumbnail"
 	local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__%(extractor)s.%(ext)s"
@@ -95,6 +98,7 @@ getRestrictedFilenamesFORMAT () {
 		echo "=> Downloading url # $i/$# ..."
 		echo
 		echo $url | egrep -wq "https?:" || url=https://www.youtube.com/watch?v=$url
+		protocol=$(echo "$url" | cut -d: -f1)
 		fqdn=$(echo "$url" | cut -d/ -f3)
 		domain=$(echo $fqdn | awk -F. '{print$(NF-1)"."$NF}')
 		domainStringForFilename=$(echo $domain | tr . _)
@@ -127,12 +131,27 @@ getRestrictedFilenamesFORMAT () {
 			$undebug
 			fileName=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\"))._filename")
 			extension=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).ext")
-			thumbnailURL=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).thumbnail")
 			formatString=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format")
 			chosenFormatID=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format_id")
 			streamDirectURL="$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).url")"
 			remoteFileSize=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize" | sed "s/null/-1/")
-			isLIVE=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).is_live")
+
+			# Les resultats ci-dessous ne dependent pas du format selectionne
+			jsonHeaders=$(echo "$jsonResults"  | $jq -r 'del(.formats, .thumbnails, .automatic_captions, .requested_subtitles)')
+			isLIVE=$(echo "$jsonHeaders" | $jq -r .is_live)
+			thumbnailURL=$(echo "$jsonHeaders" | $jq -r .thumbnail)
+			uploader_id=$(echo "$jsonHeaders" | $jq -r .uploader_id)
+			channel_id=$(echo "$jsonHeaders" | $jq -r .channel_id)
+			channel_url=$(echo "$jsonHeaders" | $jq -r .channel_url)
+			[ $channel_url = null ] && channel_url=$(echo "$jsonHeaders" | $jq -r .uploader_url)
+
+			if [ $channel_url = null ];then
+				case $sld in
+					youtube) channel_url=$protocol://$fqdn/channel/$channel_id;;
+					vimeo) channel_url=$protocol://$fqdn/$uploader_id;;
+					*) channel_url=null;;
+				esac
+			fi
 
 			# To create an M3U file
 			IFS=$'\n' read -d "" duration webpage_url title <<< $(echo "$jsonResults"  | $jq -r '.duration, .webpage_url, .title')
@@ -244,7 +263,12 @@ getRestrictedFilenamesFORMAT () {
 				videoContainersList=$(echo $ffprobeJSON_File_Info | $jq -r .format.format_name)
 
 				if [ $videoContainer = mov ];then
-					addURL2mp4Metadata "$url" "$fileName"
+					if [ $channel_url = null ];then
+						addURLs2mp4Metadata "$url" "$fileName"
+					else
+						addURLs2mp4Metadata "$url
+Channel URL : $channel_url" "$fileName"
+					fi
 					subTitleExtension=vtt
 				elif [ $videoContainer = matroska ];then
 					subTitleExtension=srt
@@ -296,13 +320,13 @@ getAudioExtension () {
 	fi
 	echo $audioExtension
 }
-addURL2mp4Metadata() {
+addURLs2mp4Metadata() {
 	if [ $# != 2 ];then
 		echo "=> Usage: $FUNCNAME url mediaFile" 1>&2
 		exit 1
 	fi
 
-	local url=$1
+	local url="$1"
 	local fileName=$2
 	if which mp4tags >/dev/null 2>&1;then
 		local timestampFileRef=$(mktemp) && touch -r "$fileName" $timestampFileRef
