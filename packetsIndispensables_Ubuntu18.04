@@ -153,6 +153,7 @@ lsdvd
 lshw-gtk
 lynx
 lyricue
+man2html
 marble # globe planet terre
 marble-qt # globe and map widget (no KDE dependencies)
 mdns-scan
