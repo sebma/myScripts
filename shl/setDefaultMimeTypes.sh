@@ -71,7 +71,7 @@ which smplayer >/dev/null 2>&1 && {
 	echo "=> Fait."
 }
 
-#Ouvrir les fichiers playlist avec SMPlayer
+#Ouvrir les fichiers Playlist avec SMPlayer
 which smplayer >/dev/null 2>&1 && {
 #	playlistFileTypes=".asx .bio .fpl .kpl .m3u .m3u8 .pla .aimppl .pls .smil .vlc .wpl .xspf .zpl"
 	playlistFileTypes=".asx .m3u .m3u8 .pla .pls .smil .vlc .wpl .xspf"
