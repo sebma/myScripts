@@ -129,6 +129,7 @@ getRestrictedFilenamesFORMAT () {
 			let j++
 			let numberOfFilesToDownload=$numberOfURLsToDownload*${#formatsIDs[@]}
 			$undebug
+
 			fileName=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\"))._filename")
 			extension=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).ext")
 			formatString=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format")
@@ -138,7 +139,11 @@ getRestrictedFilenamesFORMAT () {
 
 			# Les resultats ci-dessous ne dependent pas du format selectionne
 			jsonHeaders=$(echo "$jsonResults"  | $jq -r 'del(.formats, .thumbnails, .automatic_captions, .requested_subtitles)')
+
 			isLIVE=$(echo "$jsonHeaders" | $jq -r .is_live)
+			title=$(echo "$jsonHeaders" | $jq -r .title)
+			webpage_url=$(echo "$jsonHeaders" | $jq -r .webpage_url)
+			duration=$(echo "$jsonHeaders" | $jq -r .duration)
 			thumbnailURL=$(echo "$jsonHeaders" | $jq -r .thumbnail)
 			uploader_id=$(echo "$jsonHeaders" | $jq -r .uploader_id)
 			channel_id=$(echo "$jsonHeaders" | $jq -r .channel_id)
@@ -154,13 +159,18 @@ getRestrictedFilenamesFORMAT () {
 			fi
 
 			# To create an M3U file
-			IFS=$'\n' read -d "" duration webpage_url title <<< $(echo "$jsonResults"  | $jq -r '.duration, .webpage_url, .title')
-			duration=$($grep '^[0-9]*' <<< $duration || echo -1)
-
-			test -n "$playlistFileName" && printf "#EXTINF:$duration,$title\n$webpage_url\n" >> "$playlistFileName"
+			test -n "$playlistFileName" && duration=$($grep '^[0-9]*' <<< $duration || echo -1) && printf "#EXTINF:$duration,$title\n$webpage_url\n" >> "$playlistFileName"
 
 			ffprobeJSON_Stream_Info=$($ffprobe -hide_banner -v error -show_format -show_streams -print_format json "$streamDirectURL")
-			firstAudioStreamCodecName=$(echo "$ffprobeJSON_Stream_Info" | $jq -r '[ .streams[] | select(.codec_type=="audio") ][0].codec_name')
+			codeRet=$?
+			if [ $codeRet = 0 ];then
+				firstAudioStreamCodecName=$(echo "$ffprobeJSON_Stream_Info" | $jq -r '[ .streams[] | select(.codec_type=="audio") ][0].codec_name')
+			else
+				echo $normal >&2
+				echo "${colors[red]}=> WARNING : Error fetching the <firstAudioStreamCodecName> from <$streamDirectURL> with ffprobe.$normal" >&2
+				echo >&2
+				unset ffprobeJSON_Stream_Info firstAudioStreamCodecName
+			fi
 
 			thumbnailExtension=$(echo "${thumbnailURL/*\//}" | awk -F"[.]" '{print$2}')
 			thumbnailExtension="${thumbnailExtension/\?*/}"
