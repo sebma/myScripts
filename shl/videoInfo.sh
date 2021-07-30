@@ -2,7 +2,6 @@
 
 #set -o nounset
 
-
 function videoInfo {
 	local columns=$COLUMNS
 #	local columns="" # To see more info than the width of the screen
@@ -10,31 +9,31 @@ function videoInfo {
 	which ffprobe >/dev/null && {
 		local youtube_dl='command youtube-dl'
 		local ffprobe='command ffprobe -hide_banner'
+		local userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3513.1 Safari/537.36"
 		for urlOrFile
 		do
-			echo
 #			echo "=> urlOrFile = $urlOrFile"
 			if echo "$urlOrFile" | egrep -q "(https?|s?ftps?|ssh|rtmp|rtsp|mms)://"
 			then
 				#remote stream
-				if \curl -s "$urlOrFile" | file -bi - | \grep -q "^text/"
-				then
+				streamMimeType=$(\curl -qLs --user-agent "$userAgent" "$urlOrFile" | file -bi -)
+				if echo $streamMimeType | \grep "^text/" -q;then
 					echo "=> This stream needs first to be resolved by youtube-dl ..."
 					possibleFormats=best[ext=mp4]/best[ext=webm]/best[ext=flv]/18/webm/sd/http-480
 					infos="$($youtube_dl -gef $possibleFormats -- "$urlOrFile")"
 					test -z "$infos" && continue
 					title="$(echo "$infos" | sed -n 1p )"
 					directURLOfStream="$(echo "$infos" | sed -n 2p)"
-					size=$(\curl -sI "$directURLOfStream" | awk 'BEGIN{IGNORECASE=1;size=0}/Content-Length:/{if($2>0)size=$2}END{printf "%8.3f MiB\n",size/2^20}')
+					size=$(\curl -qLsI --user-agent "$userAgent" "$directURLOfStream" | awk 'BEGIN{IGNORECASE=1;size=0}/Content-Length:/{if($2>0)size=$2}END{printf "%8.3f MiB\n",size/2^20}')
 					echo "Title: $title"
 					echo "Size: $size"
-					command ffprobe $ffprobeOptions "$directURLOfStream" 2>&1
-				else
+					time $ffprobe -user_agent "$userAgent" $ffprobeOptions "$directURLOfStream" 2>&1
+				elif echo $streamMimeType | \grep charset=binary -q;then
 					#direct stream
 					echo "=> This stream is direct stream"
-					size=$(\curl -sI "$urlOrFile" | awk 'BEGIN{IGNORECASE=1;size=0}/Content-Length:/{if($2>0)size=$2}END{printf "%8.3f MiB\n",size/2^20}')
+					size=$(\curl -qLsI --user-agent "$userAgent" "$urlOrFile" | awk 'BEGIN{IGNORECASE=1;size=0}/Content-Length:/{if($2>0)size=$2}END{printf "%8.3f MiB\n",size/2^20}')
 					echo "Size: $size"
-					$ffprobe "$urlOrFile"
+					time $ffprobe -user_agent "$userAgent" "$urlOrFile"
 				fi
 			else
 				#Local file
