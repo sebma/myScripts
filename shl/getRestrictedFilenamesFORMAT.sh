@@ -62,6 +62,7 @@ getRestrictedFilenamesFORMAT () {
 	local formatsIDs=null
 	local thumbnailExtension=null
 	local artworkFileName=null
+	local userAgent=null
 	local tool=null
 	local debug="set +x"
 	local undebug="set +x"
@@ -161,9 +162,10 @@ getRestrictedFilenamesFORMAT () {
 			# To create an M3U file
 			test -n "$playlistFileName" && duration=$($grep '^[0-9]*' <<< $duration || echo -1) && printf "#EXTINF:$duration,$title\n$webpage_url\n" >> "$playlistFileName"
 
-			ffprobeJSON_Stream_Info=$($ffprobe -hide_banner -v error -show_format -show_streams -print_format json "$streamDirectURL")
-			codeRet=$?
-			if [ $codeRet = 0 ];then
+			echo "=> Fetching some information from remote stream with ffprobe ..."
+			userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3513.1 Safari/537.36"
+			ffprobeJSON_Stream_Info=$(time $ffprobe -hide_banner -user_agent "$userAgent" -v error -show_format -show_streams -print_format json "$streamDirectURL")
+			if [ $? = 0 ];then
 				firstAudioStreamCodecName=$(echo "$ffprobeJSON_Stream_Info" | $jq -r '[ .streams[] | select(.codec_type=="audio") ][0].codec_name')
 			else
 				echo $normal >&2
@@ -184,7 +186,7 @@ getRestrictedFilenamesFORMAT () {
 				if echo $thumbnailFormatString | $grep -q JPEG && ! echo $thumbnailFormatString | $grep -q JFIF;then
 					#Because of https://bitbucket.org/wez/atomicparsley/issues/63
 					echo "${effects[bold]}${colors[blue]}=> WARNING: The remote thumbnail is not JFIF compliant, downloading it to convert it to JPEG JFIF ...$normal"
-					if \curl -qs "$thumbnailURL" -o "$artworkFileName.tmp";then
+					if \curl -qLs "$thumbnailURL" -o "$artworkFileName.tmp";then
 						echo "=> Converting <$artworkFileName> to JPEG JFIF for AtomicParsley ..."
 						convert "$artworkFileName.tmp" "$artworkFileName" && rm -f "$artworkFileName.tmp"
 						echo "=> Done."
