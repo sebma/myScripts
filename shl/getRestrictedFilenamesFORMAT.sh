@@ -149,15 +149,8 @@ getRestrictedFilenamesFORMAT () {
 			uploader_id=$(echo "$jsonHeaders" | $jq -r .uploader_id)
 			channel_id=$(echo "$jsonHeaders" | $jq -r .channel_id)
 			channel_url=$(echo "$jsonHeaders" | $jq -r .channel_url)
-			[ $channel_url = null ] && channel_url=$(echo "$jsonHeaders" | $jq -r .uploader_url)
-
-			if [ $channel_url = null ];then
-				case $sld in
-					youtube) channel_url=$protocol://$fqdn/channel/$channel_id;;
-					vimeo) channel_url=$protocol://$fqdn/$uploader_id;;
-					*) channel_url=null;;
-				esac
-			fi
+			uploader_url=$(echo "$jsonHeaders" | $jq -r .uploader_url)
+			channelURL=$uploader_url
 
 			# To create an M3U file
 			test -n "$playlistFileName" && duration=$($grep '^[0-9]*' <<< $duration || echo -1) && printf "#EXTINF:$duration,$title\n$webpage_url\n" >> "$playlistFileName"
@@ -279,11 +272,11 @@ getRestrictedFilenamesFORMAT () {
 				videoContainersList=$(echo $ffprobeJSON_File_Info | $jq -r .format.format_name)
 
 				if [ $videoContainer = mov ];then
-					if [ $channel_url = null ];then
+					if [ $channelURL = null ];then
 						addURLs2mp4Metadata "$url" "$fileName"
 					else
 						addURLs2mp4Metadata "$url
-Channel URL : $channel_url" "$fileName"
+Channel URL : $channelURL" "$fileName"
 					fi
 					subTitleExtension=vtt
 				elif [ $videoContainer = matroska ];then
