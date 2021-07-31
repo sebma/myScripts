@@ -166,6 +166,7 @@ getRestrictedFilenamesFORMAT () {
 				echo >&2
 				unset ffprobeJSON_Stream_Info firstAudioStreamCodecName
 			fi
+			echo
 
 			thumbnailExtension=$(echo "${thumbnailURL/*\//}" | awk -F"[.]" '{print$2}')
 			thumbnailExtension="${thumbnailExtension/\?*/}"
@@ -285,6 +286,7 @@ Channel URL : $channelURL" "$fileName"
 
 				[ $extension = m4a ] && \ls "${fileName/.*/}".*.$subTitleExtension >/dev/null 2>&1  && addSubtitles2media "$fileName" "${fileName/.*/}".*.$subTitleExtension
 				df -T . | awk '{print$2}' | egrep -q "fuseblk|vfat" || chmod -w "$fileName"
+				echo
 				videoInfo.sh "$fileName"
 			fi
 		done
