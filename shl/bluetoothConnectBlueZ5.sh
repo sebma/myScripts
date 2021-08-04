@@ -26,7 +26,7 @@ if [ -z "$deviceList" ]; then {
 fi
 
 printf "Here are the available devices : "
-echo "$deviceList" | awk '/^Device/{print$NF}'
+echo "$deviceList" | cut -d' ' -f3-
 if [ $# = 0 ]; then {
 	printf "Type the device name you want to connect to : "
 	read deviceRegExp
