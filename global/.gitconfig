@@ -11,7 +11,7 @@
 	st = status -bs
 	stu = status -bs -uno
 	com = commit -uno
-	mvIntoDIR = "!f1() { cd ${GIT_PREFIX:-.};git mv -v $1 $2/;git commit -uno $1 $2 -m \"Moved $1 to $2/\"; }; f1"
+	mvIntoDIR = "!f1() { cd ${GIT_PREFIX:-.};git mv -v $1 $2/;git commit -uno $1 $2 -m \"Moved $1 into $2/\"; }; f1"
 	mvv = "!f2() { cd ${GIT_PREFIX:-.};git mv -v $1 $2;git commit -uno $1 $2 -m \"Renamed $1 to $2\"; }; f2"
 [credential]
 	helper = cache --timeout=86400
