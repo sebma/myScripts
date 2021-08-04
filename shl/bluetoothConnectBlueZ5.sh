@@ -49,10 +49,10 @@ test -f /usr/lib/pulse-$pulseaudioVersion/modules/module-bluetooth-discover.so |
 echo "=> Done."
 
 echo "=> Loading <module-bluetooth-discover.so>  ..."
-pactl list modules | grep -q module-bluetooth-discover || pactl load-module module-bluetooth-discover
+pactl list modules | grep module-bluetooth-discover -q || pactl load-module module-bluetooth-discover
 
 deviceRegExp=$(sed "s/ /./g" <<< "$deviceRegExp")
-if echo "$deviceList" | grep -q "$deviceRegExp"; then {
+if echo "$deviceList" | grep "$deviceRegExp" -q; then
 	deviceHW=$(echo "$deviceList" | awk /^Device.*$deviceRegExp/'{print$2}' | sort -u)
 	cat<<-EOF | bluetoothctl
 	select $bluetoothControllerMACAddress
@@ -69,8 +69,7 @@ EOF
 	echo info $deviceHW | bluetoothctl | grep -v UUID:
 
 	$scriptDir/moveAudio2BlueToothSink.sh $deviceHW
-} else {
+else
 	echo "=> ERROR: The device you have chosen is not visible." >&2
 	exit 5
-}
 fi
