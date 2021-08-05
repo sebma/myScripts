@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 topd () {
-	du -cxhd 1 2>/dev/null | grep -v '\s*\.$' | sort -hr | head -n $1
+	[ $# = 0 ] && local lines=10 || local lines=$1
+	du -cxhd 1 2>/dev/null | grep -v '\s*\.$' | sort -hr | head -n $lines
 }
 
-topd "$1"
+topd "$@"
