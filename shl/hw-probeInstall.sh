@@ -47,8 +47,9 @@ hw-probeInstall () {
 			if ! which inxi >/dev/null 2>&1;then
 				cd inxi >/dev/null 2>&1 || { git clone https://aur.archlinux.org/inxi.git;cd inxi; }
 				if git config remote.origin.url | grep -q /inxi;then
-					makepkg -si && sync && which inxi
+					makepkg -si
 					retCode=$?
+					sync
 					cd ->/dev/null
 				else
 					git clone https://aur.archlinux.org/inxi.git
@@ -61,7 +62,9 @@ hw-probeInstall () {
 				cd hw-probe >/dev/null 2>&1 || { git clone https://aur.archlinux.org/hw-probe.git;cd hw-probe; }
 				if git config remote.origin.url | grep -q /hw-probe;then
 					sed -i "/^depends=/s/'edid-decode'//" PKGBUILD
-					makepkg -si && sync && which hw-probe
+					makepkg -si
+					retCode=$?
+					sync
 					cd ->/dev/null
 				else
 					git clone https://aur.archlinux.org/hw-probe.git
