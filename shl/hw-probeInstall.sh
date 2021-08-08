@@ -24,6 +24,7 @@ distribName () {
 hw-probeInstall () {
 	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo=$(which sudo) || local sudo=""
 	local distribName=$(distribName)
+	local retCode=0
 	if [ $distribName = ubuntu ]; then
 		local ubuntuSources=/etc/apt/sources.list
 		grep -q universe $ubuntuSources   || $sudo add-apt-repository universe -y
@@ -34,6 +35,7 @@ hw-probeInstall () {
 		apt-cache policy hw-probe | grep -q mikhailnov/hw-probe || $sudo apt update
 		dpkg -l inxi | grep -q ^.i || $sudo apt install -V inxi
 		dpkg -l hw-probe | grep -q ^.i || $sudo apt install -V hw-probe
+		retCode=$?
 	elif [ $distribName = arch ]; then
 		if $sudo echo "";then
 			$sudo pacman -Sy
@@ -46,6 +48,7 @@ hw-probeInstall () {
 				cd inxi >/dev/null 2>&1 || { git clone https://aur.archlinux.org/inxi.git;cd inxi; }
 				if git config remote.origin.url | grep -q /inxi;then
 					makepkg -si && sync && which inxi
+					retCode=$?
 					cd ->/dev/null
 				else
 					git clone https://aur.archlinux.org/inxi.git
@@ -66,6 +69,10 @@ hw-probeInstall () {
 			fi
 		fi
 	fi
+
+	echo
+	which hw-probe >/dev/null 2>&1 && hw-probe -v
+	return $retCode
 }
 
 hw-probeInstall
