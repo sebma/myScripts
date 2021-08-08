@@ -26,9 +26,14 @@ hw-probeInstallFromSource () {
 	local distribName=$(distribName)
 	local hw_probeGitREPO=https://github.com/linuxhw/hw-probe
 
-	if ! which git > /dev/null 2>&1; then
-		echo "=> ERROR [$FUNCNAME] : You must first install <git>." 1>&2;
+	if which hw-probe >/dev/null 2>&1; then
+		echo "=> INFO [$FUNCNAME] : hw-probe is already installed." 1>&2
 		return 1
+	fi
+
+	if ! which git >/dev/null 2>&1; then
+		echo "=> ERROR [$FUNCNAME] : You must first install <git>." 1>&2
+		return 2
 	fi
 
 	local prevDIR=$PWD
