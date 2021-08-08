@@ -32,14 +32,20 @@ hw-probeInstallFromSource () {
 	fi
 
 	local prevDIR=$PWD
+	local retCode=0
 	mkdir -p ~/git/linuxhw
 	if cd ~/git/linuxhw;then
 		git clone $hw_probeGitREPO
 		if cd hw-probe;then
 			$sudo make install prefix=/usr/local
+			retCode=$?
+			echo
 		fi
 	fi
+
 	cd $prevDIR
+	which hw-probe >/dev/null 2>&1 && hw-probe -v
+	return $retCode
 }
 
 hw-probeInstallFromSource
