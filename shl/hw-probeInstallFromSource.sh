@@ -24,7 +24,7 @@ distribName () {
 hw-probeInstallFromSource () {
 	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo=$(which sudo) || local sudo=""
 	local distribName=$(distribName)
-	local hw-probeGitREPO=https://github.com/linuxhw/hw-probe
+	local hw_probeGitREPO=https://github.com/linuxhw/hw-probe
 
 	if ! which git > /dev/null 2>&1; then
 		echo "=> ERROR [$FUNCNAME] : You must first install <git>." 1>&2;
@@ -32,9 +32,9 @@ hw-probeInstallFromSource () {
 	fi
 
 	local prevDIR=$PWD
-	mkdir -p git/linuxhw
-	if cd git/linuxhw;then
-		git clone $https://github.com/linuxhw/hw-probe
+	mkdir -p ~/git/linuxhw
+	if cd ~/git/linuxhw;then
+		git clone $hw_probeGitREPO
 		if cd hw-probe;then
 			$sudo make install prefix=/usr/local
 		fi
