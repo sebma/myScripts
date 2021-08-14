@@ -46,12 +46,12 @@ sessionstoreBackupsDIR  = chosenFirefoxProfileDIR + os.sep + "sessionstore-backu
 
 if exists( chosenFirefoxProfileDIR + os.sep + "sessionstore.jsonlz4" ) :
 	firefoxOpenedTabsFile = chosenFirefoxProfileDIR + os.sep + "sessionstore.jsonlz4"
+elif exists( sessionstoreBackupsDIR + os.sep + "recovery.jsonlz4" ) :
+	firefoxOpenedTabsFile = sessionstoreBackupsDIR + os.sep + "recovery.jsonlz4"
 elif exists( chosenFirefoxProfileDIR + os.sep + "sessionstore.js" ) :
 	firefoxOpenedTabsFile = chosenFirefoxProfileDIR + os.sep + "sessionstore.js"
 elif exists( sessionstoreBackupsDIR + os.sep + "recovery.js" ) :
 	firefoxOpenedTabsFile = sessionstoreBackupsDIR + os.sep + "recovery.js"
-elif exists( sessionstoreBackupsDIR + os.sep + "recovery.jsonlz4" ) :
-	firefoxOpenedTabsFile = sessionstoreBackupsDIR + os.sep + "recovery.jsonlz4"
 else :
 	print("=> ERROR : Cannot find the %s directory." % sessionstoreBackupsDIR,file=stderr)
 	exit(1)
