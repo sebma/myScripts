@@ -44,7 +44,9 @@ else :
 chosenFirefoxProfileDIR = firefoxProfilesDIR + os.sep + firefoxProfileName
 sessionstoreBackupsDIR  = chosenFirefoxProfileDIR + os.sep + "sessionstore-backups"
 
-if exists( chosenFirefoxProfileDIR + os.sep + "sessionstore.js" ) :
+if exists( chosenFirefoxProfileDIR + os.sep + "sessionstore.jsonlz4" ) :
+	firefoxOpenedTabsFile = chosenFirefoxProfileDIR + os.sep + "sessionstore.jsonlz4"
+elif exists( chosenFirefoxProfileDIR + os.sep + "sessionstore.js" ) :
 	firefoxOpenedTabsFile = chosenFirefoxProfileDIR + os.sep + "sessionstore.js"
 elif exists( sessionstoreBackupsDIR + os.sep + "recovery.js" ) :
 	firefoxOpenedTabsFile = sessionstoreBackupsDIR + os.sep + "recovery.js"
