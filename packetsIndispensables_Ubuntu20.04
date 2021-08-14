@@ -115,8 +115,7 @@ kde-baseapps
 kde-plasma-desktop
 kde-window-manager
 kdegraphics-thumbnailers
-keepass2
-keepassx
+keepassxc
 kid3-cli
 kinfocenter
 kmix
