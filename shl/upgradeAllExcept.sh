@@ -3,6 +3,7 @@
 function upgradeAllBut {
 	local packagesNotUpgraded="$@"
 	local apt=$(which apt)
+	local retCode=-1
 	if [ -z "$packagesNotUpgraded" ]
 	then
 		packagesToBeUpgraded=$($(which apt-get) dist-upgrade --dry-run | awk '/^Inst/{print$2}' | grep -v "Listing..." | xargs)
