@@ -20,7 +20,9 @@ function upgradeAllBut {
 			sudo $apt install -V $packagesToBeUpgraded
 		fi
 	fi
+	retCode=$?
 	sync
+	return $retCode
 }
 function main {
 	set -- ${@%/*}  # Remove trailing "/distrib" from all arguments
@@ -29,6 +31,7 @@ function main {
 	then
 		if [ -e /etc/debian_version ]; then	
 			upgradeAllBut "$@"
+			return $?
 		else
 			echo "=> The distribution $(\lsb_release -si) is not supported." >&2
 			return 1
