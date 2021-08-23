@@ -159,16 +159,16 @@ getRestrictedFilenamesFORMAT () {
 			if echo $chosenFormatID | \grep "[+]" -q;then
 				:
 			else
-			streamDirectURL="$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).url")"
-			ffprobeJSON_Stream_Info=$(time $ffprobe -hide_banner -user_agent "$userAgent" -v error -show_format -show_streams -print_format json "$streamDirectURL")
-			if [ $? = 0 ];then
-				firstAudioStreamCodecName=$(echo "$ffprobeJSON_Stream_Info" | $jq -r '[ .streams[] | select(.codec_type=="audio") ][0].codec_name')
-			else
-				echo $normal >&2
-				echo "${colors[red]}=> WARNING : Error fetching the <firstAudioStreamCodecName> from <$streamDirectURL> with ffprobe.$normal" >&2
-				echo >&2
-				unset ffprobeJSON_Stream_Info firstAudioStreamCodecName
-			fi
+				streamDirectURL="$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).url")"
+				ffprobeJSON_Stream_Info=$(time $ffprobe -hide_banner -user_agent "$userAgent" -v error -show_format -show_streams -print_format json "$streamDirectURL")
+				if [ $? = 0 ];then
+					firstAudioStreamCodecName=$(echo "$ffprobeJSON_Stream_Info" | $jq -r '[ .streams[] | select(.codec_type=="audio") ][0].codec_name')
+				else
+					echo $normal >&2
+					echo "${colors[red]}=> WARNING : Error fetching the <firstAudioStreamCodecName> from <$streamDirectURL> with ffprobe.$normal" >&2
+					echo >&2
+					unset ffprobeJSON_Stream_Info firstAudioStreamCodecName
+				fi
 			fi
 			echo
 
