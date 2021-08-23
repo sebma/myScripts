@@ -131,24 +131,24 @@ getRestrictedFilenamesFORMAT () {
 			let numberOfFilesToDownload=$numberOfURLsToDownload*${#formatsIDs[@]}
 			$undebug
 
-			fileName=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\"))._filename")
-			extension=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).ext")
-			formatString=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format")
-			chosenFormatID=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format_id")
-			remoteFileSize=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize" | sed "s/null/-1/")
+			jsonHeaders=$(echo "$jsonResults" | $jq -r 'del(.formats, .thumbnails, .automatic_captions, .requested_subtitles)')
+			fileName=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\"))._filename")
+			extension=$(echo "$jsonHeaders"| $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).ext")
+			formatString=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format")
+			chosenFormatID=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format_id")
+			remoteFileSize=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize" | sed "s/null/-1/")
 
 			# Les resultats ci-dessous ne dependent pas du format selectionne
-			jsonHeaders=$(echo "$jsonResults"  | $jq -r 'del(.formats, .thumbnails, .automatic_captions, .requested_subtitles)')
+			isLIVE=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .is_live)')
+			title=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .title)')
+			webpage_url=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .webpage_url)')
+			duration=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .duration)')
+			thumbnailURL=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .thumbnail)')
 
-			isLIVE=$(echo "$jsonHeaders" | $jq -r .is_live)
-			title=$(echo "$jsonHeaders" | $jq -r .title)
-			webpage_url=$(echo "$jsonHeaders" | $jq -r .webpage_url)
-			duration=$(echo "$jsonHeaders" | $jq -r .duration)
-			thumbnailURL=$(echo "$jsonHeaders" | $jq -r .thumbnail)
-			uploader_id=$(echo "$jsonHeaders" | $jq -r .uploader_id)
-			channel_id=$(echo "$jsonHeaders" | $jq -r .channel_id)
-			channel_url=$(echo "$jsonHeaders" | $jq -r .channel_url)
-			uploader_url=$(echo "$jsonHeaders" | $jq -r .uploader_url)
+			uploader_id=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .uploader_id)')
+			channel_id=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .channel_id)')
+			channel_url=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .channel_url)')
+			uploader_url=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .uploader_url)')
 			channelURL=$uploader_url
 
 			# To create an M3U file
@@ -157,18 +157,21 @@ getRestrictedFilenamesFORMAT () {
 			echo "=> Fetching some information from remote stream with ffprobe ..."
 			userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3513.1 Safari/537.36"
 			if echo $chosenFormatID | \grep "[+]" -q;then
-				:
+				audioFormatID=$(echo $formatID | sed "s/.*+//")
+				streamDirectURL="$(echo "$jsonResults" | $jq -n -r "first(inputs | .formats[] | select(.format_id==\"$audioFormatID\")).url")"
 			else
-				streamDirectURL="$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).url")"
-				ffprobeJSON_Stream_Info=$(time $ffprobe -hide_banner -user_agent "$userAgent" -v error -show_format -show_streams -print_format json "$streamDirectURL")
-				if [ $? = 0 ];then
-					firstAudioStreamCodecName=$(echo "$ffprobeJSON_Stream_Info" | $jq -r '[ .streams[] | select(.codec_type=="audio") ][0].codec_name')
-				else
-					echo $normal >&2
-					echo "${colors[red]}=> WARNING : Error fetching the <firstAudioStreamCodecName> from <$streamDirectURL> with ffprobe.$normal" >&2
-					echo >&2
-					unset ffprobeJSON_Stream_Info firstAudioStreamCodecName
-				fi
+				streamDirectURL="$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).url")"
+			fi
+
+			ffprobeJSON_Stream_Info=$(time $ffprobe -hide_banner -user_agent "$userAgent" -v error -show_format -show_streams -print_format json "$streamDirectURL")
+
+			if [ $? = 0 ];then
+				firstAudioStreamCodecName=$(echo "$ffprobeJSON_Stream_Info" | $jq -r '[ .streams[] | select(.codec_type=="audio") ][0].codec_name')
+			else
+				echo $normal >&2
+				echo "${colors[red]}=> WARNING : Error fetching the <firstAudioStreamCodecName> from <$streamDirectURL> with ffprobe.$normal" >&2
+				echo >&2
+				unset ffprobeJSON_Stream_Info firstAudioStreamCodecName
 			fi
 			echo
 
@@ -177,7 +180,7 @@ getRestrictedFilenamesFORMAT () {
 			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -Lqs "$thumbnailURL" | file -bi - | awk -F ';' '{sub(".*/","",$1);print gensub("jpeg","jpg",1,$1)}')
 			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/%.$extension/.$thumbnailExtension}
 
-			[ "$debug" ] && echo "=> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal>  fileName = <$fileName>  extension = <$extension>  isLIVE = <$isLIVE>  formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName>  firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url> title = <$title> duration = <$duration>" && echo
+			[ "$debug" ] && echo "=> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal> fileName = <$fileName> extension = <$extension> isLIVE = <$isLIVE> formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName> firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url> title = <$title> duration = <$duration>" && echo
 
 			if [ $thumbnailerName = AtomicParsley ];then
 				thumbnailFormatString=$(\curl -Lqs "$thumbnailURL" | file -b -)
