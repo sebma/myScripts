@@ -135,7 +135,6 @@ getRestrictedFilenamesFORMAT () {
 			extension=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).ext")
 			formatString=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format")
 			chosenFormatID=$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format_id")
-			streamDirectURL="$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).url")"
 			remoteFileSize=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize" | sed "s/null/-1/")
 
 			# Les resultats ci-dessous ne dependent pas du format selectionne
@@ -157,6 +156,10 @@ getRestrictedFilenamesFORMAT () {
 
 			echo "=> Fetching some information from remote stream with ffprobe ..."
 			userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3513.1 Safari/537.36"
+			if echo $chosenFormatID | \grep "[+]" -q;then
+				:
+			else
+			streamDirectURL="$(echo "$jsonResults"  | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).url")"
 			ffprobeJSON_Stream_Info=$(time $ffprobe -hide_banner -user_agent "$userAgent" -v error -show_format -show_streams -print_format json "$streamDirectURL")
 			if [ $? = 0 ];then
 				firstAudioStreamCodecName=$(echo "$ffprobeJSON_Stream_Info" | $jq -r '[ .streams[] | select(.codec_type=="audio") ][0].codec_name')
@@ -165,6 +168,7 @@ getRestrictedFilenamesFORMAT () {
 				echo "${colors[red]}=> WARNING : Error fetching the <firstAudioStreamCodecName> from <$streamDirectURL> with ffprobe.$normal" >&2
 				echo >&2
 				unset ffprobeJSON_Stream_Info firstAudioStreamCodecName
+			fi
 			fi
 			echo
 
