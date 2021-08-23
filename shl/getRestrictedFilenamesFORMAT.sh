@@ -132,6 +132,7 @@ getRestrictedFilenamesFORMAT () {
 			$undebug
 
 			jsonHeaders=$(echo "$jsonResults" | $jq -r 'del(.formats, .thumbnails, .automatic_captions, .requested_subtitles)')
+			# Extraction d'infos pour le(s) format(s) selectionne(s)
 			fileName=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\"))._filename")
 			extension=$(echo "$jsonHeaders"| $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).ext")
 			formatString=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format")
@@ -158,6 +159,7 @@ getRestrictedFilenamesFORMAT () {
 			userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3513.1 Safari/537.36"
 			if echo $chosenFormatID | \grep "[+]" -q;then
 				audioFormatID=$(echo $formatID | sed "s/.*+//")
+				# On utilise "$jsonResults" car on interroge TOUS les formats possibles contenus dans le tableau ".formats[]"
 				streamDirectURL="$(echo "$jsonResults" | $jq -n -r "first(inputs | .formats[] | select(.format_id==\"$audioFormatID\")).url")"
 			else
 				streamDirectURL="$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).url")"
