@@ -11,14 +11,6 @@ pulseaudio --kill;sleep 1;pidof pulseaudio >/dev/null || pulseaudio --start --lo
 sleep 1s
 ps -fC pulseaudio
 
-echo "=> Starting bluetooth controllers ..."
-hciconfig | awk -F'[\t :]+' '/^\w+:/{controller=$1}/\tDOWN/{controller2Start=controller;controller="";print controller2Start}' | while read controller
-do
-	echo "==> Starting bluetooth controller <$controller> ..."
-	sudo hciconfig $controller up
-done
-sleep 1s
-
 echo "=> Restarting the bluetooth service ..."
 $sudo service bluetooth stop;sleep 1;$sudo service bluetooth start;sleep 1
 if [ $systemType = systemd ];then
@@ -27,3 +19,12 @@ if [ $systemType = systemd ];then
 else
 	service bluetooth status
 fi
+sleep 1s
+
+echo "=> Starting bluetooth controllers ..."
+hciconfig | awk -F'[\t :]+' '/^\w+:/{controller=$1}/\tDOWN/{controller2Start=controller;controller="";print controller2Start}' | while read controller
+do
+	echo "==> Starting bluetooth controller <$controller> ..."
+	sudo hciconfig $controller up
+done
+sleep 1s
