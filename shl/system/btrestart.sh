@@ -14,6 +14,7 @@ ps -fC pulseaudio
 echo "=> Starting bluetooth controllers ..."
 hciconfig | awk -F'[\t :]+' '/^\w+:/{controller=$1}/\tDOWN/{controller2Start=controller;controller="";print controller2Start}' | while read controller
 do
+	echo "==> Starting bluetooth controller <$controller> ..."
 	sudo hciconfig $controller up
 done
 
