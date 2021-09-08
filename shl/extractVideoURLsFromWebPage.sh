@@ -31,9 +31,12 @@ function extractVideoURLsFromWebPage {
 		elif [ $sld = dailymotion ];then
 			urlPrefix=${urlBase}/video
 			apiUrl="$url"
-			echo "$url" | \grep -q /playlist || apiUrl="$(echo "$url" | sed "s|$fqdn|$fqdn/user|" )"
+			if echo "$url" | \grep /playlist -q;then
+				apiUrl="${url}/videos?limit=100"
+			else
+				apiUrl="$(echo "$url" | sed "s|$fqdn|$fqdn/user|" )"
+			fi
 			apiUrl="${apiUrl/www/api}"
-			echo "$url" | \grep -q /videos$ || apiUrl="$apiUrl/videos"
 			echo "=> apiUrl = $apiUrl" 1>&2
 			\curl -qs "$apiUrl" | jq -r '"'$urlPrefix/'"+.list[].id'
 		elif [ $sld = vimeo ];then
