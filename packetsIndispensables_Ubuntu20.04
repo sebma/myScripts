@@ -56,6 +56,7 @@ deborphan
 dfc
 dh-make
 diatheke # command line bible browsing and search tool
+dict
 dkms
 dlocate
 doublecmd-qt
@@ -247,6 +248,7 @@ tmpreaper
 tmux
 traceroute
 transfig
+translate-shell
 trash-cli
 units
 unoconv
