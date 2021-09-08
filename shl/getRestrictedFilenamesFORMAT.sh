@@ -156,7 +156,10 @@ getRestrictedFilenamesFORMAT () {
 			test -n "$playlistFileName" && duration=$($grep '^[0-9]*' <<< $duration || echo -1) && printf "#EXTINF:$duration,$title\n$webpage_url\n" >> "$playlistFileName"
 
 			echo "=> Fetching some information from remote stream with ffprobe ..."
-			userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3513.1 Safari/537.36"
+			which chromium-browser >/dev/null 2>&1 && chromeVersion=$(chromium-browser --version 2>/dev/null | awk '{printf$2}') || chromeVersion="73.0.3671.2"
+			userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36"
+			userAgent="$(printf "$userAgent" $chromeVersion)"
+
 			if echo $chosenFormatID | \grep "[+]" -q;then
 				audioFormatID=$(echo $formatID | sed "s/.*+//")
 				# On utilise "$jsonResults" car on interroge TOUS les formats possibles contenus dans le tableau ".formats[]"
