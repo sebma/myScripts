@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-url=https://www.youtube.com/c/JosephPrinceOnline/live
-url="$(ytdlGetLiveURL.sh "$url")"
-getRestrictedFilenamesFORMAT.sh 94 https://www.youtube.com/c/JosephPrinceOnline/live
+url=https://www.youtube.com/user/JosephPrinceOnline/live
+#url="$(ytdlGetLiveURL.sh "$url")"
+cd /multimedia/Videos/CHRIST/Joseph_Prince/Live_sermons_JP && getRestrictedFilenamesFORMAT.sh 93 "$url"
