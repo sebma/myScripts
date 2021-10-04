@@ -91,7 +91,7 @@ if( $IsWindows ) {
 	set-alias np1 notepad1
 	set-alias np2 notepad2
 	set-alias np3 notepad3
-	set-alias ytdl youtube-dl.exe
+	set-alias yt-dl youtube-dl.exe
 	function speedtestDownloadSingle { time speedtest --single --bytes --no-upload }
 	function speedtestDownloadSimple { time speedtest --simple --bytes --no-upload }
 	function speedtestSimple { time speedtest --simple --bytes }
