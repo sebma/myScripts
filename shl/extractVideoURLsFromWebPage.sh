@@ -45,7 +45,7 @@ function extractVideoURLsFromWebPage {
 			\curl -qs $urlBase/api/v2/$channel/videos.json | jq -r '.[] | "'$urlPrefix/'"+(.id|tostring)'
 		elif [ $sld = youtube ];then
 			urlPrefix=$urlBase
-			\curl -qs "$url" | grep -w video | grep -oP 'href="\K/[^/][^ &"]+' | uniq | sed "s|^|$urlPrefix|"
+			\curl -qs "$url" | grep -oP '"url":"\K/watch\?v=[\d\w-_]{11}' | uniq | sed "s|^|$urlPrefix|"
 		elif [ $sld = preachub ];then
 			\curl -Lqs "$url" | pup ".pm-pl-list-thumb a attr{href}"
 		elif [ $domain = ok.ru ];then
