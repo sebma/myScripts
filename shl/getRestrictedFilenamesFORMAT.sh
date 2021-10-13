@@ -159,6 +159,7 @@ getRestrictedFilenamesFORMAT () {
 			# To create an M3U file
 			test -n "$playlistFileName" && duration=$($grep '^[0-9]*' <<< $duration || echo -1) && printf "#EXTINF:$duration,$title\n$webpage_url\n" >> "$playlistFileName"
 
+			if [ -z "$acodec" ] || [ $acodec = null ];then
 			# Preparing the User Agent for ffprobe
 			which chromium-browser>/dev/null 2>&1 && chromeVersion=$(chromium-browser --version 2>/dev/null | awk '{printf$2}') || chromeVersion="73.0.3671.2"
 			userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36"
@@ -182,6 +183,9 @@ getRestrictedFilenamesFORMAT () {
 				unset ffprobeJSON_Stream_Info firstAudioStreamCodecName
 			fi
 			echo
+			else
+				firstAudioStreamCodecName=$acodec
+			fi
 
 			thumbnailExtension=$(echo "${thumbnailURL/*\//}" | awk -F"[.]" '{print$2}')
 			thumbnailExtension="${thumbnailExtension/\?*/}"
