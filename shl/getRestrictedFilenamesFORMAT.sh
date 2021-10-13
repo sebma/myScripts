@@ -102,6 +102,7 @@ getRestrictedFilenamesFORMAT () {
 		protocol=$(echo "$url" | cut -d: -f1)
 		fqdn=$(echo "$url" | cut -d/ -f3)
 		domain=$(echo $fqdn | awk -F. '{print$(NF-1)"."$NF}')
+		[ $domain = youtu.be ] && domain=youtube.com
 		domainStringForFilename=$(echo $domain | tr . _)
 		sld=$(echo $fqdn | awk -F '.' '{print $(NF-1)}')
 		case $sld in
@@ -184,7 +185,7 @@ getRestrictedFilenamesFORMAT () {
 			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -Lqs "$thumbnailURL" | file -bi - | awk -F ';' '{sub(".*/","",$1);print gensub("jpeg","jpg",1,$1)}')
 			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/%.$extension/.$thumbnailExtension}
 
-			[ "$debug" ] && echo "=> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal> fileName = <$fileName> extension = <$extension> isLIVE = <$isLIVE> formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName> firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url> title = <$title> duration = <$duration>" && echo
+			[ "$debug" ] && echo "=> domain = <$domain> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal> fileName = <$fileName> extension = <$extension> isLIVE = <$isLIVE> formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName> firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url> title = <$title> duration = <$duration>" && echo
 
 			if [ $thumbnailerName = AtomicParsley ];then
 				thumbnailFormatString=$(\curl -Lqs "$thumbnailURL" | file -b -)
