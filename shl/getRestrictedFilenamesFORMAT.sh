@@ -111,6 +111,7 @@ getRestrictedFilenamesFORMAT () {
 		domainStringForFilename=$(echo $domain | tr . _)
 		[ $domain = youtu.be ] && domainStringForFilename=youtube_com
 		sld=$(echo $fqdn | awk -F '.' '{print $(NF-1)}')
+		[ $domain = youtu.be ] && sld=youtube
 		case $sld in
 #			facebook) siteVideoFormat=$(echo $initialSiteVideoFormat+m4a | \sed -E "s/^(\(?)\w+/\1bestvideo/g") ;;
 			*) siteVideoFormat=$initialSiteVideoFormat ;;
