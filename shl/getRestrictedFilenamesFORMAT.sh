@@ -102,8 +102,8 @@ getRestrictedFilenamesFORMAT () {
 		protocol=$(echo "$url" | cut -d: -f1)
 		fqdn=$(echo "$url" | cut -d/ -f3)
 		domain=$(echo $fqdn | awk -F. '{print$(NF-1)"."$NF}')
-		[ $domain = youtu.be ] && domain=youtube.com
 		domainStringForFilename=$(echo $domain | tr . _)
+		[ $domain = youtu.be ] && domainStringForFilename=youtube_com
 		sld=$(echo $fqdn | awk -F '.' '{print $(NF-1)}')
 		case $sld in
 #			facebook) siteVideoFormat=$(echo $initialSiteVideoFormat+m4a | \sed -E "s/^(\(?)\w+/\1bestvideo/g") ;;
@@ -377,7 +377,7 @@ addURLs2mp4Metadata() {
 		fi
 
 		echo "[ffmpeg] Adding '$url' to '$fileName' description metadata"
-		$ffmpeg -loglevel $ffmpegLogLevel -i "$fileName" -map 0 -c copy -metadata $metadataURLFieldName="$url" "$outputVideo"
+		time $ffmpeg -loglevel $ffmpegLogLevel -i "$fileName" -map 0 -c copy -metadata $metadataURLFieldName="$url" "$outputVideo"
 		retCode=$?
 		[ $retCode = 0 ] && sync && \mv -f "$outputVideo" "$fileName"
 	elif which mp4tags >/dev/null 2>&1;then
