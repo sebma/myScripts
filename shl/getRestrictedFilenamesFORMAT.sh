@@ -334,7 +334,7 @@ getAudioExtension () {
 	local audioExtension=unknown
 
 	if [ $BASH_VERSINFO -ge 4 ];then
-		declare -A audioExtension=( [libspeex]=spx [speex]=spx [opus]=opus [vorbis]=ogg [aac]=m4a [mp3]=mp3 [mp2]=mp2 [ac3]=ac3 [wmav2]=wma [pcm_dvd]=wav [pcm_s16le]=wav )
+		declare -A audioExtension=( [libspeex]=spx [speex]=spx [opus]=opus [vorbis]=ogg [aac]=m4a [mp4a]=m4a [mp3]=mp3 [mp2]=mp2 [ac3]=ac3 [wmav2]=wma [pcm_dvd]=wav [pcm_s16le]=wav )
 		audioExtension=${audioExtension[$acodec]}
 	else
 		case $acodec in
