@@ -349,7 +349,10 @@ addURLs2mp4Metadata() {
 
 	local url="$1"
 	local fileName=$2
-	if which ffmpeg>/dev/null 2>&1;then
+	local retCode=-1
+	local timestampFileRef=$(mktemp)
+	touch -r "$fileName" $timestampFileRef
+	if which ffmpeg >/dev/null 2>&1;then
 		local extension="${fileName/*./}"
 		local outputVideo="${fileName/.$extension/_NEW.$extension}"
 
@@ -374,16 +377,17 @@ addURLs2mp4Metadata() {
 
 		echo "[ffmpeg] Adding '$url' to '$fileName' description metadata"
 		$ffmpeg -loglevel $ffmpegLogLevel -i "$fileName" -map 0 -c copy -metadata $metadataURLFieldName="$url" "$outputVideo"
-		local retCode=$?
-		[ $retCode = 0 ] && sync && touch -r "$fileName" "$outputVideo" && \mv -f "$outputVideo" "$fileName"
-	elif which mp4tags2 >/dev/null 2>&1;then
-		local timestampFileRef=$(mktemp) && touch -r "$fileName" $timestampFileRef
+		retCode=$?
+		[ $retCode = 0 ] && sync && \mv -f "$outputVideo" "$fileName"
+	elif which mp4tags >/dev/null 2>&1;then
 		echo "[mp4tags] Adding '$url' to '$fileName' description metadata"
 		time mp4tags -m "$url" "$fileName"
-		local codeRet=$?
-		touch -r $timestampFileRef "$fileName" && \rm $timestampFileRef
-		return $codeRet
+		retCode=$?
 	fi
+
+	[ $retCode = 0 ] && touch -r $timestampFileRef "$fileName"
+	\rm $timestampFileRef
+	return $retCode
 }
 function addSubtitles2media {
 	local inputVideo=$1
