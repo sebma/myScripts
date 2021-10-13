@@ -155,11 +155,11 @@ getRestrictedFilenamesFORMAT () {
 			# To create an M3U file
 			test -n "$playlistFileName" && duration=$($grep '^[0-9]*' <<< $duration || echo -1) && printf "#EXTINF:$duration,$title\n$webpage_url\n" >> "$playlistFileName"
 
-			echo "=> Fetching some information from remote stream with ffprobe ..."
-			which chromium-browser >/dev/null 2>&1 && chromeVersion=$(chromium-browser --version 2>/dev/null | awk '{printf$2}') || chromeVersion="73.0.3671.2"
+			# Preparing the User Agent for ffprobe
+			which chromium-browser>/dev/null 2>&1 && chromeVersion=$(chromium-browser --version 2>/dev/null | awk '{printf$2}') || chromeVersion="73.0.3671.2"
 			userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36"
 			userAgent="$(printf "$userAgent" $chromeVersion)"
-
+			echo "=> Fetching some information from remote stream with ffprobe ..."
 			if echo $chosenFormatID | \grep "[+]" -q;then
 				audioFormatID=$(echo $formatID | sed "s/.*+//")
 				# On utilise "$jsonResults" car on interroge TOUS les formats possibles contenus dans le tableau ".formats[]"
@@ -167,14 +167,13 @@ getRestrictedFilenamesFORMAT () {
 			else
 				streamDirectURL="$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).url")"
 			fi
-
 			ffprobeJSON_Stream_Info=$(time $ffprobe -hide_banner -user_agent "$userAgent" -v error -show_format -show_streams -print_format json "$streamDirectURL")
 
 			if [ $? = 0 ];then
 				firstAudioStreamCodecName=$(echo "$ffprobeJSON_Stream_Info" | $jq -r '[ .streams[] | select(.codec_type=="audio") ][0].codec_name')
 			else
 				echo $normal >&2
-				echo "${colors[red]}=> WARNING : Error fetching the <firstAudioStreamCodecName> from <$streamDirectURL> with ffprobe.$normal" >&2
+				echo "${colors[red]}=> WARNING : Error fetching the <firstAudioStreamCodecName> with ffprobe on the remote direct stream.$normal" >&2
 				echo >&2
 				unset ffprobeJSON_Stream_Info firstAudioStreamCodecName
 			fi
@@ -204,9 +203,8 @@ getRestrictedFilenamesFORMAT () {
 				fi
 			fi
 
-			echo $formatString | $grep -v '+' | $grep -q "audio only" && ytdlExtraOptions+=( -x )
-
-			if echo "${ytdlExtraOptions[@]}" | $grep -qw -- "-x";then
+			echo $formatString | $grep -v '+' | $grep "audio only" -q && ytdlExtraOptions+=( -x )
+			if echo "${ytdlExtraOptions[@]}" | $grep -w "\-x" -q;then
 				extension=$(getAudioExtension $firstAudioStreamCodecName) || continue
 				( [ $extension = m4a ] || [ $extension = opus ] ) && ytdlExtraOptions+=( -k )
 				newFileName="${fileName/.*/.$extension}"
