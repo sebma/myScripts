@@ -349,7 +349,7 @@ addURLs2mp4Metadata() {
 
 	local url="$1"
 	local fileName=$2
-	if which mp4tags >/dev/null 2>&1;then
+	if which mp4tags2 >/dev/null 2>&1;then
 		local timestampFileRef=$(mktemp) && touch -r "$fileName" $timestampFileRef
 		echo "[mp4tags] Adding '$url' to '$fileName' description metadata"
 		time mp4tags -m "$url" "$fileName"
