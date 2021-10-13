@@ -33,7 +33,6 @@ getRestrictedFilenamesFORMAT () {
 
 	local ytdlExtraOptions=()
 	local ytdlInitialOptions=()
-	local youtube_dl="eval LANG=C.UTF-8 command youtube-dl" # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
 	local translate=cat
 	local siteVideoFormat downloadOK=-1 extension fqdn fileSizeOnFS=0 remoteFileSize=0
 	local protocol=https
@@ -67,6 +66,12 @@ getRestrictedFilenamesFORMAT () {
 	local tool=null
 	local debug="set +x"
 	local undebug="set +x"
+	local downloader=yt-dlp
+
+#	local youtube_dl="eval LANG=C.UTF-8 command youtube-dl" # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
+	videoDownloader () {
+		LANG=C.UTF-8 $downloader "$@"
+	}
 
 	for tool in ffmpeg grep ffprobe jq;do
 		local $tool="$(which $tool)"
@@ -91,7 +96,7 @@ getRestrictedFilenamesFORMAT () {
 	initialSiteVideoFormat="$1"
 	shift
 
-	youtube-dl --rm-cache
+	videoDownloader --rm-cache
 	for url
 	do
 		let i++
@@ -112,14 +117,14 @@ getRestrictedFilenamesFORMAT () {
 		esac
 		formats=( $(echo $siteVideoFormat | \sed "s/,/ /g") )
 
-		errorLogFile="youtube-dl_errors_$$.log"
+		errorLogFile="${downloader}_errors_$$.log"
 		youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__$domainStringForFilename.%(ext)s"
 		jsonResults=null
 		ytdlExtraOptions=( "${ytdlInitialOptions[@]}" )
 		echo "$url" | grep -q /live$ && ytdlExtraOptions+=( --playlist-items 1 )
 
-		printf "=> Fetching the generated destination filename(s) for \"$url\" with youtube-dl at %s ...\n" "$(LC_MESSAGES=en date)"
-		jsonResults=$(time command youtube-dl --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
+		printf "=> Fetching the generated destination filename(s) for \"$url\" with $downloader at %s ...\n" "$(LC_MESSAGES=en date)"
+		jsonResults=$(time videoDownloader --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
 		formatsIDs=( $(echo "$jsonResults" | $jq -r .format_id | awk '!seen[$0]++') ) # Remove duplicate lines i.e: https://stackoverflow.com/a/1444448/5649639
 		echo
 
@@ -255,12 +260,12 @@ getRestrictedFilenamesFORMAT () {
 
 			echo "=> Downloading file # $j/$numberOfFilesToDownload ..."
 			echo
-			printf "=> Starting youtube-dl at %s ...\n" "$(LC_MESSAGES=en date)"
+			printf "=> Starting $downloader at %s ...\n" "$(LC_MESSAGES=en date)"
 			echo
-			errorLogFile="youtube-dl_errors_$$.log"
+			errorLogFile="${downloader}_errors_$$.log"
 			trap - INT
 			$debug
-			time LANG=C.UTF-8 command youtube-dl -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+			time videoDownloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 			downloadOK=$?
 			$undebug
 			sync
@@ -277,7 +282,7 @@ getRestrictedFilenamesFORMAT () {
 			if [ $fileSizeOnFS -ge $remoteFileSize ] || [ $downloadOK = 0 ]; then
 				addThumbnail2media "$fileName" "$artworkFileName"
 			else
-				time LANG=C.UTF-8 command youtube-dl -o $fileName -f "$chosenFormatID" "$url" 2>$errorLogFile
+				time videoDownloader -o $fileName -f "$chosenFormatID" "$url" 2>$errorLogFile
 				downloadOK=$?
 				echo
 
