@@ -127,6 +127,8 @@ getRestrictedFilenamesFORMAT () {
 
 		printf "=> Fetching the generated destination filename(s) for \"$url\" with $downloader at %s ...\n" "$(LC_MESSAGES=en date)"
 		jsonResults=$(time videoDownloader --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
+		# ytdlExtraOptions+= ( --exec 'basename %(filepath)s .%(ext)s' --write-info-json )
+		# jsonFileList=$(egrep -v "^(Deleting |\[)|\[download\]" ytdlpOutput.txt | sed -z "s/\n/.info.json /g")
 		formatsIDs=( $(echo "$jsonResults" | $jq -r .format_id | awk '!seen[$0]++') ) # Remove duplicate lines i.e: https://stackoverflow.com/a/1444448/5649639
 		echo
 
