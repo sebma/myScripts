@@ -123,6 +123,7 @@ getRestrictedFilenamesFORMAT () {
 		jsonResults=null
 		ytdlExtraOptions=( "${ytdlInitialOptions[@]}" )
 		echo "$url" | grep -q /live$ && ytdlExtraOptions+=( --playlist-items 1 )
+		[ $downloader = yt-dlp ] && ytdlExtraOptions+=( --format-sort +proto )
 
 		printf "=> Fetching the generated destination filename(s) for \"$url\" with $downloader at %s ...\n" "$(LC_MESSAGES=en date)"
 		jsonResults=$(time videoDownloader --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
