@@ -58,7 +58,7 @@ function osVersion {
 				9600 {$OSRelease = "W2K12R2"; Break}
 				14393 {$OSRelease = "W2K16v1607"; Break}
 				16229 {$OSRelease = "W2K16v1709"; Break}
-				default { $OSRelease = "Not Listed"; Break}
+				default { $OSRelease = "Not Known"; Break}
 			}
 		}
 		else {
@@ -70,7 +70,7 @@ function osVersion {
 				9200 {$OSRelease = "8"; Break}
 				9600 {$OSRelease = "8.1"; Break}
 				19042 {$OSRelease = "10"; Break}
-				default { $OSRelease = "Not Listed"; Break}
+				default { $OSRelease = "Not Known"; Break}
 			}
 		}
 	}
