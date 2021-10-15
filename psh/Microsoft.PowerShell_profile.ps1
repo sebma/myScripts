@@ -92,10 +92,10 @@ if( $IsWindows ) {
 	Set-Alias np2 notepad2
 	Set-Alias np3 notepad3
 	Set-Alias yt-dl youtube-dl.exe
-	function speedtestDownloadSingle { time speedtest --single --bytes --no-upload }
-	function speedtestDownloadSimple { time speedtest --simple --bytes --no-upload }
-	function speedtestSimple { time speedtest --simple --bytes }
-	function speedtestSingle { time speedtest --single --bytes }
+	function speedtestDownloadSingle { time speedtest --single --no-upload }
+	function speedtestDownloadSimple { time speedtest --simple --no-upload }
+	function speedtestSimple { time speedtest --simple }
+	function speedtestSingle { time speedtest --single }
 	if( ! (alias | select-string wget) ) { Set-Alias wget Invoke-WebRequest }
 
 	Set-Alias  ex
