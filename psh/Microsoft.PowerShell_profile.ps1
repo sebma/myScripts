@@ -87,16 +87,16 @@ if( $IsWindows ) { $OSVersion = (osVersion) }
 $dirSep = [io.path]::DirectorySeparatorChar
 if( $IsWindows ) {
 	Set-Alias vi "$env:ProgramFiles/Git/usr/bin/vim.exe"
-	set-alias np notepad
-	set-alias np1 notepad1
-	set-alias np2 notepad2
-	set-alias np3 notepad3
-	set-alias yt-dl youtube-dl.exe
+	Set-Alias np notepad
+	Set-Alias np1 notepad1
+	Set-Alias np2 notepad2
+	Set-Alias np3 notepad3
+	Set-Alias yt-dl youtube-dl.exe
 	function speedtestDownloadSingle { time speedtest --single --bytes --no-upload }
 	function speedtestDownloadSimple { time speedtest --simple --bytes --no-upload }
 	function speedtestSimple { time speedtest --simple --bytes }
 	function speedtestSingle { time speedtest --single --bytes }
-	if( ! (alias | select-string wget) ) { set-alias wget Invoke-WebRequest }
+	if( ! (alias | select-string wget) ) { Set-Alias wget Invoke-WebRequest }
 
 	Set-Alias  ex
 	function ex{exit}
