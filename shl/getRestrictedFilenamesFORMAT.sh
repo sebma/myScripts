@@ -96,7 +96,7 @@ getRestrictedFilenamesFORMAT () {
 	initialSiteVideoFormat="$1"
 	shift
 
-	time videoDownloader --rm-cache
+	time videoDownloader --ignore-config --rm-cache
 	for url
 	do
 		let i++
