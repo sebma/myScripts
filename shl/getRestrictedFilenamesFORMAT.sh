@@ -35,7 +35,7 @@ getRestrictedFilenamesFORMAT () {
 	local ytdlInitialOptions=()
 	local translate=cat
 	local siteVideoFormat downloadOK=-1 extension fqdn fileSizeOnFS=0 remoteFileSize=0
-	local protocol=https
+	local protocol=null
 	local -i i=0
 	local -i j=0
 	local acodec=null
@@ -96,7 +96,7 @@ getRestrictedFilenamesFORMAT () {
 	initialSiteVideoFormat="$1"
 	shift
 
-	videoDownloader --rm-cache
+	time videoDownloader --rm-cache
 	for url
 	do
 		let i++
@@ -105,13 +105,12 @@ getRestrictedFilenamesFORMAT () {
 		echo "=> Downloading url # $i/$# ..."
 		echo
 		echo $url | egrep -wq "https?:" || url=https://www.youtube.com/watch?v=$url
-		protocol=$(echo "$url" | cut -d: -f1)
 		fqdn=$(echo "$url" | cut -d/ -f3)
+		[ $fqdn = youtu.be ] && fqdn=www.youtube.com
 		domain=$(echo $fqdn | awk -F. '{print$(NF-1)"."$NF}')
+		sld=$(echo $fqdn | awk -F '.' '{print $(NF-1)}') # Single level domain
 		domainStringForFilename=$(echo $domain | tr . _)
-		[ $domain = youtu.be ] && domainStringForFilename=youtube_com
-		sld=$(echo $fqdn | awk -F '.' '{print $(NF-1)}')
-		[ $domain = youtu.be ] && sld=youtube
+
 		case $sld in
 #			facebook) siteVideoFormat=$(echo $initialSiteVideoFormat+m4a | \sed -E "s/^(\(?)\w+/\1bestvideo/g") ;;
 			*) siteVideoFormat=$initialSiteVideoFormat ;;
@@ -202,7 +201,7 @@ getRestrictedFilenamesFORMAT () {
 			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -Lqs "$thumbnailURL" | file -bi - | awk -F ';' '{sub(".*/","",$1);print gensub("jpeg","jpg",1,$1)}')
 			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/%.$extension/.$thumbnailExtension}
 
-			[ "$debug" ] && echo "=> domain = <$domain> protocol = <$protocol> acodec = <$acodec> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal> fileName = <$fileName> extension = <$extension> isLIVE = <$isLIVE> formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName> firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url> title = <$title> duration = <$duration>" && echo
+			[ "$debug" ] && echo "=> protocol = <$protocol> acodec = <$acodec> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal> fileName = <$fileName> extension = <$extension> isLIVE = <$isLIVE> formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName> firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url> title = <$title> duration = <$duration>" && echo
 
 			if [ $thumbnailerName = AtomicParsley ];then
 				thumbnailFormatString=$(\curl -Lqs "$thumbnailURL" | file -b -)
