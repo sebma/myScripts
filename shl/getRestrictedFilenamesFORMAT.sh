@@ -68,6 +68,10 @@ getRestrictedFilenamesFORMAT () {
 	local undebug="set +x"
 	local downloader=yt-dlp
 
+	startTime="$(LC_MESSAGES=en date)"
+	echo "=> Starting <$scriptBaseName $@> at : $startTime ..."
+	echo
+
 #	local youtube_dl="eval LANG=C.UTF-8 command youtube-dl" # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
 	videoDownloader () {
 		LANG=C.UTF-8 $downloader "$@"
