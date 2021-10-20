@@ -69,8 +69,6 @@ getRestrictedFilenamesFORMAT () {
 	local downloader=yt-dlp
 
 	startTime="$(LC_MESSAGES=en date)"
-	echo "=> Starting <$scriptBaseName $@> at : $startTime ..."
-	echo
 
 #	local youtube_dl="eval LANG=C.UTF-8 command youtube-dl" # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
 	videoDownloader () {
@@ -91,6 +89,7 @@ getRestrictedFilenamesFORMAT () {
 	grep --help | grep -q -- --color && grepColor+=" --color"
 
 	echo $1 | $grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
+
 	echo $scriptOptions | $grep -q -- "-x" && ytdlInitialOptions+=( -x )
 	echo $scriptOptions | $grep -q -- "-y" && downloader=yt-dl
 	echo $scriptOptions | $grep -q -- "-p" && playlistFileName=$2 && shift 2
@@ -100,6 +99,9 @@ getRestrictedFilenamesFORMAT () {
 
 	initialSiteVideoFormat="$1"
 	shift
+
+	echo "=> Started <$scriptBaseName> on $@ at : $startTime ..."
+	echo
 
 	time videoDownloader --ignore-config --rm-cache
 	for url
@@ -146,6 +148,8 @@ getRestrictedFilenamesFORMAT () {
 			let numberOfFilesToDownload=$numberOfURLsToDownload*${#formatsIDs[@]}
 			$undebug
 
+			videoFormatID=${formatID/+*}
+
 			jsonHeaders=$(echo "$jsonResults" | $jq -r 'del(.formats, .thumbnails, .automatic_captions, .requested_subtitles)')
 			# Extraction d'infos pour le(s) format(s) selectionne(s)
 			fileName=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\"))._filename")
@@ -155,7 +159,7 @@ getRestrictedFilenamesFORMAT () {
 			remoteFileSize=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize" | sed "s/null/-1/")
 			acodec=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).acodec")
 			acodec=$(echo $acodec | cut -d. -f1)
-			protocolForDownload=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).protocol")
+			protocolForDownload=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$videoFormatID\")).protocol")
 
 			# Les resultats ci-dessous ne dependent pas du format selectionne
 			isLIVE=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .is_live)')
