@@ -92,6 +92,7 @@ getRestrictedFilenamesFORMAT () {
 
 	echo $1 | $grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
 	echo $scriptOptions | $grep -q -- "-x" && ytdlInitialOptions+=( -x )
+	echo $scriptOptions | $grep -q -- "-y" && downloader=yt-dl
 	echo $scriptOptions | $grep -q -- "-p" && playlistFileName=$2 && shift 2
 	echo $scriptOptions | $grep -q -- "-v" && debug="set -x"
 	echo $scriptOptions | $grep -q -- "-vv" && debug="set -x" && ytdlInitialOptions+=( -v )
