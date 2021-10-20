@@ -131,7 +131,7 @@ getRestrictedFilenamesFORMAT () {
 		echo "$url" | grep -q /live$ && ytdlExtraOptions+=( --playlist-items 1 )
 		[ $downloader = yt-dlp ] && ytdlExtraOptions+=( --format-sort +proto )
 
-		printf "=> Fetching the generated destination filename(s) for \"$url\" with $downloader at %s ...\n" "$(LC_MESSAGES=en date)"
+		printf "=> Fetching the generated destination filename(s) for \"$url\" with ${effects[bold]}${colors[blue]}$downloader$normal at %s ...\n" "$(LC_MESSAGES=en date)"
 		jsonResults=$(time videoDownloader --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
 		# ytdlExtraOptions+= ( --exec 'basename %(filepath)s .%(ext)s' --write-info-json )
 		# jsonFileList=$(egrep -v "^(Deleting |\[)|\[download\]" ytdlpOutput.txt | sed -z "s/\n/.info.json /g")
@@ -159,7 +159,7 @@ getRestrictedFilenamesFORMAT () {
 			remoteFileSize=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize" | sed "s/null/-1/")
 			acodec=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).acodec")
 			acodec=$(echo $acodec | cut -d. -f1)
-			protocolForDownload=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$videoFormatID\")).protocol")
+			protocolForDownload=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$videoFormatID\")).protocol")
 
 			# Les resultats ci-dessous ne dependent pas du format selectionne
 			isLIVE=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .is_live)')
@@ -210,7 +210,7 @@ getRestrictedFilenamesFORMAT () {
 			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -Lqs "$thumbnailURL" | file -bi - | awk -F ';' '{sub(".*/","",$1);print gensub("jpeg","jpg",1,$1)}')
 			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/%.$extension/.$thumbnailExtension}
 
-			[ "$debug" ] && echo "=> protocolForDownload = <$protocolForDownload> acodec = <$acodec> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal> fileName = <$fileName> extension = <$extension> isLIVE = <$isLIVE> formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName> firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url> title = <$title> duration = <$duration>" && echo
+			[ "$debug" ] && echo "=> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal> acodec = <$acodec> fileName = <$fileName> extension = <$extension> isLIVE = <$isLIVE> formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName> firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url> title = <$title> duration = <$duration>" && echo
 
 			if [ $thumbnailerName = AtomicParsley ];then
 				thumbnailFormatString=$(\curl -Lqs "$thumbnailURL" | file -b -)
