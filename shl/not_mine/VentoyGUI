@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+
+architecture=$(uname -m)
+case $architecture in
+	x86_64) ;;
+	i686) architecture=i386;;
+	*) echo "=> Unkown architecture.";exit;;
+esac
+VentoyGUIScript=/opt/ventoy/VentoyGUI.$architecture
+
+ls -l $VentoyGUIScript | grep -q "root $USER" || sudo chgrp $USER $VentoyGUIScript
+test ! -x $VentoyGUIScript && sudo chmod g+x $VentoyGUIScript
+
+if cd /opt/ventoy;then
+	if [ $(id -u) = 0 ];then
+		sudo ./$(basename $VentoyGUIScript) "$@"
+	else
+		./$(basename $VentoyGUIScript) "$@"
+	fi
+fi
