@@ -6,13 +6,14 @@ case $architecture in
 	i686) architecture=i386;;
 	*) echo "=> Unkown architecture.";exit;;
 esac
-VentoyGUIScript=/opt/ventoy/VentoyGUI.$architecture
+ventoyROOT=/opt/ventoy
+VentoyGUIScript=$ventoyROOT/VentoyGUI.$architecture
 
 ls -l $VentoyGUIScript | grep -q "root $USER" || sudo chgrp $USER $VentoyGUIScript
 test ! -x $VentoyGUIScript && sudo chmod g+x $VentoyGUIScript
 
-if cd /opt/ventoy;then
-	if [ $(id -u) = 0 ];then
+if cd $ventoyROOT;then
+	if [ $(id -u) != 0 ];then
 		sudo ./$(basename $VentoyGUIScript) "$@"
 	else
 		./$(basename $VentoyGUIScript) "$@"
