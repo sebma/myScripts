@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-hw-probeAddNodeToInventory ()
+hw_probeAddNodeToInventory ()
 {
 	local inventoryID=null
 	if ! which hw-probe >/dev/null 2>&1;then
@@ -20,4 +20,4 @@ hw-probeAddNodeToInventory ()
 	\sudo -E \hw-probe -all -upload -i $inventoryID && echo "=> INFO: Check your email to add confirm adding the new node to your inventory : https://linux-hardware.org/index.php?view=computers&inventory=$inventoryID" 1>&2
 }
 
-hw-probeAddNodeToInventory "$@"
+hw_probeAddNodeToInventory "$@"
