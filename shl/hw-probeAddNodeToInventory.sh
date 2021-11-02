@@ -7,8 +7,10 @@ hw_probeAddNodeToInventory ()
 		echo "=> ERROR [$FUNCNAME] : You must first install <hw-probe>." >&2
 		return 1
 	fi
+
 	if [ $# = 0 ]; then
-		inventoryID="LHW-8028-0102-D496-15BF"
+		inventoryID="LHW-8028-0102-D496-15BF" # mine
+		# inventoryID="LHW-B264-AC0E-0B7D-6BFF" # celui de ma soeur
 	else
 		if [ $# = 1 ]; then
 			inventoryID=$1
