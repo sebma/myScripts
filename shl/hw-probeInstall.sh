@@ -75,7 +75,7 @@ hw_probeInstall () {
 	fi
 
 	echo
-	which hw-probe >/dev/null 2>&1 && hw-probe -v
+	which hw-probe >/dev/null 2>&1 && $sudo sed -i "/inxi /s/inxi -[Fa-z]*/inxi -Fxxxzmd/" $(which hw-probe) && hw-probe -v
 	return $retCode
 }
 
