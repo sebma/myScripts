@@ -21,7 +21,7 @@ distribName () {
 
 	echo $osName | awk '{print tolower($0)}'
 }
-hw-probeInstallFromSource () {
+hw_probeInstallFromSource () {
 	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo=$(which sudo) || local sudo=""
 	local distribName=$(distribName)
 	local hw_probeGitREPO=https://github.com/linuxhw/hw-probe
@@ -55,4 +55,4 @@ hw-probeInstallFromSource () {
 	return $retCode
 }
 
-hw-probeInstallFromSource
+hw_probeInstallFromSource
