@@ -21,7 +21,7 @@ distribName () {
 
 	echo $osName | awk '{print tolower($0)}'
 }
-hw-probeInstall () {
+hw_probeInstall () {
 	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo=$(which sudo) || local sudo=""
 	local distribName=$(distribName)
 	local retCode=0
@@ -78,4 +78,4 @@ hw-probeInstall () {
 	return $retCode
 }
 
-hw-probeInstall
+hw_probeInstall
