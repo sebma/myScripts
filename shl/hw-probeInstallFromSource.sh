@@ -23,7 +23,6 @@ distribName () {
 }
 hw_probeInstallFromSource () {
 	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo=$(which sudo) || local sudo=""
-	local distribName=$(distribName)
 	local hw_probeGitREPO=https://github.com/linuxhw/hw-probe
 
 	if which hw-probe >/dev/null 2>&1; then
@@ -51,7 +50,7 @@ hw_probeInstallFromSource () {
 
 	sync
 	cd $prevDIR
-	which hw-probe >/dev/null 2>&1 && hw-probe -v
+	which hw-probe >/dev/null 2>&1 && $sudo sed -i "/inxi /s/inxi -[Fa-z]*/inxi -Fxxxzmd/" $(which hw-probe) && hw-probe -v
 	return $retCode
 }
 
