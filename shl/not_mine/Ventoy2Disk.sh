@@ -16,3 +16,5 @@ if cd $ventoyROOT;then
 		./$(basename $Ventoy2DiskScript) "$@"
 	fi
 fi
+
+tac $ventoyROOT/log.txt | sed "/^#* Ventoy2Disk/q" | tac
