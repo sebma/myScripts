@@ -27,10 +27,12 @@ hw_probeInstall () {
 	local retCode=0
 	if [ $distribName = ubuntu ]; then
 		local ubuntuSources=/etc/apt/sources.list
+		local distribVersion=$(source /etc/os-release;echo $VERSION_ID)
+		local distribMajorNumber=$(echo $distribVersion | cut -d. -f1)
 		grep -q universe $ubuntuSources   || $sudo add-apt-repository universe -y
 		grep -q multiverse $ubuntuSources || $sudo add-apt-repository multiverse -y
 		grep -q "^deb .*unit193/inxi" /etc/apt/sources.list.d/*.list || $sudo add-apt-repository ppa:unit193/inxi -y
-		grep -q "^deb .*mikhailnov/hw-probe" /etc/apt/sources.list.d/*.list || $sudo add-apt-repository ppa:mikhailnov/hw-probe -y
+		[ $distribMajorNumber -lt 20 ] && ! grep -q "^deb .*mikhailnov/hw-probe" /etc/apt/sources.list.d/*.list && $sudo add-apt-repository ppa:mikhailnov/hw-probe -y
 		apt-cache policy inxi | grep -q unit193/inxi || $sudo apt update
 		apt-cache policy hw-probe | grep -q mikhailnov/hw-probe || $sudo apt update
 		dpkg -l inxi | grep -q ^.i || $sudo apt install -V inxi
