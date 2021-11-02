@@ -27,8 +27,7 @@ hw_probeInstall () {
 	local retCode=0
 	if [ $distribName = ubuntu ]; then
 		local ubuntuSources=/etc/apt/sources.list
-		local distribVersion=$(source /etc/os-release;echo $VERSION_ID)
-		local distribMajorNumber=$(echo $distribVersion | cut -d. -f1)
+		local distribMajorNumber=$(source /etc/os-release;echo $VERSION_ID | cut -d. -f1)
 		grep -q universe $ubuntuSources   || $sudo add-apt-repository universe -y
 		grep -q multiverse $ubuntuSources || $sudo add-apt-repository multiverse -y
 		grep -q "^deb .*unit193/inxi" /etc/apt/sources.list.d/*.list || $sudo add-apt-repository ppa:unit193/inxi -y
