@@ -1,1 +1,1 @@
-archiver aria2 curl dos2unix gow mediainfo-cli python rsync unzip vim wget yt-dlp
+archiver aria2 curl dos2unix git gow mediainfo-cli python rsync unzip vim wget yt-dlp
