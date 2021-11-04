@@ -1,0 +1,1 @@
+sudo Rename-Computer -NewName
