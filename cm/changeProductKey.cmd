@@ -1,1 +1,1 @@
-slmgr.vbs /ipk %1
+changepk /productkey %1
