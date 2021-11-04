@@ -109,7 +109,8 @@ if( $IsWindows ) {
 	function which($command) { (gcm $command).definition }
 	function lock { rundll32.exe user32.dll,LockWorkStation }
 	function windowsCaption { (gwmi -class Win32_OperatingSystem).Caption }
-	Set-Alias renamePC { Rename-Computer -NewName }
+	function renamePC { Rename-Computer -NewName }
+	function logoff { shutdown -l }
 	Set-Alias reboot Restart-Computer
 } elseif( $IsLinux ) {
 	# TO BE DONE
