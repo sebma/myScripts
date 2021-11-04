@@ -1,1 +1,1 @@
-freetube-pre mpv.net smplayer smtube vlc 
+freetube --pre mpvnet.install smplayer smtube vlc 
