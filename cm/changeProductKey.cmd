@@ -1,1 +1,1 @@
-changepk /productkey %1
+sudo changepk /productkey %1
