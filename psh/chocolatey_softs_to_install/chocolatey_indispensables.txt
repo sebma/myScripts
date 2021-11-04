@@ -1,0 +1,1 @@
+7zip firefox freetube --pre immunet libreoffice-fresh notepad3 processhacker vlc yt-dlp 
