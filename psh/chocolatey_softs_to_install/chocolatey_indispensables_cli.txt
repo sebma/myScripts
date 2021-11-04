@@ -1,0 +1,1 @@
+aria2 curl dos2unix gow mediainfo-cli python unix2dos vim wget yt-dlp
