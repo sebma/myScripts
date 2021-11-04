@@ -1,1 +1,2 @@
-7zip firefox freetube --pre immunet libreoffice-fresh notepad3 processhacker vlc yt-dlp 
+#7zip doublecmd firefox freetube --pre immunet infrarecorder libreoffice-fresh mediainfo notepad3 processhacker vlc
+7zip doublecmd firefox freetube --pre immunet infrarecorder libreoffice-fresh mediainfo notepad3 processexp vlc
