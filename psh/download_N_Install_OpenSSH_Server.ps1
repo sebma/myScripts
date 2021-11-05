@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 # Whatever
 Set-PSDebug -Trace 1
 $arch = (gwmi win32_processor).AddressWidth
