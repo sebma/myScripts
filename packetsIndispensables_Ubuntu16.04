@@ -37,6 +37,7 @@ bluez
 bluez-tools
 browser-plugin-vlc
 build-essential
+cairo-dock
 cairo-dock-core
 calligrawords-common
 ccd2iso
@@ -83,6 +84,7 @@ gdebi
 gdebi-core
 gdisk
 geany
+git
 git-man
 gitso
 gmic
@@ -104,6 +106,7 @@ highlight
 html-xml-utils
 htop
 httpie
+hw-probe
 ifupdown
 indicator-bluetooth
 input-utils
