@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 # vim: set ft=sh noet:
 Set-PSDebug -Trace 1
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
