@@ -38,6 +38,7 @@ bibletime
 bluez
 bluez-tools
 build-essential
+cairo-dock
 cairo-dock-core
 ccd2iso
 ccze
@@ -82,6 +83,7 @@ gdebi
 gdebi-core
 gdisk
 geany
+git
 git-man
 gitso
 gmic
@@ -101,6 +103,7 @@ highlight
 html-xml-utils
 htop
 httpie
+hw-probe
 ifupdown
 indicator-bluetooth
 input-utils
