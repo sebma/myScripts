@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 Set-PSDebug -Trace 1
 $url="$1"
 $OutFile=basename "$url"
