@@ -51,6 +51,7 @@ cmake-curses-gui
 command-not-found
 conky-all
 cpanminus
+curl
 curlftpfs
 dcfldd
 deborphan
@@ -80,6 +81,7 @@ firefox-globalmenu
 flpsed
 fslint
 gawk
+gccgo-go
 gdebi
 gdebi-core
 gdisk
@@ -111,6 +113,7 @@ hw-probe
 ifupdown
 indicator-bluetooth
 input-utils
+inxi
 ipcalc
 iperf
 iperf3
@@ -215,12 +218,16 @@ putty
 pv
 pwgen
 pypy-dev
+python
 python-gnuplot
 python-matplotlib
 python-pisa
 python-pkg-resources
 python-pyx
 python-scapy
+python2
+python3
+python3-distutils
 qalculate
 qpdf
 qpdfview
@@ -241,6 +248,7 @@ smart-notifier
 smartmontools
 smem
 smplayer
+smtube
 sox
 speex
 spice-vdagent
