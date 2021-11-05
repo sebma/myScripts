@@ -1,7 +1,13 @@
 #!/usr/bin/env pwsh
-param( $firstArg )
+# param( $firstArg )
+# $firstArg = $args[0]
 
-function calcSignature( $filename ) {
+$argc = $args.Length
+for ($i=0; $i -lt $argc; $i++) {
+	"argv[" + $i + "] = " + $args[$i]
+}
+
+function calcSignature {
 	$scriptName = Split-Path -Leaf $PSCommandPath
 	switch( $scriptName ) {
 		"md5sum.ps1"    { $algo = "MD5";    Break }
@@ -10,7 +16,12 @@ function calcSignature( $filename ) {
 		"sha384sum.ps1" { $algo = "SHA384"; Break }
 		"sha512sum.ps1" { $algo = "SHA512"; Break }
 	}
-	(Get-FileHash -algo $algo $filename).Hash + "  " + $filename
+
+	for ($i=0; $i -lt $argc; $i++) {
+		"argv[" + $i + "] = <" + $($args[$i]) + ">"
+		$filename = $($args[$i])
+		(Get-FileHash -algo $algo $filename).Hash + "  " + $filename
+	}
 }
 
-calcSignature( $firstArg )
+# calcSignature
