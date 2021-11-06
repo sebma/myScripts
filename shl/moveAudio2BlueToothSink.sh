@@ -16,7 +16,7 @@ function moveAudioToBluetoothSink {
 	esac
 	set +o pipefail
 
-	[ "$bluetoothDeviceMacAddr" = null ] && bluetoothDeviceMacAddr=$(echo devices | bluetoothctl 2>/dev/null | awk "/Device.*($bluetoothDeviceMacAddr|$bluetoothDeviceName)/"'{printf$2;exit}')
+	[ "$bluetoothDeviceMacAddr" = null ] && bluetoothDeviceMacAddr=$(echo devices | bluetoothctl 2>/dev/null | awk "/Device.*($bluetoothDeviceName)/"'{printf$2;exit}')
 
 	if [ -n "$bluetoothDeviceMacAddr" ];then
 		bluetoothDevicePACTLMacAddr=$(echo $bluetoothDeviceMacAddr | sed s/:/_/g)
