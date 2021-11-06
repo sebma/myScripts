@@ -5,7 +5,7 @@ function moveAudioToBluetoothSink {
 
 	( echo $1 | egrep -q -- "^--?(h|u)" ) && echo "=> Usage : $FUNCNAME connected|bluetoothDeviceName|bluetoothDeviceMacAddr" 1>&2 && return 1
 	local firstArg=$1
-	local bluetoothDeviceName=null
+	local bluetoothDeviceName=""
 	local bluetoothDeviceMacAddr=null
 
 	set -o pipefail
