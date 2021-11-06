@@ -5,9 +5,8 @@ simpleUserGroups=""
 for userName
 do
 	id $userName 2>/dev/null || {
-		$sudo addgroup $userName
 		$sudo adduser $userName
-		for group in $userName $simpleUserGroups
+		for group in $simpleUserGroups
 		do
 			groups $userName | grep -q $group || $sudo adduser $userName $group
 		done
