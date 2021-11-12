@@ -18,7 +18,7 @@ architecture=$(uname -m)
 case $architecture in
 	x86_64) ;;
 	i686) architecture=i386;;
-	*) echo "=> Unkown architecture.";exit;;
+	*) echo "=> Unsupported architecture.";exit;;
 esac
 
 if [ -n "$Ventoy2DiskLatestGitHubReleaseURL" ];then
