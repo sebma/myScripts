@@ -34,6 +34,5 @@ fi
 
 if cd $ventoyROOT && [ $# != 0 ];then
 	sudo ./Ventoy2Disk.sh -u "$@"
+	tac $ventoyROOT/log.txt | sed "/^#* Ventoy2Disk/q" | tac
 fi
-
-tac $ventoyROOT/log.txt | sed "/^#* Ventoy2Disk/q" | tac
