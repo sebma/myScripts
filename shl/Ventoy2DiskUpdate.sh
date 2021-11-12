@@ -30,7 +30,7 @@ if [ -n "$Ventoy2DiskLatestGitHubReleaseURL" ];then
 	time sudo $cp2ext234 -r /tmp/ventoy-$ventoyLatestRelease/* /opt/ventoy
 	sudo chown root -R $ventoyROOT/*
 	rm -fr /tmp/ventoy-$ventoyLatestRelease/
-	test -f $ventoyROOT/tool/x86_64/ash && sudo rm $ventoyROOT/tool/x86_64/ash
+	test -f $ventoyROOT/tool/x86_64/ash && sudo rm -v $ventoyROOT/tool/x86_64/ash
 
 	if cd $ventoyROOT && [ $# != 0 ];then
 		sudo ./Ventoy2Disk.sh -l "$@"
