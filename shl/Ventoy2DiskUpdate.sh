@@ -10,7 +10,7 @@ gitHubUser=ventoy
 gitHubRepo=Ventoy
 gitHubAPIRepoURL=$gitHubAPIURL/repos/$gitHubUser/$gitHubRepo
 ventoyLatestRelease=$(git ls-remote --tags --refs --sort=-version:refname https://github.com/$gitHubUser/$gitHubRepo | awk -F/ '{print gensub("^v","",1,$NF);exit}')
-Ventoy2DiskLatestGitHubReleaseURL=$(curl -s $gitHubAPIRepoURL/releases/latest |  jq -r '.[0].assets[] | select( .content_type == "application/x-gzip" ).browser_download_url')
+Ventoy2DiskLatestGitHubReleaseURL=$(curl -s $gitHubAPIRepoURL/releases |  jq -r '.[0].assets[] | select( .content_type == "application/x-gzip" ).browser_download_url')
 
 curl -s "$Ventoy2DiskLatestGitHubReleaseURL" | tar -C /tmp -xz
 chmod +x /tmp/ventoy-$ventoyLatestRelease/tool/xzcat
