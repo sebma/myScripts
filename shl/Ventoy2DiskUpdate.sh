@@ -9,8 +9,8 @@ gitHubAPIURL=https://api.github.com
 gitHubUser=ventoy
 gitHubRepo=Ventoy
 gitHubAPIRepoURL=$gitHubAPIURL/repos/$gitHubUser/$gitHubRepo
-Ventoy2DiskLatestGitHubReleaseURL=$(curl -s $gitHubAPIRepoURL/releases/latest |  jq -r '.assets[0] | select(.browser_download_url | contains("linux.tar.gz")) | .browser_download_url')
-ventoyLatestRelease=$(git ls-remote --tags --refs https://github.com/$gitHubUser/$gitHubRepo | awk -F/ 'END{print gensub("^v","",1,$NF)}')
+ventoyLatestRelease=$(git ls-remote --tags --refs --sort=-version:refname https://github.com/$gitHubUser/$gitHubRepo | awk -F/ '{print gensub("^v","",1,$NF);exit}')
+Ventoy2DiskLatestGitHubReleaseURL=$(curl -s $gitHubAPIRepoURL/releases/latest |  jq -r '.[0].assets[] | select( .content_type == "application/x-gzip" ).browser_download_url'
 
 curl -s "$Ventoy2DiskLatestGitHubReleaseURL" | tar -C /tmp -xz
 chmod +x /tmp/ventoy-$ventoyLatestRelease/tool/xzcat
