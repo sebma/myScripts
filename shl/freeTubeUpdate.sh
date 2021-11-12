@@ -9,7 +9,7 @@ gitHubUser=FreeTubeApp
 gitHubRepo=FreeTube
 gitHubAPIRepoURL=$gitHubAPIURL/repos/$gitHubUser/$gitHubRepo
 freeTubeLatestGitHubReleaseURL=$(curl -s $gitHubAPIRepoURL/releases | jq -r '.[0].assets[] | select(.name | contains("amd64.deb")) | .browser_download_url')
-freeTubeLatestGitHubReleaseTag=$(curl -s $gitHubAPIRepoURL/tags | jq -r '.[0].name' | sed 's/v//;s/-beta//')
+freeTubeLatestGitHubReleaseTag=$(curl -s $gitHubAPIRepoURL/releases | jq -r '.[0].tag_name' | sed 's/v//;s/-beta//')
 freeTubeInstalledVersion=$(dpkg-query --showformat='${Version}' -W freetube)
 if [ "$freeTubeLatestGitHubReleaseTag" != "$freeTubeInstalledVersion" ];then
 	freeTubeLatestGitHubReleaseName=$(basename $freeTubeLatestGitHubReleaseURL)
