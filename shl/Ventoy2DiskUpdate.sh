@@ -33,7 +33,7 @@ if [ "$ventoyLatestRelease" != "$ventoyCurrentVersion" ];then
 		sudo chown root -R $ventoyROOT/*
 		rm -fr /tmp/ventoy-$ventoyLatestRelease/
 		test -f $ventoyROOT/tool/x86_64/ash && sudo rm -v $ventoyROOT/tool/x86_64/ash
-	
+
 		if cd $ventoyROOT && [ $# != 0 ];then
 			sudo ./Ventoy2Disk.sh -l "$@"
 			tac $ventoyROOT/log.txt | sed "/^#* Ventoy2Disk/q" | tac
