@@ -11,7 +11,7 @@ gitHubUser=ventoy
 gitHubRepo=Ventoy
 gitHubAPIRepoURL=$gitHubAPIURL/repos/$gitHubUser/$gitHubRepo
 #ventoyLatestRelease=$(git ls-remote --tags --refs --sort=-version:refname https://github.com/$gitHubUser/$gitHubRepo | awk -F/ '{print gensub("^v","",1,$NF);exit}')
-ventoyLatestRelease=$(curl -s $gitHubAPIRepoURL/tags | jq -r '.[0].name' | sed 's/v//;s/-beta//')
+ventoyLatestRelease=$(curl -s $gitHubAPIRepoURL/releases | jq -r '.[0].tag_name' | sed 's/v//;s/-beta//')
 Ventoy2DiskLatestGitHubReleaseURL=$(curl -s $gitHubAPIRepoURL/releases |  jq -r '.[0].assets[] | select( .content_type == "application/x-gzip" ).browser_download_url')
 
 architecture=$(uname -m)
@@ -30,9 +30,9 @@ if [ -n "$Ventoy2DiskLatestGitHubReleaseURL" ];then
 	time sudo $cp2ext234 -r /tmp/ventoy-$ventoyLatestRelease/* /opt/ventoy
 	sudo chown root -R $ventoyROOT/*
 	rm -fr /tmp/ventoy-$ventoyLatestRelease/
-fi
 
-if cd $ventoyROOT && [ $# != 0 ];then
-	sudo ./Ventoy2Disk.sh -u "$@"
-	tac $ventoyROOT/log.txt | sed "/^#* Ventoy2Disk/q" | tac
+	if cd $ventoyROOT && [ $# != 0 ];then
+		sudo ./Ventoy2Disk.sh -u "$@"
+		tac $ventoyROOT/log.txt | sed "/^#* Ventoy2Disk/q" | tac
+	fi
 fi
