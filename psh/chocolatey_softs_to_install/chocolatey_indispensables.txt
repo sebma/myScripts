@@ -1,2 +1,2 @@
-#7zip doublecmd firefox freetube --pre immunet infrarecorder libreoffice-fresh mediainfo microsoft-teams notepad3 processhacker thunderbird vlc
- 7zip doublecmd firefox freetube --pre immunet infrarecorder libreoffice-fresh mediainfo microsoft-teams notepad3 procexp thunderbird vlc
+#7zip doublecmd firefox freetube --pre immunet infrarecorder libreoffice-fresh mediainfo microsoft-teams notepad3 processhacker thunderbird ventoy vlc
+ 7zip doublecmd firefox freetube --pre immunet infrarecorder libreoffice-fresh mediainfo microsoft-teams notepad3 procexp thunderbird ventoy vlc
