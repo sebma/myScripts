@@ -12,7 +12,7 @@ gitHubRepo=Ventoy
 gitHubAPIRepoURL=$gitHubAPIURL/repos/$gitHubUser/$gitHubRepo
 #ventoyLatestRelease=$(git ls-remote --tags --refs --sort=-version:refname https://github.com/$gitHubUser/$gitHubRepo | awk -F/ '{print gensub("^v","",1,$NF);exit}')
 ventoyLatestRelease=$(curl -s $gitHubAPIRepoURL/releases | jq -r '.[0].tag_name' | sed 's/v//;s/-beta//')
-Ventoy2DiskLatestGitHubReleaseURL=$(curl -s $gitHubAPIRepoURL/releases |  jq -r '.[0].assets[] | select( .content_type == "application/x-gzip" ).browser_download_url')
+Ventoy2DiskLatestGitHubReleaseURL=$(curl -s $gitHubAPIRepoURL/releases |  jq -r '.[0].assets[] | select( .content_type | match( "application/.*gzip" ) ).browser_download_url')
 
 architecture=$(uname -m)
 case $architecture in
