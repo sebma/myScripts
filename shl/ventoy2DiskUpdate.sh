@@ -2,6 +2,7 @@
 
 scriptDir=$(dirname $0)
 scriptDir=$(cd $scriptDir;pwd)
+scriptBaseName=${0##*/}
 
 app=ventoy
 ventoyROOT=/opt/$app
@@ -13,9 +14,14 @@ gitHubUser=ventoy
 gitHubRepo=Ventoy
 gitHubAPIRepoURL=$gitHubAPIURL/repos/$gitHubUser/$gitHubRepo
 
+echo "=> Searching for the latest release on $protocol://$gitHubURL/$gitHubUser/$gitHubRepo ..."
 ventoyLatestRelease=$(\curl -Ls $protocol://$gitHubAPIRepoURL/releases | jq -r '.[0].tag_name' | sed 's/v//;s/-beta//')
+echo "=> Found the $ventoyLatestRelease version."
 ventoyCurrentVersion=$(<$ventoyROOT/ventoy/version)
-if [ "$ventoyLatestRelease" != "$ventoyCurrentVersion" ];then
+
+if [ "$ventoyLatestRelease" = "$ventoyCurrentVersion" ];then
+	echo "=> [$scriptBaseName] INFO : You already have the latest release, which is $ventoyLatestRelease."
+else
 	Ventoy2DiskLatestGitHubReleaseURL=$(\curl -Ls $protocol://$gitHubAPIRepoURL/releases |  jq -r '.[0].assets[] | select( .content_type | match( "application/.*gzip" ) ).browser_download_url')
 	if [ -n "$Ventoy2DiskLatestGitHubReleaseURL" ];then
 		echo "=> Ventoy2DiskLatestGitHubReleaseURL = <$Ventoy2DiskLatestGitHubReleaseURL>"
