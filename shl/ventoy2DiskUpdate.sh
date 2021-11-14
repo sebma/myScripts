@@ -14,13 +14,6 @@ gitHubAPIRepoURL=$gitHubAPIURL/repos/$gitHubUser/$gitHubRepo
 #ventoyLatestRelease=$(git ls-remote --tags --refs --sort=-version:refname $protocol://$gitHubURL/$gitHubUser/$gitHubRepo | awk -F/ '{print gensub("^v","",1,$NF);exit}')
 ventoyLatestRelease=$(\curl -Ls $protocol://$gitHubAPIRepoURL/releases | jq -r '.[0].tag_name' | sed 's/v//;s/-beta//')
 
-architecture=$(uname -m)
-case $architecture in
-	x86_64) ;;
-	i686) architecture=i386;;
-	*) echo "=> Unsupported architecture.";exit;;
-esac
-
 ventoyCurrentVersion=$(<$ventoyROOT/ventoy/version)
 if [ "$ventoyLatestRelease" != "$ventoyCurrentVersion" ];then
 	Ventoy2DiskLatestGitHubReleaseURL=$(\curl -Ls $protocol://$gitHubAPIRepoURL/releases |  jq -r '.[0].assets[] | select( .content_type | match( "application/.*gzip" ) ).browser_download_url')
