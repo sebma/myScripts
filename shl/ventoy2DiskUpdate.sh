@@ -5,14 +5,14 @@ scriptDir=$(cd $scriptDir;pwd)
 app=ventoy
 ventoyROOT=/opt/$app
 Ventoy2DiskScript=$ventoyROOT/Ventoy2Disk.sh
-gitHubURL=https://github.com
-gitHubAPIURL=https://api.github.com
+protocol=https
+gitHubURL=github.com
+gitHubAPIURL=api.$gitHubURL
 gitHubUser=ventoy
 gitHubRepo=Ventoy
 gitHubAPIRepoURL=$gitHubAPIURL/repos/$gitHubUser/$gitHubRepo
-#ventoyLatestRelease=$(git ls-remote --tags --refs --sort=-version:refname https://github.com/$gitHubUser/$gitHubRepo | awk -F/ '{print gensub("^v","",1,$NF);exit}')
-ventoyLatestRelease=$(curl -s $gitHubAPIRepoURL/releases | jq -r '.[0].tag_name' | sed 's/v//;s/-beta//')
-Ventoy2DiskLatestGitHubReleaseURL=$(curl -s $gitHubAPIRepoURL/releases |  jq -r '.[0].assets[] | select( .content_type | match( "application/.*gzip" ) ).browser_download_url')
+#ventoyLatestRelease=$(git ls-remote --tags --refs --sort=-version:refname $protocol://$gitHubURL/$gitHubUser/$gitHubRepo | awk -F/ '{print gensub("^v","",1,$NF);exit}')
+ventoyLatestRelease=$(curl -s $protocol://$gitHubAPIRepoURL/releases | jq -r '.[0].tag_name' | sed 's/v//;s/-beta//')
 
 architecture=$(uname -m)
 case $architecture in
@@ -23,6 +23,7 @@ esac
 
 ventoyCurrentVersion=$(<$ventoyROOT/ventoy/version)
 if [ "$ventoyLatestRelease" != "$ventoyCurrentVersion" ];then
+	Ventoy2DiskLatestGitHubReleaseURL=$(\curl -Ls $protocol://$gitHubAPIRepoURL/releases |  jq -r '.[0].assets[] | select( .content_type | match( "application/.*gzip" ) ).browser_download_url')
 	if [ -n "$Ventoy2DiskLatestGitHubReleaseURL" ];then
 		echo "=> Ventoy2DiskLatestGitHubReleaseURL = <$Ventoy2DiskLatestGitHubReleaseURL>"
 		\curl -Ls "$Ventoy2DiskLatestGitHubReleaseURL" | tar -C /tmp -xz || exit
