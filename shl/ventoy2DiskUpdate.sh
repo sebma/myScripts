@@ -12,7 +12,7 @@ gitHubUser=ventoy
 gitHubRepo=Ventoy
 gitHubAPIRepoURL=$gitHubAPIURL/repos/$gitHubUser/$gitHubRepo
 #ventoyLatestRelease=$(git ls-remote --tags --refs --sort=-version:refname $protocol://$gitHubURL/$gitHubUser/$gitHubRepo | awk -F/ '{print gensub("^v","",1,$NF);exit}')
-ventoyLatestRelease=$(curl -s $protocol://$gitHubAPIRepoURL/releases | jq -r '.[0].tag_name' | sed 's/v//;s/-beta//')
+ventoyLatestRelease=$(\curl -Ls $protocol://$gitHubAPIRepoURL/releases | jq -r '.[0].tag_name' | sed 's/v//;s/-beta//')
 
 architecture=$(uname -m)
 case $architecture in
