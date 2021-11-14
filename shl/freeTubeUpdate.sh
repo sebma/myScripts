@@ -3,7 +3,7 @@
 architecture=$(uname -m)
 case $architecture in
 	x86_64) arch=amd64;;
-	i686)   arch=i386;;
+	i686)   arch=i386; echo "=> FreeTube does not support $architecture architectures." >&2;exit 1;;
 	*) echo "=> Unsupported architecture.";exit;;
 esac
 
