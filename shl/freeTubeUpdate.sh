@@ -30,7 +30,7 @@ else
 	freeTubeLatestGitHubReleaseURL=$(\curl -Ls $protocol://$gitHubAPIRepoURL/releases | jq -r ".[0].assets[] | select( .name | contains( \"$arch.deb\") ) | .browser_download_url")
 	if [ -n "$freeTubeLatestGitHubReleaseURL" ];then
 		freeTubeLatestGitHubReleaseName=$(basename $freeTubeLatestGitHubReleaseURL)
-		wget -O $freeTubeLatestGitHubReleaseName "$freeTubeLatestGitHubReleaseURL"
+		wget -nv -O $freeTubeLatestGitHubReleaseName "$freeTubeLatestGitHubReleaseURL"
 		sudo gdebi -n $freeTubeLatestGitHubReleaseName && rm -v $freeTubeLatestGitHubReleaseName
 		sync
 	fi
