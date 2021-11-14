@@ -32,5 +32,6 @@ else
 		freeTubeLatestGitHubReleaseName=$(basename $freeTubeLatestGitHubReleaseURL)
 		wget -O $protocol://$freeTubeLatestGitHubReleaseName "$freeTubeLatestGitHubReleaseURL"
 		sudo gdebi -n $freeTubeLatestGitHubReleaseName && rm -v $freeTubeLatestGitHubReleaseName
+		sync
 	fi
 fi
