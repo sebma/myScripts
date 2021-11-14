@@ -17,7 +17,7 @@ gitHubAPIRepoURL=$gitHubAPIURL/repos/$gitHubUser/$gitHubRepo
 echo "=> Searching for the latest release on $protocol://$gitHubURL/$gitHubUser/$gitHubRepo ..."
 ventoyLatestRelease=$(\curl -Ls $protocol://$gitHubAPIRepoURL/releases | jq -r '.[0].tag_name' | sed 's/v//;s/-beta//')
 echo "=> Found the $ventoyLatestRelease version."
-ventoyCurrentVersion=$(<$ventoyROOT/ventoy/version 2>/dev/null)
+ventoyCurrentVersion=$(cat $ventoyROOT/ventoy/version 2>/dev/null)
 
 if [ "$ventoyLatestRelease" = "$ventoyCurrentVersion" ];then
 	echo "=> [$scriptBaseName] INFO : You already have the latest release, which is $ventoyLatestRelease."
