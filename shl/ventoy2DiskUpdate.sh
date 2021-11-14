@@ -38,5 +38,6 @@ else
 			sudo ./Ventoy2Disk.sh -l "$@"
 			tac $ventoyROOT/log.txt | sed "/^#* Ventoy2Disk/q" | tac
 		fi
+		sync
 	fi
 fi
