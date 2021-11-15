@@ -4,6 +4,10 @@
 $tls12 = [Enum]::ToObject([System.Net.SecurityProtocolType], 3072)
 [System.Net.ServicePointManager]::SecurityProtocol = $tls12
 
+if( ! [System.Net.ServicePointManager]::SecurityProtocol.HasFlag([Net.SecurityProtocolType]::Tls12) ) {
+	[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+}
+
 # sudo Update-Help
 
 function osFamily {
