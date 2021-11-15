@@ -1,0 +1,4 @@
+scoop bucket add extras
+scoop bucket add nirsoft
+scoop bucket add versions
+archiver aria2 curl dos2unix git gow mediainfo-cli mpv python rsync unzip wget yt-dlp
