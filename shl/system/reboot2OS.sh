@@ -15,6 +15,7 @@ fi
 entryName=$(awk -F"'" -v OS=$OSName '$0 ~ OS{printf $2;exit}' /boot/grub/grub.cfg)
 
 if [ -n "$entryName" ];then
+	echo "=> Will boot <$entryName> next ..."
 	sudo grub-reboot "$entryName"
 	echo "=> grub-editenv - list ..."
 	grub-editenv - list
