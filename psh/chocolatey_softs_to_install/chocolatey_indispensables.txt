@@ -1,2 +1,2 @@
-#7zip doublecmd firefox freetube --pre immunet infrarecorder libreoffice-fresh mediainfo microsoft-teams mpvnet.install notepad3 palemoon processhacker thunderbird ventoy vlc
- 7zip doublecmd firefox freetube --pre immunet infrarecorder libreoffice-fresh mediainfo microsoft-teams mpvnet.install notepad3 palemoon procexp thunderbird ventoy vlc
+#7zip adobereader doublecmd firefox freetube --pre immunet infrarecorder libreoffice-fresh mediainfo microsoft-teams mpvnet.install notepad3 palemoon processhacker thunderbird ventoy vlc
+ 7zip adobereader doublecmd firefox freetube --pre immunet infrarecorder libreoffice-fresh mediainfo microsoft-teams mpvnet.install notepad3 palemoon procexp thunderbird ventoy vlc
