@@ -6,7 +6,12 @@ elif [ $# = 1 ];then
 	OSName="$1"
 fi
 
-# ! grep GRUB_DEFAULT=.*saved /etc/default/grub -q && sudo sed -i "s/GRUB_DEFAULT=.*/GRUB_DEFAULT=saved/" /etc/default/grub && sudo update-grub
+grubenvFS_Type=$(lsblk -n -o type $(df /boot/grub/grubenv | awk '/boot/{printf$1}'))
+if [ $grubenvFS_Type = part ];then # https://www.gnu.org/software/grub/manual/grub/html_node/Environment-block.html
+	if ! grep GRUB_DEFAULT=.*saved /etc/default/grub -q;then
+		sudo sed -i "s/GRUB_DEFAULT=.*/GRUB_DEFAULT=saved/" /etc/default/grub && sudo update-grub
+	fi
+fi
 
 entryName=$(awk -F"'" -v OS=$OSName '$0 ~ OS{printf $2;exit}' /boot/grub/grub.cfg)
 if [ -n "$entryName" ];then
