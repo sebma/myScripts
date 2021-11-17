@@ -1,1 +1,1 @@
-choco-cleaner archiver aria2 curl dos2unix git gow mediainfo-cli mpv python rsync unzip wget yt-dlp
+choco-cleaner archiver aria2 curl dos2unix git gow mediainfo-cli mpv python3 --version=3.8.10 rsync unzip wget yt-dlp
