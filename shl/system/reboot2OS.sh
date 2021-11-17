@@ -15,10 +15,9 @@ fi
 entryName=$(awk -F"'" -v OS=$OSName '$0 ~ OS{printf $2;exit}' /boot/grub/grub.cfg)
 
 if [ -n "$entryName" ];then
-	echo "=> Will boot <$entryName> next ..."
+	printf "=> At the being, the system is configured to boot to <%s> by default.\n" "$(grub-editenv - list | cut -d= -f2-)"
 	grub-editenv - list | grep "next_entry=$entryName" -q || sudo grub-reboot "$entryName"
-	echo "=> grub-editenv - list ..."
-	grub-editenv - list
+	printf "=> Will now boot to <%s> by default.\n" "$(grub-editenv - list | cut -d= -f2-)"
 	echo "=> Rebooting to <$entryName> in 5 seconds ..."
 	sleep 5s
 	sync
