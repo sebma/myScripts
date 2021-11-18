@@ -3,7 +3,7 @@
 if [ $# = 0 ];then
 	printf "=> At the being, the system is configured to boot to <%s>.\n" "$(grub-editenv - list | cut -d= -f2-)"
 	echo
-	echo "=> You need to specify either an index or an entryName or an ID string you need next to reboot to."
+	echo "=> You need to specify either an index or an entryName or an ID string you need to reboot to next."
 	echo
 	awk -F"'" '/menuentry /{print"=> index = <"i++"> entryName = <"$2"> ID = <"$4">"}' /boot/grub/grub.cfg
 	exit 2
