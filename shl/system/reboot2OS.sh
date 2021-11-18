@@ -1,7 +1,9 @@
 #!/usr/bin/env sh
 
 if [ $# = 0 ];then
-	echo "=> You need to specify either an index or an entryName or an ID string."
+	printf "=> At the being, the system is configured to boot to <%s>.\n" "$(grub-editenv - list | cut -d= -f2-)"
+	echo
+	echo "=> You need to specify either an index or an entryName or an ID string you need next to reboot to."
 	echo
 	awk -F"'" '/menuentry /{print"=> index = <"i++"> entryName = <"$2"> ID = <"$4">"}' /boot/grub/grub.cfg
 	exit 2
@@ -23,7 +25,6 @@ fi
 
 entryName=$(awk -F"'" -v OS=$OSName '$0 ~ OS{printf $2;exit}' /boot/grub/grub.cfg)
 if [ -n "$entryName" ];then
-	printf "=> At the being, the system is configured to boot to <%s>.\n" "$(grub-editenv - list | cut -d= -f2-)"
 	grub-editenv - list | grep "next_entry=$entryName" -q || sudo grub-reboot "$entryName"
 	printf "=> Will now boot to <%s>.\n" "$(grub-editenv - list | cut -d= -f2-)"
 	echo "=> Rebooting to <$entryName> in 5 seconds ..."
