@@ -1,9 +1,17 @@
 #!/usr/bin/env sh
 
 if [ $# = 0 ];then
-	OSName=Ubuntu
+	echo "=> You need to specify either an index or an entryName or an ID string."
+	echo
+	awk -F"'" '/menuentry /{print"=> index = <"i++"> entryName = <"$2"> ID = <"$4">"}' /boot/grub/grub.cfg
+	exit 2
 elif [ $# = 1 ];then
-	OSName="$1"
+	if [ "$1" = -h ];then
+		echo "=> Usage: $0 [index|entryName|ID]" >&2
+		exit 1
+	else
+		OSName="$1"
+	fi
 fi
 
 grubenvFS_Type=$(lsblk -n -o type $(df /boot/grub/grubenv | awk '/boot/{printf$1}'))
