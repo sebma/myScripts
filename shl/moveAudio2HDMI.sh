@@ -4,9 +4,10 @@ function moveAudioToHDMI {
 	! pidof pulseaudio >/dev/null && echo "=> Pulseaudio is down, restarting Pulseaudio ..." && pulseaudio --start --log-target=syslog
 
 	! pactl list sinks short >/dev/null 2>&1 && test "$SSH_CONNECTION" && pax11publish -r
-	hdmiOutputPattern='\.hdmi-stereo\>'
-	sink_output=$(pactl list sinks short | awk "/$hdmiOutputPattern/"'{printf$1}')
 
+	hdmiOutputPattern='\.hdmi-stereo\>'
+
+	sink_output=$(pactl list sinks short | awk "/$hdmiOutputPattern/"'{printf$1}')
 	if ! pactl list sink-inputs short | egrep "^[0-9]+\s$sink_output\s" -q;then
 		echo "=> BEFORE :"
 		pactl list sink-inputs short
