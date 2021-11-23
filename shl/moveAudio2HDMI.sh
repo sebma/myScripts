@@ -8,7 +8,8 @@ function moveAudioToHDMI {
 	hdmiOutputPattern='\.hdmi-stereo\>'
 
 	sink_output=$(pactl list sinks short | awk "/$hdmiOutputPattern/"'{printf$1}')
-	if [ -n "$sink_output" ] && ! pactl list sink-inputs short | egrep "^[0-9]+\s$sink_output\s" -q;then
+	nbSinkInputs=$(pactl list sink-inputs short | wc -l)
+	if [ $nbSinkInputs != 0 ] && [ -n "$sink_output" ] && ! pactl list sink-inputs short | egrep "^[0-9]+\s$sink_output\s" -q;then
 		echo "=> ${0/*\/} ..."
 
 		echo "=> BEFORE :"
