@@ -8,7 +8,7 @@ function moveAudioToDigitalStereo {
 	analogStereoOutputPattern='\.iec958-stereo\>'
 
 	sink_output=$(pactl list sinks short | awk "/$analogStereoOutputPattern/"'{printf$1}')
-	if ! pactl list sink-inputs short | egrep "^[0-9]+\s$sink_output\s" -q;then
+	if [ -n "$sink_output" ] && ! pactl list sink-inputs short | egrep "^[0-9]+\s$sink_output\s" -q;then
 		echo "=> BEFORE :"
 		pactl list sink-inputs short
 
