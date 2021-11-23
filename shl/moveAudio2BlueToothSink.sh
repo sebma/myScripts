@@ -26,6 +26,8 @@ function moveAudioToBluetoothSink {
 
 			sink_output=$(pactl list sinks short | awk "/$bluetoothDevicePACTLMacAddr/"'{printf$1}')
 			if [ -n "$sink_output" ] && ! pactl list sink-inputs short | egrep "^[0-9]+\s$sink_output\s" -q;then
+				echo "=> ${0/*\/} ..."
+
 				echo "=> BEFORE :"
 				pactl list sink-inputs short
 	
@@ -40,6 +42,8 @@ function moveAudioToBluetoothSink {
 
 				echo "=> AFTER :"
 				pactl list sink-inputs short
+
+				echo "=> DONE."
 			fi
 		else
 			echo "=> ERROR : There is no audio sink for $bluetoothDeviceMacAddr" >&2
