@@ -25,7 +25,7 @@ function moveAudioToBluetoothSink {
 		if [ $bluetoothSinkVisible = true ];then
 
 			sink_output=$(pactl list sinks short | awk "/$bluetoothDevicePACTLMacAddr/"'{printf$1}')
-			if ! pactl list sink-inputs short | egrep "^[0-9]+\s$sink_output\s" -q;then
+			if [ -n "$sink_output" ] && ! pactl list sink-inputs short | egrep "^[0-9]+\s$sink_output\s" -q;then
 				echo "=> BEFORE :"
 				pactl list sink-inputs short
 	
