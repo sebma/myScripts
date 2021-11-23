@@ -10,11 +10,13 @@ function moveAudioToHDMI {
 	hdmiOutputPattern='\.hdmi-stereo\>'
 	sink_output=$(pactl list sinks short | awk "/$hdmiOutputPattern/"'{printf$1}')
 
-	echo "=> sink_output = $sink_output"
-	pactl list sink-inputs short | awk '/protocol-native.c/{print$1}' | while read sink_input
-	do
-		pactl move-sink-input $sink_input $sink_output
-	done
+	if pactl list sink-inputs short | grep "^$sink_input\s$sink_output\s" -q;then
+		echo "=> sink_output = $sink_output"
+		pactl list sink-inputs short | awk '/protocol-native.c/{print$1}' | while read sink_input
+		do
+			pactl move-sink-input $sink_input $sink_output
+		done
+	fi
 
 	echo "=> AFTER :"
 	pactl list sink-inputs short
