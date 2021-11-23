@@ -9,6 +9,8 @@ function moveAudioToDigitalStereo {
 
 	sink_output=$(pactl list sinks short | awk "/$analogStereoOutputPattern/"'{printf$1}')
 	if [ -n "$sink_output" ] && ! pactl list sink-inputs short | egrep "^[0-9]+\s$sink_output\s" -q;then
+		echo "=> ${0/*\/} ..."
+
 		echo "=> BEFORE :"
 		pactl list sink-inputs short
 
@@ -20,6 +22,8 @@ function moveAudioToDigitalStereo {
 
 		echo "=> AFTER :"
 		pactl list sink-inputs short
+
+		echo "=> DONE."
 	fi
 }
 
