@@ -10,10 +10,10 @@ function moveAudioTo {
 
 	! pactl list sinks short >/dev/null 2>&1 && test "$SSH_CONNECTION" && pax11publish -r
 
-	hdmiOutputPattern="$1"
-#	echo "=> hdmiOutputPattern = $hdmiOutputPattern"
+	selectedOutputPattern="$1"
+#	echo "=> selectedOutputPattern = $selectedOutputPattern"
 
-	sink_output=$(pactl list sinks short | awk "/$hdmiOutputPattern/"'{printf$1}')
+	sink_output=$(pactl list sinks short | awk "/$selectedOutputPattern/"'{printf$1}')
 	nbSinkInputs=$(pactl list sink-inputs short | wc -l)
 	if [ $nbSinkInputs != 0 ] && [ -n "$sink_output" ] && ! pactl list sink-inputs short | egrep "^[0-9]+\s$sink_output\s" -q;then
 		echo "=> ${0/*\/} ..."
