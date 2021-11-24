@@ -5,9 +5,9 @@ function moveAudioToDigitalStereo {
 
 	! pactl list sinks short >/dev/null 2>&1 && test "$SSH_CONNECTION" && pax11publish -r
 
-	analogStereoOutputPattern='\.iec958-stereo\>'
+	digitalStereoOutputPattern='\.iec958-stereo\>'
 
-	sink_output=$(pactl list sinks short | awk "/$analogStereoOutputPattern/"'{printf$1}')
+	sink_output=$(pactl list sinks short | awk "/$digitalStereoOutputPattern/"'{printf$1}')
 	nbSinkInputs=$(pactl list sink-inputs short | wc -l)
 	if [ $nbSinkInputs != 0 ] && [ -n "$sink_output" ] && ! pactl list sink-inputs short | egrep "^[0-9]+\s$sink_output\s" -q;then
 		echo "=> ${0/*\/} ..."
