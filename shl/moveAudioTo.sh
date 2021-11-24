@@ -11,7 +11,7 @@ function moveAudioTo {
 	! pactl list sinks short >/dev/null 2>&1 && test "$SSH_CONNECTION" && pax11publish -r
 
 	hdmiOutputPattern="$1"
-	echo "=> hdmiOutputPattern = $hdmiOutputPattern"
+#	echo "=> hdmiOutputPattern = $hdmiOutputPattern"
 
 	sink_output=$(pactl list sinks short | awk "/$hdmiOutputPattern/"'{printf$1}')
 	nbSinkInputs=$(pactl list sink-inputs short | wc -l)
