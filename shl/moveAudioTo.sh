@@ -34,6 +34,6 @@ function moveAudioTo {
 	fi
 }
 
-moveAudioTo "$@"
-
 moveAudio2HDMI { moveAudioTo '\.hdmi-stereo\>'  }
+
+$funcName "$@"
