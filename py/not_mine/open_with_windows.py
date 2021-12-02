@@ -6,7 +6,7 @@ import json
 import struct
 import subprocess
 
-VERSION = '7.1b2'
+VERSION = '7.2.6'
 
 try:
 	sys.stdin.buffer
@@ -32,23 +32,8 @@ try:
 
 except AttributeError:
 	# Python 2.x version (if sys.stdin.buffer is not defined)
-	# Read a message from stdin and decode it.
-	def getMessage():
-		rawLength = sys.stdin.read(4)
-		if len(rawLength) == 0:
-			sys.exit(0)
-		messageLength = struct.unpack('@I', rawLength)[0]
-		message = sys.stdin.read(messageLength)
-		return json.loads(message)
-
-	# Send an encoded message to stdout
-	def sendMessage(messageContent):
-		encodedContent = json.dumps(messageContent)
-		encodedLength = struct.pack('@I', len(encodedContent))
-
-		sys.stdout.write(encodedLength)
-		sys.stdout.write(encodedContent)
-		sys.stdout.flush()
+	print('Python 3.2 or newer is required.')
+	sys.exit(-1)
 
 
 def install():
@@ -74,12 +59,14 @@ def install():
 
 	registry_locations = {
 		'chrome': os.path.join('Software', 'Google', 'Chrome', 'NativeMessagingHosts'),
+		'chromium': os.path.join('Software', 'Chromium', 'NativeMessagingHosts'),
 		'firefox': os.path.join('Software', 'Mozilla', 'NativeMessagingHosts'),
+		'thunderbird': os.path.join('Software', 'Thunderbird', 'NativeMessagingHosts'),
 	}
 
 	for browser, registry_location in registry_locations.items():
 		browser_manifest = manifest.copy()
-		if browser == 'firefox':
+		if browser in ['firefox', 'thunderbird']:
 			browser_manifest['allowed_extensions'] = ['openwith@darktrojan.net']
 		else:
 			browser_manifest['allowed_origins'] = [
@@ -108,6 +95,7 @@ def find_browsers():
 	count = _winreg.QueryInfoKey(key)[0]
 
 	browsers = []
+	found_msedge = False
 	while count > 0:
 		subkey = _winreg.EnumKey(key, count - 1)
 		try:
@@ -115,11 +103,14 @@ def find_browsers():
 				'name': _winreg.QueryValue(key, subkey),
 				'command': _winreg.QueryValue(key, os.path.join(subkey, 'shell', 'open', 'command'))
 			})
+			if subkey == 'Microsoft Edge':
+				found_msedge = True
 		except:
 			pass
 		count -= 1
 
-	if os.path.exists(os.path.join(windir, 'SystemApps', 'Microsoft.MicrosoftEdge_8wekyb3d8bbwe', 'MicrosoftEdge.exe')):
+	if not found_msedge and \
+		os.path.exists(os.path.join(windir, 'SystemApps', 'Microsoft.MicrosoftEdge_8wekyb3d8bbwe', 'MicrosoftEdge.exe')):
 		browsers.append({
 			'name': 'Microsoft Edge',
 			'command': os.path.join(windir, 'explorer.exe') + ' "microsoft-edge:%s "'
@@ -169,4 +160,5 @@ if __name__ == '__main__':
 			listen()
 			sys.exit(0)
 
-	print('Open With native helper, version %s.' % VERSION)
+	print('This is the Open With native helper, version %s.' % VERSION)
+	print('Run this script again with the word "install" after the file name to install.')
