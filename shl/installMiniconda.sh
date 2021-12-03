@@ -149,7 +149,7 @@ function installMiniconda {
 	       	echo "=> conda$Version est pas dans le PATH, modifier le fichier ~/.bashrc, fermer le terminal et relancer <$0>." >&2
 		exit 1
 	else
-		test $(uname) = Linux && groups | \egrep -wq "sudo|adm|admin|root" && symlinkCommand="sudo ln -vsf" || symlinkCommand="ln -vsf"
+		test $(uname) = Linux && groups | \egrep -wq "sudo|adm|admin|root|wheel" && symlinkCommand="sudo ln -vsf" || symlinkCommand="ln -vsf"
 		local condaVersionPath=$(which -a conda | grep miniconda$Version)
 		local condaRelativeDirName=../../miniconda$Version/bin
 
