@@ -30,16 +30,16 @@ function main {
 					grep -q "$distribCodeName-updates" /etc/apt/sources.list || { sudo add-apt-repository "deb $repoBaseURL $distribCodeName-updates main restricted universe multiverse";needUpdate=1; }
 					updateRepo="sudo apt update"
 					test $needUpdate == 1 && echo && $updateRepo
-		
+
 					installCommand="sudo apt install -V"
-			
+
 					echo
 					echo "=> Installing $(lsb_release -sd) console tools ..."
 					echo
 					consoleTools="transfig eog linux-image-generic texlive-xetex texlive-luatex texlive-extra-utils pdf2svg perl-doc lsof rename lsb-release bash-completion vim rlwrap hdf5-tools python-argcomplete htop command-not-found gpm conky-all dfc git smartmontools inxi aria2 gdebi-core speedtest-cli"
 					consoleToolsNumber=$(echo $consoleTools | wc -w)
 					test $(dpkg -l $consoleTools | grep -c ^ii) == $consoleToolsNumber && echo "==> INFO : The console tools are already installed." || $installCommand $consoleTools
-			
+
 					echo
 					echo "=> Installing the lightwight Xfce environment ..."
 					graphicTools="lxrandr xclip xsel gsmartcontrol gparted lshw-gtk numlockx smart-notifier xfce4 xfce4-mount-plugin xubuntu-desktop"
@@ -55,7 +55,7 @@ function main {
 						echo
 						nvcc -V
 					else
-#						if ! test -s /etc/apt/sources.list.d/graphics-drivers-ubuntu-ppa-$distribCodeName.list 
+#						if ! test -s /etc/apt/sources.list.d/graphics-drivers-ubuntu-ppa-$distribCodeName.list
 #						then
 #							sudo add-apt-repository ppa:graphics-drivers/ppa -y
 #							$updateRepo
