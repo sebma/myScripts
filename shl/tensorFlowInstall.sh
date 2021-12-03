@@ -5,7 +5,7 @@ function main {
 	set -o nounset
 
 	local os=$(uname -s)
-	local -r isAdmin=$(groups | egrep -wq "sudo|adm|admin|root" && echo true || echo false)
+	local -r isAdmin=$(groups | egrep -wq "sudo|adm|admin|root|wheel" && echo true || echo false)
 
 	if [ $os = Linux ]
 	then
@@ -158,7 +158,7 @@ function installTFCondaEnv {
 	set -o nounset
 
 	local os=$(uname -s)
-	local -r isAdmin=$(groups | egrep -wq "sudo|adm|admin|root" && echo true || echo false)
+	local -r isAdmin=$(groups | egrep -wq "sudo|adm|admin|root|wheel" && echo true || echo false)
 
 	if [ $os = Linux ] || [ $os = Darwin ]
 	then
