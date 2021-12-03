@@ -106,14 +106,13 @@ function main {
 					grep -q "$distribCodeName/updates" /etc/apt/sources.list || sudo add-apt-repository "deb $repoBaseURL $distribCodeName/updates main contrib non-free"
 					updateRepo="sudo apt update"
 					$updateRepo
-		
+
 					graphicTools="gsmartcontrol gparted lshw-gtk numlockx smart-notifier xfce4 xfce4-mount-plugin"
 					installCommand="sudo apt install -V"
 				;;
 				*) ;;
 			esac
-		
-			
+
 			echo
 			echo "=> Installing cuDNN for cuda ..."
 			if grep -q CUDNN_MAJOR $CUDA_HOME/include/cudnn.h
