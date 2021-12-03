@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
-#export SNAP=/snap/chromium/current
-export SNAP=$(snap run --shell chromium -c 'echo $SNAP')
-bash $SNAP/bin/chromium.launcher &
+SNAP=$(snap run --shell chromium -c 'echo $SNAP')
+SNAP_USER_COMMON=$(snap run --shell chromium -c 'echo $SNAP_USER_COMMON')
+SNAP=$SNAP SNAP_USER_COMMON=$SNAP_USER_COMMON $SNAP/bin/chromium.launcher &
