@@ -22,7 +22,7 @@ else
 			continue
 		else
 			echo "=> INFO: Installing the picoscope Python module because it's not installed ..." >&2
-			if groups | egrep -wq "sudo|adm|admin"
+			if groups | egrep -wq "sudo|adm|admin|root|wheel"
 			then
 		#		sudo -H $(which $pipCmd) install picoscope==0.6.2
 				sudo -H $(which $pipCmd) install git+https://github.com/colinoflynn/pico-python.git@0.6.2
