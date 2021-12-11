@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 mkdir $HOME/Desktop $HOME/Documents $HOME/Downloads $HOME/Music $HOME/Pictures $HOME/Public $HOME/Templates $HOME/Videos
 
 ln -s Desktop Bureau
