@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 urlsFile="$1"
 test $# = 0 && {
@@ -7,10 +7,11 @@ test $# = 0 && {
 }
 
 echo "#EXTM3U" | \recode ..utf-8
-egrep -v "^(#|$)" $urlsFile | uniq | while read url
+egrep -v "^(#|$)" $urlsFile | uniq | while read line
 do
 	extension=.mp4
-	title=$(basename "$url" $extension | sed "s/%20/ /g")
+	title="$(echo $line | cut -d" " -f2- | sed "s/%20/ /g")"
+	url="$(echo "$line" | sed "s/ .*//g")"
 	echo "#EXTINF:-1,$title" | \recode ..utf-8
 	echo $url | \recode ..utf-8
 done
