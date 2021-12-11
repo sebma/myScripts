@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 Extension=".JPG"
 ExtensionList=".JPG .jpg"
