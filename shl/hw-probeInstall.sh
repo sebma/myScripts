@@ -22,7 +22,7 @@ distribName () {
 	echo $osName | awk '{print tolower($0)}'
 }
 hw_probeInstall () {
-	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo=$(which sudo) || local sudo=""
+	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo="command sudo" || local sudo=""
 	local distribName=$(distribName)
 	local retCode=0
 	if [ $distribName = ubuntu ]; then
