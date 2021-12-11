@@ -49,7 +49,7 @@ function main {
 					cudaPackageName=cuda-9-0
 					cudaVersion=$(echo $cudaPackageName | cut -d- -f2- | tr "-" .)
 					echo "=> Installing CUDA v$cudaVersion and the nvidia driver version from which it depends ..."
-					if which nvcc >/dev/null 2>&1
+					if type -P nvcc >/dev/null 2>&1
 					then
 						echo "==> INFO : cuda is already installed :"
 						echo
