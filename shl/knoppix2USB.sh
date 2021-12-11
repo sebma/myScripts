@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 MyScriptsDir=$(dirname $0)
 SrcLoaderSubDir=isolinux
