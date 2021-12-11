@@ -5,9 +5,9 @@ Distrib=`awk '{print $1}' /etc/issue`
 [ -z "$Distrib" ] && Distrib=`grep -q "=" /etc/*-release && head -1 /etc/*-release | cut -d'=' -f2 || awk '{print $1}' /etc/*-release`
 
 IFace="$(ifconfig -a | grep "Ethernet" | head -1 | cut -d' ' -f1)"
-echo "=> IFace="$IFace"
+echo "=> IFace=$IFace"
 
-#echo Distrib="$Distrib
+#echo Distrib=$Distrib
 
 case $Distrib in
   Gentoo)
