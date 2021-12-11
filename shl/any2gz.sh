@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 trap 'echo "===> Program interrupted by CTRL+C" >&2 && exit 3' SIGINT
 
