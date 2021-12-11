@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 Ratio="33%"
 declare -i Factor=1/3
