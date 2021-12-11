@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 #time -p MP4Box -force-cat $(printf " -cat %s" $(ls -v $@)) -new output.mp4
 set -x

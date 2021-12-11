@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 nohup $(which kwin) --replace &
 echo "=> Sleeping 10 seconds to wait for KWin to load ..."

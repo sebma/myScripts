@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 cpan=$(which cpan)
 printf "o conf prerequisites_policy follow\no conf build_requires_install_policy yes\no conf commit" | $cpan

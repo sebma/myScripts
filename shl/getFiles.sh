@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 test $# = 0 && {
 	echo "=> Usage: $(basename $0) <wget args> URL" >&2

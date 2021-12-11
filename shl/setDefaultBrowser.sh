@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 [ $# = 0 ] && browserList="google-chrome brave-browser palemoon firefox-esr firefox midori qupzilla chromium-browser konqueror" || browserList="$@"
 

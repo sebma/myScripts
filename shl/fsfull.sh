@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 interpreter=`ps -o pid,comm | awk /$$/'{print $2}'`
 echo "=> interpreter = $interpreter"

@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 getprop 2>/dev/null | grep -q ro.build.version.release && export osFamily=Android || export osFamily=$(uname -s)
 wifiInfos ()

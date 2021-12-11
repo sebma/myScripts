@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 firefoxCacheDirname=cache2
 cd $HOME/.mozilla/firefox/ && {

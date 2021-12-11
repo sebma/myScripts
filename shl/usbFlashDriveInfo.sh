@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 scriptName=$(basename $0)
 usbFlashDriveInfo() {

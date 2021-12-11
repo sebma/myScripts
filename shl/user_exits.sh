@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 test $1 && userList=$@ || userList=$USER
 

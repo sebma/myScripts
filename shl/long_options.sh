@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 usage() {
 	echo "Usage: $0 [-hv] [-s SERVEUR] [-p DB_PREFIX] [-a actnn] [-c ark|producer ID_CHUNK] [-m all|preing|ing|sto|dm|acc] [-t nh|hm|ns]"

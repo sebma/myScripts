@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 any2mp4Fonction() {
 	local codeRet=0

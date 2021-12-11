@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 distribName=$(lsb_release -si)
 currentKernelVersion=$(uname -r | cut -d. -f1,2 | tr -d .)

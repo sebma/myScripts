@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 set -x
 #time -p avconv -probesize 400M -analyzeduration 400M -i concat:$(printf "%s|" $(ls -v $@)) -map 0 -c copy output.vob

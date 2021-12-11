@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 urlsFile="$1"
 test $# = 0 && {

@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 echo "=> Northbridge Chipset :"
 lspci -nnvs 0:0.0 | egrep "^00:|Kernel|Subsystem"

@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 restart_conky() {
 	while ! \pgrep plasma-desktop >/dev/null

@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 type lsb_release >/dev/null 2>&1 || {
   echo "=> ERROR: lsb_release is not present !" >&2

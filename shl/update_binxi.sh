@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 update_binxi() {
 	local scriptDir=$(dirname $0)

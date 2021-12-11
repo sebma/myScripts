@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 priereZoomHttps_URL="https://us04web.zoom.us/j/78356654717?pwd=bnFKSU5NTmRwVmxXZURaZlcrT1VLdz09"
 

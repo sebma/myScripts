@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 [ $1 ] || {
     echo "=> Usage : $(basename $0) <prefix>" >&2

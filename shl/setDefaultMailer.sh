@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 [ $# = 0 ] && mailerList="thunderbird kmail claws-mail geary evolution mailspring" || mailerList="$@"
 

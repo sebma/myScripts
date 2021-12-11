@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 inputPlaylist="$1"
 ffprobe="command ffprobe -hide_banner"

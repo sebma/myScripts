@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 os() {
 	local OSTYPE=$(bash -c 'echo $OSTYPE')

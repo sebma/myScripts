@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 \wget -nv http://landley.net/toybox/bin/toybox-$(uname -m) -P /tmp/
 sudo install -vpm755 /tmp/toybox-$(uname -m) /usr/local/bin/toybox

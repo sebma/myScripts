@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 scriptDir=$(dirname $0)
 scriptDir=$(cd $scriptDir;pwd)

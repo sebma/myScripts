@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 wiresharkGroup=wireshark
 grep -wq $wiresharkGroup /etc/group || sudo groupadd  --system $wiresharkGroup
