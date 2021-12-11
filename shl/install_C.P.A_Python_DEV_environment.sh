@@ -18,7 +18,7 @@ EOF
 function installMiniconda {
 	local Version=$1
 	local condaInstallerURL=""
-	if which -a conda | grep -q miniconda$Version/bin/conda
+	if type -P -a conda | grep -q miniconda$Version/bin/conda
 	then
 		echo "=> INFO: Miniconda version $Version is already installed." >&2
 	else
