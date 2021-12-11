@@ -8,7 +8,7 @@ if ! df $varMailPartition | grep -q $varMailPartition;then
 	exit 1
 fi
 
-rsync=$(which rsync)
+rsync="command rsync"
 move="$rsync -uth -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST $RSYNC_EXCLUSION -ogpuv -lH --remove-source-files"
 
 test -d $varMailPartition/thunderbird/$USER || { groups | grep -q sudo && sudo mkdir -v -p $varMailPartition/thunderbird/$USER || exit; }
