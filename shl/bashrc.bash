@@ -129,9 +129,9 @@ httpserver() {
 }
 
 scp() {
-	#scpCommand="$(which rsync) -pPt -uv --rsh=$(which ssh) -qt"
-	scpCommand="$(which rsync) -pPt -v"
-	$scpCommand -e "$(which ssh) -qt" $@
+	#scpCommand="command rsync -pPt -uv --rsh="$(type -P ssh) -qt"
+	scpCommand="command rsync -pPt -v"
+	$scpCommand -e "command ssh -qt" $@
 	test $? = 127 && {
 		$scpCommand -e "$(which ssh) -qt" --rsync-path=/usr/local/bin/rsync $@ || $(which scp) -p $@
 	}
