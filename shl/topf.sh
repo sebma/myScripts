@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 topf () { 
-	local find=$(which find)
+	local find="command find"
 	local findExcludedPathList="./proc ./sys ./dev"
 	local findPrunePathsExpression="( -type d -a ( -name .git $(printf -- " -o -path %s" $findExcludedPathList) ) ) -prune -o"
 	[ $# = 0 ] && local lines=10 || local lines=$1
