@@ -13,7 +13,7 @@ os() {
 			if [ -s /etc/os-release ]; then
 				( . /etc/os-release && echo $PRETTY_NAME )
 			else
-				if which lsb_release > /dev/null 2>&1; then
+				if type -P lsb_release > /dev/null 2>&1; then
 					\lsb_release -scd | paste -sd" "
 					echo
 				else
