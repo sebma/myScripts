@@ -4,8 +4,8 @@ fsRegExp="\<(ext[234]|btrfs|f2fs|xfs|jfs|reiserfs|nilfs|hfs|vfat|fuseblk)\>"
 RSYNC_SKIP_COMPRESS_LIST=7z/aac/avi/bz2/deb/flv/gz/iso/jpeg/jpg/mkv/mov/m4a/mp2/mp3/mp4/mpeg/mpg/oga/ogg/ogm/ogv/webm/rpm/tbz/tgz/z/zip
 
 #sudo -k
-find=$(which find)
-rsync=$(which rsync)
+find="command find"
+rsync="command rsync"
 rsyncOptions="-h -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST -utr"
 filesystemsList=$(df -T | egrep -vw "/media|/mnt|/tmp" | awk "/$fsRegExp/"'{print$NF}' | sort -u | paste -sd' ')
 echo "=> filesystemsList=\"$filesystemsList\""
