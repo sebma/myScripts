@@ -2,7 +2,7 @@
 
 function upgradeAllBut {
 	local packagesNotUpgraded="$@"
-	local apt=$(which apt)
+	local apt="command apt"
 	local retCode=-1
 	if [ -z "$packagesNotUpgraded" ]
 	then
