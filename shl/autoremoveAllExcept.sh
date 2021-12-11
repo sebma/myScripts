@@ -2,7 +2,7 @@
 
 function autoremoveAllBut {
 	local packagesNotUpgraded="$@"
-	local apt=$(which apt)
+	local apt="command apt"
 	if [ -z "$packagesNotUpgraded" ]
 	then
 		packagesToBeRemoved=$($(which apt-get) autoremove --dry-run | awk '/^Remv/{print$2}' | grep -v "Listing..." | xargs)
