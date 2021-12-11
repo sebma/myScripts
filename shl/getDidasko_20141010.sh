@@ -26,7 +26,7 @@ initColors
 trap 'echo "$red=> SIGINT Received.$normal";exit;' INT
 
 export TIME="\nreal %E\nuser %U\nsys %S"
-time=$(which time)
+time="command time"
 fqdn=www.centre-didasko.org
 baseUrl=http://$fqdn/audio/page
 pageNumberFieldName=page-numbers
