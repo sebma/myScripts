@@ -171,7 +171,7 @@ function deployPubKeys {
 
 	if ! env | grep -q remoteServerType
 	then
-		if which whiptail >/dev/null 2>&1
+		if type -P whiptail >/dev/null 2>&1
 		then
 			remoteServerType=$(whiptail --title "Remote server type" --menu "What is the remote server type [AIX / Solaris / HP-UX / Linux] ? " 20 78 16 \
 			"a)" "AIX Server" "s)" "Solaris Server" "h)" "HP-UX Server" "l)" "Linux Server" "q)" Quit 3>&2 2>&1 1>&3)
