@@ -22,7 +22,7 @@ distribName () {
 	echo $osName | awk '{print tolower($0)}'
 }
 inxiInstallFromSource () {
-	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo=$(which sudo) || local sudo=""
+	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo="command sudo" || local sudo=""
 	local inxiGitREPO=https://github.com/smxi/inxi
 
 	if type -P inxi >/dev/null 2>&1; then
