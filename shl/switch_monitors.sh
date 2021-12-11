@@ -1,4 +1,6 @@
-#!/bin/sh -eu
+#!/usr/bin/env bash
+
+set -eu
 
 screenList="`xrandr | awk '/ connected/{print$1}'`"
 nbScreens=`echo "$screenList" | wc -l`
