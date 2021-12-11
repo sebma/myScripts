@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 type 7z &>/dev/null || echo ERREUR: L\'utilitaire \"7z\" est absent du systeme ! 1>&2 && exit 1
 type tar &>/dev/null || echo ERREUR: L\'utilitaire \"tar\" est absent du systeme ! 1>&2 && exit 1
