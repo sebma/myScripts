@@ -15,7 +15,7 @@ echo XKEYBOARD=fr > /etc/sysconfig/keyboard
 #Activation du "NumLock" sur tous les "tty" de la console
 #et desactivation du beep sur la console et sur "XWindow"
 INITTY=/dev/tty[1-8]
-ListHardWareCmd=$(which lshw || which lshal)
+ListHardWareCmd="command lshw || which lshal"
 $ListHardWareCmd | egrep -qi "notebook|laptop" || {
 	for tty in $INITTY; do
 		setleds -D +num < $tty
