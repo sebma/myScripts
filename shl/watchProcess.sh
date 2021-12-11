@@ -2,7 +2,7 @@
 
 function watchProcess {
 	local pidList=""
-	local ps=$(which ps)
+	local ps="command ps"
 	mkdir -p ~/log
 	test $# = 1 && while true
 	do
