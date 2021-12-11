@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 [ "`id -u`" = "0" ] || { echo "You need root privileges to modify the system!" >&2 ; exit 1; }
 [ -d "$1" ] && CONFIGS="$1/configs.tbz"
 [ -f "$CONFIGS" ] || CONFIGS="/cdrom/KNOPPIX/configs.tbz"
