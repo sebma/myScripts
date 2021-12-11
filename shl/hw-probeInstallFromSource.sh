@@ -22,7 +22,7 @@ distribName () {
 	echo $osName | awk '{print tolower($0)}'
 }
 hw_probeInstallFromSource () {
-	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo=$(which sudo) || local sudo=""
+	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo="command sudo" || local sudo=""
 	local hw_probeGitREPO=https://github.com/linuxhw/hw-probe
 
 	if type -P hw-probe >/dev/null 2>&1; then
