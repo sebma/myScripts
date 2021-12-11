@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 InputDirList="/d/Originaux/+90 /d/Originaux/-90"
 time for Dir in $InputDirList
