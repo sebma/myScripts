@@ -47,7 +47,7 @@ getRestrictedFilenamesFORMAT () {
 	local embedThumbnail="--write-thumbnail"
 	local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__%(extractor)s.%(ext)s"
 	local thumbnailerName=$(basename $(which AtomicParsley 2>/dev/null || which ffmpeg 2>/dev/null))
-	local thumbnailerExecutable=$(which $thumbnailerName 2>/dev/null)
+	local thumbnailerExecutable="command $thumbnailerName 2>/dev/null"
 	local ffmpegNormalLogLevel=repeat+error
 	local ffmpegInfoLogLevel=repeat+info
 	local ffmpegLogLevel=$ffmpegNormalLogLevel
