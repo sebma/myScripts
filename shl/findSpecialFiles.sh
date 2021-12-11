@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-type sudo >/dev/null 2>&1 && sudo=$(which sudo) || sudo=""
+type sudo >/dev/null 2>&1 && sudo="command sudo" || sudo=""
 $sudo -v
 
 test $# = 0 && fileSystemList=$(df -T | egrep -iv "home|data" | awk "/btrfs|ext[234]/"'{print$NF}') || fileSystemList=$@
