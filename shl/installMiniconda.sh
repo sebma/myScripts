@@ -98,7 +98,7 @@ EOF
 
 function installMinicondaFromBrew {
 	[ $debug = 1 ] && set -x
-	local brew=$(which brew)
+	local brew="command brew"
 	$brew -v || {
 		echo "=> ERROR : Homebrew is not installed, you must install it first." >&2
 		exit -1
@@ -150,7 +150,7 @@ function installMiniconda {
 		exit 1
 	else
 		test $(uname) = Linux && groups | \egrep -wq "sudo|adm|admin|root|wheel" && symlinkCommand="sudo ln -vsf" || symlinkCommand="ln -vsf"
-		local condaVersionPath=$(which -a conda | grep miniconda$Version)
+		local condaVersionPath="$(type -P -a conda | grep miniconda$Version)"
 		local condaRelativeDirName=../../miniconda$Version/bin
 
 		cd $(dirname $condaVersionPath)
@@ -163,7 +163,7 @@ function installMiniconda {
 
 function installCondaPythonPackages {
 	local minicondaVersion=$1
-	local conda=$(which conda$minicondaVersion)
+	local conda="command conda$minicondaVersion"
 	local requiredPythonPackageList="$2"
 	local envName="$3"
 	local osFamily=$(uname -s)
