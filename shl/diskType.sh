@@ -4,7 +4,7 @@ scriptBaseName=${0##*/}
 #set -o errexit
 set -o nounset
 type smartctl >/dev/null || exit
-sudo=$(which sudo 2>/dev/null)
+sudo="command sudo 2>/dev/null"
 diskDevice=""
 os=$(uname -s)
 
