@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 local gnuFileUtils="chcon chgrp chown chmod cp dd df dir dircolors install ln ls mkdir mkfifo mknod mktemp mv rm rmdir shred sync touch truncate vdir"
 local fileUtils="chgrp|chown|chmod|cp|dd|df|install|ln|ls|mkdir|mkfifo|mknod|mv|rm|rmdir|sync|touch"
