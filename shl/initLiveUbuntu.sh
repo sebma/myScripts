@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 sudo loadkeys fr-latin9
 for tty in /dev/tty[1-6]; do
