@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 #echo "Setting the root password ..."
 #sudo passwd
