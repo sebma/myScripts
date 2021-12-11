@@ -37,7 +37,7 @@ function installMiniconda {
 		test -f $installerScript || curl -#O $condaInstallerURL
 		chmod +x $installerScript
 
-		brew=$(which brew)
+		brew="command brew"
 		if [ $(uname -s) = Darwin ] 
 		then
 			$brew -v || {
@@ -66,7 +66,7 @@ function installMiniconda {
 
 	if ! which conda$Version >/dev/null #Si le lien symbolique, par exemple: conda2 n'est pas dans le PATH
 	then
-		local condaVersionPath=$(which -a conda | grep miniconda$Version)
+		local condaVersionPath="$(type -P -a conda | grep miniconda$Version)"
 		cd $(dirname $condaVersionPath)
 		local condaRelativeDirName=../../miniconda$Version/bin
 		ln -vsf $condaRelativeDirName/conda conda$Version && ln -vsf $condaRelativeDirName/conda-env conda-env$Version && ln -vsf $condaRelativeDirName/activate activate$Version && ln -vsf $condaRelativeDirName/deactivate deactivate$Version
@@ -75,7 +75,7 @@ function installMiniconda {
 
 function installCondaPythonPackages {
 	local minicondaVersion=$1
-	local conda=$(which conda$minicondaVersion)
+	local conda="command conda$minicondaVersion"
 	local CPARequiredPythonPackageList="$2"
 	local envName="$3"
 
