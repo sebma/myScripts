@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 declareShellTools () {
 	tools="awk cut egrep grep sed tee"
