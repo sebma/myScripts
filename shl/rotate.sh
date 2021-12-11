@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 i=$1
 #CurrFileName=$(jhead -exonly $i | awk '/File name/{print $4}')
