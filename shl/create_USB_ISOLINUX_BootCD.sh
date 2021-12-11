@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 cd $HOME
 mkdir -p $HOME/iso/casper
