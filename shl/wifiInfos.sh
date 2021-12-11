@@ -15,7 +15,7 @@ wifiInfos ()
 		echo "=> ERROR : Could not find any wireless network card." 1>&2
 		return 1
 	}
-	if which iw > /dev/null; then
+	if type -P iw > /dev/null; then
 		physicalDevice=$(iw dev | \sed -n "1s/#//;1p")
 		echo "=> Wifi physical device capabilities :"
 		iw phy $physicalDevice info
