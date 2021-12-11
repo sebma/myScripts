@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 echo "=> Installation des paquets contenus dans $PWD ..."
 rmmod snd_via82xx
 dpkg -r iceweasel-l10n-de iceweasel-l10n-fr iceweasel
