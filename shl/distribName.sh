@@ -6,7 +6,7 @@ distribName () {
 	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
 
 	if [ $osFamily = Linux ]; then
-		if which lsb_release >/dev/null 2>&1; then
+		if type -P lsb_release >/dev/null 2>&1; then
 			osName=$(lsb_release -si | awk '{print tolower($0)}')
 			[ $osName = "n/a" ] && osName=$(source /etc/os-release && echo $ID)
 		elif [ -s /etc/os-release ]; then
