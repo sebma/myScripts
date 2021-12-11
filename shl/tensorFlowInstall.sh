@@ -215,7 +215,7 @@ function installTFCondaEnv {
 			echo "CONDA_DEFAULT_ENV = <$(env | grep CONDA_DEFAULT_ENV)>"
 		fi
 
-		conda=$(which conda)
+		conda="command conda"
 		echo "conda = $conda"
 
 		$conda list | grep -q argcomplete || $sudo $conda install argcomplete
