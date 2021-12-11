@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 [ $# -ne 1 ] && {
   echo "Usage: <$0> <Filesystem Type>" 1>&2
