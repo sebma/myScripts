@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 args=$@
-if which matlab >/dev/null
+if type -P matlab >/dev/null
 then
 #	$(which matlab) -nojvm -r "${args/.m/}; exit" # Incompatible avec fig = gcf; appelle par la fonction surf()
 	$(which matlab) -nodesktop -nosplash -r "${args/.m/}; exit"
