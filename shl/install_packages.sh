@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 echo "=> Dechargement du pilote du chipset via82xx pour la carte son integree ..."
 rmmod snd_via82xx
 echo "=> MAJ du navigateur WEB + installation du francais pour ce navigateur ..."
