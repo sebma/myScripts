@@ -11,7 +11,7 @@ fi
 brewPostInstall ()
 {
 	type brew >/dev/null || return
-	$local brew=$(which brew)
+	$local brew="command brew"
 	echo "=> Updating homebrew ..." 1>&2
 	echo 1>&2
 	bash -c "time $brew update -v"
