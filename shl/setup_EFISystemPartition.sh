@@ -3,7 +3,7 @@
 set -o errexit
 set -o nounset
 
-type sudo >/dev/null 2>&1 && sudo=$(which sudo) || sudo=""
+type sudo >/dev/null 2>&1 && sudo="command sudo" || sudo=""
 if [ $# != 1 ]
 then
         echo "=> Usage : $(basename $0) win7ESPBootFiles.zip" >&2
