@@ -12,10 +12,10 @@ fi
 
 function systemType {
 	local ps=unset
-	ps --help 2>&1 | $grep -q "error while loading shared libraries" && ps="busybox ps" || ps=$(which ps)
+	ps --help 2>&1 | $grep -q "error while loading shared libraries" && ps="busybox ps" || ps="command ps"
 	local initPath=$($ps -e -o comm= -o pid= | $grep "  *1$" | $cut -d" " -f1)
 	if [ -n "$initPath" ];then
-		initPath=$(which $initPath) #Needed for gentoo and maybe others
+		initPath=$(type -P $initPath) #Needed for gentoo and maybe others
 		$strings $initPath | $egrep -o "upstart|sysvinit|systemd" | $head -1
 	else
 		echo unknown
