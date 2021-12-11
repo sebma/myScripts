@@ -1,4 +1,4 @@
-#!/bin/sh -eu
+#!/usr/bin/env bash -eu
  
 test $# -eq 0 && {
   echo "=> Usage: $0 <xpiFileName1> [<xpiFileName2>] [...]" >&2
