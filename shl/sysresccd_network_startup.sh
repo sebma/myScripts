@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 [ $(id -u) -ne  0 ] && {
 	echo "=> You must be root to run this script" 1>&2
