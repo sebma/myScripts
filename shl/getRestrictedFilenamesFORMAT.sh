@@ -46,7 +46,7 @@ getRestrictedFilenamesFORMAT () {
 	local metadataURLFieldName=description
 	local embedThumbnail="--write-thumbnail"
 	local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__%(extractor)s.%(ext)s"
-	local thumbnailerName=$(basename $(which AtomicParsley 2>/dev/null || which ffmpeg 2>/dev/null))
+	local thumbnailerName=$(basename $(type -P AtomicParsley 2>/dev/null || type -P ffmpeg 2>/dev/null))
 	local thumbnailerExecutable="command $thumbnailerName 2>/dev/null"
 	local ffmpegNormalLogLevel=repeat+error
 	local ffmpegInfoLogLevel=repeat+info
@@ -76,7 +76,7 @@ getRestrictedFilenamesFORMAT () {
 	}
 
 	for tool in ffmpeg grep ffprobe jq;do
-		local $tool="$(which $tool)"
+		local $tool="$(type -P $tool)"
 		if [ -z "${!tool}" ];then
 			echo "=> [$FUNCNAME] ERROR: $tool is required, you need to install it." >&2
 			return 2
@@ -180,7 +180,7 @@ getRestrictedFilenamesFORMAT () {
 
 			if [ -z "$acodec" ] || [ $acodec = null ];then
 				# Preparing the User Agent for ffprobe
-				which chromium-browser>/dev/null 2>&1 && chromeVersion=$(chromium-browser --version 2>/dev/null | awk '{printf$2}') || chromeVersion="73.0.3671.2"
+				type -P chromium-browser>/dev/null 2>&1 && chromeVersion=$(chromium-browser --version 2>/dev/null | awk '{printf$2}') || chromeVersion="73.0.3671.2"
 				userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36"
 				userAgent="$(printf "$userAgent" $chromeVersion)"
 				echo "=> Fetching some information from remote stream with ffprobe ..."
@@ -382,11 +382,11 @@ addURLs2mp4Metadata() {
 		local extension="${fileName/*./}"
 		local outputVideo="${fileName/.$extension/_NEW.$extension}"
 
-		local ffmpeg="$(which ffmpeg)"
-		local ffprobe="$(which ffprobe)"
+		local ffmpeg="command ffmpeg"
+		local ffprobe="command ffprobe"
 		ffmpeg+=" -hide_banner"
 		ffprobe+=" -hide_banner"
-		local jq="$(which jq)"
+		local jq="command jq"
 
 		local ffmpegNormalLogLevel=repeat+error
 		local ffmpegInfoLogLevel=repeat+info
@@ -431,7 +431,7 @@ function addSubtitles2media {
 		*) subTitleCodec=not_supported;;
 	esac
 
-	local ffmpeg="$(which ffmpeg)"
+	local ffmpeg="command ffmpeg"
 	ffmpeg+=" -hide_banner"
 	local ffmpegNormalLogLevel=repeat+error
 	local ffmpegInfoLogLevel=repeat+info
@@ -463,11 +463,11 @@ addThumbnail2media() {
 	local extension="${fileName/*./}"
 	local outputVideo="${fileName/.$extension/_NEW.$extension}"
 
-	local ffmpeg="$(which ffmpeg)"
-	local ffprobe="$(which ffprobe)"
+	local ffmpeg="command ffmpeg"
+	local ffprobe="command ffprobe"
 	ffmpeg+=" -hide_banner"
 	ffprobe+=" -hide_banner"
-	local jq="$(which jq)"
+	local jq="command jq"
 
 	local ffmpegNormalLogLevel=repeat+error
 	local ffmpegInfoLogLevel=repeat+info
