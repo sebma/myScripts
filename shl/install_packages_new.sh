@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 rmmod snd_via82xx
 apt-get --yes remove iceweasel
 echo "=> MAJ de la base de donnees des paquets Debian via Internet ..."
