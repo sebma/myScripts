@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 apt-get install perl
 #yum install perl
