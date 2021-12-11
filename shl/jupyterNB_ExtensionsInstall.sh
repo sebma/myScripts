@@ -19,7 +19,7 @@ then
 	echo "CONDA_DEFAULT_ENV = <$(env | grep CONDA_DEFAULT_ENV)>"
 fi
 
-conda=$(which conda)
+conda="command conda"
 echo "conda = $conda"
 pip=$($conda env list | awk "/$condaEnvName/"'{print$NF"/bin/pip"}')
 
