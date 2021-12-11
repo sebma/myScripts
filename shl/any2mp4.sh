@@ -5,7 +5,7 @@ any2mp4Fonction() {
 
 	if type ffmpeg >/dev/null
 	then
-		videoConv=$(which ffmpeg)
+		videoConv="command ffmpeg"
 	else
 		echo "=> ERROR: <ffmpeg> is not installed." >&2
 		return 1
