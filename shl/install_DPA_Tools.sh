@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-brew=$(which brew)
+brew="command brew"
 brewFormulasToInstall="watch bash python3 gdb git remake"
 brewOptionalFormulasToInstall="macvim cgdb octave bash-completion@2 brew-cask-completion pip-completion zsh-completions"
 
