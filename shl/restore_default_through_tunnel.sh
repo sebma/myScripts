@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 leasesFile=$(locate -r "dhclient.leases$")
 Interface=$(route -n | egrep -v "tun0|wlan|lo|^0.0.0.0|169.254" | awk '/^[0-9]/{print$NF}' | sort -u)
