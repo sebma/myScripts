@@ -123,7 +123,7 @@ function installMiniconda {
 	local osFamily=$(uname -s)
 	local archi=$(uname -m | \sed "s/^i6/x/")
 
-	if which -a conda | grep -q miniconda$Version/bin/conda && [ $reInstall = 0 ]
+	if type -P -a conda | grep -q miniconda$Version/bin/conda && [ $reInstall = 0 ]
 	then
 		echo "=> INFO: Miniconda version $Version is already installed." >&2
 		exit 1
