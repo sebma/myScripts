@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 Distrib=""
 Distrib=`awk '{print $1}' /etc/issue`
