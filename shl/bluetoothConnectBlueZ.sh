@@ -9,7 +9,7 @@ else
 	echo "=> bluetoothController = $bluetoothController"
 fi
 
-if which bluetoothctl >/dev/null 2>&1; then
+if type -P bluetoothctl >/dev/null 2>&1; then
 	echo "=> You are using BlueZ5." >&2
 
 	bluetoothControllerMACAddress=$(printf "list\nquit\n" | bluetoothctl | awk /^Controller/'{print$2;exit}')
@@ -75,7 +75,7 @@ EOF
 	}
 	fi
 	
-elif which hciconfig >/dev/null 2>&1; then
+elif type -P hciconfig >/dev/null 2>&1; then
 	echo "=> You are using BlueZ4." >&2
 
 	if hciconfig $bluetoothController | grep -q DOWN;then
