@@ -5,7 +5,7 @@ distribName () {
 	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
 
 	if [ $osFamily = Linux ]; then
-		if which lsb_release >/dev/null 2>&1; then
+		if type -P lsb_release >/dev/null 2>&1; then
 			osName=$(lsb_release -si)
 			[ $osName = "n/a" ] && osName=$(\sed -n "s/[\"']//g;s/^ID=//p;" /etc/os-release)
 		elif [ -s /etc/os-release ]; then
@@ -25,7 +25,7 @@ hw_probeInstallFromSource () {
 	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo=$(which sudo) || local sudo=""
 	local hw_probeGitREPO=https://github.com/linuxhw/hw-probe
 
-	if which hw-probe >/dev/null 2>&1; then
+	if type -P hw-probe >/dev/null 2>&1; then
 		echo "=> INFO [$FUNCNAME] : hw-probe is already installed." 1>&2
 		return 1
 	fi
