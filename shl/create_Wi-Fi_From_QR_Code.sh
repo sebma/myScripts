@@ -18,7 +18,7 @@ function create_Wi-Fi_From_QR_Code {
 		return 2
 	fi
 
-	local qrdecode=$(which zbarimg)
+	local qrdecode="command zbarimg"
 	if [ -z "$qrdecode" ];then
 		echo "=> ERROR: You must install the <zbarimg> utility." >&2
 		return 3
