@@ -209,7 +209,7 @@ function installTFCondaEnv {
 
 		if env | grep CONDA_DEFAULT_ENV
 		then
-			echo "conda = $(which conda)"
+			echo "conda = $(type -P conda)"
 			echo "=> WARNING: You must be OUTSIDE of the environment to do the rest of the installation, quitting the environment ..." >&2
 			source deactivate
 			echo "CONDA_DEFAULT_ENV = <$(env | grep CONDA_DEFAULT_ENV)>"
