@@ -4,7 +4,7 @@
 
 for mailer in $mailerList
 do
-	which $mailer >/dev/null 2>&1 && defaultMailer=$mailer && break
+	type -P $mailer >/dev/null 2>&1 && defaultMailer=$mailer && break
 done
 
 echo "=> defaultMailer = $defaultMailer"
