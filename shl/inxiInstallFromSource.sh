@@ -30,7 +30,7 @@ inxiInstallFromSource () {
 		return 1
 	fi
 
-	if ! which git >/dev/null 2>&1; then
+	if ! type -P git >/dev/null 2>&1; then
 		echo "=> ERROR [$FUNCNAME] : You must first install <git>." 1>&2
 		return 2
 	fi
