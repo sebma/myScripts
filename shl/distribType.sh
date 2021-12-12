@@ -42,7 +42,7 @@ distribType () {
 	elif [ $osFamily = Android ]; then
 			distribType=Android
 	else
-		which bash >/dev/null 2>&1 && distribType=$(bash -c 'echo $OSTYPE') || distribType=$osFamily
+		type -P bash >/dev/null 2>&1 && distribType=$(bash -c 'echo $OSTYPE') || distribType=$osFamily
 	fi
 
 	echo $distribType
