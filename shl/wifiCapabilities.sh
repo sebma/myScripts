@@ -17,7 +17,7 @@ wifiCapabilities ()
 	}
 	physicalDevice=$(iw dev 2>/dev/null | \sed -n "1s/#//;1p")
 	test "$physicalDevice" && echo "=> Wifi physical device capabilities :" && iw phy $physicalDevice info
-	which iwlist > /dev/null && {
+	type -P iwlist > /dev/null && {
 		echo "========================================================================"
 		iwlist $wiFiDevice bitrate || \sudo iwlist $wiFiDevice bitrate
 		iwlist $wiFiDevice encryption || \sudo iwlist $wiFiDevice encryption
