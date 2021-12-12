@@ -101,7 +101,7 @@ function installTFCondaEnv {
 			$conda list -n $tensorFlowEnvName | grep -q $PyPIPythonModule || $sudo -H $pip install $PyPIPythonModule
 		done
 
-		which gpustat >/dev/null 2>&1 && echo && gpustat -cpu -P
+		type -P gpustat >/dev/null 2>&1 && echo && gpustat -cpu -P
 	fi
 }
 
