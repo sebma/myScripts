@@ -7,7 +7,7 @@ TeXLiveInstall () {
 	osFamily=undefined
 	wget=wget
 	command bash -c 'echo $OSTYPE' | grep -q android && osFamily=Android || osFamily=$(uname -s)
-	if ! which tlmgr > /dev/null 2>&1; then
+	if ! type -P tlmgr > /dev/null 2>&1; then
 		if [ $osFamily = Linux ]; then
 			$wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
 			texLiveDIR=$(tar tf install-tl-unx.tar.gz | awk -F/ '/\/$/{print$(NF-1);exit}')
