@@ -50,7 +50,7 @@ inxiInstallFromSource () {
 
 	sync
 	cd $prevDIR
-	which inxi >/dev/null 2>&1 && inxi -V
+	type -P inxi >/dev/null 2>&1 && inxi -V
 	return $retCode
 }
 
