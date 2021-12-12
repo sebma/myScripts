@@ -137,7 +137,7 @@ test -w /var/tmp || sudo chmod 1777 /var/tmp
 
 setMimes() {
 	#Ouvrir les fichiers documents avec LibreOffice
-	which libreoffice >/dev/null 2>&1 && {
+	type -P libreoffice >/dev/null 2>&1 && {
 		documentFileTypes=".doc .docx .sxw .odt .xls .xlsx .sxc .ods .ppt .pps .pptx .ppsx .sxi .odp"
 		documentMimeTypes="$(mimetype -b $documentFileTypes | sort -u | xargs)"
 		xdg-mime default libreoffice-startcenter.desktop $documentMimeTypes
@@ -145,7 +145,7 @@ setMimes() {
 	}
 
 	#Ouvrir les fichiers Audio avec audacious
-	which audacious >/dev/null 2>&1 && {
+	type -P audacious >/dev/null 2>&1 && {
 		audioFileTypes=".wav .wma .aac .ac3 .mp2 .mp3 .ogg .m4a .spx .opus"
 		audioMimeTypes="$(mimetype -b $audioFileTypes | grep audio | sort -u | xargs) audio/x-vorbis+ogg"
 		xdg-mime default audacious.desktop $audioMimeTypes
@@ -153,7 +153,7 @@ setMimes() {
 	}
 
 	#Ouvrir les fichiers Video avec SMPlayer
-	which smplayer >/dev/null 2>&1 && {
+	type -P smplayer >/dev/null 2>&1 && {
 		videoFileTypes=".asf .avi .wmv .mpg .mpeg .mp4 .divx .flv .mov .ogv .webm .vob .ts .3gp .mkv"
 		videoMimeTypes=$(mimetype -b $videoFileTypes | grep video | sort -u | xargs)
 		xdg-mime default smplayer.desktop $videoMimeTypes
@@ -164,7 +164,7 @@ setMimes() {
 	xdg-mime default apturl.desktop x-scheme-handler/apt
 
 	#Ouvrir les fichiers .deb avec gdebi-gtk
-	which gdebi-gtk >/dev/null 2>&1 && xdg-mime default gdebi.desktop application/x-deb
+	type -P gdebi-gtk >/dev/null 2>&1 && xdg-mime default gdebi.desktop application/x-deb
 }
 
 sudo grep -q pwfeedback /etc/sudoers.d/sudoers_$(id -u) || echo -e "Defaults\tenv_reset,pwfeedback" | tee -a /etc/sudoers.d/sudoers_$(id -u)
