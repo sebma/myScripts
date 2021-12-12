@@ -42,8 +42,8 @@ hw_probeInstall () {
 			$sudo pacman -Sy
 			$sudo pacman -Fy
 
-			which fakeroot >/dev/null 2>&1 || $sudo pacman -S fakeroot
-			which strip >/dev/null 2>&1 || $sudo pacman -S binutils
+			type -P fakeroot >/dev/null 2>&1 || $sudo pacman -S fakeroot
+			type -P strip >/dev/null 2>&1 || $sudo pacman -S binutils
 
 			if ! type -P inxi >/dev/null 2>&1;then
 				cd inxi >/dev/null 2>&1 || { git clone https://aur.archlinux.org/inxi.git;cd inxi; }
@@ -57,7 +57,7 @@ hw_probeInstall () {
 				fi
 			fi
 
-			which make >/dev/null 2>&1 || $sudo pacman -S make
+			type -P make >/dev/null 2>&1 || $sudo pacman -S make
 
 			if ! type -P hw-probe >/dev/null 2>&1;then
 				cd hw-probe >/dev/null 2>&1 || { git clone https://aur.archlinux.org/hw-probe.git;cd hw-probe; }
@@ -75,7 +75,7 @@ hw_probeInstall () {
 	fi
 
 	echo
-	which hw-probe >/dev/null 2>&1 && $sudo sed -i "/inxi /s/inxi -[Fa-z]*/inxi -Fxxxzmd/" $(which hw-probe) && hw-probe -v
+	type -P hw-probe >/dev/null 2>&1 && $sudo sed -i "/inxi /s/inxi -[Fa-z]*/inxi -Fxxxzmd/" $(which hw-probe) && hw-probe -v
 	return $retCode
 }
 
