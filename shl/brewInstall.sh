@@ -8,7 +8,7 @@ brewInstall () {
 	brewPrefix=undefined
 	osFamily=undefined
 	$(which bash) -c 'echo $OSTYPE' | grep -q android && osFamily=Android || osFamily=$(uname -s)
-	if ! which brew > /dev/null 2>&1; then
+	if ! type -P brew > /dev/null 2>&1; then
 		if [ $osFamily = Linux ]; then
 			if groups | \egrep -wq "adm|admin|sudo|root|wheel"; then
 				brewPrefix=/home/linuxbrew/.linuxbrew
