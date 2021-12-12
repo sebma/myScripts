@@ -39,8 +39,8 @@ inxiInstall () {
 			$sudo pacman -Sy
 			$sudo pacman -Fy
 
-			which fakeroot >/dev/null 2>&1 || $sudo pacman -S fakeroot
-			which strip >/dev/null 2>&1 || $sudo pacman -S binutils
+			type -P fakeroot >/dev/null 2>&1 || $sudo pacman -S fakeroot
+			type -P strip >/dev/null 2>&1 || $sudo pacman -S binutils
 
 			if ! type -P inxi >/dev/null 2>&1;then
 				cd inxi >/dev/null 2>&1 || { git clone https://aur.archlinux.org/inxi.git;cd inxi; }
@@ -57,7 +57,7 @@ inxiInstall () {
 	fi
 
 	echo
-	which inxi >/dev/null 2>&1 && inxi -V
+	type -P inxi >/dev/null 2>&1 && inxi -V
 	return $retCode
 }
 
