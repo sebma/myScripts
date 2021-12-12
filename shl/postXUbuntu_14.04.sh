@@ -572,7 +572,7 @@ pgrep gpm >/dev/null || {
 #	sudo gpm -m /dev/input/mouse0 -t ps2
 }
 
-which audacious >/dev/null || {
+type -P audacious >/dev/null || {
 	echo "=> Installation de <audacious> (equivalent de WinAMP) et de <smplayer> ..."
 	$installPackages -y audacious smplayer || true
 	$cleanPackages
@@ -603,12 +603,12 @@ case $distribRelease in
 	10.04|10.10|11.04|11.10|12.04) compizPackageList="compizconfig-settings-manager compiz-fusion-plugins-main compiz-fusion-plugins-extra";;
 esac
 
-which ccsm >/dev/null || {
+type -P ccsm >/dev/null || {
 	echo "=> Installation de <$compizPackageList> ..."
 	$installPackages -y $compizPackageList || true
 }
 
-which sound-juicer >/dev/null || {
+type -P sound-juicer >/dev/null || {
 	echo "=> Installation de <sound-juicer gstreamer0.10-plugins-ugly gstreamer0.10-plugins-bad> ..."
 	$installPackages sound-juicer gstreamer0.10-plugins-ugly gstreamer0.10-plugins-bad || true
 }

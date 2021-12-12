@@ -137,7 +137,7 @@ $installPackages -y vim
 grep -q syn ~/.vimrc || echo syntax on >> ~/.vimrc
 
 #Ouvrir les fichiers documents avec LibreOffice
-which libreoffice >/dev/null 2>&1 && {
+type -P libreoffice >/dev/null 2>&1 && {
 	documentFileTypes=".doc .docx .sxw .odt .xls .xlsx .sxc .ods .ppt .pps .pptx .ppsx .sxi .odp"
 	documentMimeTypes="$(mimetype -b $documentFileTypes | sort -u | xargs)"
 	xdg-mime default libreoffice-startcenter.desktop $documentMimeTypes
@@ -145,7 +145,7 @@ which libreoffice >/dev/null 2>&1 && {
 }
 
 #Ouvrir les fichiers Audio avec audacious
-which audacious >/dev/null 2>&1 && {
+type -P audacious >/dev/null 2>&1 && {
 	audioFileTypes=".wav .wma .aac .ac3 .mp2 .mp3 .ogg .m4a .spx .opus"
 	audioMimeTypes="$(mimetype -b $audioFileTypes | grep audio | sort -u | xargs) audio/x-vorbis+ogg"
 	xdg-mime default audacious.desktop $audioMimeTypes
@@ -153,7 +153,7 @@ which audacious >/dev/null 2>&1 && {
 }
 
 #Ouvrir les fichiers Video avec SMPlayer
-which smplayer >/dev/null 2>&1 && {
+type -P smplayer >/dev/null 2>&1 && {
 	videoFileTypes=".asf .avi .wmv .mpg .mpeg .mp4 .divx .flv .mov .ogv .webm .vob .ts .3gp .mkv"
 	videoMimeTypes=$(mimetype -b $videoFileTypes | grep video | sort -u | xargs)
 	xdg-mime default smplayer.desktop $videoMimeTypes
@@ -164,7 +164,7 @@ which smplayer >/dev/null 2>&1 && {
 xdg-mime default apturl.desktop x-scheme-handler/apt
 
 #Ouvrir les fichiers .deb avec gdebi-gtk
-which gdebi-gtk >/dev/null 2>&1 && xdg-mime default gdebi.desktop application/x-deb
+type -P gdebi-gtk >/dev/null 2>&1 && xdg-mime default gdebi.desktop application/x-deb
 
 env | grep -q DISPLAY && {
 	echo "=> Chargement du clavier francais pour la session graphique courante ..."
@@ -1098,7 +1098,7 @@ myPrinterMake=Lexmark
 myPrinterModel=MS310dn
 myPrinterName=${myPrinterMake}_$myPrinterModel
 myPrinterIP=192.168.1.1
-which ippfind >/dev/null 2>&1 && myPrinterURI=$(ippfind _ipp._tcp | head -1) || myPrinterURI=ipp://$myPrinterIP/ipp
+type -P ippfind >/dev/null 2>&1 && myPrinterURI=$(ippfind _ipp._tcp | head -1) || myPrinterURI=ipp://$myPrinterIP/ipp
 myPrinterLocation=Home
 #ppdModelLocation=$(lpinfo -m | grep -i $myPrinterModel | awk '/Foomatic/{print$1}')
 ppdModelLocation=$(lpinfo --make-and-model "$myPrinterMake $myPrinterModel" -m | awk '/Foomatic/{print$1}')
@@ -1250,7 +1250,7 @@ pgrep gpm >/dev/null || {
 #	sudo gpm -m /dev/input/mouse0 -t ps2
 }
 
-which audacious >/dev/null || {
+type -P audacious >/dev/null || {
 	echo "=> Installation de <audacious> (equivalent de WinAMP) et de <smplayer> ..."
 	$installPackages -y audacious smplayer || true
 	$cleanPackages
@@ -1281,12 +1281,12 @@ case $distribRelease in
 	10.04|10.10|11.04|11.10|12.04) compizPackageList="compizconfig-settings-manager compiz-fusion-plugins-main compiz-fusion-plugins-extra";;
 esac
 
-which ccsm >/dev/null || {
+type -P ccsm >/dev/null || {
 	echo "=> Installation de <$compizPackageList> ..."
 	$installPackages -y $compizPackageList || true
 }
 
-which sound-juicer >/dev/null || {
+type -P sound-juicer >/dev/null || {
 	echo "=> Installation de <sound-juicer gstreamer0.10-plugins-ugly gstreamer0.10-plugins-bad> ..."
 	$installPackages sound-juicer gstreamer0.10-plugins-ugly gstreamer0.10-plugins-bad || true
 }
