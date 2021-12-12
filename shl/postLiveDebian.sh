@@ -989,14 +989,14 @@ test -f /usr/bin/any2mp4 || {
 	sudo touch /usr/bin/any2mp4
 	sudo chmod +x /usr/bin/any2mp4
 	cat <<-EOF
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 any2mp4Fonction() {
   local codeRet=0
 
   if type ffmpeg >/dev/null
   then
-    videoConv=\$(which ffmpeg)
+    videoConv="command ffmpeg"
   else
     echo "=> ERROR: <ffmpeg> is not installed." >&2
     return 1
