@@ -2,7 +2,7 @@
 
 gitUpdateAllMyLocalRepos ()
 {
-	local find="$(which find)"
+	local find="command find"
 	local remoteRepoUrl=""
 	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s) # The bash interpreter is needed for it sets the OSTYPE variable
 	[ $osFamily = Darwin ] && find=gfind
