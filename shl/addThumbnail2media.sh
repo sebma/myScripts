@@ -13,9 +13,9 @@ addThumbnail2media() {
 	local artworkFileName="$1"
 	local fileName="$2"
 
-	local ffmpeg="$(which ffmpeg)"
-	local ffprobe="$(which ffprobe)"
-	local jq="$(which jq)"
+	local ffmpeg="command ffmpeg"
+	local ffprobe="command ffprobe"
+	local jq="command jq"
 
 	ffmpeg+=" -hide_banner"
 	ffprobe+=" -hide_banner"
