@@ -5,7 +5,7 @@ set -o errexit
 
 function flac2spx() 
 { 
-	ffmpeg="$(which ffmpeg) -hide_banner -probesize 400M -analyzeduration 400M"
+	ffmpeg="command ffmpeg -hide_banner -probesize 400M -analyzeduration 400M"
     typeset inputFile="$1"
     if [ -s "$inputFile" ]; then
         outputFile=${inputFile/.flac/_speex.oga}
@@ -35,7 +35,7 @@ function init() {
 }
 
 function main() {
-	ffprobe="$(which ffprobe) -hide_banner -probesize 400M -analyzeduration 400M"
+	ffprobe="command ffprobe -hide_banner -probesize 400M -analyzeduration 400M"
 	echo "=> Current time :"
 	date +"%x %X"
 	echo "=> Crontab environment :"
