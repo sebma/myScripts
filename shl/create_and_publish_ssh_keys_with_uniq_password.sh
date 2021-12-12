@@ -163,7 +163,7 @@ initKeys $firstServer
 function deployPubKeys {
 	eval $(funcname) >&2
 	tmpFile=$(mktemp)
-	if ! which sshpass >/dev/null 2>&1
+	if ! type -P sshpass >/dev/null 2>&1
 	then
 		echo "=> ERROR: The <sshpass> tool is not installed on <$(hostname)>." >&2
 		clean_exit 1
