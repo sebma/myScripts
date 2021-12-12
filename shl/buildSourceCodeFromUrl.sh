@@ -25,7 +25,7 @@ function buildSourceCode {
 	configureArgs="--prefix=$prefix --exec-prefix=$prefix $@"
     echo "=> pwd = $PWD"
     echo "=> prefix = $prefix"
-    \grep -w url ./.git/config && which git > /dev/null 2>&1 && git pull
+    \grep -w url ./.git/config && type -P git > /dev/null 2>&1 && git pull
     if [ ! -s configure ]; then
         test -s ./bootstrap.sh && time ./bootstrap.sh || { 
             test -s ./autogen.sh && time ./autogen.sh
