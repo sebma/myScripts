@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ultraDefrag=ultradefrag-5.0.0AB.7.zip
-if ! which udefrag &>/dev/null
+if ! type -P udefrag &>/dev/null
 then
 	wget -nv http://jp-andre.pagesperso-orange.fr/$ultraDefrag
 	if unzip -n $ultraDefrag
