@@ -22,11 +22,11 @@ wifiInfos ()
 		echo "=> Stations infos. :"
 		iw dev $wiFiDevice station dump
 		echo "=> Wifi networks list :"
-		which nmcli && nmcli dev wifi list || iw dev $wiFiDevice scan || \sudo iw dev $wiFiDevice scan
+		type -P nmcli && nmcli dev wifi list || iw dev $wiFiDevice scan || \sudo iw dev $wiFiDevice scan
 		echo "=> Connected network link status :"
 		iw dev $wiFiDevice link || \sudo iw dev $wiFiDevice link
 	fi
-	which iwlist > /dev/null && {
+	type -P iwlist > /dev/null && {
 		echo "========================================================================"
 		iwlist $wiFiDevice bitrate || \sudo iwlist $wiFiDevice bitrate
 		iwlist $wiFiDevice encryption || \sudo iwlist $wiFiDevice encryption
