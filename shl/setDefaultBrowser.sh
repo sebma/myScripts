@@ -4,7 +4,7 @@
 
 for browser in $browserList
 do
-	which $browser >/dev/null 2>&1 && defaultBrowser=$browser && break
+	type -P $browser >/dev/null 2>&1 && defaultBrowser=$browser && break
 done
 
 echo "=> Chosen defaultBrowser = $defaultBrowser"
