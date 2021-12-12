@@ -7,7 +7,7 @@ if [ $os = Linux ] || [ $os = Darwin ]
 then
 	for tool in zenity qrencode
 	do
-		if ! which $tool >/dev/null 2>&1 
+		if ! type -P $tool >/dev/null 2>&1
 		then
 			echo "=> $0 ERROR: $tool is not installed." >&2
 			exit 1
