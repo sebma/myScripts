@@ -26,15 +26,15 @@ initColors
 if type xmlstarlet >/dev/null 2>&1
 then
 	xpathTool=xmlstarlet
-	xpathCMD="$(which xmlstarlet) select -t -v"
+	xpathCMD="command xmlstarlet select -t -v"
 elif type xml >/dev/null 2>&1
 then
 	xpathTool=xml
-	xpathCMD="$(which xml) select -t -v"
+	xpathCMD="command xml select -t -v"
 elif type xpath >/dev/null 2>&1
 then
 	xpathTool=xpath
-	xpathCMD="$(which xpath) select -q -e"
+	xpathCMD="command xpath select -q -e"
 fi
 
 #echo "=> xpathTool = $xpathTool"
