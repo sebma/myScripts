@@ -3,7 +3,7 @@
 hw_probeAddNodeToInventory ()
 {
 	local inventoryID=null
-	if ! which hw-probe >/dev/null 2>&1;then
+	if ! type -P hw-probe >/dev/null 2>&1;then
 		echo "=> ERROR [$FUNCNAME] : You must first install <hw-probe>." >&2
 		return 1
 	fi
