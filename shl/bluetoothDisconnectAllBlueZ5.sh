@@ -9,7 +9,7 @@ else
 	echo "=> bluetoothController = $bluetoothController"
 fi
 
-if ! which bluetoothctl >/dev/null 2>&1; then {
+if ! type -P bluetoothctl >/dev/null 2>&1; then {
 	echo "=> ERROR: You must install BlueZ v5." >&2
 	exit 2
 }
