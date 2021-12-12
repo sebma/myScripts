@@ -6,7 +6,7 @@ scriptDir=$(cd $scriptDir;pwd)
 brewPortableInstall () {
 	brew=undefined
 	brewPrefix=undefined
-	if ! which brew > /dev/null 2>&1; then
+	if ! type -P brew > /dev/null 2>&1; then
 		git --help >/dev/null || return
 		brewPrefix=$HOME/.linuxbrew
 		git clone https://github.com/homebrew/brew $brewPrefix
