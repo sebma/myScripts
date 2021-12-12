@@ -17,7 +17,7 @@ cd $usbPendriveMountPoint/clonezillaSrc/ && {
 	cd ~/src/drbl-*/ && make && $sudo make install || exit
 	cd ~/src/clonezilla-*/ && $sudo make install
 	chmod +x /usr/sbin/clonezilla
-	which clonezilla && {
+	type -P clonezilla && {
 		rm -fr ~/src/drbl-*/ ~/src/clonezilla-*/
 		sync
 	}
