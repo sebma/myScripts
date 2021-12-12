@@ -24,7 +24,7 @@ function installMinicondaFromScript {
 	local osFamily=$(uname -s)
 	local archi=$(uname -m | \sed "s/^i6/x/")
 	local wgetOptions="-c --progress=bar"
-	local wget="$(which wget2 2>/dev/null || which wget) $wgetOptions"
+	local wget="$(type -P wget2 2>/dev/null || type -P wget) $wgetOptions"
 
 	case $osFamily in
 
