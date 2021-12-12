@@ -54,7 +54,7 @@ function buildFromArchive {
 function main {
 	local firstArg=$1
 	set -o nounset
-	which cbgp || {
+	type -P cbgp || {
 		if [ "$firstArg" ]
 		then
 			prefix=$1
