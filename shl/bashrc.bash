@@ -89,7 +89,7 @@ convertPuttyPubKeys () {
 	done
 }
 
-#alias ssh="$(which ssh) -qAY"
+#alias ssh="command ssh -qAY"
 ssh () { test $1 && server=$(echo $1 | cut -d@ -f2) && $(which bash) -c ": < /dev/tcp/$server/ssh" && $(which ssh) -qAY $@; }
 
 topf5() { find . -xdev -type f -size +10M $@ -printf "%M %n %u %g %k %AY-%Am-%Ad %AX %p\n" 2>/dev/null | sort -nk5 | tail -5|awk '{size=$5/1024;sub($5,size"M");print}'|column -t;}
