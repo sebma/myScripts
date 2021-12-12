@@ -19,7 +19,7 @@ then
 	$brew tap caskroom/versions
 	$brew tap buo/cask-upgrade
 
-	brewCask="$(which brew) cask"
+	brewCask="command brew cask"
 	mono_mdk_V5_0_1_1_Formula_URL="https://raw.githubusercontent.com/caskroom/homebrew-cask/84b7491d6a2c7124fd54ac177cb55f61192018bf/Casks/mono-mdk.rb" #mono-mdk v5.0.1.1 est un pre-requis pour Picoscope6
 	brewCaskFormulasToInstall="$mono_mdk_V5_0_1_1_Formula_URL picoscope arduino"
 
