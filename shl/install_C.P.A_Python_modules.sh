@@ -64,7 +64,7 @@ function installMiniconda {
 	#	sudo chown -R $USER:$(id -gn) /usr/local/miniconda$Version
 	fi
 
-	if ! which conda$Version >/dev/null #Si le lien symbolique, par exemple: conda2 n'est pas dans le PATH
+	if ! type -P conda$Version >/dev/null #Si le lien symbolique, par exemple: conda2 n'est pas dans le PATH
 	then
 		local condaVersionPath="$(type -P -a conda | grep miniconda$Version)"
 		cd $(dirname $condaVersionPath)
