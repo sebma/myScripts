@@ -144,7 +144,7 @@ function installMiniconda {
 	#	sudo chown -R $USER:$(id -gn) /usr/local/miniconda$Version
 	fi
 
-	if ! which -a conda >/dev/null
+	if ! type -P -a conda >/dev/null
 	then
 	       	echo "=> conda$Version est pas dans le PATH, modifier le fichier ~/.bashrc, fermer le terminal et relancer <$0>." >&2
 		exit 1
