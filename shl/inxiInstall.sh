@@ -42,7 +42,7 @@ inxiInstall () {
 			which fakeroot >/dev/null 2>&1 || $sudo pacman -S fakeroot
 			which strip >/dev/null 2>&1 || $sudo pacman -S binutils
 
-			if ! which inxi >/dev/null 2>&1;then
+			if ! type -P inxi >/dev/null 2>&1;then
 				cd inxi >/dev/null 2>&1 || { git clone https://aur.archlinux.org/inxi.git;cd inxi; }
 				if git config remote.origin.url | grep -q /inxi;then
 					makepkg -si
