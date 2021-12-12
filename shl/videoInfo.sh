@@ -6,7 +6,7 @@ function videoInfo {
 	local columns=$COLUMNS
 #	local columns="" # To see more info than the width of the screen
 	local size=0
-	which ffprobe >/dev/null && {
+	type -P ffprobe >/dev/null && {
 		local youtube_dl='command youtube-dl'
 		local ffprobe='command ffprobe -hide_banner'
 		local userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3513.1 Safari/537.36"
