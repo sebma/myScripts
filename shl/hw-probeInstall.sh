@@ -45,7 +45,7 @@ hw_probeInstall () {
 			which fakeroot >/dev/null 2>&1 || $sudo pacman -S fakeroot
 			which strip >/dev/null 2>&1 || $sudo pacman -S binutils
 
-			if ! which inxi >/dev/null 2>&1;then
+			if ! type -P inxi >/dev/null 2>&1;then
 				cd inxi >/dev/null 2>&1 || { git clone https://aur.archlinux.org/inxi.git;cd inxi; }
 				if git config remote.origin.url | grep -q /inxi;then
 					makepkg -si
@@ -59,7 +59,7 @@ hw_probeInstall () {
 
 			which make >/dev/null 2>&1 || $sudo pacman -S make
 
-			if ! which hw-probe >/dev/null 2>&1;then
+			if ! type -P hw-probe >/dev/null 2>&1;then
 				cd hw-probe >/dev/null 2>&1 || { git clone https://aur.archlinux.org/hw-probe.git;cd hw-probe; }
 				if git config remote.origin.url | grep -q /hw-probe;then
 					sed -i "/^depends=/s/'edid-decode'//" PKGBUILD
