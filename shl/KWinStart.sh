@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-nohup $(which kwin) --replace &
+nohup $(type -P kwin) --replace &
 echo "=> Sleeping 10 seconds to wait for KWin to load ..."
 sleep 10
 pgrep conky && {
