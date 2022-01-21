@@ -19,7 +19,7 @@ gitHubUser=FreeTubeApp
 gitHubRepo=FreeTube
 gitHubAPIRepoURL=$gitHubAPIURL/repos/$gitHubUser/$gitHubRepo
 
-if ! type -P jq;then
+if ! type -P jq >/dev/null;then
 	echo "=> $0 : ERROR : You need to first install jq." >&2
 	exit 2
 fi
