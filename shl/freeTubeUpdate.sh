@@ -19,6 +19,11 @@ gitHubUser=FreeTubeApp
 gitHubRepo=FreeTube
 gitHubAPIRepoURL=$gitHubAPIURL/repos/$gitHubUser/$gitHubRepo
 
+if ! type -P jq;then
+	echo "=> $0 : ERROR : You need to first install jq." >&2
+	exit 2
+fi
+
 echo "=> Searching for the latest release on $protocol://$gitHubURL/$gitHubUser/$gitHubRepo ..."
 freeTubeLatestRelease=$(\curl -Ls $protocol://$gitHubAPIRepoURL/releases | jq -r '.[0].tag_name' | sed 's/v//;s/-beta//')
 echo "=> Found the $freeTubeLatestRelease version."
@@ -31,7 +36,7 @@ else
 	if [ -n "$freeTubeLatestGitHubReleaseURL" ];then
 		freeTubeLatestGitHubReleaseName=$(basename $freeTubeLatestGitHubReleaseURL)
 		wget -nv -O $freeTubeLatestGitHubReleaseName "$freeTubeLatestGitHubReleaseURL"
-		sudo gdebi -n $freeTubeLatestGitHubReleaseName && rm -v $freeTubeLatestGitHubReleaseName
+		sudo apt install -V ./$freeTubeLatestGitHubReleaseName && rm -v $freeTubeLatestGitHubReleaseName
 		sync
 	fi
 fi
