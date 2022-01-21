@@ -3,6 +3,12 @@
 gitUpdateRepos () {
 	local remoteRepoUrl=""
 	local dir=""
+
+	if ! type -P git >/dev/null;then
+		echo "=> $FUNCNAME: ERROR : You must first install git." >&2
+		return 1
+	fi
+
 	for dir
 	do
 		if cd $dir;then
