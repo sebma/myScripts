@@ -125,7 +125,7 @@ blue=$(tput setaf 4)
 	$sudo smartctl -A $diskDevice | egrep "VALUE|Temperature_Cel"
 	echo
 	$sudo smartctl -l scttempsts $diskDevice | tail -n +5
-	printf "=> Disk temperature using hddtemp :"
+	printf "=> Disk temperature using hddtemp $diskDevice :"
 	sudo hddtemp $diskDevice 2>&1 | cut -d: -f3 | tr -s ' ' | grep --color=always .
 } 2>&1 | tee $logFile
 
