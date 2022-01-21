@@ -133,7 +133,7 @@ getRestrictedFilenamesFORMAT () {
 		[ $downloader = yt-dlp ] && ytdlExtraOptions+=( --format-sort +proto )
 
 		printf "=> Fetching the generated destination filename(s) for \"$url\" with ${effects[bold]}${colors[blue]}$downloader$normal at %s ...\n" "$(LC_MESSAGES=en date)"
-		jsonResults=$(time videoDownloader --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
+		jsonResults=$(time videoDownloader --ignore-config --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
 		# ytdlExtraOptions+= ( --exec 'basename %(filepath)s .%(ext)s' --write-info-json )
 		# jsonFileList=$(egrep -v "^(Deleting |\[)|\[download\]" ytdlpOutput.txt | sed -z "s/\n/.info.json /g")
 		formatsIDs=( $(echo "$jsonResults" | $jq -r .format_id | awk '!seen[$0]++') ) # Remove duplicate lines i.e: https://stackoverflow.com/a/1444448/5649639
@@ -549,7 +549,7 @@ function getRestrictedFilenamesHQ {
 }
 function getRestrictedFilenamesFSD {
 	local height=480
-	local other_Formats=fsd/std/sd
+	local other_Formats=fsd/std
 	local possibleFormats="bestvideo[ext=mp4][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
 	getRestrictedFilenamesFORMAT "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
