@@ -50,7 +50,7 @@ hw_probeInstallFromSource () {
 
 	sync
 	cd $prevDIR
-	type -P hw-probe >/dev/null 2>&1 && $sudo sed -i "/inxi /s/inxi -[Fa-z]*/inxi -Fxxxzmd/" $(which hw-probe) && hw-probe -v
+	type -P hw-probe >/dev/null 2>&1 && $sudo sed -i "/inxi /s/inxi -[Fa-z]*/inxi -Fxxxzmd/" $(which hw-probe) && \hw-probe -v
 	return $retCode
 }
 
