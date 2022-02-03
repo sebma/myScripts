@@ -217,7 +217,7 @@ getRestrictedFilenamesFORMAT () {
 				thumbnailFormatString=$(\curl -Lqs "$thumbnailURL" | file -b -)
 				if echo $thumbnailFormatString | $grep -q JPEG && ! echo $thumbnailFormatString | $grep -q JFIF;then
 					#Because of https://bitbucket.org/wez/atomicparsley/issues/63
-					echo "${effects[bold]}${colors[blue]}=> WARNING: The remote thumbnail is not JFIF compliant, downloading it to convert it to JPEG JFIF ...$normal"
+					echo "${effects[bold]}${colors[blue]}=> WARNING: The remote thumbnail is not JFIF compliant, downloading it to converting it to JPEG JFIF ...$normal"
 					if \curl -qLs "$thumbnailURL" -o "$artworkFileName.tmp";then
 						echo "=> Converting <$artworkFileName> to JPEG JFIF for AtomicParsley ..."
 						convert "$artworkFileName.tmp" "$artworkFileName" && rm -f "$artworkFileName.tmp"
