@@ -26,7 +26,7 @@ mpvFORMAT() {
 	shift
 
 	# Si on lance mpv via un ssh sur le PC b206, alors on ne forward pas l'affichage
-	test "$SSH_CONNECTION" && hostname | grep -qi b206$ && DISPLAY=:0
+	test "$SSH_CONNECTION" && hostname | egrep -qi "b206$|eb1501p$" && DISPLAY=:0
 
 	if grep -q "\[$format\]" "$mpvConfigFile";then
 		LANG=en_US.utf8 nohup $mpv --profile="$format" "$@" &
