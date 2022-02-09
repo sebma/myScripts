@@ -36,6 +36,6 @@ function moveAudioTo {
 
 moveAudio2AnalogStereo() { moveAudioTo '\.analog-stereo\>'; }
 moveAudio2DigitalAudio() { moveAudioTo '\.iec958-stereo\>'; }
-moveAudio2HDMI() { moveAudioTo '\.hdmi-stereo\>'; }
+moveAudio2HDMI() { moveAudioTo '\.hdmi-stereo'; }
 
 $funcName "$@"
