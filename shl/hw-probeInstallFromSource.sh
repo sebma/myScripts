@@ -42,7 +42,11 @@ hw_probeInstallFromSource () {
 		git clone $hw_probeGitREPO
 		if cd $(basename $hw_probeGitREPO);then
 			git pull
-			$sudo make install prefix=/usr/local
+			if type -P checkinstall >/dev/null 2>&1;then
+				$sudo checkinstall prefix=/usr/local
+			else
+				$sudo make install prefix=/usr/local
+			fi
 			retCode=$?
 			echo
 		fi
