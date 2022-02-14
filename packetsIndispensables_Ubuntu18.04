@@ -211,6 +211,7 @@ plasma-desktop
 plasma-pa
 plasma-wallpapers-addons
 plasma-workspace
+pm-utils
 pmount
 ppa-purge
 pulseaudio-module-bluetooth
