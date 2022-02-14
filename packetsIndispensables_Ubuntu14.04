@@ -203,6 +203,7 @@ pidgin-sipe
 pidgin-skype
 pkg-config
 plasma-wallpapers-addons
+pm-utils
 pmount
 ppa-purge
 pulseaudio-module-bluetooth
