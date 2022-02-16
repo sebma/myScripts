@@ -4,6 +4,6 @@ set -x
 for EDID in $(ls /sys/class/drm/*/edid)
 do
 	parse-edid < $EDID
-done
-xrandr
+done | more
+xrandr | grep connected
 set +x
