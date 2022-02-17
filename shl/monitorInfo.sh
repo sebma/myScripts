@@ -14,4 +14,7 @@ if [ -z "$SSH_CONNECTION" ];then
 	#xrandr --verbose | edid-decode | egrep 'Manufacturer:|Product|Alphanumeric'
 	echo "=> xrandr --props | edid-decode | egrep 'Manufacturer:|Product|Alphanumeric' ..."
 	xrandr --props | edid-decode | egrep 'Manufacturer:|Product|Alphanumeric'
+else
+	echo "=> You cannot use <${0/*\//}> through SSH." >&2
+	exit 1
 fi
