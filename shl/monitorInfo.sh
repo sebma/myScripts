@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
 
+echo "=> xrandr | grep connected ..."
 xrandr | grep connected
-echo
+
 for EDID in $(ls /sys/class/drm/*/edid)
 do
 	text=$(tr -d '\0' <"$EDID")
-	[ -n "$text" ] && edid-decode < $EDID | egrep "Manufacturer:|Product"
+	[ -n "$text" ] && echo "=> edid-decode < $EDID | egrep 'Manufacturer:|Product|Alphanumeric' ..." && edid-decode < $EDID | egrep 'Manufacturer:|Product|Alphanumeric'
 	sleep 0.0001s
 done | more
+
+#xrandr --verbose | edid-decode | egrep 'Manufacturer:|Product|Alphanumeric'
+echo "=> xrandr --props | edid-decode | egrep 'Manufacturer:|Product|Alphanumeric' ..."
+xrandr --props | edid-decode | egrep 'Manufacturer:|Product|Alphanumeric'
