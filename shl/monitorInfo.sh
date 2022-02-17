@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
-set -x
+xrandr | grep connected
+echo
 for EDID in $(ls /sys/class/drm/*/edid)
 do
-	parse-edid < $EDID
+	text=$(tr -d '\0' <"$EDID")
+	[ -n "$text" ] && edid-decode < $EDID | egrep "Manufacturer:|Product"
+	sleep 0.0001s
 done | more
-xrandr | grep connected
-set +x
