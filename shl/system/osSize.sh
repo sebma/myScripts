@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #La partition swap n'est pas prise en compte pour le moment
-LANG=C
+export LANG=C
 df="command df"
 echo $OSTYPE | grep -q android && export osFamily=Android || export osFamily=$(uname -s)
 if [ $osFamily = Linux ];then
