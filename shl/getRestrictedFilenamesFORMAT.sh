@@ -208,7 +208,7 @@ getRestrictedFilenamesFORMAT () {
 
 			thumbnailExtension=$(echo "${thumbnailURL/*\//}" | awk -F"[.]" '{print$2}')
 			thumbnailExtension="${thumbnailExtension/\?*/}"
-			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -Lqs "$thumbnailURL" | file -bi - | awk -F ';' '{sub(".*/","",$1);print gensub("jpeg","jpg",1,$1)}')
+			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -Lqs "$thumbnailURL" | file -bi - | awk -F ';' '{sub(".*/","",$1);sub("jpeg","jpg",$1);print$1}')
 			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/%.$extension/.$thumbnailExtension}
 
 			[ "$debug" ] && echo "=> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal> acodec = <$acodec> fileName = <$fileName> extension = <$extension> isLIVE = <$isLIVE> formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName> firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url> title = <$title> duration = <$duration>" && echo
