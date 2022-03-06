@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-interpreter=$(ps -o args= $$ | awk '{print gensub("^/.*/","",1,$1)}')
+interpreter=$(ps -o args= $$ | awk '{print sub("^/.*/","");print}')
 
 if [ $interpreter = bash ] || [ $interpreter = zsh ] || [ $interpreter = sh ];then
 	local=local
