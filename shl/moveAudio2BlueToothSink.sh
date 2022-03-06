@@ -11,7 +11,7 @@ function moveAudioToBluetoothSink {
 	set -o pipefail
 	case $firstArg in
 		*:*) bluetoothDeviceMacAddr=$firstArg;;
-		connected) bluetoothDeviceMacAddr=$(pactl list sinks short | grep bluez | awk -F'[.\t]' '/bluez/{print gensub("_",":","g",$3)}' || echo null);;
+		connected) bluetoothDeviceMacAddr=$(pactl list sinks short | grep bluez | awk -F'[.\t]' '/bluez/{gsub("_",":",$3);print$3}' || echo null);;
 		*) bluetoothDeviceName=$firstArg;;
 	esac
 	set +o pipefail
