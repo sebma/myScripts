@@ -7,4 +7,5 @@ test $# != 1 && {
 }
 
 ok_ru_htmlFile=$1
-cat $ok_ru_htmlFile | pup 'json{}' | jq -r 'recurse | arrays[] | select(.class == "video-card_n ellip").title,select(.class == "video-card_lk").href' | awk '{videoRelativeURL=$0;url="https://ok.ru"gensub("?.*$",1,videoRelativeURL); getline title; print url" # "title}'
+urlBase="https://ok.ru"
+cat $ok_ru_htmlFile | pup 'json{}' | jq -r 'recurse | arrays[] | select(.class == "video-card_n ellip").title,select(.class == "video-card_lk").href' | awk '{videoRelativeURL=$0;url=gensub("?.*$","",1,videoRelativeURL); getline title; print url" # "title}'
