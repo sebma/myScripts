@@ -13,7 +13,7 @@ then
 			exit 1
 		fi
 	done
-	qrencode -s 7 -o $USER.WP.png "$(zenity --password --title="Wifi Password")" && nohup $open $USER.WP.png &
+	qrencode -l H -s 7 -o $USER.WP.png "$(zenity --password --title="Wifi Password")" && nohup $open $USER.WP.png &
 else
 	echo "=> $0 ERROR: $os is not supported yet." >&2
 	exit 2
