@@ -478,7 +478,7 @@ addThumbnail2media() {
 #	numberOfVideoStreams=$(echo $ffprobeJSON_File_Info | $jq -r '[ .streams[] | select(.codec_type=="video") ] | length'
 	local latestVideoStreamCodecName=$(echo $ffprobeJSON_File_Info | $jq -r '[ .streams[] | select(.codec_type=="video") ][-1].codec_name')
 
-	local major_brand=$(echo $ffprobeJSON_File_Info | $jq -r .format.tags.major_brand)
+	local major_brand=$(echo $ffprobeJSON_File_Info | $jq -r .format.tags.major_brand | sed "s/\s*$//")
 	local retCode=0
 
 	[ "$debug" ] && echo "=> videoContainer = <$videoContainer>  latestVideoStreamCodecName = <$latestVideoStreamCodecName> major_brand = <$major_brand>" && echo
