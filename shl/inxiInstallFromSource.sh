@@ -61,7 +61,7 @@ inxiInstallFromSource () {
 
 	echo
 	sync
-	type -P inxi && inxi -V
+	type -P inxi && inxi -V | head && rm /tmp/myTmp/inxi /tmp/myTmp/inxi.1
 	return $retCode
 }
 
