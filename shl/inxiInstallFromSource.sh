@@ -25,7 +25,9 @@ inxiInstallFromSource () {
 	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo="command sudo" || local sudo=""
 	local inxiGitREPO=https://github.com/smxi/inxi
 
-	if type -P inxi >/dev/null 2>&1; then
+	local forceInstall=false
+	test $# != 0 && [ "$1" == "-f" ] && forceInstall=true
+	if type -P inxi >/dev/null 2>&1 && ! $forceInstall; then
 		echo "=> INFO [$FUNCNAME] : inxi is already installed." 1>&2
 		return 1
 	fi
@@ -41,8 +43,9 @@ inxiInstallFromSource () {
 	if cd ~/git/linuxhw;then
 		git clone $inxiGitREPO
 		if cd $(basename $inxiGitREPO);then
+			pwd
 			git pull
-			$sudo make install prefix=/usr/local
+			$sudo install -vpm 755 inxi /usr/local/ || install -vpm 755 inxi ~/myScripts/pl/not_mine/
 			retCode=$?
 			echo
 		fi
@@ -50,8 +53,8 @@ inxiInstallFromSource () {
 
 	sync
 	cd $prevDIR
-	type -P inxi >/dev/null 2>&1 && inxi -V
+	type -P inxi && inxi -V
 	return $retCode
 }
 
-inxiInstallFromSource
+inxiInstallFromSource "$@"
