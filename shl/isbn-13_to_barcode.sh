@@ -5,7 +5,7 @@ ISBN2Barcode ()
 	local string=""
 	if [ $# = 1 ]; then
 		string="$1"
-		barcode -e ean-13 -S -b "$string" | mogrify -format png -sample 200% - | feh -
+		barcode -e ean-13 -S -b "$string" | mogrify -format png -resize 200% - | feh -
 	fi
 }
 
