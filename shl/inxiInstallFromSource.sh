@@ -39,20 +39,28 @@ inxiInstallFromSource () {
 
 	local prevDIR=$PWD
 	local retCode=0
-	mkdir -p ~/git/linuxhw
-	if cd ~/git/linuxhw;then
-		git clone $inxiGitREPO
-		if cd $(basename $inxiGitREPO);then
-			pwd
-			git pull
-			$sudo install -vpm 755 inxi /usr/local/ || install -vpm 755 inxi ~/myScripts/pl/not_mine/
-			retCode=$?
-			echo
+	if wget --no-config -N -P /tmp/myTmp/ -nv https://github.com/smxi/inxi/raw/master/inxi; then
+		sudo -v || sudo=""
+		if [ -n "$sudo" ]; then
+			$sudo install -Dvpm 755 /tmp/myTmp/inxi /usr/local/bin/inxi
+		else
+			install -Dvpm 755 /tmp/myTmp/inxi ~/myScripts/pl/not_mine/inxi
+		fi
+		retCode=$?
+	fi
+
+	if wget --no-config -N -P /tmp/myTmp/ -nv https://github.com/smxi/inxi/raw/master/inxi.1; then
+		if [ -n "$sudo" ]; then
+			$sudo install -Dvpm 755 /tmp/myTmp/inxi.1 /usr/local/share/man/man1/inxi.1
+			$sudo gzip -9fv /usr/local/share/man/man1/inxi.1
+		else
+			install -Dvpm 755 /tmp/myTmp/inxi.1 ~/local/share/man/man1/inxi.1
+			gzip -9fv ~/local/share/man/man1/inxi.1
 		fi
 	fi
 
+	echo
 	sync
-	cd $prevDIR
 	type -P inxi && inxi -V
 	return $retCode
 }
