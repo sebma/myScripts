@@ -6,7 +6,6 @@ ISBN2Barcode_with_barcode ()
 	if [ $# = 1 ]; then
 		string="$1"
 		stringLength="${#string}"
-		echo "=> stringLength = $stringLength"
 		if [ $stringLength = 10 ];then
 			barcode -e isbn -S -b "$string" | mogrify -format png -resize 200% - | feh -
 		elif [ $stringLength = 13 ];then
