@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-ISBN2Barcode ()
+ISBN2Barcode_with_barcode ()
 {
 	local string=""
 	if [ $# = 1 ]; then
@@ -9,4 +9,4 @@ ISBN2Barcode ()
 	fi
 }
 
-ISBN2Barcode "$1"
+ISBN2Barcode_with_barcode "$1"
