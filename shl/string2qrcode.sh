@@ -2,10 +2,10 @@
 
 string2qrcode ()
 {
-	local dotSize=7 url=""
+	local dotSize=7 string=""
 	if [ $# = 1 ]; then
-		url="$1"
-		qrencode -l H -s $dotSize -o- "$url" | feh -
+		string="$1"
+		qrencode -l H -s $dotSize -o- "$string" | feh -
 	fi
 }
 
