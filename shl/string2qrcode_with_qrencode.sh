@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-string2qrcode ()
+string2qrcode_with_qrencode ()
 {
 	local dotSize=8 string=""
 	if [ $# = 1 ]; then
@@ -9,4 +9,4 @@ string2qrcode ()
 	fi
 }
 
-string2qrcode "$1"
+string2qrcode_with_qrencode "$1"
