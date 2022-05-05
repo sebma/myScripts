@@ -26,6 +26,7 @@ audacity
 avahi-daemon
 avahi-utils
 axel
+barcode
 bash-completion
 bcmwl-kernel-source
 bible-kjv
@@ -76,6 +77,7 @@ expect
 fatresize
 fbset
 fdupes
+feh
 ffmpeg
 ffmpegthumbs
 firefox-globalmenu
@@ -112,6 +114,7 @@ htop
 httpie
 hw-probe
 ifupdown
+imagemagick
 indicator-bluetooth
 input-utils
 inxi
