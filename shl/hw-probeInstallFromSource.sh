@@ -23,7 +23,7 @@ distribName () {
 }
 hw_probeInstallFromSource () {
 	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo="command sudo" || local sudo=""
-	local hw_probeGitREPO=https://github.com/linuxhw/hw-probe
+	local gitREPO=https://github.com/linuxhw/hw-probe
 
 	local forceInstall=false
 	test $# != 0 && [ "$1" == "-f" ] && forceInstall=true
@@ -39,7 +39,7 @@ hw_probeInstallFromSource () {
 
 	local prevDIR=$PWD
 	local retCode=0
-	if wget --no-config -N -P /tmp/myTmp/ -nv https://github.com/linuxhw/hw-probe/raw/master/hw-probe.pl; then
+	if wget --no-config -N -P /tmp/myTmp/ -nv $gitREPO/raw/master/hw-probe.pl; then
 		sudo -v || sudo=""
 		if [ -n "$sudo" ]; then
 			$sudo install -Dvpm 755 /tmp/myTmp/hw-probe.pl /usr/local/bin/hw-probe
