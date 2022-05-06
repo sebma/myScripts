@@ -37,6 +37,15 @@ hw_probeInstallFromSource () {
 
 	local prevDIR=$PWD
 	local retCode=0
+	if wget --no-config -N -P /tmp/myTmp/ -nv https://github.com/linuxhw/hw-probe/raw/master/hw-probe.pl; then
+		sudo -v || sudo=""
+		if [ -n "$sudo" ]; then
+			$sudo install -Dvpm 755 /tmp/myTmp/hw-probe.pl /usr/local/bin/hw-probe
+		else
+			install -Dvpm 755 /tmp/myTmp/hw-probe.pl ~/myScripts/pl/not_mine/hw-probe
+		fi
+		retCode=$?
+	fi
 
 	sync
 	cd $prevDIR
