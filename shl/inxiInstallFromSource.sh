@@ -23,7 +23,7 @@ distribName () {
 }
 inxiInstallFromSource () {
 	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo="command sudo" || local sudo=""
-	local inxiGitREPO=https://github.com/smxi/inxi
+	local gitREPO=https://github.com/smxi/inxi
 
 	local forceInstall=false
 	test $# != 0 && [ "$1" == "-f" ] && forceInstall=true
@@ -39,7 +39,7 @@ inxiInstallFromSource () {
 
 	local prevDIR=$PWD
 	local retCode=0
-	if wget --no-config -N -P /tmp/myTmp/ -nv https://github.com/smxi/inxi/raw/master/inxi; then
+	if wget --no-config -N -P /tmp/myTmp/ -nv $gitREPO/raw/master/inxi; then
 		sudo -v || sudo=""
 		if [ -n "$sudo" ]; then
 			$sudo install -Dvpm 755 /tmp/myTmp/inxi /usr/local/bin/inxi
@@ -49,7 +49,7 @@ inxiInstallFromSource () {
 		retCode=$?
 	fi
 
-	if wget --no-config -N -P /tmp/myTmp/ -nv https://github.com/smxi/inxi/raw/master/inxi.1; then
+	if wget --no-config -N -P /tmp/myTmp/ -nv $gitREPO/raw/master/inxi.1; then
 		if [ -n "$sudo" ]; then
 			$sudo install -Dvpm 755 /tmp/myTmp/inxi.1 /usr/local/share/man/man1/inxi.1
 			$sudo gzip -9fv /usr/local/share/man/man1/inxi.1
