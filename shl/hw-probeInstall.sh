@@ -75,7 +75,7 @@ hw_probeInstall () {
 	fi
 
 	echo
-	type -P hw-probe >/dev/null 2>&1 && $sudo sed -i "/inxi /s/inxi -[Fa-z]*/inxi -FZxxxzmd/" $(which hw-probe) && \hw-probe -v
+	type -P hw-probe >/dev/null 2>&1 && $sudo sed -i "/inxi /s/inxi -[Fa-z]*/inxi -FJxxxzmd/" $(which hw-probe) && \hw-probe -v
 	return $retCode
 }
 
