@@ -37,24 +37,10 @@ hw_probeInstallFromSource () {
 
 	local prevDIR=$PWD
 	local retCode=0
-	mkdir -p ~/git/linuxhw
-	if cd ~/git/linuxhw;then
-		git clone $hw_probeGitREPO
-		if cd $(basename $hw_probeGitREPO);then
-			git pull
-			if type -P checkinstall >/dev/null 2>&1;then
-				$sudo checkinstall prefix=/usr/local
-			else
-				$sudo make install prefix=/usr/local
-			fi
-			retCode=$?
-			echo
-		fi
-	fi
 
 	sync
 	cd $prevDIR
-	type -P hw-probe >/dev/null 2>&1 && $sudo sed -i "/inxi /s/inxi -[Fa-z]*/inxi -Fxxxzmd/" $(which hw-probe) && \hw-probe -v
+	type -P hw-probe >/dev/null 2>&1 && $sudo sed -i "/inxi /s/inxi -[Fa-z]*/inxi -FZxxxzmd/" $(which hw-probe) && \hw-probe -v
 	return $retCode
 }
 
