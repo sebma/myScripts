@@ -25,7 +25,9 @@ hw_probeInstallFromSource () {
 	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo="command sudo" || local sudo=""
 	local hw_probeGitREPO=https://github.com/linuxhw/hw-probe
 
-	if type -P hw-probe >/dev/null 2>&1; then
+	local forceInstall=false
+	test $# != 0 && [ "$1" == "-f" ] && forceInstall=true
+	if type -P hw-probe >/dev/null 2>&1 && ! $forceInstall; then
 		echo "=> INFO [$FUNCNAME] : hw-probe is already installed." 1>&2
 		return 1
 	fi
