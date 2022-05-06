@@ -55,4 +55,4 @@ hw_probeInstallFromSource () {
 	return $retCode
 }
 
-hw_probeInstallFromSource
+hw_probeInstallFromSource "$@"
