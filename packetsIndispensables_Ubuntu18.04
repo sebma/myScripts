@@ -159,6 +159,7 @@ libterm-readline-gnu-perl
 libtool
 libvirt-bin
 links2
+lm-sensors
 lsdvd
 lshw-gtk
 lynx
