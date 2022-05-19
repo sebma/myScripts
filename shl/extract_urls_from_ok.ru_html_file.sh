@@ -8,5 +8,6 @@ test $# != 1 && {
 
 ok_ru_htmlFile=$1
 urlBase="https://ok.ru"
-nbsp="\xC2\xA0" # https://en.wikipedia.org/wiki/Non-breaking_space
-cat $ok_ru_htmlFile | pup 'json{}' | jq -r 'recurse | arrays[] | ( select(.class == "video-card_n ellip").title | gsub("\n";" ") ),( select(.class == "video-card_lk").href | sub("[?].*$";"") )' | sed "s/$nbsp/ /g" | awk '{videoRelativeURL=$0;url=videoRelativeURL; getline title; print url" # "title}'
+#nbsp="\xC2\xA0" # https://en.wikipedia.org/wiki/Non-breaking_space
+nbspUnicodeCodePoint='"\u00A0"' # https://en.wikipedia.org/wiki/Non-breaking_space
+cat $ok_ru_htmlFile | pup 'json{}' | nbspUnicodeCodePoint=$nbspUnicodeCodePoint jq -r 'recurse | arrays[] | ( select(.class == "video-card_n ellip").title | gsub("\n";" ") | gsub(env.nbspUnicodeCodePoint | fromjson;" ") ),( select(.class == "video-card_lk").href | sub("[?].*$";"") )' | awk '{url=$0;getline title;print url" # "title}'
