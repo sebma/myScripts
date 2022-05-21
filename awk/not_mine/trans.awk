@@ -5,8 +5,8 @@ read -r -d '' TRANS_PROGRAM << 'EOF'
 BEGIN {
 Name        = "Translate Shell"
 Description = "Command-line translator using Google Translate, Bing Translator, Yandex.Translate, etc."
-Version     = "0.9.6.11"
-ReleaseDate = "2019-07-25"
+Version     = "0.9.6.12"
+ReleaseDate = "2020-05-11"
 Command     = "trans"
 EntryPoint  = "translate.awk"
 EntryScript = "translate"
@@ -83,6 +83,13 @@ for (i in patterns)
 if (string ~ "^" patterns[i]) return patterns[i]
 return NULLSTR
 }
+function ucfirst(string) {
+if (length(string) >= 2)
+return toupper(substr(string, 1, 1)) substr(string, 2)
+else if (length(string) == 1)
+return toupper(string)
+return NULLSTR
+}
 function replicate(string, len,
 i, temp) {
 temp = NULLSTR
@@ -135,8 +142,12 @@ case "u0026":
 return "&"
 case "u003c":
 return "<"
+case "u003d":
+return "="
 case "u003e":
 return ">"
+case "u200b":
+return ""
 default:
 return char
 }
@@ -630,6 +641,9 @@ close(command)
 return length(group) - 1
 }
 function base64(text,    command, temp) {
+if (detectProgram("uname", "-s", 1) == "Linux")
+command = "echo -n " parameterize(text) PIPE "base64 -w0"
+else
 command = "echo -n " parameterize(text) PIPE "base64"
 command = "bash -c " parameterize(command, "\"")
 command | getline temp
@@ -734,6 +748,7 @@ Locale["be"]["iso"]                = "bel"
 Locale["be"]["glotto"]             = "bela1254"
 Locale["be"]["script"]             = "Cyrl"
 Locale["bn"]["name"]               = "Bengali"
+Locale["bn"]["name2"]              = "Bangla"
 Locale["bn"]["endonym"]            = "বাংলা"
 Locale["bn"]["translations-of"]    = "%s এর অনুবাদ"
 Locale["bn"]["definitions-of"]     = "%s এর সংজ্ঞা"
@@ -914,6 +929,7 @@ Locale["et"]["iso"]                = "est"
 Locale["et"]["glotto"]             = "esto1258"
 Locale["et"]["script"]             = "Latn"
 Locale["tl"]["name"]               = "Filipino"
+Locale["tl"]["name2"]              = "Tagalog"
 Locale["tl"]["endonym"]            = "Tagalog"
 Locale["tl"]["translations-of"]    = "Mga pagsasalin ng %s"
 Locale["tl"]["definitions-of"]     = "Mga kahulugan ng %s"
@@ -1184,6 +1200,12 @@ Locale["km"]["family"]             = "Austroasiatic"
 Locale["km"]["iso"]                = "khm"
 Locale["km"]["glotto"]             = "cent1989"
 Locale["km"]["script"]             = "Khmr"
+Locale["rw"]["name"]               = "Kinyarwanda"
+Locale["rw"]["endonym"]            = "Ikinyarwanda"
+Locale["rw"]["family"]             = "Atlantic-Congo"
+Locale["rw"]["iso"]                = "kin"
+Locale["rw"]["glotto"]             = "kiny1244"
+Locale["rw"]["script"]             = "Latn"
 Locale["ko"]["name"]               = "Korean"
 Locale["ko"]["endonym"]            = "한국어"
 Locale["ko"]["translations-of"]    = "%s의 번역"
@@ -1196,8 +1218,10 @@ Locale["ko"]["iso"]                = "kor"
 Locale["ko"]["glotto"]             = "kore1280"
 Locale["ko"]["script"]             = "Kore"
 Locale["ko"]["dictionary"]         = "true"
-Locale["ku"]["name"]               = "Kurdish"
-Locale["ku"]["endonym"]            = "Kurdî"
+Locale["ku"]["name"]               = "Kurdish (Central)"
+Locale["ku"]["name2"]              = "Sorani"
+Locale["ku"]["endonym"]            = "Soranî"
+Locale["ku"]["endonym2"]           = "Kurdî"
 Locale["ku"]["family"]             = "Indo-European"
 Locale["ku"]["iso"]                = "kur"
 Locale["ku"]["glotto"]             = "kurd1259"
@@ -1348,6 +1372,7 @@ Locale["mn"]["iso"]                = "mon"
 Locale["mn"]["glotto"]             = "mong1331"
 Locale["mn"]["script"]             = "Cyrl"
 Locale["my"]["name"]               = "Myanmar"
+Locale["my"]["name2"]              = "Burmese"
 Locale["my"]["endonym"]            = "မြန်မာစာ"
 Locale["my"]["translations-of"]    = "%s၏ ဘာသာပြန်ဆိုချက်များ"
 Locale["my"]["definitions-of"]     = "%s၏ အနက်ဖွင့်ဆိုချက်များ"
@@ -1380,7 +1405,14 @@ Locale["no"]["family"]             = "Indo-European"
 Locale["no"]["iso"]                = "nor"
 Locale["no"]["glotto"]             = "norw1258"
 Locale["no"]["script"]             = "Latn"
+Locale["or"]["name"]               = "Odia"
+Locale["or"]["endonym"]            = "ଓଡ଼ିଆ"
+Locale["or"]["family"]             = "Indo-European"
+Locale["or"]["iso"]                = "ori"
+Locale["or"]["glotto"]             = "macr1269"
+Locale["or"]["script"]             = "Orya"
 Locale["ps"]["name"]               = "Pashto"
+Locale["ps"]["name2"]              = "Pushto"
 Locale["ps"]["endonym"]            = "پښتو"
 Locale["ps"]["translations-of"]    = "د %sژباړې"
 Locale["ps"]["definitions-of"]     = "د%s تعریفونه"
@@ -1393,6 +1425,7 @@ Locale["ps"]["glotto"]             = "pash1269"
 Locale["ps"]["script"]             = "Arab"
 Locale["ps"]["rtl"]                = "true"
 Locale["fa"]["name"]               = "Persian"
+Locale["fa"]["name2"]              = "Farsi"
 Locale["fa"]["endonym"]            = "فارسی"
 Locale["fa"]["translations-of"]    = "ترجمه‌های %s"
 Locale["fa"]["definitions-of"]     = "تعریف‌های %s"
@@ -1415,18 +1448,18 @@ Locale["pl"]["family"]             = "Indo-European"
 Locale["pl"]["iso"]                = "pol"
 Locale["pl"]["glotto"]             = "poli1260"
 Locale["pl"]["script"]             = "Latn"
-Locale["pt"]["name"]               = "Portuguese"
-Locale["pt"]["endonym"]            = "Português"
-Locale["pt"]["translations-of"]    = "Traduções de %s"
-Locale["pt"]["definitions-of"]     = "Definições de %s"
-Locale["pt"]["synonyms"]           = "Sinônimos"
-Locale["pt"]["examples"]           = "Exemplos"
-Locale["pt"]["see-also"]           = "Veja também"
-Locale["pt"]["family"]             = "Indo-European"
-Locale["pt"]["iso"]                = "por"
-Locale["pt"]["glotto"]             = "port1283"
-Locale["pt"]["script"]             = "Latn"
-Locale["pt"]["dictionary"]         = "true"
+Locale["pt-BR"]["name"]            = "Portuguese (Brazilian)"
+Locale["pt-BR"]["endonym"]         = "Português Brasileiro"
+Locale["pt-BR"]["translations-of"] = "Traduções de %s"
+Locale["pt-BR"]["definitions-of"]  = "Definições de %s"
+Locale["pt-BR"]["synonyms"]        = "Sinônimos"
+Locale["pt-BR"]["examples"]        = "Exemplos"
+Locale["pt-BR"]["see-also"]        = "Veja também"
+Locale["pt-BR"]["family"]          = "Indo-European"
+Locale["pt-BR"]["iso"]             = "por"
+Locale["pt-BR"]["glotto"]          = "braz1246"
+Locale["pt-BR"]["script"]          = "Latn"
+Locale["pt-BR"]["dictionary"]      = "true"
 Locale["pa"]["name"]               = "Punjabi"
 Locale["pa"]["endonym"]            = "ਪੰਜਾਬੀ"
 Locale["pa"]["translations-of"]    = "ਦੇ ਅਨੁਵਾਦ%s"
@@ -1489,6 +1522,7 @@ Locale["sr-Cyrl"]["family"]        = "Indo-European"
 Locale["sr-Cyrl"]["iso"]           = "srp-Cyrl"
 Locale["sr-Cyrl"]["glotto"]        = "serb1264"
 Locale["sr-Cyrl"]["script"]        = "Cyrl"
+Locale["sr-Latn"]["support"]       = "bing-only"
 Locale["sr-Latn"]["name"]          = "Serbian (Latin)"
 Locale["sr-Latn"]["endonym"]       = "srpski"
 Locale["sr-Latn"]["translations-of"] = "Prevodi za „%s“"
@@ -1557,6 +1591,7 @@ Locale["sk"]["iso"]                = "slk"
 Locale["sk"]["glotto"]             = "slov1269"
 Locale["sk"]["script"]             = "Latn"
 Locale["sl"]["name"]               = "Slovenian"
+Locale["sl"]["name2"]              = "Slovene"
 Locale["sl"]["endonym"]            = "Slovenščina"
 Locale["sl"]["translations-of"]    = "Prevodi za %s"
 Locale["sl"]["definitions-of"]     = "Razlage za %s"
@@ -1602,6 +1637,7 @@ Locale["su"]["iso"]                = "sun"
 Locale["su"]["glotto"]             = "sund1252"
 Locale["su"]["script"]             = "Latn"
 Locale["sw"]["name"]               = "Swahili"
+Locale["sw"]["name2"]              = "Kiswahili"
 Locale["sw"]["endonym"]            = "Kiswahili"
 Locale["sw"]["translations-of"]    = "Tafsiri ya %s"
 Locale["sw"]["definitions-of"]     = "Ufafanuzi wa %s"
@@ -1624,6 +1660,7 @@ Locale["sv"]["iso"]                = "swe"
 Locale["sv"]["glotto"]             = "swed1254"
 Locale["sv"]["script"]             = "Latn"
 Locale["tg"]["name"]               = "Tajik"
+Locale["tg"]["name2"]              = "Tajiki"
 Locale["tg"]["endonym"]            = "Тоҷикӣ"
 Locale["tg"]["translations-of"]    = "Тарҷумаҳои %s"
 Locale["tg"]["definitions-of"]     = "Таърифҳои %s"
@@ -1645,6 +1682,12 @@ Locale["ta"]["family"]             = "Dravidian"
 Locale["ta"]["iso"]                = "tam"
 Locale["ta"]["glotto"]             = "tami1289"
 Locale["ta"]["script"]             = "Taml"
+Locale["tt"]["name"]               = "Tatar"
+Locale["tt"]["endonym"]            = "татарча"
+Locale["tt"]["family"]             = "Turkic"
+Locale["tt"]["iso"]                = "tat"
+Locale["tt"]["glotto"]             = "tata1255"
+Locale["tt"]["script"]             = "Cyrl"
 Locale["te"]["name"]               = "Telugu"
 Locale["te"]["endonym"]            = "తెలుగు"
 Locale["te"]["translations-of"]    = "%s యొక్క అనువాదాలు"
@@ -1678,6 +1721,12 @@ Locale["tr"]["family"]             = "Turkic"
 Locale["tr"]["iso"]                = "tur"
 Locale["tr"]["glotto"]             = "nucl1301"
 Locale["tr"]["script"]             = "Latn"
+Locale["tk"]["name"]               = "Turkmen"
+Locale["tk"]["endonym"]            = "Türkmen"
+Locale["tk"]["family"]             = "Turkic"
+Locale["tk"]["iso"]                = "tuk"
+Locale["tk"]["glotto"]             = "turk1304"
+Locale["tk"]["script"]             = "Latn"
 Locale["uk"]["name"]               = "Ukrainian"
 Locale["uk"]["endonym"]            = "Українська"
 Locale["uk"]["translations-of"]    = "Переклади слова або виразу \"%s\""
@@ -1701,6 +1750,13 @@ Locale["ur"]["iso"]                = "urd"
 Locale["ur"]["glotto"]             = "urdu1245"
 Locale["ur"]["script"]             = "Arab"
 Locale["ur"]["rtl"]                = "true"
+Locale["ug"]["name"]               = "Uyghur"
+Locale["ug"]["endonym"]            = "ئۇيغۇر تىلى"
+Locale["ug"]["family"]             = "Turkic"
+Locale["ug"]["iso"]                = "uig"
+Locale["ug"]["glotto"]             = "uigh1240"
+Locale["ug"]["script"]             = "Arab"
+Locale["ug"]["rtl"]                = "true"
 Locale["uz"]["name"]               = "Uzbek"
 Locale["uz"]["endonym"]            = "Oʻzbek tili"
 Locale["uz"]["translations-of"]    = "%s: tarjima variantlari"
@@ -1797,6 +1853,14 @@ Locale["yue"]["family"]            = "Sino-Tibetan"
 Locale["yue"]["iso"]               = "yue"
 Locale["yue"]["glotto"]            = "cant1236"
 Locale["yue"]["script"]            = "Hant"
+Locale["prs"]["support"]           = "bing-only"
+Locale["prs"]["name"]              = "Dari"
+Locale["prs"]["endonym"]           = "دری"
+Locale["prs"]["family"]            = "Indo-European"
+Locale["prs"]["iso"]               = "prs"
+Locale["prs"]["glotto"]            = "dari1249"
+Locale["prs"]["script"]            = "Arab"
+Locale["prs"]["rtl"]               = "true"
 Locale["fj"]["support"]           = "bing-only"
 Locale["fj"]["name"]              = "Fijian"
 Locale["fj"]["endonym"]           = "Vosa Vakaviti"
@@ -1811,6 +1875,18 @@ Locale["mww"]["family"]            = "Hmong-Mien"
 Locale["mww"]["iso"]               = "mww"
 Locale["mww"]["glotto"]            = "hmon1333"
 Locale["mww"]["script"]            = "Latn"
+Locale["pt-PT"]["support"]         = "bing-only"
+Locale["pt-PT"]["name"]            = "Portuguese (European)"
+Locale["pt-PT"]["endonym"]         = "Português Europeu"
+Locale["pt-PT"]["translations-of"] = "Traduções de %s"
+Locale["pt-PT"]["definitions-of"]  = "Definições de %s"
+Locale["pt-PT"]["synonyms"]        = "Sinônimos"
+Locale["pt-PT"]["examples"]        = "Exemplos"
+Locale["pt-PT"]["see-also"]        = "Veja também"
+Locale["pt-PT"]["family"]          = "Indo-European"
+Locale["pt-PT"]["iso"]             = "por"
+Locale["pt-PT"]["glotto"]          = "port1283"
+Locale["pt-PT"]["script"]          = "Latn"
 Locale["otq"]["support"]           = "bing-only"
 Locale["otq"]["name"]              = "Querétaro Otomi"
 Locale["otq"]["endonym"]           = "Hñąñho"
@@ -1851,6 +1927,14 @@ Locale["tlh-Qaak"]["endonym"]      = " "
 Locale["tlh-Qaak"]["family"]       = "Artificial Language"
 Locale["tlh-Qaak"]["iso"]          = "tlh"
 Locale["tlh-Qaak"]["script"]       = "Piqd"
+Locale["kmr"]["support"]           = "bing-only"
+Locale["kmr"]["name"]              = "Kurdish (Northern)"
+Locale["kmr"]["name2"]             = "Kurmanji"
+Locale["kmr"]["endonym"]           = "Kurmancî"
+Locale["kmr"]["family"]            = "Indo-European"
+Locale["kmr"]["iso"]               = "kmr"
+Locale["kmr"]["glotto"]            = "nort2641"
+Locale["kmr"]["script"]            = "Latn"
 Locale["as"]["support"]            = "unstable"
 Locale["as"]["name"]               = "Assamese"
 Locale["as"]["endonym"]            = "অসমীয়া"
@@ -1914,13 +1998,6 @@ Locale["ie"]["family"]             = "Artificial Language"
 Locale["ie"]["iso"]                = "ile"
 Locale["ie"]["glotto"]             = "occi1241"
 Locale["ie"]["script"]             = "Latn"
-Locale["rw"]["support"]            = "unstable"
-Locale["rw"]["name"]               = "Kinyarwanda"
-Locale["rw"]["endonym"]            = "Ikinyarwanda"
-Locale["rw"]["family"]             = "Atlantic-Congo"
-Locale["rw"]["iso"]                = "kin"
-Locale["rw"]["glotto"]             = "kiny1244"
-Locale["rw"]["script"]             = "Latn"
 Locale["oc"]["support"]            = "unstable"
 Locale["oc"]["name"]               = "Occitan"
 Locale["oc"]["endonym"]            = "Occitan"
@@ -1935,13 +2012,6 @@ Locale["om"]["family"]             = "Afro-Asiatic"
 Locale["om"]["iso"]                = "orm"
 Locale["om"]["glotto"]             = "nucl1736"
 Locale["om"]["script"]             = "Latn"
-Locale["or"]["support"]            = "unstable"
-Locale["or"]["name"]               = "Oriya"
-Locale["or"]["endonym"]            = "ଓଡ଼ିଆ"
-Locale["or"]["family"]             = "Indo-European"
-Locale["or"]["iso"]                = "ori"
-Locale["or"]["glotto"]             = "macr1269"
-Locale["or"]["script"]             = "Orya"
 Locale["pap"]["support"]           = "yandex-only"
 Locale["pap"]["name"]              = "Papiamento"
 Locale["pap"]["endonym"]           = "Papiamentu"
@@ -1970,20 +2040,6 @@ Locale["bo"]["family"]             = "Sino-Tibetan"
 Locale["bo"]["iso"]                = "bod"
 Locale["bo"]["glotto"]             = "tibe1272"
 Locale["bo"]["script"]             = "Tibt"
-Locale["tk"]["support"]            = "unstable"
-Locale["tk"]["name"]               = "Turkmen"
-Locale["tk"]["endonym"]            = "Türkmen"
-Locale["tk"]["family"]             = "Turkic"
-Locale["tk"]["iso"]                = "tuk"
-Locale["tk"]["glotto"]             = "turk1304"
-Locale["tk"]["script"]             = "Latn"
-Locale["tt"]["support"]            = "yandex-only"
-Locale["tt"]["name"]               = "Tatar"
-Locale["tt"]["endonym"]            = "татарча"
-Locale["tt"]["family"]             = "Turkic"
-Locale["tt"]["iso"]                = "tat"
-Locale["tt"]["glotto"]             = "tata1255"
-Locale["tt"]["script"]             = "Cyrl"
 Locale["udm"]["support"]           = "yandex-only"
 Locale["udm"]["name"]              = "Udmurt"
 Locale["udm"]["endonym"]           = "удмурт"
@@ -1991,14 +2047,6 @@ Locale["udm"]["family"]            = "Uralic"
 Locale["udm"]["iso"]               = "udm"
 Locale["udm"]["glotto"]            = "udmu1245"
 Locale["udm"]["script"]            = "Cyrl"
-Locale["ug"]["support"]            = "unstable"
-Locale["ug"]["name"]               = "Uyghur"
-Locale["ug"]["endonym"]            = "ئۇيغۇر تىلى"
-Locale["ug"]["family"]             = "Turkic"
-Locale["ug"]["iso"]                = "uig"
-Locale["ug"]["glotto"]             = "uigh1240"
-Locale["ug"]["script"]             = "Arab"
-Locale["ug"]["rtl"]                = "true"
 Locale["vo"]["support"]            = "unstable"
 Locale["vo"]["name"]               = "Volapük"
 Locale["vo"]["endonym"]            = "Volapük"
@@ -2019,6 +2067,7 @@ Locale["chr"]["family"]            = "Iroquoian"
 Locale["chr"]["iso"]               = "chr"
 Locale["chr"]["glotto"]            = "cher1273"
 Locale["chr"]["script"]            = "Cher"
+Locale["emj"]["status"]            = "non-language"
 Locale["emj"]["support"]           = "yandex-only"
 Locale["emj"]["name"]              = "Emoji"
 Locale["emj"]["endonym"]           = "Emoji"
@@ -2027,15 +2076,20 @@ function initLocaleAlias(    i) {
 for (i in Locale) {
 LocaleAlias[Locale[i]["iso"]] = i
 LocaleAlias[tolower(Locale[i]["name"])] = i
+if ("name2" in Locale[i])
+LocaleAlias[tolower(Locale[i]["name2"])] = i
 LocaleAlias[tolower(Locale[i]["endonym"])] = i
 }
 LocaleAlias["in"] = "id"
 LocaleAlias["iw"] = "he"
 LocaleAlias["ji"] = "yi"
 LocaleAlias["jw"] = "jv"
+LocaleAlias["kurdish"] = "ku" # Kurdish: default to "ku" (N.B. Google uses this code for Kurmanji)
 LocaleAlias["mo"] = "ro"
 LocaleAlias["nb"] = "no"
 LocaleAlias["nn"] = "no"
+LocaleAlias["pt"] = "pt-BR"
+LocaleAlias["portuguese"] = "pt-BR"
 LocaleAlias["sh"]      = "sr-Cyrl"
 LocaleAlias["sr"]      = "sr-Cyrl"
 LocaleAlias["srp"]     = "sr-Cyrl"
@@ -2068,6 +2122,12 @@ return group[1]
 return
 }
 function getName(code) {
+return Locale[getCode(code)]["name"]
+}
+function getNames(code) {
+if ("name2" in Locale[getCode(code)])
+return Locale[getCode(code)]["name"] " / " Locale[getCode(code)]["name2"]
+else
 return Locale[getCode(code)]["name"]
 }
 function getEndonym(code) {
@@ -2160,7 +2220,7 @@ case "Tibt": return "Tibetan"
 default: return "Unknown"
 }
 }
-function getDetails(code,    group, iso, language, script) {
+function getDetails(code,    group, iso, script) {
 if (code == "auto" || !getCode(code)) {
 e("[ERROR] Language not found: " code "\n"\
 "        Run '-reference / -R' to see a list of available languages.")
@@ -2170,19 +2230,16 @@ script = scriptName(getScript(code))
 if (isRTL(code)) script = script " (R-to-L)"
 split(getISO(code), group, "-")
 iso = group[1]
-split(getName(code), group, " ")
-language = length(group) == 1 ? group[1] "_language" :
-group[2] ~ /^\(.*\)$/ ? group[1] "_language" : join(group, "_")
 return ansi("bold", sprintf("%s\n", getDisplay(code)))\
-sprintf("%-22s%s\n", "Name", ansi("bold", getName(code)))\
+sprintf("%-22s%s\n", "Name", ansi("bold", getNames(code)))\
 sprintf("%-22s%s\n", "Family", ansi("bold", getFamily(code)))\
 sprintf("%-22s%s\n", "Writing system", ansi("bold", script))\
 sprintf("%-22s%s\n", "Code", ansi("bold", getCode(code)))\
 sprintf("%-22s%s\n", "ISO 639-3", ansi("bold", iso))\
-sprintf("%-22s%s\n", "SIL", ansi("bold", "http://www-01.sil.org/iso639-3/documentation.asp?id=" iso))\
+sprintf("%-22s%s\n", "SIL", ansi("bold", "https://iso639-3.sil.org/code/" iso))\
 sprintf("%-22s%s\n", "Glottolog", getGlotto(code) ?
-ansi("bold", "http://glottolog.org/resource/languoid/id/" getGlotto(code)) : "")\
-sprintf("%-22s%s", "Wikipedia", ansi("bold", "http://en.wikipedia.org/wiki/" language))
+ansi("bold", "https://glottolog.org/resource/languoid/id/" getGlotto(code)) : "")\
+sprintf("%-22s%s", "Wikipedia", ansi("bold", "https://en.wikipedia.org/wiki/ISO_639:" iso))
 }
 function showPhonetics(phonetics, code) {
 if (code && getCode(code) == "en")
@@ -2500,36 +2557,38 @@ i++
 }
 PROCINFO["sorted_in"] = saveSortedIn
 if (displayName == "endonym") {
-r = "┌" replicate("─", 23) "┬" replicate("─", 23) "┬" replicate("─", 23) "┐" RS
+r = "┌" replicate("─", 25) "┬" replicate("─", 25) "┬" replicate("─", 25) "┐" RS
 for (i = 0; i < rows; i++) {
 r = r "│"
 for (j = 0; j < 3; j++) {
 if (cols[j][i]) {
 t1 = getDisplay(cols[j][i])
+if (length(t1) > 17)
+t1 = substr(t1, 1, 14) "..."
 switch (cols[j][i]) {
 case "he":
-t1 = sprintf(" %-18s", t1)
+t1 = sprintf(" %-20s", t1)
 break
-case "ur":
-t1 = sprintf(" %-17s", t1)
+case "or": case "ur":
+t1 = sprintf(" %-19s", t1)
 break
 case "hi": case "gu": case "km": case "kn":
 case "my": case "ne": case "pa": case "si":
 case "ta": case "te": case "yi":
-t1 = sprintf(" %-16s", t1)
+t1 = sprintf(" %-18s", t1)
 break
 case "yue":
-t1 = sprintf(" %-13s", t1)
+t1 = sprintf(" %-15s", t1)
 break
 case "ja": case "ko":
-t1 = sprintf(" %-12s", t1)
+t1 = sprintf(" %-14s", t1)
 break
 case "zh-CN": case "zh-TW":
-t1 = sprintf(" %-11s", t1)
+t1 = sprintf(" %-13s", t1)
 break
 default:
-if (length(t1) <= 15)
-t1 = sprintf(" %-15s", t1)
+if (length(t1) <= 17)
+t1 = sprintf(" %-17s", t1)
 }
 switch (length(cols[j][i])) {
 case 1: case 2: case 3: case 4:
@@ -2549,21 +2608,21 @@ t2 = ansi("bold", cols[j][i])
 }
 r = r t1 t2
 } else
-r = r sprintf("%23s│", NULLSTR)
+r = r sprintf("%25s│", NULLSTR)
 }
 r = r RS
 }
-r = r "└" replicate("─", 23) "┴" replicate("─", 23) "┴" replicate("─", 23) "┘"
+r = r "└" replicate("─", 25) "┴" replicate("─", 25) "┴" replicate("─", 25) "┘"
 } else {
-r = "┌" replicate("─", 23) "┬" replicate("─", 23) "┬" replicate("─", 23) "┐" RS
+r = "┌" replicate("─", 25) "┬" replicate("─", 25) "┬" replicate("─", 25) "┐" RS
 for (i = 0; i < rows; i++) {
 r = r "│"
 for (j = 0; j < 3; j++) {
 if (cols[j][i]) {
 t1 = getName(cols[j][i])
-if (length(t1) > 15)
-t1 = substr(t1, 1, 12) "..."
-t1 = sprintf(" %-15s", t1)
+if (length(t1) > 17)
+t1 = substr(t1, 1, 14) "..."
+t1 = sprintf(" %-17s", t1)
 switch (length(cols[j][i])) {
 case 1: case 2: case 3: case 4:
 t2 = sprintf("- %s │", ansi("bold", sprintf("%4s", cols[j][i])))
@@ -2582,11 +2641,11 @@ t2 = ansi("bold", cols[j][i])
 }
 r = r t1 t2
 } else
-r = r sprintf("%23s│", NULLSTR)
+r = r sprintf("%25s│", NULLSTR)
 }
 r = r RS
 }
-r = r "└" replicate("─", 23) "┴" replicate("─", 23) "┴" replicate("─", 23) "┘"
+r = r "└" replicate("─", 25) "┴" replicate("─", 25) "┴" replicate("─", 25) "┘"
 }
 return r
 }
@@ -3066,7 +3125,7 @@ PROCINFO[HttpService, "READ_TIMEOUT"] = 2000
 function preprocess(text) {
 return quote(text)
 }
-function preprocessByDump(text,    arr, len, temp) {
+function preprocessByDump(text,    arr, i, len, temp) {
 len = dumpX(text, arr)
 temp = ""
 for (i = 1; i <= len; i++)
@@ -3116,15 +3175,23 @@ ERRNO = ""
 } else
 break
 }
-if ((status == "301" || status == "302") && location)
+if ((status == "301" || status == "302") && location) {
 content = curl(location)
+} else if (status == "429") {
+e("[ERROR] " ucfirst(Option["engine"]) " did not return results because rate limiting is in effect")
+assert(false, "[ERROR] Rate limiting")
+} else if (status >= "400") {
+e("[ERROR] " ucfirst(Option["engine"]) " returned an error response. HTTP status code: " status)
+assert(false, "[ERROR] Other HTTP error")
+}
 return assert(content, "[ERROR] Null response.")
 }
 function postResponse(text, sl, tl, hl, type,
 content, contentLength, contentType, group,
-header, isBody, reqBody, url, status, location) {
+header, isBody, reqBody, url, status, location, userAgent) {
 url = _PostRequestUrl(text, sl, tl, hl, type)
 contentType = _PostRequestContentType(text, sl, tl, hl, type)
+userAgent = _PostRequestUserAgent(text, sl, tl, hl, type)
 reqBody = _PostRequestBody(text, sl, tl, hl, type)
 if (DumpContentengths[reqBody])
 contentLength = DumpContentengths[reqBody]
@@ -3135,8 +3202,10 @@ header = "POST " url " HTTP/1.1\r\n"\
 "Connection: close\r\n"\
 "Content-Length: " contentLength "\r\n"\
 "Content-Type: " contentType "\r\n"
-if (Option["user-agent"])
+if (Option["user-agent"] && !userAgent)
 header = header "User-Agent: " Option["user-agent"] "\r\n"
+if (userAgent)
+header = header "User-Agent: " userAgent "\r\n"
 if (Cookie)
 header = header "Cookie: " Cookie "\r\n"
 if (HttpAuthUser && HttpAuthPass)
@@ -3174,13 +3243,19 @@ exit 1
 if ((status == "301" || status == "302") && location) {
 url = "https" substr(url, 5)
 content = curlPost(url, reqBody)
+} else if (status == "429") {
+e("[ERROR] " ucfirst(Option["engine"]) " did not return results because rate limiting is in effect")
+assert(false, "[ERROR] Rate limiting")
+} else if (status >= "400") {
+e("[ERROR] " ucfirst(Option["engine"]) " returned an error response. HTTP status code: " status)
+assert(false, "[ERROR] Other HTTP error")
 }
 return content
 }
 function p(string) {
 if (Option["view"]) {
-print string | Option["pager"]
-close(Option["pager"])
+print string | Option["pager"] (Option["pager"] == "less" ? " -R" : "")
+close(Option["pager"] (Option["pager"] == "less" ? " -R" : ""))
 } else
 print string > Option["output"]
 }
@@ -3333,6 +3408,10 @@ return @vm(text, sl, tl, hl, type)
 }
 function _PostRequestContentType(text, sl, tl, hl, type,    vm) {
 vm = engineMethod("PostRequestContentType")
+return @vm(text, sl, tl, hl, type)
+}
+function _PostRequestUserAgent(text, sl, tl, hl, type,    vm) {
+vm = engineMethod("PostRequestUserAgent")
 return @vm(text, sl, tl, hl, type)
 }
 function _PostRequestBody(text, sl, tl, hl, type,    vm) {
@@ -3876,6 +3955,9 @@ return HttpPathPrefix "/ttranslatev3"
 function bingPostRequestContentType(text, sl, tl, hl, type) {
 return "application/x-www-form-urlencoded"
 }
+function bingPostRequestUserAgent(text, sl, tl, hl, type) {
+return ""
+}
 function bingPostRequestBody(text, sl, tl, hl, type) {
 if (type == "lookup")
 return "&text=" quote(text) "&from=" sl "&to=" tl
@@ -3906,9 +3988,15 @@ _tl = getCode(tl); if (!_tl) _tl = tl
 _hl = getCode(hl); if (!_hl) _hl = hl
 if (_sl == "auto")  _sl = "auto-detect"
 if (_sl == "bs")    _sl = "bs-Latn"
+if (_sl == "no")    _sl = "nb"
+if (_sl == "pt-BR") _sl = "pt"
+else if (_sl == "pt-PT") _sl = "pt"
 if (_sl == "zh-CN") _sl = "zh-Hans"
 if (_sl == "zh-TW") _sl = "zh-Hant"
 if (_tl == "bs")    _tl = "bs-Latn"
+if (_tl == "no")    _tl = "nb"
+if (_tl == "pt-BR") _tl = "pt"
+else if (_tl == "pt-PT") _tl = "pt-pt"
 if (_tl == "zh-CN") _tl = "zh-Hans"
 if (_tl == "zh-TW") _tl = "zh-Hant"
 content = postResponse(text, _sl, _tl, _hl, "translate")
@@ -4636,6 +4724,10 @@ Option[name] = value
 } else if (command ~ /^:show$/) {
 name = words[2]
 print prettify("welcome-submessage", toString(Option[name], 1, 0, 1))
+} else if (command ~ /^:swap$/) {
+tl = Option["tl"][1]
+Option["tl"][1] = Option["sls"][1]
+Option["sls"][1] = tl
 } else if (command ~ /^:engine$/) {
 value = words[2]
 Option["engine"] = value
@@ -4700,9 +4792,10 @@ Option["pager"] = ENVIRON["PAGER"]
 Option["browser"] = ENVIRON["BROWSER"]
 Option["proxy"] = ENVIRON["HTTP_PROXY"] ? ENVIRON["HTTP_PROXY"] : ENVIRON["http_proxy"]
 Option["user-agent"] = ENVIRON["USER_AGENT"] ? ENVIRON["USER_AGENT"] :
-"Mozilla/5.0 (X11; Linux x86_64) "\
-"AppleWebKit/602.1 (KHTML, like Gecko) Version/8.0 "\
-"Safari/602.1 Epiphany/3.18.2"
+"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) "\
+"AppleWebKit/537.36 (KHTML, like Gecko) "\
+"Chrome/81.0.4044.138 "\
+"Safari/537.36"
 Option["ip-version"] = 0
 Option["no-rlwrap"] = 0
 Option["interactive"] = 0
@@ -5244,7 +5337,7 @@ EOF
 read -r -d '' TRANS_MANPAGE << 'EOF'
 .\" Automatically generated by Pandoc 2.5
 .\"
-.TH "TRANS" "1" "2019\-07\-25" "0.9.6.11" ""
+.TH "TRANS" "1" "2020\-05\-11" "0.9.6.12" ""
 .hy
 .SH NAME
 .PP
@@ -5689,5 +5782,5 @@ Initialization script.
 Mort Yao <soi@mort.ninja>.
 EOF
 export TRANS_MANPAGE
-export TRANS_BUILD=git:b4132bd
+export TRANS_BUILD=git:1e3f901
 gawk -f <(echo -E "$TRANS_PROGRAM") - "$@"
