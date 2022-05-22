@@ -149,7 +149,7 @@ getRestrictedFilenamesFORMAT () {
 			let numberOfFilesToDownload=$numberOfURLsToDownload*${#formatsIDs[@]}
 			$undebug
 
-			videoFormatID=${formatID/+*}
+			videoFormatID=${formatID/+*/}
 
 			jsonHeaders=$(echo "$jsonResults" | $jq -r 'del(.formats, .thumbnails, .automatic_captions, .requested_subtitles)')
 			# Extraction d'infos pour le(s) format(s) selectionne(s)
