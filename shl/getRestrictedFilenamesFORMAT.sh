@@ -161,8 +161,8 @@ getRestrictedFilenamesFORMAT () {
 			if [ $remoteFileSize != -1 ]; then
 				remoteFileSizeMiB=$(echo $remoteFileSize | awk \$1/=2^20)
 			else
-				filesize_approx=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize_approx")
-				remoteFileSizeMiB=$(echo $filesize_approx | awk \$1/=2^20)
+				filesize_approx=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize_approx" | sed "s/null/-1/")
+				[ $filesize_approx != -1 ] && remoteFileSizeMiB=$(echo $filesize_approx | awk \$1/=2^20) || remoteFileSizeMiB=-1
 			fi
 
 			acodec=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).acodec")
@@ -219,7 +219,7 @@ getRestrictedFilenamesFORMAT () {
 			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/%.$extension/.$thumbnailExtension}
 
 			[ "$debug" ] && echo "=> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal> acodec = <$acodec> fileName = <$fileName> extension = <$extension> isLIVE = <$isLIVE> formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName> firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url> title = <$title> duration = <$duration>" && echo
-			[ "$debug" ] && echo "=> remoteFileSizeMiB = <$remoteFileSizeMiB>" && echo
+			[ "$debug" ] && echo "=> remoteFileSizeMiB = <$remoteFileSizeMiB MiB>" && echo
 
 			if [ $thumbnailerName = AtomicParsley ];then
 				thumbnailFormatString=$(\curl -Lqs "$thumbnailURL" | file -b -)
