@@ -2,7 +2,8 @@
 
 function autoremoveAllBut {
 	local packagesNotUpgraded="$@"
-	local apt="command apt"
+	local apt=$(type -P apt)
+	local sudo="command sudo"
 	if [ -z "$packagesNotUpgraded" ]
 	then
 		packagesToBeRemoved=$($(which apt-get) autoremove --dry-run | awk '/^Remv/{print$2}' | grep -v "Listing..." | xargs)
@@ -13,11 +14,10 @@ function autoremoveAllBut {
 
 	echo "=> packagesToBeRemoved = <$packagesToBeRemoved>"
 	echo
-	test -n "$packagesToBeRemoved" && sudo screen -L $apt purge -V $packagesToBeRemoved
+	test -n "$packagesToBeRemoved" && $sudo screen -L $apt purge -V $packagesToBeRemoved
 	sync
 	set +x
 }
-
 function main {
 	set -- ${@%/*}  # Remove trailing "/distrib" from all arguments
 	local os=$(uname -s)
