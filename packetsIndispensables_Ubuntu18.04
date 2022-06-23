@@ -204,6 +204,7 @@ pandoc
 pavucontrol
 pcregrep
 pdf2svg
+pdfgrep
 pdftk
 perl-doc
 perlconsole
