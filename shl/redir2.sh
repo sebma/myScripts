@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-exec 3>&1 &> >(tee -a myFile.log) # backup stdout to file descriptor 3 and then redirect stdout to myFile.log via process substitution
+exec 3>&1 1> >(tee -a myFile.log) # backup stdout to file descriptor 3 and then redirect stdout to myFile.log via process substitution
 
 myVar1=X.Y.Z.T
 echo "=> BEFORE THE LOOP : myVar1 = $myVar1"
