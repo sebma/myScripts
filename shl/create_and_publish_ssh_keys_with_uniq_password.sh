@@ -222,20 +222,20 @@ function deployPubKeys {
 
 	set +o nounset
 	scriptToRunRemotely=/tmp/check_and_update_pubkey_$USER
-	cat <<EOF > $scriptToRunRemotely
-#!sh
-test $DEBUG && set -x
-chmod go-w .
-mkdir -p $sshKeysDir
-[ -s $remotePubKeyFilename ] && fingerPrint=\$(ssh-keygen -lf $remotePubKeyFilename | awk '!/is not a public key file/{print\$2}')
-if [ "$localPubKeyFingerPrint" != "\$fingerPrint" ]
-then
-	printf '=> Updating your public key'
-	echo '$localPubKey' >> $remotePubKeyFilename
-else
-	printf '=> Your public key is already'
-fi
-chmod -R go-rwx $sshKeysDir
+	cat <<-EOF > $scriptToRunRemotely
+		#!sh
+		test $DEBUG && set -x
+		chmod go-w .
+		mkdir -p $sshKeysDir
+		[ -s $remotePubKeyFilename ] && fingerPrint=\$(ssh-keygen -lf $remotePubKeyFilename | awk '!/is not a public key file/{print\$2}')
+		if [ "$localPubKeyFingerPrint" != "\$fingerPrint" ]
+		then
+			printf '=> Updating your public key'
+			echo '$localPubKey' >> $remotePubKeyFilename
+		else
+			printf '=> Your public key is already'
+		fi
+		chmod -R go-rwx $sshKeysDir
 EOF
 	set -o nounset
 
