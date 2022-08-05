@@ -1,14 +1,8 @@
 # $HOME/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1
 #
 
-if( ! ( Test-Path -Path (Split-Path "$PROFILE") ) ) { New-Item -Path (Split-Path "$PROFILE") -Type dir;exit }
-
-$tls12 = [Enum]::ToObject([System.Net.SecurityProtocolType], 3072)
-[System.Net.ServicePointManager]::SecurityProtocol = $tls12
-
-if( ! [System.Net.ServicePointManager]::SecurityProtocol.HasFlag([Net.SecurityProtocolType]::Tls12) ) {
-	[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
-}
+# Create Profile directory if not exists
+if( ! ( Test-Path -Path (Split-Path "$PROFILE") ) ) { mkdir (Split-Path "$PROFILE");exit }
 
 function osFamily {
 	if( !(Test-Path variable:IsWindows) ) {
@@ -51,14 +45,14 @@ if( $IsLinux -or $IsMacOS ) {
 	$username = $env:USER
 	$hostname = $env:HOSTNAME
 } elseif( $IsWindows ) {
-	$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
 	$username = $env:USERNAME
 	$domain = $env:USERDOMAIN
 	$hostname = $env:COMPUTERNAME
+	$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
 }
 
 if( ! ($isAdmin) -and ( gcm sudo 2>$null ) ) {
-	if( (Get-ExecutionPolicy) -ne "Unrestricted" -and (Get-ExecutionPolicy) -ne "RemoteSigned"  ) {
+	if( (Get-ExecutionPolicy) -ne "Unrestricted" -and (Get-ExecutionPolicy) -ne "RemoteSigned" -and (Get-ExecutionPolicy) -ne "ByPass" ) {
 		sudo Set-ExecutionPolicy RemoteSigned
 	}
 #	sudo Update-Help
@@ -116,28 +110,50 @@ setAliases
 
 $dirSep = [io.path]::DirectorySeparatorChar
 if( $IsWindows ) {
+	if( ! (Test-Path $HOME/Desktop/$env:COMPUTERNAME.nfo) ) { msinfo32 -nfo $HOME/Desktop/$env:COMPUTERNAME.nfo }
+
+	function isInstalled($cmd) {
+		return gcm "$cmd" 2>$null
+	}
+
+	if( ! (isInstalled("grep.exe")) ) {
+		function grep($pattern , $file) {
+			(cat $file) -match "$pattern"
+		}
+	}
+
 	function InstallChocolatey {
+		$tls12 = [Enum]::ToObject([System.Net.SecurityProtocolType], 3072)
+		[System.Net.ServicePointManager]::SecurityProtocol = $tls12
+
+		if( ! [System.Net.ServicePointManager]::SecurityProtocol.HasFlag([Net.SecurityProtocolType]::Tls12) ) {
+			[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+		}
+
+		[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
 		if( $isAdmin ) {
 			if( (Get-ExecutionPolicy) -ne "Unrestricted" -and (Get-ExecutionPolicy) -ne "Bypass" ) { Set-ExecutionPolicy Bypass -Scope Process -Force }
-			[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
 			iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 		}
 	}
 
 	function InstallScoop {
-		if( ( $isAdmin ) -and ! ( gcm scoop 2>$null ) ) {
-			iex "& {$(irm get.scoop.sh)} -RunAsAdmin -ScoopDir $env:ProgramData\scoop"
-		}
-		if( ! ( gcm git 2>$null ) ) {
-			scoop install -g git
-		} else {
-			if( ( git config --global credential.helper ) -eq "manager-core" ) {
-				git config --global credential.helper manager-core
+		if( $isAdmin ) {
+			if( ! (isInstalled("scoop.ps1")) ) {
+				if( (Get-ExecutionPolicy) -ne "Unrestricted" -and (Get-ExecutionPolicy) -ne "RemoteSigned" -and (Get-ExecutionPolicy) -ne "Bypass" ) { Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force }
+				iex "& {$(irm get.scoop.sh)} -RunAsAdmin -ScoopDir $env:ProgramData\scoop"
 			}
-		}
+			if( ! (isInstalled("git.exe")) ) {
+				scoop install -g git
+			} else {
+				if( ( git config --global credential.helper ) -ne "manager-core" ) {
+					git config --global credential.helper manager-core
+				}
+			}
 
-		scoop bucket add extras
-		scoop bucket list
+			if( ! (scoop bucket list | sls extras) ) { scoop bucket add extras }
+			scoop bucket list
+		}
 	}
 
 	function changeLanguage2English {
@@ -147,10 +163,6 @@ if( $IsWindows ) {
 	}
 	
 	changeLanguage2English
-
-	function grep($pattern , $file) {
-		(cat $file) -match "$pattern"
-	}
 
 	function RegInitUser {
 		if( Get-ItemProperty -path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -name LaunchTo 2>$null) {
