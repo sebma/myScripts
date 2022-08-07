@@ -5,8 +5,10 @@ if( $IsWindows ) {
 	function InstallScoop {
 		if( $isAdmin ) {
 			if( ! (isInstalled("scoop.ps1")) ) {
-				if( (Get-ExecutionPolicy) -ne "Unrestricted" -and (Get-ExecutionPolicy) -ne "RemoteSigned" -and (Get-ExecutionPolicy) -ne "Bypass" ) { Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force }
-				iex "& {$(irm get.scoop.sh)} -RunAsAdmin -ScoopDir $env:ProgramData\scoop"
+				if( (Get-ExecutionPolicy) -ne "Unrestricted" -and (Get-ExecutionPolicy) -ne "RemoteSigned" -and (Get-ExecutionPolicy) -ne "Bypass" ) {
+					sudo Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+				}
+				sudo iex "& {$(irm get.scoop.sh)} -RunAsAdmin -ScoopDir $env:ProgramData\scoop"
 			}
 			if( ! (isInstalled("git.exe")) ) {
 				scoop install -g git
