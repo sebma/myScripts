@@ -10,7 +10,7 @@ function source($script) { . $script }
 
 function isInstalled($cmd) { return gcm "$cmd" 2>$null }
 
-#	sudo Update-Help
+# sudo Update-Help
 
 function osFamily {
 	if( !(Test-Path variable:IsWindows) ) {
