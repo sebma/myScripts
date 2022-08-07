@@ -20,4 +20,5 @@ if( $IsWindows ) {
 			}
 		}
 	}
+	InstallChocolatey
 }
