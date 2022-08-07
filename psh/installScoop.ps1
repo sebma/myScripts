@@ -22,4 +22,5 @@ if( $IsWindows ) {
 			scoop bucket list
 		}
 	}
+	InstallScoop
 }
