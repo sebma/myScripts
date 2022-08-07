@@ -46,7 +46,6 @@ function osFamily {
 		return $osFamily
 	}
 }
-
 if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily } else { $osFamily = osFamily }
 
 if( $IsWindows ) {
@@ -60,7 +59,7 @@ if( $IsWindows ) {
 }
 
 function osVersion {
-	if( $osFamily -eq "Windows" ) {
+	if( $IsWindows ) {
 		$windowsType = (Get-WmiObject -Class Win32_OperatingSystem).ProductType
 		if( $windowsType -eq 1 ) { $isWindowsWorkstation = $true } else { $isWindowsWorkstation = $false }
 		$isWindowsServer = !$isWindowsWorkstation
@@ -98,8 +97,7 @@ function osVersion {
 	}
 	return $OSRelease
 }
-
-if( $IsWindows ) { $OSVersion = (osVersion) }
+$OSVersion = (osVersion)
 
 function setAliases {
 	set-alias -Scope Global yt-dl youtube-dl
