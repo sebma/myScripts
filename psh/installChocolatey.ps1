@@ -1,4 +1,3 @@
-
 function isInstalled($cmd) { return gcm "$cmd" 2>$null }
 
 if( $IsWindows ) {
