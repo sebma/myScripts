@@ -19,6 +19,7 @@ if( $IsWindows ) {
 
 		if( ! (scoop bucket list | sls extras) ) { sudo scoop bucket add extras }
 		scoop bucket list
+		sudo cache off
 	}
 	InstallScoop
 }
