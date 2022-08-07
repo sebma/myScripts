@@ -108,13 +108,11 @@ function setAliases {
 
 setAliases 
 
+function isInstalled($cmd) { return gcm "$cmd" 2>$null }
+
 $dirSep = [io.path]::DirectorySeparatorChar
 if( $IsWindows ) {
 	if( ! (Test-Path $HOME/Desktop/$env:COMPUTERNAME.nfo) ) { msinfo32 -nfo $HOME/Desktop/$env:COMPUTERNAME.nfo }
-
-	function isInstalled($cmd) {
-		return gcm "$cmd" 2>$null
-	}
 
 	if( ! (isInstalled("grep.exe")) ) {
 		function grep($pattern , $file) {
