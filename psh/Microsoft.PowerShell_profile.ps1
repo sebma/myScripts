@@ -4,6 +4,14 @@
 # Create Profile directory if not exists
 if( ! ( Test-Path -Path (Split-Path "$PROFILE") ) ) { mkdir (Split-Path "$PROFILE");exit }
 
+$dirSep = [io.path]::DirectorySeparatorChar
+
+function source($script) { . $script }
+
+function isInstalled($cmd) { return gcm "$cmd" 2>$null }
+
+#	sudo Update-Help
+
 function osFamily {
 	if( !(Test-Path variable:IsWindows) ) {
 		# $IsWindows is not defined, let's define it
@@ -41,21 +49,14 @@ function osFamily {
 
 if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily } else { $osFamily = osFamily }
 
-if( $IsLinux -or $IsMacOS ) { 
-	$username = $env:USER
-	$hostname = $env:HOSTNAME
-} elseif( $IsWindows ) {
+if( $IsWindows ) {
 	$username = $env:USERNAME
 	$domain = $env:USERDOMAIN
 	$hostname = $env:COMPUTERNAME
 	$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
-}
-
-if( ! ($isAdmin) -and ( gcm sudo 2>$null ) ) {
-	if( (Get-ExecutionPolicy) -ne "Unrestricted" -and (Get-ExecutionPolicy) -ne "RemoteSigned" -and (Get-ExecutionPolicy) -ne "ByPass" ) {
-		sudo Set-ExecutionPolicy RemoteSigned
-	}
-#	sudo Update-Help
+} elseif( $IsLinux -or $IsMacOS ) {
+	$username = $env:USER
+	$hostname = $env:HOSTNAME
 }
 
 function osVersion {
@@ -108,9 +109,6 @@ function setAliases {
 
 setAliases 
 
-function isInstalled($cmd) { return gcm "$cmd" 2>$null }
-
-$dirSep = [io.path]::DirectorySeparatorChar
 if( $IsWindows ) {
 	if( ! (Test-Path $HOME/Desktop/$env:COMPUTERNAME.nfo) ) { msinfo32 -nfo $HOME/Desktop/$env:COMPUTERNAME.nfo }
 
