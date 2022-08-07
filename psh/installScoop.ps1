@@ -1,4 +1,3 @@
-
 function isInstalled($cmd) { return gcm "$cmd" 2>$null }
 
 if( $IsWindows ) {
@@ -11,14 +10,14 @@ if( $IsWindows ) {
 				sudo iex "& {$(irm get.scoop.sh)} -RunAsAdmin -ScoopDir $env:ProgramData\scoop"
 			}
 			if( ! (isInstalled("git.exe")) ) {
-				scoop install -g git
+				sudo scoop install -g git
 			} else {
 				if( ( git config --global credential.helper ) -ne "manager-core" ) {
-					git config --global credential.helper manager-core
+					sudo git config --global credential.helper manager-core
 				}
 			}
 
-			if( ! (scoop bucket list | sls extras) ) { scoop bucket add extras }
+			if( ! (scoop bucket list | sls extras) ) { sudo scoop bucket add extras }
 			scoop bucket list
 		}
 	}
