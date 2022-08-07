@@ -348,7 +348,7 @@ function Prompt {
 	if( $isAdmin) { Write-Host "$username : " -NoNewline -ForegroundColor Red } else { Write-Host "$username : " -NoNewline }
 	Write-Host "$hostname " -NoNewline -ForegroundColor Yellow
 	Write-Host "@ $domain / " -NoNewline -ForegroundColor Red
-	Write-Host "$osFamily $OSRelease" -NoNewline -ForegroundColor Green
+	Write-Host "$osFamily $OSVersion " -NoNewline -ForegroundColor Green
 	Write-Host "PSv$PSHVersion " -NoNewline
 	Write-Host "$mywd" -ForegroundColor Green
 	if( $isAdmin) { return "# " } else { return "> " }
