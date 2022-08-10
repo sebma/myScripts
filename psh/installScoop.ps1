@@ -2,6 +2,7 @@ function isInstalled($cmd) { return gcm "$cmd" 2>$null }
 
 if( $IsWindows ) {
 	function InstallScoop {
+		sudo config CacheMode auto
 		sudo cache on # i.e https://github.com/gerardog/gsudo#credentials-cache
 		if( ! (isInstalled("scoop.ps1")) ) {
 			if( (Get-ExecutionPolicy) -ne "Unrestricted" -and (Get-ExecutionPolicy) -ne "RemoteSigned" -and (Get-ExecutionPolicy) -ne "Bypass" ) {
