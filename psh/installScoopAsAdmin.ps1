@@ -18,7 +18,6 @@ if( $IsWindows ) {
 		}
 
 		if( ! (sudo scoop bucket list | sls extras) ) { sudo scoop bucket add extras }
-		sudo scoop bucket list
 		sudo cache off
 	}
 	InstallScoopAsAdmin
