@@ -9,15 +9,6 @@ if( $IsWindows ) {
 			}
 			iwr -useb get.scoop.sh | iex
 		}
-		if( ! (isInstalled("git.exe")) ) {
-			sudo scoop install -g git gsudo
-		} else {
-			if( ( git config --global credential.helper ) -ne "manager-core" ) {
-				sudo git config --global credential.helper manager-core
-			}
-		}
-
-		if( ! (scoop bucket list | sls extras) ) { scoop bucket add extras }
 		sudo cache off
 	}
 	InstallScoopAsUser
