@@ -39,6 +39,7 @@ bible-kjv-text
 bibletime
 bluez
 bluez-tools
+bsdmainutils
 build-essential
 cairo-dock
 cairo-dock-core
