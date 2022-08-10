@@ -1,7 +1,7 @@
 function isInstalled($cmd) { return gcm "$cmd" 2>$null }
 
 if( $IsWindows ) {
-	function InstallScoop {
+	function InstallScoopAsAdmin {
 		sudo config CacheMode auto
 		sudo cache on # i.e https://github.com/gerardog/gsudo#credentials-cache
 		if( ! (isInstalled("scoop.ps1")) ) {
@@ -22,5 +22,5 @@ if( $IsWindows ) {
 		scoop bucket list
 		sudo cache off
 	}
-	InstallScoop
+	InstallScoopAsAdmin
 }
