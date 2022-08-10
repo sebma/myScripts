@@ -9,15 +9,6 @@ if( $IsWindows ) {
 			}
 			sudo iex "& {$(irm get.scoop.sh)} -RunAsAdmin -ScoopDir $env:ProgramData\scoop"
 		}
-		if( ! (isInstalled("git.exe")) ) {
-			sudo scoop install -g git
-		} else {
-			if( ( git config --global credential.helper ) -ne "manager-core" ) {
-				sudo git config --global credential.helper manager-core
-			}
-		}
-
-		if( ! (sudo scoop bucket list | sls extras) ) { sudo scoop bucket add extras }
 		sudo cache off
 	}
 	InstallScoopAsAdmin
