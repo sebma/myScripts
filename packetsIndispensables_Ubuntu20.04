@@ -155,6 +155,7 @@ links2
 lm-sensors
 lsdvd
 lshw-gtk
+lsscsi
 lynx
 lz4json
 man2html-base
