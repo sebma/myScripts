@@ -64,6 +64,7 @@ getRestrictedFilenamesFORMAT () {
 	local artworkFileName=null
 	local userAgent=null
 	local tool=null
+	local debugLevel=0
 	local debug="set +x"
 	local undebug="set +x"
 	local downloader=yt-dlp
@@ -94,9 +95,9 @@ getRestrictedFilenamesFORMAT () {
 	echo $scriptOptions | $grep -q -- "-x" && ytdlInitialOptions+=( -x )
 	echo $scriptOptions | $grep -q -- "-y" && downloader=yt-dl
 	echo $scriptOptions | $grep -q -- "-p" && playlistFileName=$2 && shift 2
-	echo $scriptOptions | $grep -q -- "-v" && debug="set -x"
-	echo $scriptOptions | $grep -q -- "-vv" && debug="set -x" && ytdlInitialOptions+=( -v )
-	echo $scriptOptions | $grep -q -- "-vvv" && debug="set -x" && ffmpegLogLevel=$ffmpegInfoLogLevel
+	echo $scriptOptions | $grep -q -- "-v" && debugLevel=1
+	echo $scriptOptions | $grep -q -- "-vv" && debugLevel=2 && ytdlInitialOptions+=( -v )
+	echo $scriptOptions | $grep -q -- "-vvv" && debugLevel=3 && ffmpegLogLevel=$ffmpegInfoLogLevel
 
 	initialSiteVideoFormat="$1"
 	shift
@@ -157,6 +158,10 @@ getRestrictedFilenamesFORMAT () {
 			extension=$(echo "$jsonHeaders"| $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).ext")
 			formatString=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format")
 			chosenFormatID=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).format_id")
+			resolution=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).resolution")
+			width=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).width")
+			height=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).height")
+
 			remoteFileSize=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize" | sed "s/null/-1/")
 			if [ $remoteFileSize != -1 ]; then
 				remoteFileSizeMiB=$(echo $remoteFileSize | awk \$1/=2^20)
@@ -218,8 +223,18 @@ getRestrictedFilenamesFORMAT () {
 			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -Lqs "$thumbnailURL" | file -bi - | awk -F ';' '{sub(".*/","",$1);sub("jpeg","jpg",$1);print$1}')
 			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/%.$extension/.$thumbnailExtension}
 
-			[ "$debug" ] && echo "=> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal> acodec = <$acodec> fileName = <$fileName> extension = <$extension> isLIVE = <$isLIVE> formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName> firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url> title = <$title> duration = <$duration>" && echo
-			[ "$debug" ] && echo "=> remoteFileSizeMiB = <$remoteFileSizeMiB MiB>" && echo
+			echo $formatString | $grep -v '+' | $grep "audio only" -q && ytdlExtraOptions+=( -x )
+			if echo "${ytdlExtraOptions[@]}" | $grep -w "\-x" -q;then
+				extension=$(getAudioExtension $firstAudioStreamCodecName) || continue
+				( [ $extension = m4a ] || [ $extension = opus ] ) && ytdlExtraOptions+=( -k )
+				newFileName="${fileName/.*/.$extension}"
+			else
+				newFileName="$fileName"
+			fi
+
+			echo "=> title = <$title>" && echo
+			echo "=> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal> resolution = <${effects[bold]}${colors[blue]}$resolution$normal> remoteFileSizeMiB = <$remoteFileSizeMiB MiB> duration = <$(date -u -d @$duration +%H:%M:%S)>" && echo
+			[ "$debugLevel" = 1 ] && echo "=> acodec = <$acodec> fileName = <$fileName> extension = <$extension> isLIVE = <$isLIVE> formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName> firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url>" && echo
 
 			if [ $thumbnailerName = AtomicParsley ];then
 				thumbnailFormatString=$(\curl -Lqs "$thumbnailURL" | file -b -)
@@ -231,26 +246,16 @@ getRestrictedFilenamesFORMAT () {
 						convert "$artworkFileName.tmp" "$artworkFileName" && rm -f "$artworkFileName.tmp"
 						echo "=> Done."
 						echo
-						[ "$debug" ] && file "$artworkFileName"
-						[ "$debug" ] && ls -l --time-style=+'%Y-%m-%d %T' "$artworkFileName"
+						[ "$debugLevel" ] && file "$artworkFileName"
+						[ "$debugLevel" ] && ls -l --time-style=+'%Y-%m-%d %T' "$artworkFileName"
 						echo
 					fi
 				fi
 			fi
 
-			echo $formatString | $grep -v '+' | $grep "audio only" -q && ytdlExtraOptions+=( -x )
-			if echo "${ytdlExtraOptions[@]}" | $grep -w "\-x" -q;then
-				extension=$(getAudioExtension $firstAudioStreamCodecName) || continue
-				( [ $extension = m4a ] || [ $extension = opus ] ) && ytdlExtraOptions+=( -k )
-				newFileName="${fileName/.*/.$extension}"
-			else
-				newFileName="$fileName"
-			fi
-
-			[ "$debug" ] && echo "=> newFileName = <$newFileName>" && echo
 
 			[ $isLIVE = true ] && url="$webpage_url"
-			echo "=> Downloading <$url> using the <${effects[bold]}${colors[blue]}$chosenFormatID$normal> $sld format ..."
+			echo "=> Downloading <$url> ..."
 			echo
 
 			ytdlExtraOptions+=( --add-metadata --prefer-ffmpeg --restrict-filenames --embed-subs --write-auto-sub --sub-lang='en,fr,es,de' )
@@ -261,7 +266,7 @@ getRestrictedFilenamesFORMAT () {
 			fi
 
 			$undebug
-			[ "$debug" ] && echo "=> ytdlExtraOptions = ${ytdlExtraOptions[@]}" && echo
+			[ "$debugLevel" = 1 ] && echo "=> ytdlExtraOptions = ${ytdlExtraOptions[@]}" && echo
 
 			if [ -f "$newFileName" ] && [ $isLIVE != true ]; then
 				echo "=> The file <$newFileName> already exists, comparing it's size with the remote file ..." 1>&2
@@ -285,7 +290,7 @@ getRestrictedFilenamesFORMAT () {
 			echo
 			errorLogFile="${downloader}_errors_$$.log"
 			trap - INT
-			$debug
+			$debugLevel
 			time videoDownloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 			downloadOK=$?
 			$undebug
@@ -458,6 +463,7 @@ function addSubtitles2media {
 }
 addThumbnail2media() {
 	local scriptOptions=null
+	local debug="set +x"
 	echo $1 | \grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
 
 	if [ $# != 2 ];then
