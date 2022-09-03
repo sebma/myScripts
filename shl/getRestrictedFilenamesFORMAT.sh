@@ -113,7 +113,14 @@ getRestrictedFilenamesFORMAT () {
 		echo
 		echo "=> Downloading url # $i/$# ..."
 		echo
-		echo $url | egrep -wq "https?:" || url=https://www.youtube.com/watch?v=$url
+		if [[ $url =~ ^https?: ]];then
+			:
+		elif [[ $url =~ ^file:.*/FreeTube/ ]];then # handles FreeTube drag'n'drop URLs
+			url=https://youtu.be/$(basename $url)
+		else
+			url=https://youtu.be/$url
+		fi
+
 		fqdn=$(echo "$url" | cut -d/ -f3)
 		[ $fqdn = youtu.be ] && fqdn=www.youtube.com
 		domain=$(echo $fqdn | awk -F. '{print$(NF-1)"."$NF}')
