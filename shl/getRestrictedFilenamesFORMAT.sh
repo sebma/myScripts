@@ -96,7 +96,7 @@ getRestrictedFilenamesFORMAT () {
 	echo $scriptOptions | $grep -q -- "-y" && downloader=yt-dl
 	echo $scriptOptions | $grep -q -- "-p" && playlistFileName=$2 && shift 2
 	echo $scriptOptions | $grep -q -- "-v" && debugLevel=1
-	echo $scriptOptions | $grep -q -- "-vv" && debugLevel=2 && ytdlInitialOptions+=( -v )
+	echo $scriptOptions | $grep -q -- "-vv" && debugLevel=2 && debug="set -x" && ytdlInitialOptions+=( -v )
 	echo $scriptOptions | $grep -q -- "-vvv" && debugLevel=3 && ffmpegLogLevel=$ffmpegInfoLogLevel
 
 	initialSiteVideoFormat="$1"
@@ -290,7 +290,7 @@ getRestrictedFilenamesFORMAT () {
 			echo
 			errorLogFile="${downloader}_errors_$$.log"
 			trap - INT
-			$debugLevel
+			$debug
 			time videoDownloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 			downloadOK=$?
 			$undebug
@@ -463,7 +463,7 @@ function addSubtitles2media {
 }
 addThumbnail2media() {
 	local scriptOptions=null
-	local debug="set +x"
+	local debug=""
 	echo $1 | \grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
 
 	if [ $# != 2 ];then
