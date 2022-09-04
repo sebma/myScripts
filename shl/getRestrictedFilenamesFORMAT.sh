@@ -185,7 +185,7 @@ getRestrictedFilenamesFORMAT () {
 			isLIVE=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .is_live)')
 			title=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .title)')
 			webpage_url=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .webpage_url)')
-			duration=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .duration)')
+			duration=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .duration)' | sed "s/null/0/")
 			thumbnailURL=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .thumbnail)')
 
 			uploader_id=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .uploader_id)')
@@ -240,7 +240,13 @@ getRestrictedFilenamesFORMAT () {
 			fi
 
 			echo "=> title = <$title>" && echo
-			echo "=> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal> resolution = <${effects[bold]}${colors[blue]}$resolution$normal> remoteFileSizeMiB = <$remoteFileSizeMiB MiB> duration = <$(date -u -d @$duration +%H:%M:%S)>" && echo
+			printf "=> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal> resolution = <${effects[bold]}${colors[blue]}$resolution$normal>"
+			if [ $isLIVE == false ];then
+				echo "=> remoteFileSizeMiB = <$remoteFileSizeMiB MiB> duration = <$(date -u -d @$duration +%H:%M:%S)>" && echo
+			else
+				echo " isLIVE = <${effects[bold]}${colors[blue]}$isLIVE$normal>" && echo
+			fi
+
 			[ "$debugLevel" = 1 ] && echo "=> acodec = <$acodec> fileName = <$fileName> extension = <$extension> isLIVE = <$isLIVE> formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName> firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url>" && echo
 
 			if [ $thumbnailerName = AtomicParsley ];then
