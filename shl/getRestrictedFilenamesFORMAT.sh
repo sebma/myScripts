@@ -169,6 +169,10 @@ getRestrictedFilenamesFORMAT () {
 			width=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).width")
 			height=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).height")
 
+			acodec=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).acodec")
+			acodec=$(echo $acodec | cut -d. -f1)
+			protocolForDownload=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$videoFormatID\")).protocol")
+
 			remoteFileSize=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize" | sed "s/null/-1/")
 			if [ $remoteFileSize != -1 ]; then
 				remoteFileSizeMiB=$(echo $remoteFileSize | awk \$1/=2^20)
@@ -176,10 +180,6 @@ getRestrictedFilenamesFORMAT () {
 				filesize_approx=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize_approx" | sed "s/null/-1/")
 				[ $filesize_approx != -1 ] && remoteFileSizeMiB=$(echo $filesize_approx | awk \$1/=2^20) || remoteFileSizeMiB=-1
 			fi
-
-			acodec=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).acodec")
-			acodec=$(echo $acodec | cut -d. -f1)
-			protocolForDownload=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$videoFormatID\")).protocol")
 
 			# Les resultats ci-dessous ne dependent pas du format selectionne
 			isLIVE=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .is_live)')
