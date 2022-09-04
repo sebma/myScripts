@@ -240,11 +240,11 @@ getRestrictedFilenamesFORMAT () {
 			fi
 
 			echo "=> title = <$title>" && echo
-			printf "=> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal> resolution = <${effects[bold]}${colors[blue]}$resolution$normal>"
+			printf "=> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal> resolution = <${effects[bold]}${colors[blue]}$resolution$normal> "
 			if [ $isLIVE == false ];then
-				echo "=> remoteFileSizeMiB = <$remoteFileSizeMiB MiB> duration = <$(date -u -d @$duration +%H:%M:%S)>" && echo
+				echo "remoteFileSizeMiB = <$remoteFileSizeMiB MiB> duration = <$(date -u -d @$duration +%H:%M:%S)>" && echo
 			else
-				echo " isLIVE = <${effects[bold]}${colors[blue]}$isLIVE$normal>" && echo
+				echo "isLIVE = <${effects[bold]}${colors[blue]}$isLIVE$normal>" && echo
 			fi
 
 			[ "$debugLevel" = 1 ] && echo "=> acodec = <$acodec> fileName = <$fileName> extension = <$extension> isLIVE = <$isLIVE> formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName> firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url>" && echo
