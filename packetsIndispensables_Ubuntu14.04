@@ -56,6 +56,7 @@ conky-all
 cpanminus
 curl
 curlftpfs
+datamash
 dcfldd
 deborphan
 dfc
@@ -241,6 +242,7 @@ qupzilla
 recode
 remake
 rlwrap
+rs
 screen
 sdparm
 shutter
