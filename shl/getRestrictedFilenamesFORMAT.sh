@@ -86,8 +86,9 @@ getRestrictedFilenamesFORMAT () {
 
 	ffmpeg+=" -hide_banner"
 	ffprobe+=" -hide_banner"
+	[ $(uname -s) = Darwin ] && grep="$(type -P ggrep)"
 	grepColor=$grep
-	grep --help | grep -q -- --color && grepColor+=" --color"
+	grep --help 2>&1 | grep -q -- --color && grepColor+=" --color"
 
 	echo $1 | $grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
 
