@@ -87,6 +87,7 @@ getRestrictedFilenamesFORMAT () {
 	ffmpeg+=" -hide_banner"
 	ffprobe+=" -hide_banner"
 	[ $(uname -s) = Darwin ] && grep="$(type -P ggrep)"
+	[ $(uname -s) = Darwin ] && stat="$(type -P gstat)"
 	grepColor=$grep
 	grep --help 2>&1 | grep -q -- --color && grepColor+=" --color"
 
@@ -285,7 +286,7 @@ getRestrictedFilenamesFORMAT () {
 			if [ -f "$newFileName" ] && [ $isLIVE != true ]; then
 				echo "=> The file <$newFileName> already exists, comparing it's size with the remote file ..." 1>&2
 				echo 1>&2
-				fileSizeOnFS=$(stat -c %s "$newFileName" || echo 0)
+				fileSizeOnFS=$($stat -c %s "$newFileName" || echo 0)
 				test $? != 0 && return
 				if [ ! -w "$newFileName" ] || [ $fileSizeOnFS -ge $remoteFileSize ]; then
 					echo "${colors[yellowOnBlue]}=> The file <$newFileName> is already downloaded and greater/equal to the remote, skipping ...$normal" 1>&2
