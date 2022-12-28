@@ -319,7 +319,7 @@ getRestrictedFilenamesFORMAT () {
 				fileName="${fileName/.*/.$extension}"
 			fi
 
-			fileSizeOnFS=$(stat -c %s "$fileName" || echo 0)
+			fileSizeOnFS=$($stat -c %s "$fileName" || echo 0)
 			if [ $fileSizeOnFS -ge $remoteFileSize ] || [ $downloadOK = 0 ]; then
 				addThumbnail2media "$fileName" "$artworkFileName"
 			else
