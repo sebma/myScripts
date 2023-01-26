@@ -65,7 +65,7 @@ getRestrictedFilenamesFORMAT () {
 	local userAgent=null
 	local tool=null
 	local debugLevel=0
-	local debug="set +x"
+	local debug="set -x"
 	local undebug="set +x"
 	local downloader=yt-dlp
 
@@ -76,7 +76,7 @@ getRestrictedFilenamesFORMAT () {
 		LANG=C.UTF-8 $downloader "$@"
 	}
 
-	for tool in ffmpeg grep ffprobe jq;do
+	for tool in ffmpeg ffprobe jq;do
 		local $tool="$(type -P $tool)"
 		if [ -z "${!tool}" ];then
 			echo "=> [$FUNCNAME] ERROR: $tool is required, you need to install it." >&2
@@ -86,8 +86,16 @@ getRestrictedFilenamesFORMAT () {
 
 	ffmpeg+=" -hide_banner"
 	ffprobe+=" -hide_banner"
-	[ $(uname -s) = Darwin ] && grep="$(type -P ggrep)"
-	[ $(uname -s) = Darwin ] && stat="$(type -P gstat)"
+
+	osFamily=$(uname -s)
+	if [ $osFamily = Linux ];then
+		grep="$(type -P grep)"
+		stat="$(type -P stat)"
+	elif [ $osFamily = Darwin ];then
+		grep="$(type -P ggrep)"
+		stat="$(type -P gstat)"
+	fi
+
 	grepColor=$grep
 	grep --help 2>&1 | grep -q -- --color && grepColor+=" --color"
 
@@ -157,7 +165,7 @@ getRestrictedFilenamesFORMAT () {
 		do
 			let j++
 			let numberOfFilesToDownload=$numberOfURLsToDownload*${#formatsIDs[@]}
-			$undebug
+#			$undebug
 
 			videoFormatID=${formatID/+*/}
 
@@ -201,7 +209,9 @@ getRestrictedFilenamesFORMAT () {
 
 			if [ -z "$acodec" ] || [ $acodec = null ];then
 				# Preparing the User Agent for ffprobe
-				type -P chromium-browser>/dev/null 2>&1 && chromeVersion=$(chromium-browser --version 2>/dev/null | awk '{printf$2}') || chromeVersion="73.0.3671.2"
+#				type -P chromium-browser>/dev/null 2>&1 && chromeVersion=$(chromium-browser --version 2>/dev/null | awk '{printf$2}') || chromeVersion="73.0.3671.2"
+				test -z "$chromeVersion" && chromeVersion="85.0.4183.83"
+
 				userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36"
 				userAgent="$(printf "$userAgent" $chromeVersion)"
 				echo "=> Fetching some information from remote stream with ffprobe ..."
@@ -280,7 +290,7 @@ getRestrictedFilenamesFORMAT () {
 				ytdlExtraOptions+=( --hls-prefer-native )
 			fi
 
-			$undebug
+#			$undebug
 			[ "$debugLevel" = 1 ] && echo "=> ytdlExtraOptions = ${ytdlExtraOptions[@]}" && echo
 
 			if [ -f "$newFileName" ] && [ $isLIVE != true ]; then
@@ -308,7 +318,7 @@ getRestrictedFilenamesFORMAT () {
 			$debug
 			time videoDownloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 			downloadOK=$?
-			$undebug
+#			$undebug
 			sync
 			echo
 
@@ -329,7 +339,7 @@ getRestrictedFilenamesFORMAT () {
 
 				$grepColor -A1 'ERROR:.*' $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && echo >&2 && return $downloadOK || \rm $errorLogFile
 			fi
-			$undebug
+#			$undebug
 
 			if [ $downloadOK = 0 ]; then
 				ffprobeJSON_File_Info=$($ffprobe -v error -show_format -show_streams -print_format json "$fileName")
