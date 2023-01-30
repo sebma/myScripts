@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 declare {isDebian,isRedHat}Like=false
 
