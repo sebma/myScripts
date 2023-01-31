@@ -16,4 +16,5 @@ for iface in $(ip -o a | awk '/inet6/{gsub("\\.","/",$2);print$2}');do #cf. http
         grep $iface.disable_ipv6=1 /etc/sysctl.conf -q || echo net.ipv6.conf.$iface.disable_ipv6=1 | $sudo tee -a /etc/sysctl.conf
 done
 
+# SUR UBUNTU, si "netplan" est utilise, il faut aussi ajouter "link-local: []" dans le fichier YAML : "/etc/netplan/00-installer-config.yaml" : A IMPLEMENTER
 ip -o a
