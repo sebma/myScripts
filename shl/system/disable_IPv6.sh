@@ -23,7 +23,9 @@ if $isDebianLike;then
 		do
 			nmcli connection modify $connection ipv6.method disabled
 		done
-		$sudo systemctl restart NetworkManager
+		if [ -z "$SSH_CONNECTION" ];then
+			$sudo systemctl restart NetworkManager
+		fi
 	fi
 fi
 ip -o a | grep inet6
