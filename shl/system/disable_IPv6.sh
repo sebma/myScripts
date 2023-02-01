@@ -21,7 +21,7 @@ if $isDebianLike;then
 	if nmcli connection show >/dev/null;then 
 		nmcli connection show | sed -n '2,$ p' | awk '{print$1}' | while read connection;
 		do
-			nmcli connection modify $connection ipv6.method disabled
+			$sudo nmcli connection modify $connection ipv6.method disabled
 		done
 		if [ -z "$SSH_CONNECTION" ];then
 			$sudo systemctl restart NetworkManager
