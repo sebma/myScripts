@@ -11,7 +11,7 @@ elif echo $distribID | egrep "debian|ubuntu" -q;then
 	sudo=sudo
 fi
 
-test $(id -g) == 0 && sudo=""
+test $(id -u) == 0 && sudo=""
 
 if which systemctl >/dev/null 2>&1;then
 	if systemctl is-enabled NetworkManager >/dev/null;then
