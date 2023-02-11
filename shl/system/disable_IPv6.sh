@@ -7,8 +7,8 @@ if echo $distribID | egrep "centos|rhel|fedora" -q;then
 	isRedHatLike=true
 	sudo=""
 elif echo $distribID | egrep "debian|ubuntu" -q;then
-	sudo=sudo
 	isDebianLike=true
+	sudo=sudo
 fi
 
 test $(id -u) == 0 && sudo=""
