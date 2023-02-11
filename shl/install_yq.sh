@@ -28,4 +28,5 @@ if [ -n "$archiveName" ];then
 	$sudo install -vpm755 yq.1.gz /usr/local/share/man/man1/
 	rm yq_linux_$arch yq.1.gz install-man-page.sh
 	cd - >/dev/null
+	which yq >/dev/null && yq -V
 fi
