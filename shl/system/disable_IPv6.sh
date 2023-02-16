@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 declare {isDebian,isRedHat}Like=false
-
 distribID=$(source /etc/os-release;echo $ID)
 if echo $distribID | egrep "centos|rhel|fedora" -q;then
 	isRedHatLike=true
@@ -10,7 +9,6 @@ elif echo $distribID | egrep "debian|ubuntu" -q;then
 	isDebianLike=true
 	sudo=sudo
 fi
-
 test $(id -u) == 0 && sudo=""
 
 #cf. https://superuser.com/q/1765288/528454
