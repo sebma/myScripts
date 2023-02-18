@@ -12,6 +12,7 @@ distribID=$(source /etc/os-release;echo $ID)
 if echo $distribID | egrep "centos|rhel|fedora" -q;then
 	isRedHatLike=true
 fi
+test $(id -u) == 0 && sudo="" || sudo=$(which sudo)
 
 if $isRedHatLike;then
 	if test -d /proc/net/bonding;then
