@@ -15,7 +15,9 @@ EOF
 
 cat << EOF | $sudo tee /firstboot.sh
 #!/bin/bash 
-#SOME COMMANDS YOU WANT TO EXECUTE
+#SOME COMMANDS YOU WANT TO EXECUTE, ex: rm -f /etc/ssh/ssh_host_* && dpkg-reconfigure openssh-server
+# OR : ssh-keygen -A
+
 systemctl disable firstboot.service 
 rm -f /etc/systemd/system/firstboot.service
 rm -f /firstboot.sh
