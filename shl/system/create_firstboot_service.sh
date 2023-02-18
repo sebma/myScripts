@@ -2,6 +2,7 @@
 
 test $(id -u) == 0 && sudo="" || sudo=$(which sudo)
 
+# Taken from https://askubuntu.com/a/1327781
 cat << EOF | $sudo tee /etc/systemd/system/firstboot.service
 [Unit]
 Description=One time boot script
