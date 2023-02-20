@@ -19,6 +19,9 @@ done
 
 if $isDebianLike;then
 	# SUR UBUNTU, si "netplan" est utilise, il faut aussi ajouter "link-local: []" dans le fichier YAML : "/etc/netplan/00-installer-config.yaml" : A IMPLEMENTER avec yq
+	if netplan get network.ethernets >/dev/null;then
+		$sudo yq -i '.network.ethernets.*.link-local = []' /etc/netplan/00-installer-config.yaml
+	fi
 	if nmcli connection show >/dev/null;then 
 		nmcli connection show | sed -n '2,$ p' | awk '{print$1}' | while read connection;
 		do
