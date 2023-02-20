@@ -19,7 +19,10 @@ done
 
 if $isDebianLike;then
 	if netplan get network | grep ethernets: -q >/dev/null;then
-		$sudo yq -i '.network.ethernets.*.link-local = []' /etc/netplan/00-installer-config.yaml
+#		$sudo yq -i '.network.ethernets.*.link-local = []' /etc/netplan/00-installer-config.yaml
+		netplan get network.ethernets | awk -F: '/^[^ ]*:$/{print$1}' | while read iface;do
+			$sudo netplan set "network.ethernets.$iface.link-local=[]"
+		done
 	fi
 	if nmcli connection show >/dev/null;then 
 		nmcli connection show | sed -n '2,$ p' | awk '{print$1}' | while read connection;
