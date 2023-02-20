@@ -18,7 +18,6 @@ for iface in $(ip -o a | awk '/inet6/{gsub("\\.","/",$2);print$2}');do
 done
 
 if $isDebianLike;then
-	# SUR UBUNTU, si "netplan" est utilise, il faut aussi ajouter "link-local: []" dans le fichier YAML : "/etc/netplan/00-installer-config.yaml" : A IMPLEMENTER avec yq
 	if netplan get network.ethernets >/dev/null;then
 		$sudo yq -i '.network.ethernets.*.link-local = []' /etc/netplan/00-installer-config.yaml
 	fi
