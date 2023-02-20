@@ -18,7 +18,7 @@ for iface in $(ip -o a | awk '/inet6/{gsub("\\.","/",$2);print$2}');do
 done
 
 if $isDebianLike;then
-	if netplan get network.ethernets >/dev/null;then
+	if netplan get network | grep ethernets: -q >/dev/null;then
 		$sudo yq -i '.network.ethernets.*.link-local = []' /etc/netplan/00-installer-config.yaml
 	fi
 	if nmcli connection show >/dev/null;then 
