@@ -18,7 +18,7 @@ for iface in $(ip -o a | awk '/inet6/{gsub("\\.","/",$2);print$2}');do
 done
 
 if $isDebianLike;then
-	if netplan get network | grep ethernets: -q >/dev/null;then
+	if netplan get network | grep ethernets: -q;then
 #		$sudo yq -i '.network.ethernets.*.link-local = []' /etc/netplan/00-installer-config.yaml
 		netplan get network.ethernets | awk -F: '/^[^ ]*:$/{print$1}' | while read iface;do
 			$sudo netplan set "network.ethernets.$iface.link-local=[]"
