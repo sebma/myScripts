@@ -4,7 +4,7 @@ if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
 		mkdir -pv /etc/netplan/BACKUP/
 		cp -pv /etc/netplan/00-installer-config.yaml /etc/netplan/BACKUP/00-installer-config-ORIG.yaml
 		netplan get network.ethernets | awk -F: '/^[^ ]*:$/{print$1}' | while read iface;do
-			echo "=> Removing the interface ($iface) IP ..."
+			echo "=> Removing the IP of $iface network interface ..."
 			netplan set "network.ethernets.$iface.addresses=null"
 		done
 		netplan apply
