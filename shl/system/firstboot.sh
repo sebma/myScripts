@@ -9,9 +9,12 @@ if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
 		done
 		netplan apply
 	fi
+	echo "=> Re-generating ssh host keys ..."
+	for type in dsa ecdsa ed25519 rsa;do
+		ssh-keygen -q -f /etc/ssh/ssh_host_${type}_key -N '' -t $type <<< y | grep Generating
+	done
+	echo "=> done."
 fi
-rm -f /etc/ssh/ssh_host_*
-ssh-keygen -A
 systemctl disable firstboot.service
 #rm -f /etc/systemd/system/firstboot.service
 #rm -f /firstboot.sh
