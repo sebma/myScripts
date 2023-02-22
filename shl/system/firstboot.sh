@@ -5,7 +5,6 @@ if netplan get network | grep ethernets -q;then
 	echo "=> Removing the interface ($iface) IP ..."
 	netplan get network.ethernets | awk -F: '/^[^ ]*:$/{print$1}' | while read iface;do
 		netplan set "network.ethernets.$iface.addresses=null"
-		#netplan get "network.ethernets.$iface.addresses"
 	done
 	netplan apply
 fi
