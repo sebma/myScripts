@@ -16,17 +16,22 @@ EOF
 
 	cat <<-EOF | $sudo tee /firstboot.sh
 #!/bin/bash
-mkdir -pv /etc/netplan/BACKUP/
-cp -pv /etc/netplan/00-installer-config.yaml /etc/netplan/BACKUP/00-installer-config-ORIG.yaml
-if netplan get network | grep ethernets -q;then
-	echo "=> Removing the interface ($iface) IP ..."
-	netplan get network.ethernets | awk -F: '/^[^ ]*:$/{print$1}' | while read iface;do
-		netplan set "network.ethernets.$iface.addresses=null"
+if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
+	if netplan get network | grep ethernets -q;then
+		mkdir -pv /etc/netplan/BACKUP/
+		cp -piv /etc/netplan/00-installer-config.yaml /etc/netplan/BACKUP/00-installer-config-ORIG.yaml <<< n
+		netplan get network.ethernets | awk -F: '/^[^ ]*:$/{print$1}' | while read iface;do
+			echo "=> Removing the IP of $iface network interface ..."
+			netplan set "network.ethernets.$iface.addresses=null"
+		done
+		netplan apply
+	fi
+	echo "=> Re-generating ssh host keys ..."
+	for type in dsa ecdsa ed25519 rsa;do
+		ssh-keygen -q -f /etc/ssh/ssh_host_${type}_key -N '' -t $type <<< y | grep Generating
 	done
-	netplan apply
+	echo "=> done."
 fi
-rm -f /etc/ssh/ssh_host_*
-ssh-keygen -A
 systemctl disable firstboot.service
 #rm -f /etc/systemd/system/firstboot.service
 #rm -f /firstboot.sh
