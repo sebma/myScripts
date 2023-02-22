@@ -2,7 +2,7 @@
 
 test $(id -u) == 0 && sudo="" || sudo=$(which sudo)
 
-if egrep "vmware|virtal" /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name -q;then
+if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
 #	Taken from https://askubuntu.com/a/1327781
 	cat << EOF | $sudo tee /etc/systemd/system/firstboot.service
 [Unit]
