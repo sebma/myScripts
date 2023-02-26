@@ -2,6 +2,7 @@
 
 scriptDir=$(dirname $0)
 scriptDir=$(cd $scriptDir;pwd)
+echo $PATH | grep -q /usr/local/bin || export PATH+=:/usr/local/bin
 echo $PATH | grep -q $scriptDir || export PATH+=:$scriptDir
 url=https://www.youtube.com/user/NewCreationChurch/live
 #url="$(ytdlGetLiveURL.sh "$url")"
