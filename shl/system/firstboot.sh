@@ -14,6 +14,12 @@ if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
 		ssh-keygen -q -f /etc/ssh/ssh_host_${type}_key -N '' -t $type <<< y | grep Generating
 	done
 	echo "=> done."
+	echo "=> Re-generating /etc/machine-id and /var/lib/dbus/machine-id ..."
+	rm -f /etc/machine-id
+	dbus-uuidgen --ensure=/etc/machine-id
+	rm -f /var/lib/dbus/machine-id
+	dbus-uuidgen --ensure
+	echo "=> done."
 fi
 systemctl disable firstboot.service
 # systemctl mask firstboot.service
