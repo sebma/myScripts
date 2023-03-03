@@ -16,5 +16,4 @@ if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
 	echo "=> done."
 fi
 systemctl disable firstboot.service
-#rm -f /etc/systemd/system/firstboot.service
-#rm -f /firstboot.sh
+# systemctl mask firstboot.service
