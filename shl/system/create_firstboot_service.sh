@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-
+# i.e. https://askubuntu.com/a/1327781/426176
 test $(id -u) == 0 && sudo="" || sudo=$(which sudo)
 
 if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
 #	Taken from https://askubuntu.com/a/1327781
-	cat << EOF | $sudo tee /etc/systemd/system/firstboot.service
+	cat << EOF | $sudo tee /lib/systemd/system/firstboot.service
 [Unit]
 Description=One time boot script
 [Service]
