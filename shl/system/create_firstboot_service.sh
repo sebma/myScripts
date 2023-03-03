@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# i.e. https://askubuntu.com/a/1327781/426176
+
 test $(id -u) == 0 && sudo="" || sudo=$(which sudo)
 
 if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
