@@ -25,7 +25,7 @@ if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
 		fi
 	elif $isRedHatLike;then
         : # TO DO
-    fi
+	fi
 
 	echo "=> Re-generating /etc/machine-id and /var/lib/dbus/machine-id ..."
 	rm -f /etc/machine-id
