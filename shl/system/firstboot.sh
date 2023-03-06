@@ -13,7 +13,7 @@ elif echo $distribID | egrep "debian|ubuntu" -q;then
 fi
 
 if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
-    if $isDebianLike;then
+	if $isDebianLike;then
 		if netplan get network | grep ethernets -q;then
 			mkdir -pv /etc/netplan/BACKUP/
 			cp -piv /etc/netplan/00-installer-config.yaml /etc/netplan/BACKUP/00-installer-config-ORIG.yaml <<< n
@@ -24,7 +24,7 @@ if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
 			netplan apply
 		fi
 	elif $isRedHatLike;then
-        : # TO DO
+		: # TO DO
 	fi
 
 	echo "=> Re-generating /etc/machine-id and /var/lib/dbus/machine-id ..."
