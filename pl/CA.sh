@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-CAToolPath=$(locate -r /CA.pl$ | grep -v /snap/)
+CAToolPath=$(locate -r /CA.pl$ | grep -v /snap/ | grep ^/usr/)
 if [ ! -s $CAToolPath ];then
 	scriptDir=$(dirname $0)
 	scriptDir=$(cd $scriptDir;pwd)
