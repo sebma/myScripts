@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
-if [ -s /usr/lib/ssl/misc/CA.pl ] && [ -x /usr/lib/ssl/misc/CA.pl ];then
-	exec /usr/lib/ssl/misc/CA.pl "$@"
-else
+CAToolPath=$(locate -r /CA.pl$ | grep -v /snap/)
+if [ ! -s $CAToolPath ];then
 	scriptDir=$(dirname $0)
 	scriptDir=$(cd $scriptDir;pwd)
-	exec $scriptDir/not_mine/CA.pl "$@"
+	CAToolPath=$scriptDir/not_mine/CA.pl
 fi
+
+exec $CAToolPath "$@"
