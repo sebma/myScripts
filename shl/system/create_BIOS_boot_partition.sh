@@ -40,7 +40,7 @@ fi
 
 #See this example : https://superuser.com/a/1773065/528454
 #$sudo parted -s $disk mktable gpt
-#$sudo parted -s $disk mkpart '"BIOS boot partition"' 1Mi 2Mi
+#$sudo parted -s $disk mkpart '"BIOS boot partition"' 1Mi 4095s
 $sudo parted -s $disk set $bbPartitionNumber bios_grub on
 $sudo parted -s $disk name $bbPartitionNumber '"BIOS boot partition"'
 $sudo parted -s $disk print
