@@ -2,7 +2,7 @@
 
 function extractVideoURLsFromWebPage {
 	[ $# != 0 ] && [ "$1" = "-h" ] && {
-		echo "=> Usage $FUNCNAME [-t] url1 url2 url3 ..." >&2
+		echo "=> Usage $FUNCNAME [-h] url1 url2 url3 ..." >&2
 		return 1
 	}
 
