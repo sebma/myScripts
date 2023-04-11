@@ -13,7 +13,11 @@ elif echo $distribID | egrep "debian|ubuntu" -q;then
 fi
 
 if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
+	echo kernel.dmesg_restrict=0 | tee -a /etc/sysctl.conf
+	systemctl restart systemd-sysctl.service
 	if $isDebianLike;then
+		sed -i 's/^ENABLED="false"/ENABLED="true"/' /etc/default/sysstat
+		dpkg-reconfigure sysstat -f noninteractive
 		if netplan get network | grep ethernets -q;then
 			mkdir -pv /etc/netplan/BACKUP/
 			cp -piv /etc/netplan/00-installer-config.yaml /etc/netplan/BACKUP/00-installer-config-ORIG.yaml <<< n
