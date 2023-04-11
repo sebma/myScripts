@@ -13,8 +13,10 @@ elif echo $distribID | egrep "debian|ubuntu" -q;then
 fi
 
 if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
-	echo kernel.dmesg_restrict=0 | tee -a /etc/sysctl.conf
-	systemctl restart systemd-sysctl.service
+	if ! grep "^\s*kernel.dmesg_restrict\s*=\s*0" /etc/sysctl.conf /etc/sysctl.d/*.conf -q;then
+		echo kernel.dmesg_restrict=0 | tee -a /etc/sysctl.conf
+		systemctl restart systemd-sysctl.service
+	fi
 	if $isDebianLike;then
 		sed -i 's/^ENABLED="false"/ENABLED="true"/' /etc/default/sysstat
 		dpkg-reconfigure sysstat -f noninteractive
