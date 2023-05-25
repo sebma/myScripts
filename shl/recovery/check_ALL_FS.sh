@@ -16,7 +16,7 @@ initPath=$($ps -e -o comm= -o pid= | $grep "  *1$" | $cut -d" " -f1)
 if [ -n "$initPath" ];then
 	initPath=$(which $initPath) #Needed for gentoo and maybe others
 	set -o pipefail
-	systemType=$($strings $initPath | $egrep -o "upstart|sysvinit|systemd" | $head -1 || echo unknown)
+	systemType=$($strings $initPath | $egrep -o "upstart|sysvinit|systemd|launchd" | $head -1 || echo unknown)
 	set +o pipefail
 else
 	exit 1
