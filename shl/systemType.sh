@@ -16,7 +16,7 @@ function systemType {
 	local initPath=$($ps -e -o comm= -o pid= | $grep "  *1$" | $cut -d" " -f1)
 	if [ -n "$initPath" ];then
 		initPath=$(type -P $initPath) #Needed for gentoo and maybe others
-		$strings $initPath | $egrep -o "upstart|sysvinit|systemd" | $head -1
+		$strings $initPath | $egrep -o "upstart|sysvinit|systemd|launchd" | $head -1
 	else
 		echo unknown
 		exit 1
