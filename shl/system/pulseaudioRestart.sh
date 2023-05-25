@@ -2,7 +2,7 @@
 
 initPath=$(ps -p 1 -o cmd= | cut -d" " -f1)
 set -o pipefail
-systemType=$(strings $initPath | egrep -o "upstart|sysvinit|systemd" | head -1 || echo unknown)
+systemType=$(strings $initPath | egrep -o "upstart|sysvinit|systemd|launchd" | head -1 || echo unknown)
 set +o pipefail
 [ $(id -u) != 0 ] && sudo=sudo || sudo=""
 
