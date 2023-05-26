@@ -24,4 +24,5 @@ for lan in 192.168.0.0/24 192.168.1.0/24;do
 done
 
 $sudo ufw status | grep inactive -q && $sudo ufw enable
+$sudo ufw reload
 $sudo ufw status
