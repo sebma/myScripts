@@ -24,7 +24,8 @@ sleep 1s
 echo "=> Starting bluetooth controllers ..."
 hciconfig | awk -F'[\t :]+' '/^\w+:/{controller=$1}/\tDOWN/{controller2Start=controller;controller="";print controller2Start}' | while read controller
 do
-	echo "==> Starting bluetooth controller <$controller> ..."
+	echo "==> Restarting bluetooth controller <$controller> ..."
+	sudo hciconfig $controller down
 	sudo hciconfig $controller up
 done
 sleep 1s
