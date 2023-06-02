@@ -18,6 +18,7 @@ if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
 		systemctl restart systemd-sysctl.service
 	fi
 	if $isDebianLike;then
+		update-ca-certificates --fresh
 		sed -i 's/^ENABLED="false"/ENABLED="true"/' /etc/default/sysstat
 		dpkg-reconfigure sysstat -f noninteractive
 		if netplan get network | grep ethernets -q;then
@@ -30,6 +31,7 @@ if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
 			netplan apply
 		fi
 	elif $isRedHatLike;then
+		update-ca-trust extract
 		: # TO DO
 	fi
 
