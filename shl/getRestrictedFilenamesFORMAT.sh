@@ -283,7 +283,10 @@ getRestrictedFilenamesFORMAT () {
 			echo "=> Downloading <$url> ..."
 			echo
 
-			ytdlExtraOptions+=( --add-metadata --prefer-ffmpeg --restrict-filenames --embed-subs --write-auto-sub --sub-lang='en,fr,es,de' )
+			ytdlExtraOptions+=( --add-metadata --prefer-ffmpeg --restrict-filenames )
+			if ! $audioOnly;then
+				ytdlExtraOptions+=( --embed-subs --write-auto-sub --sub-lang='en,fr,es,de' )
+			fi
 			if [ $isLIVE = true ];then
 				ytdlExtraOptions+=( --hls-use-mpegts --hls-prefer-ffmpeg )
 			else
