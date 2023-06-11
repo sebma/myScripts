@@ -242,7 +242,7 @@ getRestrictedFilenamesFORMAT () {
 			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -Lqs "$thumbnailURL" | file -bi - | awk -F ';' '{sub(".*/","",$1);sub("jpeg","jpg",$1);print$1}')
 			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/%.$extension/.$thumbnailExtension}
 
-			echo $formatString | $grep -v '+' | $grep "audio only" -q && ytdlExtraOptions+=( -x )
+			echo $formatString | $grep -v '+' | $grep "audio only" -q && ytdlExtraOptions+=( -x ) && audioOnly=true
 			if echo "${ytdlExtraOptions[@]}" | $grep -w "\-x" -q;then
 				extension=$(getAudioExtension $firstAudioStreamCodecName) || continue
 				( [ $extension = m4a ] || [ $extension = opus ] ) && ytdlExtraOptions+=( -k )
