@@ -89,11 +89,13 @@ getRestrictedFilenamesFORMAT () {
 
 	osFamily=$(uname -s)
 	if [ $osFamily = Linux ];then
-		grep="$(type -P grep)"
-		stat="$(type -P stat)"
+		date=$(type -P date)
+		grep=$(type -P grep)
+		stat=$(type -P stat)
 	elif [ $osFamily = Darwin ];then
-		grep="$(type -P ggrep)"
-		stat="$(type -P gstat)"
+		date=$(type -P gdate)
+		grep=$(type -P ggrep)
+		stat=$(type -P gstat)
 	fi
 
 	grepColor=$grep
@@ -254,7 +256,7 @@ getRestrictedFilenamesFORMAT () {
 			echo "=> title = <$title>" && echo
 			printf "=> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal> resolution = <${effects[bold]}${colors[blue]}$resolution$normal> "
 			if [ $isLIVE == false ];then
-				echo "remoteFileSizeMiB = <$remoteFileSizeMiB MiB> duration = <$(date -u -d @$duration +%H:%M:%S)>" && echo
+				echo "remoteFileSizeMiB = <$remoteFileSizeMiB MiB> duration = <$($date -u -d @$duration +%H:%M:%S)>" && echo
 			else
 				echo "isLIVE = <${effects[bold]}${colors[blue]}$isLIVE$normal>" && echo
 			fi
