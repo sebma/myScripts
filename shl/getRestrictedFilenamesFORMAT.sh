@@ -326,7 +326,7 @@ getRestrictedFilenamesFORMAT () {
 			$debug
 			time videoDownloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 			downloadOK=$?
-#			$undebug
+			$undebug
 			sync
 			echo
 
