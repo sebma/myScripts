@@ -167,7 +167,7 @@ getRestrictedFilenamesFORMAT () {
 		do
 			let j++
 			let numberOfFilesToDownload=$numberOfURLsToDownload*${#formatsIDs[@]}
-			$undebug
+#			$undebug
 
 			videoFormatID=${formatID/+*/}
 
@@ -295,7 +295,7 @@ getRestrictedFilenamesFORMAT () {
 				ytdlExtraOptions+=( --hls-prefer-native )
 			fi
 
-			$undebug
+#			$undebug
 			[ "$debugLevel" = 1 ] && echo "=> ytdlExtraOptions = ${ytdlExtraOptions[@]}" && echo
 
 			if [ -f "$newFileName" ] && [ $isLIVE != true ]; then
@@ -323,7 +323,7 @@ getRestrictedFilenamesFORMAT () {
 			$debug
 			time videoDownloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 			downloadOK=$?
-			$undebug
+#			$undebug
 			sync
 			echo
 
@@ -344,7 +344,7 @@ getRestrictedFilenamesFORMAT () {
 
 				$grepColor -A1 'ERROR:.*' $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && echo >&2 && return $downloadOK || \rm $errorLogFile
 			fi
-			$undebug
+#			$undebug
 
 			if [ $downloadOK = 0 ]; then
 				ffprobeJSON_File_Info=$($ffprobe -v error -show_format -show_streams -print_format json "$fileName")
