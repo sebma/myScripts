@@ -2,7 +2,7 @@
 
 pingMyLAN ()
 {
-	local myLAN=$(\ip addr show | awk '!/virbr[0-9]/&&!/\<lo\>/&&/\<inet\>/{print$2}')
+	local myLAN=$(\ip addr show | awk '!/virbr[0-9]/&&!/\<lo\>/&&/\<inet\>/&&!/127.0.0.1\/8/{print$2}')
 	if [ $# = 0 ]; then
 		if type -P fping > /dev/null 2>&1; then
 			time fping -r 0 -aAg $myLAN 2> /dev/null | sort -u
