@@ -33,6 +33,7 @@ getRestrictedFilenamesFORMAT () {
 
 	local ytdlExtraOptions=()
 	local ytdlInitialOptions=()
+	local audioOnly=false
 	local translate=cat
 	local siteVideoFormat downloadOK=-1 extension fqdn fileSizeOnFS=0 remoteFileSize=0
 	local protocolForDownload=null
@@ -286,9 +287,11 @@ getRestrictedFilenamesFORMAT () {
 			echo
 
 			ytdlExtraOptions+=( --add-metadata --prefer-ffmpeg --restrict-filenames )
+
 			if ! $audioOnly;then
 				ytdlExtraOptions+=( --embed-subs --write-auto-sub --sub-lang='en,fr,es,de' )
 			fi
+
 			if [ $isLIVE = true ];then
 				ytdlExtraOptions+=( --hls-use-mpegts --hls-prefer-ffmpeg )
 			else
@@ -312,7 +315,7 @@ getRestrictedFilenamesFORMAT () {
 			echo "=> fileName to be downloaded = <$fileName>"
 			echo
 
-			[ $thumbnailerName = AtomicParsley ] && ( [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = m4b ] || [ $extension = mp3 ] ) && embedThumbnail="--embed-thumbnail"
+			( [ $thumbnailerName = AtomicParsley ] || [ $thumbnailerName = ffmpeg ] ) && ( [ $extension = mp4 ] || [ $extension = m4a ] || [ $extension = m4b ] || [ $extension = mp3 ] ) && embedThumbnail="--embed-thumbnail"
 
 			echo "=> Downloading file # $j/$numberOfFilesToDownload ..."
 			echo
