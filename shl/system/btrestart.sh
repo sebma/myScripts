@@ -5,9 +5,11 @@ set -o pipefail
 systemType=$(strings $initPath | egrep -o "upstart|sysvinit|systemd|launchd" | head -1 || echo unknown)
 set +o pipefail
 [ $(id -u) != 0 ] && sudo=sudo || sudo=""
+pulseaudio=/usr/bin/pulseaudio
 
 echo "=> Restarting the pulseaudio server ..."
-pulseaudio --kill;sleep 1;pidof pulseaudio >/dev/null || pulseaudio --start --log-target=syslog # Restart pulseaudio
+pgrep pulseaudio -u $USER >/dev/null && $pulseaudio --kill;sleep 1s
+pgrep pulseaudio -u $USER >/dev/null || $pulseaudio --start # Restart pulseaudio
 sleep 1s
 ps -fC pulseaudio
 
@@ -29,3 +31,4 @@ do
 	sudo hciconfig $controller up
 done
 sleep 1s
+ps -fC pulseaudio
