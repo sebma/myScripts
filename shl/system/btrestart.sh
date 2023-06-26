@@ -8,8 +8,9 @@ set +o pipefail
 pulseaudio=/usr/bin/pulseaudio
 
 echo "=> Restarting the pulseaudio server ..."
+ps -fC pulseaudio
 pgrep pulseaudio -u $USER >/dev/null && $pulseaudio --kill;sleep 1s
-pgrep pulseaudio -u $USER >/dev/null || $pulseaudio --start --log-target=syslog # Restart pulseaudio
+pgrep pulseaudio -u $USER >/dev/null || $pulseaudio --start # Restart pulseaudio
 sleep 1s
 ps -fC pulseaudio
 
