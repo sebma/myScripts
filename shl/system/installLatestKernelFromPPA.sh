@@ -8,6 +8,6 @@ fi
 
 wget https://raw.githubusercontent.com/pimlie/ubuntu-mainline-kernel.sh/master/ubuntu-mainline-kernel.sh
 sudo chmod +x ubuntu-mainline-kernel.sh
-sudo install -vpm 755 ubuntu-mainline-kernel.sh /usr/local/bin/
+sudo install -vpm 755 ubuntu-mainline-kernel.sh /usr/local/bin/ && rm -f ubuntu-mainline-kernel.sh
 #sudo ubuntu-mainline-kernel.sh -i
 ubuntu-mainline-kernel.sh -h
