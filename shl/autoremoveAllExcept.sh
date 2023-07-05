@@ -14,7 +14,8 @@ function autoremoveAllBut {
 
 	echo "=> packagesToBeRemoved = <$packagesToBeRemoved>"
 	echo
-	test -n "$packagesToBeRemoved" && $sudo screen -L $apt purge -V $packagesToBeRemoved
+	[ -n "$SSH_CONNECTION" ] && type -P screen >/dev/null 2>&1 && screen="screen -L"
+	test -n "$packagesToBeRemoved" && $sudo $screen $apt purge -V $packagesToBeRemoved
 	sync
 	set +x
 }
