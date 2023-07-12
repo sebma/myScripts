@@ -25,14 +25,14 @@ if ! type -P jq >/dev/null;then
 fi
 
 echo "=> Searching for the latest release on $protocol://$gitHubURL/$gitHubUser/$gitHubRepo ..."
-freeTubeLatestRelease=$(\curl -Ls $protocol://$gitHubAPIRepoURL/releases | jq -r '.[0].tag_name' | sed 's/v//;s/-beta//')
+freeTubeLatestRelease=$(\curl -qLs $protocol://$gitHubAPIRepoURL/releases | jq -r '.[0].tag_name' | sed 's/v//;s/-beta//')
 echo "=> Found the $freeTubeLatestRelease version."
 freeTubeInstalledVersion=$(dpkg-query --showformat='${Version}' -W freetube 2>/dev/null)
 
 if [ "$freeTubeLatestRelease" = "$freeTubeInstalledVersion" ];then
 	echo "=> [$scriptBaseName] INFO : You already have the latest release, which is $freeTubeLatestRelease."
 else
-	freeTubeLatestGitHubReleaseURL=$(\curl -Ls $protocol://$gitHubAPIRepoURL/releases | jq -r ".[0].assets[] | select( .name | contains( \"$arch.deb\") ) | .browser_download_url")
+	freeTubeLatestGitHubReleaseURL=$(\curl -qLs $protocol://$gitHubAPIRepoURL/releases | jq -r ".[0].assets[] | select( .name | contains( \"$arch.deb\") ) | .browser_download_url")
 	if [ -n "$freeTubeLatestGitHubReleaseURL" ];then
 		freeTubeLatestGitHubReleaseName=$(basename $freeTubeLatestGitHubReleaseURL)
 		wget -nv -O $freeTubeLatestGitHubReleaseName "$freeTubeLatestGitHubReleaseURL"
