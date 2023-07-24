@@ -10,19 +10,19 @@ os=$(uname -s)
 
 if [ $# = 0 ] 
 then
-	[ $os = Linux  ] && diskDevice=sda
-	[ $os = Darwin ] && diskDevice=disk0
+	[ $os = Linux  ] && diskName=sda
+	[ $os = Darwin ] && diskName=disk0
 else
 	[ "$1" = "-h" ] && {
 		echo "=> Usage: $scriptBaseName [disk device name]" >&2
 		exit 1
-	} || diskDevice=$1
+	} || diskName=${1/*\/}
 fi
 
-if ! echo $diskDevice | grep -q /dev/; then 
-	diskDevice=/dev/$diskDevice
-fi
+diskDevice=/dev/$diskName
 
+smartctlMajorVersion=$(smartctl -j | jq -r .smartctl.version[0])
+smartctlMinorVersion=$(smartctl -j | jq -r .smartctl.version[1])
 smartctlMajorVersion=$(smartctl -V | awk '/release/{print$3}' | cut -d. -f1)
 smartctlVersion=$(smartctl -V | awk '/release/{print$3}')
 
@@ -32,6 +32,7 @@ then
 else
 	allInformation=-a
 fi
+
 
 smartctlDiskInfo="$($sudo smartctl -i $diskDevice)"
 which hdparm >/dev/null 2>&1 && hdparmDiskInfo="$($sudo hdparm -i $diskDevice)" && hdparmDiskMoreInfo="$($sudo hdparm -I $diskDevice)"
@@ -43,6 +44,12 @@ test -z $diskModel && echo "=> ERROR : Could not infer diskModel." 2>/dev/null &
 diskFamily="$(echo "$smartctlDiskInfo" |  awk '/Family:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
 test -z $diskFamily && diskFamily="$(echo "$smartctlDiskInfo" |  awk '/Model:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
 diskFamily="$(echo $diskFamily | sed -E "s/[.]+$|\"//g")"
+
+vendor=$(sed 's/ $//;s/ /_/g' < /sys/block/$(readlink /sys/block/$diskName)/../../vendor)
+model=$(sed 's/ $//;s/ /_/g' < /sys/block/$(readlink /sys/block/$diskName)/../../model)
+model_family=$(sudo smartctl -i $diskDevice -j | jq -r .model_family | sed 's/ $//;s/ /_/g')
+model_name=$(sudo smartctl -i $diskDevice -j | jq -r .model_name | sed 's/ $//;s/ /_/g')
+serial_number=$(sudo smartctl -i $diskDevice -j | jq -r .serial_number | sed 's/ $//;s/ /_/g')
 
 logDir=$HOME/log
 mkdir -p $logDir
@@ -58,7 +65,7 @@ blue=$(tput setaf 4)
 {
 	echo "=> Disk general info for $diskFamily model $diskModel on $diskDevice :"
 	echo
-	deviceType=$(test $(</sys/block/${diskDevice/*\//}/queue/rotational) = 0 && echo SSD || echo HDD)
+	deviceType=$(test $(</sys/block/${diskName}/queue/rotational) = 0 && echo SSD || echo HDD)
 	printf $blue$bold
 	echo "=> $diskFamily model $diskModel is a $deviceType drive."
 	echo $normal
