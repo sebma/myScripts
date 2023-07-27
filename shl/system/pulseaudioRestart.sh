@@ -8,5 +8,6 @@ set +o pipefail
 
 echo "=> Restarting the pulseaudio server ..."
 pulseaudio --kill;sleep 1;pidof pulseaudio >/dev/null || pulseaudio --start --log-target=syslog # Restart pulseaudio
+# systemctl --user restart pulseaudio.socket
 sleep 1s
 ps -fC pulseaudio
