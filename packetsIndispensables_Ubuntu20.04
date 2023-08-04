@@ -108,6 +108,7 @@ gstreamer1.0-libav
 handbrake-cli
 hddtemp
 hdf5-tools
+help2man
 highlight
 html-xml-utils
 htop
