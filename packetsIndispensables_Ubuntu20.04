@@ -108,6 +108,8 @@ gstreamer1.0-libav
 handbrake-cli
 hddtemp
 hdf5-tools
+heif-gdk-pixbuf
+heif-thumbnailer
 help2man
 highlight
 html-xml-utils
@@ -141,6 +143,7 @@ kscreen
 kwin-common
 lftp
 libguestfs-tools
+libheif-examples
 libimage-exiftool-perl
 libinput-tools
 libjpeg-turbo-progs
