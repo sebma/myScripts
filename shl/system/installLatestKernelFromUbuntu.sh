@@ -9,7 +9,7 @@ fi
 version=$(source /etc/os-release;echo $VERSION_ID)
 major=$(cut -d. -f1 <<< $version)
 if [ $major -le 14 ];then
-	sudo apt install -V linux-generic-lts-xenial
+	dpkg -l | grep linux-generic-lts-xenial -q || sudo apt install -V linux-generic-lts-xenial
 else
-	sudo apt install -V linux-generic-hwe-$version
+	dpkg -l | grep linux-generic-hwe-$version -q || sudo apt install -V linux-generic-hwe-$version
 fi
