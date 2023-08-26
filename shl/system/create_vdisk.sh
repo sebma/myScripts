@@ -76,18 +76,20 @@ if which omreport >/dev/null;then
 	if $lastest;then
 		last=$(omreport storage vdisk controller=$id -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1;last=1}/virtual\s*disk\s*[0-9]+;/{last+=1}END{printf last}')
 		last+=1
-		name=VirtualDisk$last
-	else
-		name=VirtualDisk$virtualDiskNumber
+		virtualDiskNumber=$last
 	fi
+	name=VirtualDisk$virtualDiskNumber
+
 	echo "=> Creating $name for Physical Disk $pdisk ..."
 	echo "=> omconfig storage controller action=createvdisk controller=$id raid=$raid size=max pdisk=$pdisk stripesize=$stripesize diskcachepolicy=$diskcachepolicy readpolicy=$readpolicy writepolicy=$writepolicy name=$name ..."
 	time omconfig storage controller action=createvdisk controller=$id raid=$raid size=max pdisk=$pdisk stripesize=$stripesize diskcachepolicy=$diskcachepolicy readpolicy=$readpolicy writepolicy=$writepolicy name=$name
 	retCode=$?
 	echo "=> retCode = $retCode"
+
 	if [ $retCode = 0 ];then
 		echo "=> The new created Virtual Disk is :"
-		omreport storage vdisk controller=$id -fmt ssv | grep "$name"
+		vdiskID=$(omreport storage vdisk controller=$id -fmt ssv | awk -F ';' "/VirtualDisk$virtualDiskNumber/"'{print$1;exit}')
+		omreport storage vdisk controller=$id id=$vdiskID
 	fi
 else
 	echo "=> ERROR [$scriptName] : DELL OpenManage omreport is not installed." >&2
