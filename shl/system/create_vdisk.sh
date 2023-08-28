@@ -38,7 +38,7 @@ if which omreport >/dev/null;then
 	if omreport storage vdisk controller=$id | grep VirtualDisk$virtualDiskNumber -q;then
 		echo "=> ERROR [$scriptName] : VirtualDisk$virtualDiskNumber is already in use :" >&2
 		vdiskID=$(omreport storage vdisk controller=$id -fmt ssv | awk -F ';' "/VirtualDisk$virtualDiskNumber/"'{print$1;exit}')
-		omreport storage vdisk controller=$id id=$vdiskID
+		omreport storage vdisk controller=$id vdisk=$vdiskID
 		exit 4
 	fi
 
@@ -88,7 +88,7 @@ if which omreport >/dev/null;then
 	if [ $retCode = 0 ];then
 		echo "=> The new created Virtual Disk is :"
 		vdiskID=$(omreport storage vdisk controller=$id -fmt ssv | awk -F ';' "/VirtualDisk$virtualDiskNumber/"'{print$1;exit}')
-		omreport storage vdisk controller=$id id=$vdiskID
+		omreport storage vdisk controller=$id vdisk=$vdiskID
 	fi
 else
 	echo "=> ERROR [$scriptName] : DELL OpenManage omreport is not installed." >&2
