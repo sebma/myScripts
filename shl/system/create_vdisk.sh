@@ -50,6 +50,9 @@ if which omreport >/dev/null;then
 		exit 5
 	fi
 
+	echo "=> The first physical disk in <Ready> state selected is <$pdisk> :"
+	omreport storage pdisk controller=$id pdisk=$pdisk| egrep '^(ID|Status|Capacity|Sector Size|Bus|Power|Media|State|Vendor|Product|Serial|Part.Number|^$)'
+    
 	readpolicy=$(omreport storage vdisk controller=$id -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/virtual\s*disk\s*[0-9]+;/{value=$(NF-4)}END{printf tolower(value)}')
 	writepolicy=$(omreport storage vdisk controller=$id -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/virtual\s*disk\s*[0-9]+;/{value=$(NF-3)}END{printf tolower(value)}')
 	stripesize=$(omreport storage vdisk controller=$id -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/virtual\s*disk\s*[0-9]+;/{value=$(NF-1)}END{printf gensub(" ","",1,value)}')
