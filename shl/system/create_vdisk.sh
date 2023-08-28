@@ -16,6 +16,10 @@ elif [ $# = 1 ];then
 	else
 		lastest=false
 		virtualDiskNumber=$1
+		if [ $virtualDiskNumber = 0 ];then
+			echo "=> ERROR [$scriptName] : virtualDiskNumber must be an integer." >&2
+			exit 4
+		fi
 	fi
 else
 	echo "=> Usage : $scriptName virtualDiskNumber|[latest]" >&2
@@ -29,11 +33,6 @@ if which omreport >/dev/null;then
 	if $listReadyPhysicalDisks;then
 		omreport storage pdisk controller=$id | egrep '^(ID|Status|Capacity|Sector Size|Bus|Power|Media|State|Vendor|Product|Serial|Part.Number|^$)' | awk -v myPATTERN=Ready -v RS='' -v ORS='\n\n' '$0 ~ myPATTERN'
 		exit 3
-	fi
-
-	if [ $virtualDiskNumber = 0 ];then
-		echo "=> ERROR [$scriptName] : virtualDiskNumber must be an integer." >&2
-		exit 4
 	fi
 
 	if omreport storage vdisk controller=$id | grep VirtualDisk$virtualDiskNumber -q;then
