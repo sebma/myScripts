@@ -3,9 +3,10 @@
 scriptName=$(basename $0)
 declare -i virtualDiskNumber=-1
 declare -i last=-1
+declare listReadyPhysicalDisks=false
 
 if [ $# = 0 ];then
-	lastest=true
+	lastest=true # Choose the latest VirtualDisk by default.
 elif [ $# = 1 ];then
 	if [ $1 = -h ];then
 		echo "=> Usage : $scriptName virtualDiskNumber|[latest]" >&2
