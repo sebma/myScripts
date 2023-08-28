@@ -33,6 +33,8 @@ if which omreport >/dev/null;then
 
 	if $listReadyPhysicalDisks;then
 		omreport storage pdisk controller=$id | egrep '^(ID|Status|Capacity|Sector Size|Bus|Power|Media|State|Vendor|Product|Serial|Part.Number|^$)' | awk -v myPATTERN=Ready -v RS='' -v ORS='\n\n' '$0 ~ myPATTERN'
+  		pdisk=$(omreport storage pdisk controller=$id -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/Ready;/{value=$1;print value;exit}')
+    		[ -z "$pdisk" ] && echo "=> There is no more physical disk in <Ready> state." >&2
 		exit 3
 	fi
 
