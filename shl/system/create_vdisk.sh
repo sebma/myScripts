@@ -88,6 +88,13 @@ if which omreport >/dev/null;then
 	fi
 	name=VirtualDisk$virtualDiskNumber
 
+	echo '=> Checking if there is "Preserved Cache" on the controller' " $id ..."
+	if ! omreport storage controller controller=$id | grep Preserved.Cache.*Not.Applicable -q;then
+		echo "=> ERROR : There is Preserved Cache on the controller $id." >&2
+		echo "=> You need to flush the Preserved Cache of the controller $id." >&2
+		exit 8
+	fi
+
 	echo "=> Creating $name for Physical Disk $pdisk ..."
 	echo "=> omconfig storage controller action=createvdisk controller=$id raid=$raid size=max pdisk=$pdisk stripesize=$stripesize diskcachepolicy=$diskcachepolicy readpolicy=$readpolicy writepolicy=$writepolicy name=$name ..."
 	time omconfig storage controller action=createvdisk controller=$id raid=$raid size=max pdisk=$pdisk stripesize=$stripesize diskcachepolicy=$diskcachepolicy readpolicy=$readpolicy writepolicy=$writepolicy name=$name
