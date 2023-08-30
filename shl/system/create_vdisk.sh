@@ -55,11 +55,11 @@ if which omreport >/dev/null;then
 	omreport storage pdisk controller=$id pdisk=$pdisk| egrep '^(ID|Status|Capacity|Sector Size|Bus|Power|Media|State|Vendor|Product|Serial|Part.Number|^$)'
 
 	# Fetching the values for the latest Virtual Disk
-	latestVirtualDiskID=$(omreport storage vdisk controller=$id -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/virtual\s*disk\s*[0-9]+/{value=$1}END{print value}')
-	raid=$(omreport storage vdisk controller=$id vdisk=$latestVirtualDiskID | awk '/Layout/{value=$NF;print tolower(gensub("RAID-","r",1,value))}')
-	readpolicy=$(omreport storage vdisk controller=$id vdisk=$latestVirtualDiskID | awk '/Read Policy/{value=$(NF-1)" "$NF;tolower(value)}')
-	writepolicy=$(omreport storage vdisk controller=$id vdisk=$latestVirtualDiskID | awk '/Write Policy/{value=$(NF-1)" "$NF;tolower(value)}')
-	stripesize=$(omreport storage vdisk controller=$id vdisk=$latestVirtualDiskID | awk '/Stripe Element Size/{value=$(NF-1)$NF;print tolower(value)}')
+	latestVirtualDiskID=$(omreport storage vdisk controller=$id -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/virtual\s*disk\s*[0-9]+/{value=$1}END{printf value}')
+	raid=$(omreport storage vdisk controller=$id vdisk=$latestVirtualDiskID | awk '/Layout/{value=$NF;printf tolower(gensub("RAID-","r",1,value))}')
+	readpolicy=$(omreport storage vdisk controller=$id vdisk=$latestVirtualDiskID | awk '/Read Policy/{value=$(NF-1)" "$NF;printf tolower(value)}')
+	writepolicy=$(omreport storage vdisk controller=$id vdisk=$latestVirtualDiskID | awk '/Write Policy/{value=$(NF-1)" "$NF;printf tolower(value)}')
+	stripesize=$(omreport storage vdisk controller=$id vdisk=$latestVirtualDiskID | awk '/Stripe Element Size/{value=$(NF-1)$NF;printf tolower(value)}')
 	diskcachepolicy=$(omreport storage vdisk controller=$id vdisk=$latestVirtualDiskID | awk '/Disk Cache Policy/{value=$NF}END{printf tolower(value)}')
 
 	case $readpolicy in
