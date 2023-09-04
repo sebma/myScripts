@@ -7,7 +7,7 @@ function dis2iso {
 		exit 1
 	}
 	$isoFileName = $args[0]
-	$directoryPath = $args[1]
+	$directoryPath = $args[1].TrimEnd('\')
 	mkisofs -J -R -o $isoFileName $directoryPath
 }
 
