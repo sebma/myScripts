@@ -282,11 +282,11 @@ function initVars {
 }
 
 function defaultRoute {
-	Get-NetRoute -DestinationPrefix 0.0.0.0/0 | select DestinationPrefix,NextHop,InterfaceAlias,InterfaceMetric,RouteMetric | Format-Table
+	Get-NetRoute -DestinationPrefix 0.0.0.0/0 | select DestinationPrefix,NextHop,ifIndex,InterfaceAlias,InterfaceMetric,RouteMetric | Format-Table
 }
 
 function defaultRouteV6 {
-	Get-NetRoute -DestinationPrefix ::0/0 | select DestinationPrefix,NextHop,InterfaceAlias,InterfaceMetric,RouteMetric | Format-Table
+	Get-NetRoute -DestinationPrefix ::0/0 | select DestinationPrefix,NextHop,ifIndex,InterfaceAlias,InterfaceMetric,RouteMetric | Format-Table
 }
 
 function interfaceInfo {
@@ -297,11 +297,11 @@ function interfaceInfo {
 }
 
 function showRoutes {
-	Get-NetRoute -AddressFamily IPv4 @args | select DestinationPrefix,NextHop,InterfaceAlias,InterfaceMetric,RouteMetric | Format-Table | Out-String -stream | sls -NotMatch "224.0.0.0/4|/32"
+	Get-NetRoute -AddressFamily IPv4 @args | select DestinationPrefix,NextHop,ifIndex,InterfaceAlias,InterfaceMetric,RouteMetric | Format-Table | Out-String -stream | sls -NotMatch "224.0.0.0/4|/32"
 }
 
 function showRoutesV6 {
-	Get-NetRoute -AddressFamily IPv6 @args | select DestinationPrefix,NextHop,InterfaceAlias,InterfaceMetric,RouteMetric | Format-Table | Out-String -stream | sls -NotMatch "fe80::/64|ff00::/8|/128"
+	Get-NetRoute -AddressFamily IPv6 @args | select DestinationPrefix,NextHop,ifIndex,InterfaceAlias,InterfaceMetric,RouteMetric | Format-Table | Out-String -stream | sls -NotMatch "fe80::/64|ff00::/8|/128"
 }
 
 function lanIP {
