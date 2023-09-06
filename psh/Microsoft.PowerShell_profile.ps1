@@ -298,11 +298,11 @@ function interfaceInfo {
 }
 
 function showRoutes {
-	Get-NetRoute -AddressFamily IPv4 @args | select DestinationPrefix,NextHop,ifIndex,InterfaceAlias,InterfaceMetric,RouteMetric | Format-Table | Out-String -stream | sls -NotMatch "224.0.0.0/4|/32"
+	Get-NetRoute -AddressFamily IPv4 @args | select DestinationPrefix,NextHop,ifIndex,InterfaceAlias,InterfaceMetric,RouteMetric | Format-Table | Out-String -stream | sls -n "224.0.0.0/4|/32"
 }
 
 function showRoutesV6 {
-	Get-NetRoute -AddressFamily IPv6 @args | select DestinationPrefix,NextHop,ifIndex,InterfaceAlias,InterfaceMetric,RouteMetric | Format-Table | Out-String -stream | sls -NotMatch "fe80::/64|ff00::/8|/128"
+	Get-NetRoute -AddressFamily IPv6 @args | select DestinationPrefix,NextHop,ifIndex,InterfaceAlias,InterfaceMetric,RouteMetric | Format-Table | Out-String -stream | sls -n "fe80::/64|ff00::/8|/128"
 }
 
 function lanIP {
