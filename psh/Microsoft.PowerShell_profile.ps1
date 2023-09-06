@@ -282,11 +282,11 @@ function initVars {
 }
 
 function defaultRoute {
-	Get-NetRoute -DestinationPrefix 0.0.0.0/0 | select DestinationPrefix,NextHop,InterfaceAlias,InterfaceMetric
+	Get-NetRoute -DestinationPrefix 0.0.0.0/0 | select DestinationPrefix,NextHop,InterfaceAlias,InterfaceMetric,RouteMetric | Format-Table
 }
 
 function defaultRouteV6 {
-	Get-NetRoute -DestinationPrefix ::0/0 | select DestinationPrefix,NextHop,InterfaceAlias,InterfaceMetric
+	Get-NetRoute -DestinationPrefix ::0/0 | select DestinationPrefix,NextHop,InterfaceAlias,InterfaceMetric,RouteMetric | Format-Table
 }
 
 function interfaceInfo {
