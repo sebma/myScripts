@@ -282,6 +282,7 @@ function initVars {
 }
 
 function defaultRoute {
+	gsudo.exe netsh interface ip delete destinationcache
 	Get-NetRoute -DestinationPrefix 0.0.0.0/0 | select DestinationPrefix,NextHop,ifIndex,InterfaceAlias,InterfaceMetric,RouteMetric | Format-Table | Out-String -Stream
 }
 
