@@ -215,7 +215,16 @@ if( $IsWindows ) {
 			}
 		}
 	}
-	function showSID { (whoisUSER @args).sid.value }
+	function lsgroups {
+		$argc=$args.Count
+		if ( $argc -gt 0) {
+			for($i=0;$i -lt $argc;$i++) {
+				echo "=> $($args[$i]) :"
+				(Get-ADGroupMember $($args[$i])).SamAccountName
+			}
+		}
+	}
+ 	function showSID { (whoisUSER @args).sid.value }
 	function whoisSID { (whoisUSER @args).SamAccountName }
 	function whoisUSER {
 		$argc=$args.Count
