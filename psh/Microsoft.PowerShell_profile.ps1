@@ -210,7 +210,7 @@ if( $IsWindows ) {
 			( (Get-ADUser -Identity $env:username -Properties MemberOf).memberof | Get-ADGroup ).name
 		} else {
 			for($i=0;$i -lt $argc;$i++) {
-				echo "=> $($args[$i]) :"
+				echo "=> Memberships of $($args[$i]) :"
 				( ( Get-ADUser -Identity $($args[$i]) -Properties MemberOf ).memberof | Get-ADGroup ).name
 			}
 		}
