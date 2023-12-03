@@ -224,7 +224,7 @@ if( $IsWindows ) {
 			}
 		}
 	}
- 	function showSID { (whoisUSER @args).sid.value }
+	function showSID { (whoisUSER @args).sid.value }
 	function whoisSID { (whoisUSER @args).SamAccountName }
 	function whoisUSER {
 		$argc=$args.Count
