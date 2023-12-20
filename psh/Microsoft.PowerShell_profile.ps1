@@ -291,7 +291,7 @@ function initVars {
 }
 
 function defaultRoute {
-	gsudo.exe netsh interface ip delete destinationcache
+	if( $IsWindows ) { gsudo.exe netsh interface ip delete destinationcache }
 	Get-NetRoute -DestinationPrefix 0.0.0.0/0 | select DestinationPrefix,NextHop,ifIndex,InterfaceAlias,InterfaceMetric,RouteMetric | Format-Table | Out-String -Stream
 }
 
@@ -331,8 +331,10 @@ function gateWay {
 }
 
 function showNTPServers {
-#	(Get-ItemPropertyValue -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Parameters -Name NtpServer).split(',')[0]
-	(w32tm -query -status | sls ^Source).ToString().Split()[1] + " = " + (w32tm -query -status | sls ^ID.*IP).ToString().Split()[-1].Split(')')[0]
+	if( $IsWindows ) {
+#		(Get-ItemPropertyValue -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Parameters -Name NtpServer).split(',')[0]
+		(w32tm -query -status | sls ^Source).ToString().Split()[1] + " = " + (w32tm -query -status | sls ^ID.*IP).ToString().Split()[-1].Split(')')[0]
+ 	}
 }
 
 function macAddr {
