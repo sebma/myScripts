@@ -282,6 +282,18 @@ function dirBasic {
 	ls -h -r | % FullName | sls $($args[0])
 }
 
+function dis2iso {
+	$argc=$args.Count
+	if ( $argc -ne 2 ) {
+		echo "=> Usage $scriptName isoFileName directoryPath"
+		exit 1
+	}
+	$isoFileName = $args[0]
+	$directoryPath = $args[1].TrimEnd('\').TrimEnd('/')
+	echo "=> Running: mkisofs -J -R -o $isoFileName $directoryPath"
+	mkisofs -J -R -o $isoFileName $directoryPath
+}
+
 $PowerShellUserProfileDIR = Split-Path $PROFILE
 if( ! ( Test-Path -Path "$PowerShellUserProfileDIR/seb_${osFamily}_aliases.ps1" ) ) {
 	New-Item -Path "$PowerShellUserProfileDIR/seb_${osFamily}_aliases.ps1" -ItemType file
