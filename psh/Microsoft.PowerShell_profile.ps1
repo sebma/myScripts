@@ -278,6 +278,10 @@ if( $IsWindows ) {
 	# TO BE DONE
 }
 
+function dirBasic {
+	ls -h -r | % FullName | sls $($args[0])
+}
+
 $PowerShellUserProfileDIR = Split-Path $PROFILE
 if( ! ( Test-Path -Path "$PowerShellUserProfileDIR/seb_${osFamily}_aliases.ps1" ) ) {
 	New-Item -Path "$PowerShellUserProfileDIR/seb_${osFamily}_aliases.ps1" -ItemType file
