@@ -211,7 +211,7 @@ if( $IsWindows ) {
 		} else {
 			for($i=0;$i -lt $argc;$i++) {
 				echo "=> Memberships of $($args[$i]) :"
-				( ( Get-ADUser -Identity $($args[$i]) -Properties MemberOf ).memberof | Get-ADGroup ).name
+				( ( Get-ADUser -Identity $($args[$i]) -Properties MemberOf ).memberof | Get-ADGroup ).name | sort
 			}
 		}
 	}
@@ -220,7 +220,7 @@ if( $IsWindows ) {
 		if ( $argc -gt 0) {
 			for($i=0;$i -lt $argc;$i++) {
 				echo "=> Members of group $($args[$i]) :"
-				(Get-ADGroupMember $($args[$i])).SamAccountName
+				(Get-ADGroupMember $($args[$i])).SamAccountName | sort
 			}
 		}
 	}
