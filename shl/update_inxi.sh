@@ -4,7 +4,6 @@ update_inxi() {
 	local scriptDir=$(dirname $0)
 	local scriptDir=$(cd $scriptDir;pwd)
 	local manPATH=~/.local/share/man/man1
-	local binPATH=$scriptDir/../pl/not_mine/
 
 	mkdir -pv $scriptDir/../pl/not_mine/
 	rm -v $scriptDir/../pl/not_mine/inxi
