@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-set -x
-acpi -bi
 inxi -Bxxx
-upower -i $(upower -e | grep BAT)
+if [ $(uname -s) = Linux ];then
+	set -x
+	acpi -bi
+	upower -i $(upower -e | grep BAT)
+fi
