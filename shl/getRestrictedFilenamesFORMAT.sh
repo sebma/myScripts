@@ -288,7 +288,7 @@ getRestrictedFilenamesFORMAT () {
 
 			ytdlExtraOptions+=( --add-metadata --prefer-ffmpeg --restrict-filenames )
 
-			if ! $audioOnly;then
+			if [ $audioOnly = false ] && [ $isLIVE = false ];then
 				ytdlExtraOptions+=( --embed-subs --write-auto-sub --sub-lang='en,fr,es,de' )
 			fi
 
