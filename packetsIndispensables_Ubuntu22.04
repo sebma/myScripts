@@ -26,6 +26,7 @@ aria2
 arp-scan
 ascii
 atomicparsley
+atop
 audacious
 audacity
 avahi-daemon
@@ -40,6 +41,7 @@ bibletime
 bluez
 bluez-tools
 bsdmainutils
+btop
 build-essential
 cairo-dock
 cairo-dock-core
@@ -158,6 +160,7 @@ libtool
 libvirt-bin
 links2
 lm-sensors
+lnav
 lsdvd
 lshw-gtk
 lsscsi
