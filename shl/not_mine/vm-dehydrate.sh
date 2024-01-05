@@ -76,7 +76,7 @@ echo "Clearing bash history..."
 cat /dev/null > /root/.bash_history
 history -c
 
-echo "Compacting drive..."
+echo "Compacting drive..." # VOIR AUSSI L'OUTIL "zerofree" sur https://askubuntu.com/a/1220639/426176
 dd if=/dev/zero of=/EMPTY bs=1M > /dev/null
 sync
 rm -vf /EMPTY
