@@ -21,6 +21,7 @@ aria2
 arp-scan
 ascii
 atomicparsley
+atop
 audacious
 audacity
 avahi-daemon
@@ -165,6 +166,7 @@ libtool
 libvirt-bin
 links2
 lm-sensors
+lnav
 lsdvd
 lshw-gtk
 lsscsi
