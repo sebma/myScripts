@@ -1,4 +1,5 @@
 #!/bin/bash
+# TAKEN FROM https://github.com/fabianlee/tf-vsphere-singlevm-from-template/blob/main/on_template_only/prepare-ubuntu-22.04-template.sh
 #
 # credits: based provied from https://github.com/tierrie/linux-scripts/blob/main/prepare-ubuntu-20.04.02-template.sh 
 #
