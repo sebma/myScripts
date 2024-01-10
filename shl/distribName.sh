@@ -16,6 +16,8 @@ distribName () {
 		osName="$(sw_vers -productName)"
 	elif [ $osFamily = Android ]; then
 		osName=Android
+  	elif [ $osFamily = VMkernel ]; then # ESXi
+		osName=VMkernel
 	else
 		osName=$OSTYPE
 	fi
