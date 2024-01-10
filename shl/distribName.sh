@@ -17,7 +17,7 @@ distribName () {
 	elif [ $osFamily = Android ]; then
 		osName=Android
   	elif [ $osFamily = VMkernel ]; then # ESXi
-		osName=VMkernel
+		osName=ESXi
 	else
 		osName=$OSTYPE
 	fi
