@@ -278,7 +278,7 @@ if( $IsWindows ) {
 	# TO BE DONE
 }
 
-function dirBasic {
+function findfiles {
 	ls -r -fo | % FullName | sls $($args[0])
 }
 
