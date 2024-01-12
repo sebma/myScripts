@@ -279,7 +279,7 @@ if( $IsWindows ) {
 }
 
 function dirBasic {
-	ls -h -r | % FullName | sls $($args[0])
+	ls -r -fo | % FullName | sls $($args[0])
 }
 
 function dis2iso {
