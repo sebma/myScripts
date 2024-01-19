@@ -184,7 +184,7 @@ if( $IsWindows ) {
 
 	if(alias man 2>$null | sls man) {
 		del alias:man
-		function man { help @args | more }
+		function man { help @args | less }
 	}
 
 	function basename($path) { $path.split($dirSep)[-1] }
