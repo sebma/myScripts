@@ -166,6 +166,7 @@ if( $IsWindows ) {
 		set-alias -Scope Global reboot restart-computer
 		if( ! (alias wget 2>$null | sls wget) ) { set-alias -Scope Global wget Invoke-WebRequest }
 		set-alias -Scope Global  ex
+		set-alias -Scope Global more less
 	}
 
 	SetWindowsAliases
