@@ -1,0 +1,1 @@
+gin WindowsProductName,BiosFirmwareType,CsManufacturer,CsModel,CsChassisSKUNumber,CsProcessors,CsTotalPhysicalMemory,OsName,OsVersion,CsNetworkAdapters,CsName,CsUserName,OsPagingFiles,TimeZone
