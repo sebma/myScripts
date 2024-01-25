@@ -4,7 +4,7 @@ function service_info {
 	if ( $argc -gt 0) {
 		for($i=0;$i -lt $argc;$i++) {
 			$serviceName = $($args[$i])
-			echo "=> serviceName = <$serviceName> :"
+			echo "=> serviceName = <$serviceName> :`n"
 			try {
 				Get-Service $serviceName >$null 2>&1
 				Get-CimInstance win32_service | ? Name -eq $serviceName | Select Name , State , ServiceType , StartMode , ErrorControl , PathName , TagId , Caption , StartName , DelayedAutoStart
