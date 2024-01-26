@@ -1,1 +1,2 @@
-"{0:n2} MiB" -f ( ( dir $args[0] -force -recurse | measure -property length -sum).Sum /1mb )
+$dirName = $args[0]
+"{0:n2} MiB" -f ( ( dir $dirName -force -recurse | measure -property length -sum).Sum /1mb )
