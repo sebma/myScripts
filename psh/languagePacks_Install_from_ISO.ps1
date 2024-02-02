@@ -12,9 +12,9 @@ Add-AppxPackage -Path "$LocalExperiencePackRootDIR/fr-fr/LanguageExperiencePack.
 Add-AppxPackage -Path "$LocalExperiencePackRootDIR/it-it/LanguageExperiencePack.it-IT.Neutral.appx"
 Add-AppxPackage -Path "$LocalExperiencePackRootDIR/ro-ro/LanguageExperiencePack.ro-RO.Neutral.appx"
 
-Add-WindowsPackage -Online -PackagePath "$LanguagePacksDIR/Microsoft-Windows-Client-Language-Pack_x64_ro-ro.cab"
-Add-WindowsPackage -Online -PackagePath "$LanguagePacksDIR/Microsoft-Windows-Client-Language-Pack_x64_it-it.cab"
-Add-WindowsPackage -Online -PackagePath "$LanguagePacksDIR/Microsoft-Windows-Client-Language-Pack_x64_fr-fr.cab"
-Add-WindowsPackage -Online -PackagePath "$LanguagePacksDIR/Microsoft-Windows-Client-Language-Pack_x64_es-es.cab"
 Add-WindowsPackage -Online -PackagePath "$LanguagePacksDIR/Microsoft-Windows-Client-Language-Pack_x64_en-GB.cab"
 Add-WindowsPackage -Online -PackagePath "$LanguagePacksDIR/Microsoft-Windows-Client-Language-Pack_x64_en-US.cab"
+Add-WindowsPackage -Online -PackagePath "$LanguagePacksDIR/Microsoft-Windows-Client-Language-Pack_x64_es-es.cab"
+Add-WindowsPackage -Online -PackagePath "$LanguagePacksDIR/Microsoft-Windows-Client-Language-Pack_x64_fr-fr.cab"
+Add-WindowsPackage -Online -PackagePath "$LanguagePacksDIR/Microsoft-Windows-Client-Language-Pack_x64_it-it.cab"
+Add-WindowsPackage -Online -PackagePath "$LanguagePacksDIR/Microsoft-Windows-Client-Language-Pack_x64_ro-ro.cab"
