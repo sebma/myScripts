@@ -42,7 +42,8 @@ EOF
 		if ! resolvectl dns | grep "$DNS_SERVER1" -q;then
 			iface=$(\ls /sys/class/net/ | grep -vw lo)
 			$sudo resolvectl dns $iface $DNS_SERVER1 $FallBack_DNS_SERVER
-			resolvectl status
+			resolvectl dns $iface
+			resolvectl status $iface
 		fi
 
 		# Install open-vm-tools
