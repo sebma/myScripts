@@ -61,7 +61,7 @@ EOF
 		sudo update-ca-certificates --fresh
 		ll /etc/ssl/certs/ | grep Gandi
 
-		$sudo apt net-tools -y $aptSimul # Pour netstat
+		$sudo apt -V install net-tools -y $aptSimul # Pour netstat
 		$sudo apt -V install ugrep btop plocate gh fd-find # UBUNTU >= 22.04
 		$sudo apt -V install landscape-common # cf. https://github.com/canonical/landscape-client/blob/master/debian/landscape-common.install
 		$sudo apt -V install ca-certificates debsecan ncdu ripgrep silversearcher-ag ack progress gcp shellcheck command-not-found nmon smartmontools iotop lsof net-tools pwgen ethtool smem sysstat fzf grep gawk sed curl remake wget jq jid vim dfc lshw screenfetch bc units lsscsi jq btop htop apt-file dlocate pv screen rsync x11-apps mc landscape-common parted gdisk ipcalc -y
