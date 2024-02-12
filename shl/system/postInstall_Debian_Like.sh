@@ -61,6 +61,7 @@ EOF
 		sudo update-ca-certificates --fresh
 		ll /etc/ssl/certs/ | grep Gandi
 
+		$sudo apt net-tools -y $aptSimul # Pour netstat
 		$sudo apt -V install ugrep btop plocate gh fd-find # UBUNTU >= 22.04
 		$sudo apt -V install landscape-common # cf. https://github.com/canonical/landscape-client/blob/master/debian/landscape-common.install
 		$sudo apt -V install ca-certificates debsecan ncdu ripgrep silversearcher-ag ack progress gcp shellcheck command-not-found nmon smartmontools iotop lsof net-tools pwgen ethtool smem sysstat fzf grep gawk sed curl remake wget jq jid vim dfc lshw screenfetch bc units lsscsi jq btop htop apt-file dlocate pv screen rsync x11-apps mc landscape-common parted gdisk ipcalc -y
@@ -92,7 +93,7 @@ EOF
 		$sudo update-grub
 
 		# CONFIG SNMP
-		$sudo apt install snmp snmpd libsnmp-dev net-tools -y $aptSimul 
+		$sudo apt install snmp snmpd -y $aptSimul 
 		$sudo apt install snmp-mibs-downloader -y $aptSimul # Necessaire depuis Ubuntu 12.04 cf. https://thejoyofstick.com/blog/2019/05/28/installing-snmp-mib-files-in-linux-ubuntu-12-04-lts/
 
 		ss -4nul | grep :161
@@ -101,6 +102,7 @@ EOF
 			grep rouser.svc_snmp /usr/share/snmp/snmpd.conf -q    || sudo net-snmp-create-v3-user -ro -X AES -A MD5 svc_snmp # Les MDPs sont a saisir de maniere interactive
 			grep rouser.svc_snmp_v3 /usr/share/snmp/snmpd.conf -q || sudo net-snmp-create-v3-user -ro -X AES -A SHA-512 svc_snmp_v3 # Les MDPs sont a saisir de maniere interactive
 		else
+  			$sudo apt libsnmp-dev -y $aptSimul # Pour "net-snmp-config"
 			# For Ubuntu XY.04 and older
 			MDP_SNMP_V3=ohqua7ke6Cain6aeb9au;MDP_SNMP_ENC_V3=aiChiimeegah8eejaele
 #			sudo net-snmp-config --create-snmpv3-user -v3 -ro -A $MDP_SNMP_V3 -X $MDP_SNMP_ENC_V3 -a SHA-512 -x AES svc_snmp_v3
