@@ -1,4 +1,4 @@
-function lsgroups {
+function lsgroup {
 	$argc=$args.Count
 	if ( $argc -gt 0) {
 		for($i=0;$i -lt $argc;$i++) {
@@ -8,4 +8,4 @@ function lsgroups {
 	}
 }
 
-lsgroups @args
+lsgroup @args
