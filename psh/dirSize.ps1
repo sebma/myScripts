@@ -11,9 +11,13 @@ function dirSize {
 	}
 }
 
-$argc = $args.Count
-for($i=0;$i -lt $argc;$i++) {
-	$dir = $args[$i]
-	echo "=> Size($dir) ..."
-	dirSize $dir
+function main {
+	$argc = $args.Count
+	for($i=0;$i -lt $argc;$i++) {
+		$dir = $args[$i]
+		echo "=> Size($dir) ..."
+		dirSize $dir
+	}
 }
+
+main @args
