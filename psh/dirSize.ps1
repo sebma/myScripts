@@ -1,6 +1,5 @@
 function dirSize {
 	$dirName = $args[0]
-	# $dirSize = [uint64]( ( dir "$dirName" -force -recurse | measure -property length -sum ).Sum )
 	$dirSize = ( dir "$dirName" -force -recurse | measure -property length -sum ).Sum
 	switch( $dirSize ) {
 		{ $_ -ge 1tb -and $_ -le 1pb } { "{0:n2} TiB" -f ( $dirSize / 1tb ); break }
