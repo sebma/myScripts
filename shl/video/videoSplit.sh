@@ -20,7 +20,9 @@ function videoSplit {
 	outputFile="$outputFilePath/$fileBaseName-CUT.$extension"
 	chmod -x "$fileName"
 
-#	[ $extension = mp4 ] && remuxOptions="$remuxOptions $mp4Options"
+	remuxOptions="-map 0 -c copy"
+	mp4Options="-movflags +frag_keyframe"
+	[ $extension = mp4 ] && remuxOptions="$remuxOptions $mp4Options"
 	if test $# -ge 3
 	then
 		end=$3
