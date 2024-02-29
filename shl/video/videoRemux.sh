@@ -9,7 +9,7 @@ function videoRemux {
 	fi
 
 	shift
- 	test $# -ge 2 && local outputFilePath=$2 || local outputFilePath=.
+ 	test $# -ge 2 && local outputFilePath=$2 && shift || local outputFilePath=.
 	outputFile="$outputFilePath/$fileBaseName-REMUXED.$extension"
 	outputExtension=${outputFile/*./}
 	local options
