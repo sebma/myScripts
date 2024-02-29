@@ -27,6 +27,7 @@ function videoRemux {
 	time $ffmpeg -i "$inputFile" $remuxOptions $options "$@" "$outputFile"
 	sync
 	touch -r "$inputFile" "$outputFile"
+ 	echo "=> outputFile = <$outputFile>"
 }
 
 videoRemux "$@"
