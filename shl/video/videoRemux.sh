@@ -19,7 +19,8 @@ function videoRemux {
 
 	remuxOptions="-map 0 -c copy"
 	mp4Options="-movflags +frag_keyframe"
-	time $ffmpeg -i "$inputFile" $remuxOptions $mp4Options $options "$@"
+ 	[ $extension = mp4 ] && remuxOptions="$remuxOptions $mp4Options"
+	time $ffmpeg -i "$inputFile" $remuxOptions $options "$@"
 	sync
 	touch -r "$inputFile" "$outputFile"
 }
