@@ -10,8 +10,9 @@ function videoRemux {
 
 	extension=${inputFile/*./}
 	fileBaseName=${inputFile%.???}
+	shift
  
- 	test $# -ge 2 && local outputFilePath=$2 && shift || local outputFilePath=.
+ 	test $# -ge 1 && local outputFilePath=$1 && shift || local outputFilePath=.
 	outputFile="$outputFilePath/$fileBaseName-REMUXED.$extension"
 	outputExtension=${outputFile/*./}
 	local options
