@@ -18,6 +18,7 @@ function videoHFlip {
 	esac
 
 	mp4Options="-movflags +frag_keyframe"
+ 	[ $extension = mp4 ] && options+=" $mp4Options"
 	time $ffmpeg -i "$inputFile" $mp4Options -filter:v hflip -c:a copy $options "$@"
 	sync
 	touch -r "$inputFile" "$outputFile"
