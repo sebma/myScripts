@@ -10,7 +10,7 @@ function videoHFlip {
 
 	shift
 	test $# -ge 2 && local outputFilePath=$2 || local outputFilePath=.
-	outputFile="$outputFilePath/$fileBaseName-HFLIPPED.$extension"
+	outputFile="$outputFilePath/$fileBaseName-FLIPPED.$extension"
 	outputExtension=${outputFile/*./}
 	local options
 	case $outputExtension in
