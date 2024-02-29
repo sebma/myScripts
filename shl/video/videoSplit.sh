@@ -23,6 +23,7 @@ function videoSplit {
 	remuxOptions="-map 0 -c copy"
 	mp4Options="-movflags +frag_keyframe"
 	[ $extension = mp4 ] && remuxOptions="$remuxOptions $mp4Options"
+	ffmpeg="command  ffmpeg  -hide_banner"
 	if test $# -ge 3
 	then
 		end=$3
