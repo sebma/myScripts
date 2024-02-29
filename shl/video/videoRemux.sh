@@ -2,13 +2,12 @@
 
 function videoRemux {
 	local inputFile="$1"
-	if [ $# != 2 ]
+	if [ $# = 0 ]
 	then
 		echo "=> Usage: $FUNCNAME inputFileName [ outputFilePath | .] [ffmpegCLIParameters]" >&2
 		return 1
 	fi
 
-	shift
 	extension=${inputFile/*./}
 	fileBaseName=${inputFile%.???}
  
@@ -24,6 +23,7 @@ function videoRemux {
 	remuxOptions="-map 0 -c copy"
 	mp4Options="-movflags +frag_keyframe"
  	[ $extension = mp4 ] && remuxOptions="$remuxOptions $mp4Options"
+	ffmpeg="command  ffmpeg  -hide_banner"
 	time $ffmpeg -i "$inputFile" $remuxOptions $options "$@" "$outputFile"
 	sync
 	touch -r "$inputFile" "$outputFile"
