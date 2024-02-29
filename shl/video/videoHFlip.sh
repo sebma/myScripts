@@ -26,6 +26,7 @@ function videoHFlip {
 	time $ffmpeg -i "$inputFile" $mp4Options -filter:v hflip -c:a copy $options "$@" "$outputFile"
 	sync
 	touch -r "$inputFile" "$outputFile"
+ 	echo "=> outputFile = <$outputFile>"
 }
 
 videoHFlip "$@"
