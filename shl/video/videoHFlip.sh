@@ -4,12 +4,13 @@ function videoHFlip {
 	local inputFile="$1"
 	if [ $# != 2 ]
 	then
-		echo "=> Usage: $FUNCNAME inputFileName outputFileName [ffmpegCLIParameters]" >&2
+		echo "=> Usage: $FUNCNAME inputFileName [ outputFilePath | .] [ffmpegCLIParameters]" >&2
 		return 1
 	fi
 
 	shift
-	outputFile="$1"
+	test $# -ge 2 && local outputFilePath=$2 || local outputFilePath=.
+	outputFile="$outputFilePath/$fileBaseName-REMUXED.$extension"
 	outputExtension=${outputFile/*./}
 	local options
 	case $outputExtension in
