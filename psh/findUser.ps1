@@ -1,2 +1,2 @@
 $myPattern = $args[0]
-Get-ADUser -Filter { name -like $myPattern }
+Get-ADUser -Properties CanonicalName -Filter { name -like $myPattern }
