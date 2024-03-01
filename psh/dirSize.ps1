@@ -15,7 +15,7 @@ function main {
 	for($i=0;$i -lt $argc;$i++) {
 		$dir = $args[$i]
 		echo "=> Size($dir) ..."
-		dirSize $dir
+		( Measure-Command { dirSize $dir | Out-Default } ).toString()
 	}
 }
 
