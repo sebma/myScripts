@@ -1,2 +1,1 @@
-"=> args = $args"
-( Measure-Command { $args | Out-Default } ).ToString()
+( "$args" | Measure-Command { Invoke-Expression $_ | Out-Default } ).toString()
