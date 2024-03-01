@@ -1,1 +1,1 @@
-(Measure-Command { @args | oh }).ToString()
+(Measure-Command { @args | Out-Host }).ToString()
