@@ -14,7 +14,7 @@ function videoHFlip {
  	test $# -ge 2 && local outputFilePath=$2 && shift 2 || local outputFilePath=.
   	local remainingArgs=("${@}")
    	suffix=("${remainingArgs[@]/ /_}")
-	outputFile="$outputFilePath/$fileBaseName-FLIPPED-$suffix.$extension"
+	outputFile="$outputFilePath/$fileBaseName-${suffix}-FLIPPED.$extension"
 	outputExtension=${outputFile/*./}
 	local options
 	case $outputExtension in
