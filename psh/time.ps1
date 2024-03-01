@@ -1,1 +1,2 @@
-( Measure-Command { $args | Out-Host } ).ToString()
+"=> args = $args"
+( Measure-Command { $args | Out-Default } ).ToString()
