@@ -12,8 +12,10 @@ function videoRemux {
 	fileBaseName=${inputFile%.???}
  
  	test $# -ge 2 && local outputFilePath=$2 && shift 2 || local outputFilePath=.
-	outputFile="$outputFilePath/$fileBaseName-REMUXED.$extension"
-	outputExtension=${outputFile/*./}
+  	local remainingArgs=("${@}")
+   	suffix=("${remainingArgs[@]/ /_}")
+	outputFile="$outputFilePath/$fileBaseName-FLIPPED-$suffix.$extension"
+ 	outputExtension=${outputFile/*./}
 	local options
 	case $outputExtension in
 		vob) options="-f mpeg" ;;
@@ -24,7 +26,7 @@ function videoRemux {
 	mp4Options="-movflags +frag_keyframe"
  	[ $extension = mp4 ] && remuxOptions="$remuxOptions $mp4Options"
 	ffmpeg="command  ffmpeg  -hide_banner"
-	time $ffmpeg -i "$inputFile" $remuxOptions $options "$@" "$outputFile"
+	time $ffmpeg -i "$inputFile" $remuxOptions $options "${remainingArgs[@]}" "$outputFile"
 	sync
 	touch -r "$inputFile" "$outputFile"
  	echo "=> outputFile = <$outputFile>"
