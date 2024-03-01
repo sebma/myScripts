@@ -1,4 +1,5 @@
 scoop bucket add extras
 scoop bucket add nirsoft
 scoop bucket add versions
-archiver aria2 curl dos2unix git gow mediainfo-cli mpv python38@3.8.9 rsync unzip wget yt-dlp
+archiver aria2 busybox curl dos2unix git gow mediainfo-cli mpv python38@3.8.9 rsync unzip wget yt-dlp
+# busybox contains time.exe and time.ps1
