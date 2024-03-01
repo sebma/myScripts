@@ -1,2 +1,2 @@
 $myPattern = $args[0]
-Get-ADGroup -Filter { name -like $myPattern }
+Get-ADGroup -Properties CanonicalName -Filter { name -like $myPattern }
