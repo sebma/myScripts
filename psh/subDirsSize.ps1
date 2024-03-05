@@ -14,7 +14,7 @@ function main {
 	$argc = $args.Count
 	for($i=0;$i -lt $argc;$i++) {
 		$baseDir = $args[$i].TrimEnd('\').TrimEnd('/')
-		$subDirsList = $(ls -dir $baseDir | % FullName)
+		$subDirsList = $(ls -dir -force $baseDir | % FullName)
 		foreach ($subDir in $subDirsList) {
 #			( Measure-Command { dirSize $baseDir\$subDir | Out-Default } ).toString()
 			dirSize $subDir
