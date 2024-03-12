@@ -1,0 +1,1 @@
+cat (Get-PSReadlineOption).HistorySavePath
