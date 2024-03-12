@@ -83,7 +83,7 @@ sysprep.firstboot() {
     [[ $HOSTNAME == CHANGEME ]] && {
         utils.say 'Regenerating hostname and rebooting...'
         /usr/bin/hostnamectl set-hostname \
-            "linux-$(tr -cd '[:upper:][:digit:]' < /dev/urandom | head -c 9)"
+            "linux-$(tr -cd '[:lower:][:digit:]' < /dev/urandom | head -c 9)"
         /usr/bin/systemctl reboot
     }
 
