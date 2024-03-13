@@ -90,6 +90,7 @@ EOF
 
 		# CONFIG GRUB
 		grep GRUB_TIMEOUT_STYLE=hidden /etc/default/grub -q && $sudo sed -i.orig "s/GRUB_TIMEOUT_STYLE=.*/GRUB_TIMEOUT_STYLE=menu/;s/GRUB_TIMEOUT=.*/GRUB_TIMEOUT=15/" /etc/default/grub
+  		grep '\#GRUB_GFX_MODE=' /etc/default/grub -q && $sudo sed -i.orig.2 "s/#GRUB_GFX_MODE=.*/GRUB_GFX_MODE=1152x864/" /etc/default/grub
 		$sudo update-grub
 
 		# CONFIG SNMP
