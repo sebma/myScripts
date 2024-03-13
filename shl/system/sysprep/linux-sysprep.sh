@@ -44,6 +44,7 @@ if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
 	dbus-uuidgen --ensure
 	echo "=> done."
 	echo "=> Re-generating ssh host keys ..."
+ #	ssh-keygen -A # cf. https://serverfault.com/a/471348/312306
 	for type in dsa ecdsa ed25519 rsa;do
 		ssh-keygen -q -f /etc/ssh/ssh_host_${type}_key -N '' -t $type <<< y | grep Generating
 	done
