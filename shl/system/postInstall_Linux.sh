@@ -54,7 +54,7 @@ if   $isRedHatLike;then
 		$sudo systemctl stop snmpd;$sudo net-snmp-create-v3-user -ro -X AES -A MD5 svc_snmp # Les MDPs sont a saisir de maniere interactive
 		$sudo systemctl restart snmpd
 	fi
-	$sudo egrep "^(rouser|createUser|usmUser)" /var/lib/snmp/snmpd.conf /var/lib/net-snmp/snmpd.conf /usr/share/snmp/snmpd.conf
+	$sudo egrep "^(rouser|createUser|usmUser)" /var/lib/snmp/snmpd.conf /var/lib/net-snmp/snmpd.conf /usr/share/snmp/snmpd.conf /etc/snmp/snmpd.conf
 
 	if test -f /etc/snmp/snmpd.conf;then
 		$sudo grep "^agent[Aa]ddress.*127.0.0.1" /etc/snmp/snmpd.conf -q && $sudo sed -i.orig "/^agent[Aa]ddress.*/s/^/#/" /etc/snmp/snmpd.conf
