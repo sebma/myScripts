@@ -36,7 +36,7 @@ if   $isRedHatLike;then
 	grep ^NM_CONTROLLED= /etc/sysconfig/network-scripts/ifcfg-bond0 -q || sed -i "s/NM_CONTROLLED=.*/NM_CONTROLLED=no/" /etc/sysconfig/network-scripts/ifcfg-bond0
 	grep ^ONBOOT= /etc/sysconfig/network-scripts/ifcfg-bond0 -q || sed -i "s/ONBOOT=.*/ONBOOT=yes/" /etc/sysconfig/network-scripts/ifcfg-bond0
 	grep ^BOOTPROTO=dhcp /etc/sysconfig/network-scripts/ifcfg-bond0 -q || sed -i "s/BOOTPROTO=.*/BOOTPROTO=none/" /etc/sysconfig/network-scripts/ifcfg-bond0
-	grep NOZEROCONF /etc/sysconfig/network -q || echo NOZEROCONF=yes | tee -a /etc/sysconfig/network
+	grep NOZEROCONF /etc/sysconfig/network -q || echo NOZEROCONF=yes | tee -a /etc/sysconfig/network # Disable APIPA
 	systemctl restart network
 
 	# CONF NTP (hors systemd)
