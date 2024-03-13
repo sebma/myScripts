@@ -56,6 +56,19 @@ if   $isRedHatLike;then
 	fi
 	$sudo egrep "^(rouser|createUser|usmUser)" /var/lib/net-snmp/snmpd.conf /etc/snmp/snmpd.conf
 
+	if test -f /etc/snmp/snmpd.conf;then
+		$sudo grep "^agent[Aa]ddress.*127.0.0.1" /etc/snmp/snmpd.conf -q && $sudo sed -i.orig "/^agent[Aa]ddress.*/s/^/#/" /etc/snmp/snmpd.conf
+		$sudo grep ^rocommunity /etc/snmp/snmpd.conf -q && $sudo sed -i.orig2 "/^rocommunity/s/^/#/" /etc/snmp/snmpd.conf
+		$sudo mkdir -pv /etc/snmp/snmpd.conf.d/
+		$sudo grep includeAllDisks /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.d/*.conf -q  2>/dev/null || echo includeAllDisks 20% | sudo tee -a /etc/snmp/snmpd.conf.d/my_snmpd.conf
+		egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q && sudo sed -i.BACKUP "/^sysLocation.*/s/^sysLocation.*/sysLocation    Hosted on our VMware ESX Cluster/" /etc/snmp/snmpd.conf
+		$sudo systemctl start snmpd
+	fi
+	ss -4nul | grep :161
+
+	ufw allow snmp
+	iptables -A INPUT -p udp --dport snmp -j ACCEPT
+
 	systemctl stop firewalld; systemctl disable firewalld;systemctl mask firewalld;yum remove firewalld firewalld-filesystem # Car firewalld coupe les flux SNMP
 	systemctl daemon-reload
 	# OU ALORS AUTORISER LE SNMP :
