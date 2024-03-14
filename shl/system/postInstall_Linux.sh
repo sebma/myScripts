@@ -52,6 +52,7 @@ if   $isRedHatLike;then
 	$sudo yum install -y net-snmp net-snmp-utils net-snmp-devel
 	if ! grep rouser.svc_snmp /etc/snmp/snmpd.conf -q;then
 		$sudo systemctl stop snmpd;$sudo net-snmp-create-v3-user -ro -X AES -A MD5 svc_snmp # Les MDPs sont a saisir de maniere interactive
+  		$sudo systemctl stop snmpd;$sudo net-snmp-create-v3-user -ro -X AES -A SHA-512 svc_snmp_v3 # Les MDPs sont a saisir de maniere interactive
 		$sudo systemctl restart snmpd
 	fi
 	$sudo egrep "^(rouser|createUser|usmUser)" /var/lib/snmp/snmpd.conf /var/lib/net-snmp/snmpd.conf /usr/share/snmp/snmpd.conf /etc/snmp/snmpd.conf
@@ -166,6 +167,7 @@ EOF
 		$sudo $apt install snmp snmpd -y $aptSimul # Pour la supervision SNMP
 		$sudo $apt install snmp-mibs-downloader -y $aptSimul # Necessaire depuis Ubuntu 12.04 cf. https://thejoyofstick.com/blog/2019/05/28/installing-snmp-mib-files-in-linux-ubuntu-12-04-lts/
 		$sudo systemctl stop snmpd;$sudo net-snmp-create-v3-user -ro -X AES -A MD5 svc_snmp # Les MDPs sont a saisir de maniere interactive
+  		$sudo systemctl stop snmpd;$sudo net-snmp-create-v3-user -ro -X AES -A SHA-512 svc_snmp_v3 # Les MDPs sont a saisir de maniere interactive
 
 		grep ^mibs /etc/snmp/snmp.conf -q && $sudo sed -i 's/\(^mibs.*$\)/#\1/' /etc/snmp/snmp.conf # cf. https://thejoyofstick.com/blog/2019/05/28/installing-snmp-mib-files-in-linux-ubuntu-12-04-lts/
 
