@@ -1,1 +1,1 @@
-Get-NetIPAddress -AddressFamily IPv4  | select InterfaceAlias , IPAddress | Sort-Object InterfaceAlias
+Get-NetIPInterface -ConnectionState Connected -AddressFamily IPv4 | % { Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias $_.InterfaceAlias } | select InterfaceAlias , IPAddress | Sort-Object InterfaceAlias
