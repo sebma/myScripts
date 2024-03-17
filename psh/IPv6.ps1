@@ -1,1 +1,1 @@
-Get-NetIPAddress -AddressFamily IPv6  | select InterfaceAlias , IPAddress | Sort-Object InterfaceAlias
+Get-NetIPInterface -ConnectionState Connected -AddressFamily IPv6 | % { Get-NetIPAddress -AddressFamily IPv6 -InterfaceAlias $_.InterfaceAlias } | select InterfaceAlias , IPAddress | Sort-Object InterfaceAlias
