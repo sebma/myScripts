@@ -39,9 +39,11 @@ EOF
 		resolvectl status
 		DNS_SERVER1=X.Y.Z.T1
 		FallBack_DNS_SERVER=X.Y.Z.T2
+  		DOMAIN=my.domain
 		if ! resolvectl dns | grep "$DNS_SERVER1" -q;then
 			iface=$(\ls /sys/class/net/ | grep -vw lo)
 			$sudo resolvectl dns $iface $DNS_SERVER1 $FallBack_DNS_SERVER
+   			$sudo resolvectl domain $iface $DOMAIN
 			resolvectl dns $iface
 			resolvectl status $iface
 		fi
