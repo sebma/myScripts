@@ -1,1 +1,1 @@
-netsh int ip reset
+netsh interface ip reset
