@@ -1,1 +1,1 @@
-route -6 print | findstr "On-link Gateway"
+route -6 print | findstr "On-link Gateway Persistent"
