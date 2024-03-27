@@ -1,1 +1,1 @@
-takeown /a /r /d Y
+takeown -d Y -r -a -f "%1"
