@@ -78,6 +78,8 @@ if   $isRedHatLike;then
 	# OU ALORS ON AUTORISE LE SNMP :
 	firewall-cmd --zone=public --add-port=161/udp --permanent
 	firewall-cmd --reload
+	ufw allow snmp
+	iptables -A INPUT -p udp --dport snmp -j ACCEPT
 
 	# snmpwalk -v1 -c public X.Y.Z.T system
 	snmpwalk -v2c -c MPPREAD X.Y.Z.T system
