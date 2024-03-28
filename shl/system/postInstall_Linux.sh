@@ -57,8 +57,10 @@ if   $isRedHatLike;then
 	fi
 	$sudo egrep "^(rouser|createUser|usmUser)" /var/lib/snmp/snmpd.conf /var/lib/net-snmp/snmpd.conf /usr/share/snmp/snmpd.conf /etc/snmp/snmpd.conf
 
+#	grep ^mibs /etc/snmp/snmp.conf -q && $sudo sed -i '/^mibs.*$/s/^/#/' /etc/snmp/snmp.conf # cf. https://thejoyofstick.com/blog/2019/05/28/installing-snmp-mib-files-in-linux-ubuntu-12-04-lts/
+
 	if test -f /etc/snmp/snmpd.conf;then
-		$sudo grep "^agent[Aa]ddress.*127.0.0.1" /etc/snmp/snmpd.conf -q && $sudo sed -i.orig "/^agent[Aa]ddress.*/s/^/#/" /etc/snmp/snmpd.conf
+#		$sudo grep "^agent[Aa]ddress.*127.0.0.1" /etc/snmp/snmpd.conf -q && $sudo sed -i.orig "/^agent[Aa]ddress.*/s/^/#/" /etc/snmp/snmpd.conf
 		$sudo grep ^rocommunity /etc/snmp/snmpd.conf -q && $sudo sed -i.orig2 "/^rocommunity/s/^/#/" /etc/snmp/snmpd.conf
 		$sudo mkdir -pv /etc/snmp/snmpd.conf.d/
 		$sudo grep includeAllDisks /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.d/*.conf -q  2>/dev/null || echo includeAllDisks 20% | sudo tee -a /etc/snmp/snmpd.conf.d/my_snmpd.conf
