@@ -88,6 +88,7 @@ if   $isRedHatLike;then
 	# ET L'ACTIVER SUR LA ZONE "public" :
 	firewall-cmd --zone=public --add-service snmp --permanent
 	firewall-cmd --reload
+ 	firewall-cmd --list-services
 
 	ufw allow snmp
 	iptables -A INPUT -p udp --dport snmp -j ACCEPT
