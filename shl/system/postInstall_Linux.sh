@@ -70,13 +70,11 @@ if   $isRedHatLike;then
 	ufw allow snmp
 	iptables -A INPUT -p udp --dport snmp -j ACCEPT
 
+	# SOIT ON DESACTIVE le service "firewalld"
 	systemctl stop firewalld; systemctl disable firewalld;systemctl mask firewalld;yum remove firewalld firewalld-filesystem # Car firewalld coupe les flux SNMP
 	systemctl daemon-reload
-	# OU ALORS AUTORISER LE SNMP :
+	# OU ALORS ON AUTORISE LE SNMP :
 	firewall-cmd --zone=public --add-port=161/udp --permanent
-	firewall-cmd --zone=public --add-port=161/tcp --permanent
-	firewall-cmd --zone=public --add-port=162/udp --permanent
-	firewall-cmd --zone=public --add-port=162/tcp --permanent
 	firewall-cmd --reload
 
 	# snmpwalk -v1 -c public X.Y.Z.T system
