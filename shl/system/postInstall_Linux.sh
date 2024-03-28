@@ -78,6 +78,17 @@ if   $isRedHatLike;then
 	# OU ALORS ON AUTORISE LE SNMP :
 	firewall-cmd --zone=public --add-port=161/udp --permanent
 	firewall-cmd --reload
+
+	# OU CRER UN SERVICE SNMP cf. https://firewalld.org/documentation/howto/add-a-service.html
+	firewall-cmd --permanent --new-service=snmp
+	firewall-cmd --permanent --service=snmp --set-description="SNMP protocol"
+	firewall-cmd --permanent --service=snmp --set-short=SNMP
+	firewall-cmd --permanent --service=snmp --add-port=161
+	firewall-cmd --permanent --service=snmp --add-protocol=udp
+	# ET L'ACTIVER SUR LA ZONE "public" :
+	firewall-cmd --zone=public --add-service snmp --permanent
+	firewall-cmd --reload
+
 	ufw allow snmp
 	iptables -A INPUT -p udp --dport snmp -j ACCEPT
 
