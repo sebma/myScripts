@@ -25,7 +25,7 @@ if ! type -P jq >/dev/null;then
 fi
 
 echo "=> Searching for the latest release on $protocol://$gitHubURL/$gitHubUser/$gitHubRepo ..."
-freeTubeLatestRelease=$(\curl -qLs -H "Accept: application/vnd.github.v3+json" $protocol://$gitHubAPIRepoURL/releases | jq -r '.[0].tag_name' | sed 's/v//;s/-beta//')
+freeTubeLatestRelease=$(\curl -qLs -H "Accept: application/vnd.github.v3+json" $protocol://$gitHubAPIRepoURL/tags | jq -r '.[0].name' | sed 's/v//;s/-beta//')
 echo "=> Found the $freeTubeLatestRelease version."
 freeTubeInstalledVersion=$(dpkg-query --showformat='${Version}' -W freetube 2>/dev/null)
 
