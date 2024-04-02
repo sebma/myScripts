@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+unset -f ytdlpUpdate
 ytdlpUpdate ()
 {
 	if [ $# -gt 1 ]; then
@@ -24,7 +25,7 @@ ytdlpUpdate ()
 		local ytdlpCurrentRelease=$($package --version)
 		echo "=> The current version of $package is <$ytdlpCurrentRelease>."
 		echo "=> Searching for the latest release on $ytdlpPyPI_URL ..." 1>&2
-		local ytdlpLatestRelease=$(\curl -qLs $ytdlpPyPI_URL/json | jq -r .info.version)
+		local ytdlpLatestRelease=$(time \curl -qLs $ytdlpPyPI_URL/json | jq -r .info.version)
 		if [ -z "$ytdlpLatestRelease" ]; then
 			set -o pipefail
 			echo "=> Couldn't find the latest release on $ytdlpPyPI_URL, checking the $ytdlpGitURL repository ..." 1>&2
