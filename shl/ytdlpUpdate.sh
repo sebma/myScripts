@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-unset -f ytdlpUpdate
 ytdlpUpdate ()
 {
 	if [ $# -gt 1 ]; then
