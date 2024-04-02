@@ -26,13 +26,13 @@ ytdlpUpdate ()
 	local module=yt_dlp
 	local yt_dlp="$(type -P $package)"
 	if [ -n "$yt_dlp" ]; then
-		local ytdlpCurrentRelease=$(time python3 -c "import $module; print($module.version.__version__)")
+		local ytdlpCurrentRelease=$(python3 -c "import $module; print($module.version.__version__)")
 		echo "=> The current version of $package is <$ytdlpCurrentRelease>."
 
 		local gitHub_API_Repo_URL=$(echo $ytdlpGitURL | $sed "s|github.com|api.github.com/repos|")
 		echo "=> Searching for the latest release on $gitHub_API_Repo_URL/tags ..." 1>&2
 
-		local ytdlpLatestRelease=$(time \curl -qLs -H "Accept: application/vnd.github.v3+json" $gitHub_API_Repo_URL/tags | jq -r '.[0].name')
+		local ytdlpLatestRelease=$(\curl -qLs -H "Accept: application/vnd.github.v3+json" $gitHub_API_Repo_URL/tags | jq -r '.[0].name')
 		if [ -z "$ytdlpLatestRelease" ]; then
 			set -o pipefail
 			echo "=> Couldn't find the latest release on $ytdlpPyPI_URL, checking the $ytdlpGitURL repository ..." 1>&2
