@@ -1,1 +1,1 @@
-ls -file -Recurse | ? { $_.LastWriteTime -gt (Get-Date).AddMinutes(-5) } | % FullName
+ls -File -R | ? { $_.LastWriteTime -gt (Get-Date).AddMinutes(-5) } | % FullName
