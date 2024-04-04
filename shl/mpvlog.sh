@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-mpv () 
-{ 
+function mpvLog {
 	local today=$(date +%Y%m%d)
 	local mpv="command mpv";
 	local mpvOptions="$mpvDefaultOptions --log-file=$HOME/log/mpv-$today.log";
@@ -10,4 +9,4 @@ mpv ()
 	LANG=en_US.utf8 $mpv $mpvOptions "$@"
 }
 
-mpv "$@"
+mpvLog "$@"
