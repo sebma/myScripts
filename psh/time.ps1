@@ -1,5 +1,6 @@
 function time {
-        ( "$args" | Measure-Command { Invoke-Expression $_ | Out-Default } ).toString()
+	$duration = ( "$args" | Measure-Command { Invoke-Expression $_ | Out-Default } ).toString()
+	echo "`n"$duration
 }
 
 time @args
