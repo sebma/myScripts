@@ -1,5 +1,6 @@
 function dirSize {
 	$dirName = $args[0]
+ 	echo "=> Size($dirName) ..."
 	$dirSize = ( dir "$dirName" -force -recurse | measure -property length -sum ).Sum
 	switch( $dirSize ) {
 		{ $_ -ge 1tb -and $_ -le 1pb } { "{0:n2} TiB`t$dirName" -f ( $dirSize / 1tb ); break }
@@ -10,17 +11,21 @@ function dirSize {
 	}
 }
 
+function time {
+	$duration = ( "$args" | Measure-Command { Invoke-Expression $_ | Out-Default } ).toString()
+	echo "`n"$duration
+}
+
 function main {
 	$argc = $args.Count
 	if ( $argc ) {
 		for($i=0;$i -lt $argc;$i++) {
 			$dir = $args[$i]
-			echo "=> Size($dir) ..."
-			( Measure-Command { dirSize $dir | Out-Default } ).toString()
+			time { dirSize $dir }
 		}
 	} else {
 		$dir = "."
-		( Measure-Command { dirSize $dir | Out-Default } ).toString()
+		time { dirSize $dir }
 	}
 }
 
