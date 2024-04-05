@@ -12,9 +12,14 @@ function dirSize {
 
 function main {
 	$argc = $args.Count
-	for($i=0;$i -lt $argc;$i++) {
-		$dir = $args[$i]
-		echo "=> Size($dir) ..."
+	if ( $argc ) {
+		for($i=0;$i -lt $argc;$i++) {
+			$dir = $args[$i]
+			echo "=> Size($dir) ..."
+			( Measure-Command { dirSize $dir | Out-Default } ).toString()
+		}
+	} else {
+		$dir = "."
 		( Measure-Command { dirSize $dir | Out-Default } ).toString()
 	}
 }
