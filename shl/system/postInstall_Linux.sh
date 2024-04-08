@@ -39,6 +39,19 @@ if   $isRedHatLike;then
 	grep NOZEROCONF /etc/sysconfig/network -q || echo NOZEROCONF=yes | tee -a /etc/sysconfig/network # Disable APIPA
 	systemctl restart network
 
+	# DNS
+	resolvectl status
+	DNS_SERVER1=X.Y.Z.T1
+	FallBack_DNS_SERVER=X.Y.Z.T2
+	DOMAIN=myDomain.lan
+	if ! resolvectl dns | grep "$DNS_SERVER1" -q;then
+		iface=$(\ls /sys/class/net/ | grep -vw lo)
+		$sudo resolvectl dns $iface $DNS_SERVER1 $FallBack_DNS_SERVER
+		$sudo resolvectl domain $iface $DOMAIN
+		resolvectl dns $iface
+		resolvectl status $iface
+	fi
+
 	# CONF NTP (hors systemd)
 	yum install -y ntp
 	# sed -i '/^server /s/server.*/server $NTP1 iburst/;0' /etc/ntp.conf
