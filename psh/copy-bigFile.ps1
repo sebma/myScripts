@@ -19,9 +19,8 @@ $cmd = "$robocopyCOMMAND $srcDIR $dstDIR $bigFILE $robocopyOPTIONS"
 "=> cmd = "+$cmd
 #iex $cmd | tee result.out
 #( Measure-Command { iex $cmd | Out-Default } ).toString()
-#"=> The copy took " + ( Measure-Command { iex $cmd | tee result.out | Out-Default } ).toString() + "."
 
-"=> The copy took " + ( Measure-Command { iex $cmd | tee -var result | Out-Default } ).toString() + "."
+"=> The copy took " + ( Measure-Command { iex $cmd | tee -var result | Out-Default } ).toString("hh\:mm\:ss\:ff") + "."
 
 #$speed = cat result.out 2>$null | sls Speed | select -f 1 | % { "{0:n3} MiB" -f ( ($_ -split '\s+')[3]/1MB ) }
 $speed = $result | sls Speed | select -f 1 | % { "{0:n3} MiB/s" -f ( ($_ -split '\s+')[3]/1MB ) }
