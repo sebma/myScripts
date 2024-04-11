@@ -1,7 +1,7 @@
 function time {
-	$duration = ( "$args" | Measure-Command { Invoke-Expression $_ | Out-Default } ).toString()
+	$duration = ( "$args" | Measure-Command { Invoke-Expression $_ | Out-Default } ).toString("hh\:mm\:ss\.ff")
 	echo ""
- 	echo $duration
+ 	"=> The processing took "+$duration+"."
 }
 
 time @args
