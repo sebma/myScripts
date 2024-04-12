@@ -11,4 +11,4 @@ echo ''
 netsh int ipv4 sh route | sls -n "/32|224.0.0.0/4"
 
 echo '=> Printing the route via "Get-NetRoute -AddressFamily IPv4" :'
-Get-NetRoute -AddressFamily IPv4 | select DestinationPrefix,NextHop,ifIndex,InterfaceAlias,InterfaceMetric,RouteMetric | Format-Table | Out-String -stream | sls -n "224.0.0.0/4|/32"
+Get-NetRoute -AddressFamily IPv4 | select DestinationPrefix,NextHop,InterfaceAlias,ifIndex,InterfaceMetric,RouteMetric | Format-Table | Out-String -stream | sls -n "224.0.0.0/4|/32"
