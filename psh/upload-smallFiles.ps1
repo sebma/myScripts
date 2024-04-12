@@ -8,8 +8,6 @@ $robocopyOPTIONS = "/E /R:0 /W:0 /IM /IS /IT /NFL /NP"
 $robocopyCOMMAND = "robocopy.exe"
 #$robocopyARGS = "$srcDIR", "$dstDIR" , "/IM" , "/NP"
 
-"=> $robocopyARGS = "+$robocopyARGS
-
 "=> Copying $srcDIR $dstDIR  ..."
 $cmd = "$robocopyCOMMAND $srcDIR $dstDIR $robocopyOPTIONS"
 $duration = Measure-Command { iex $cmd | tee -var result | Out-Default }
