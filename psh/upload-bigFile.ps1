@@ -1,3 +1,4 @@
+$dirSep = [io.path]::DirectorySeparatorChar
 $srcDIR = $HOME+"\Downloads"
 $dstDIR = $HOME"+"\Downloads\"+$ENV:USERNAME
 $bigFILE = "19041.1.191206-1406.vb_release_CLIENTLANGPACKDVD_OEM_MULTI.iso"
