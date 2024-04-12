@@ -1,5 +1,5 @@
 $srcDIR = $HOME+"\Downloads"
-$dstDIR = "\\data.par-nas.orion.lan\MPP\Tests-"+$ENV:USERNAME
+$dstDIR = $HOME"+"\Downloads\"+$ENV:USERNAME
 $bigFILE = "19041.1.191206-1406.vb_release_CLIENTLANGPACKDVD_OEM_MULTI.iso"
 
 #$robocopyOPTIONS = "/IM"
