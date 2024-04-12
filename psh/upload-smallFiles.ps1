@@ -1,7 +1,7 @@
 $dirSep = [io.path]::DirectorySeparatorChar
 $dir2COPY = "myDIR"
 $srcDIR = $HOME + $dirSep + "Downloads" + $dirSep + $dir2COPY
-$dstDIR = $srcDIR + $dirSep + ".." + $ENV:USERNAME + $dirSep + $dir2COPY
+$dstDIR = $srcDIR + $dirSep + ".." + $dirSep + $ENV:USERNAME + $dirSep + $dir2COPY
 
 #$robocopyOPTIONS = "/E /IM /NFL"
 $robocopyOPTIONS = "/E /R:0 /W:0 /IM /IS /IT /NFL /NP"
