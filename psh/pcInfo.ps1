@@ -19,5 +19,7 @@ echo "=> Routing table :"
 Get-NetRoute -AddressFamily IPv4 | select DestinationPrefix,NextHop,InterfaceAlias,ifIndex,InterfaceMetric,RouteMetric | Format-Table | Out-String -stream | sls -n "224.0.0.0/4|/32"
 echo "=> Software List :"
 #wmic product get name,version,installDate | sls -n "^\s*$" | Out-String -stream | Sort { ($_.trim() -split '\s+')[1] }
-Get-WmiObject -Class Win32_Product | select Name , Version , InstallDate | sort Name | Format-Table
+#Get-WmiObject -Class Win32_Product | select Name , Version , InstallDate | sort Name | Format-Table
+#Get-Package | ? Name -notMatch "update|microsoft" | Select Name , Version , InstallDate | Sort Name | Format-Table -AutoSize
+ls HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall | % { gp $_.PsPath } | select Displayname , DisplayVersion , InstallDate | sort Displayname | Format-Table | Out-String -Stream | % { $_.Trim() }
 } | Tee "$env:COMPUTERNAME-$today.txt"
