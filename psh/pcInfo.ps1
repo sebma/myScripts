@@ -21,5 +21,5 @@ echo "=> Software List :"
 #wmic product get name,version,installDate | sls -n "^\s*$" | Out-String -stream | Sort { ($_.trim() -split '\s+')[1] }
 #Get-WmiObject -Class Win32_Product | Select Name , Version , InstallDate | Sort Name | Format-Table
 #Get-Package | ? Name -notMatch "update|microsoft" | Select Name , Version , InstallDate | Sort Name | Format-Table -AutoSize
-ls HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall | % { gp $_.PsPath } | Select Displayname , DisplayVersion , InstallDate | Sort -u Displayname | Format-Table | Out-String -Stream | % { $_.Trim() }
+ls HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall | % { gp $_.PsPath } | Select Displayname , DisplayVersion , InstallDate | Sort -u Displayname | Format-Table
 } | Tee "$env:COMPUTERNAME-$today.txt"
