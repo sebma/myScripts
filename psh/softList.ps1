@@ -1,0 +1,1 @@
+ls HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall | % { gp $_.PsPath } | Select Displayname , DisplayVersion , InstallDate | Sort -u Displayname | Format-Table | Out-String -Stream | % { $_.Trim() }
