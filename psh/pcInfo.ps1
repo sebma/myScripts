@@ -4,6 +4,11 @@ echo "=> PC Summary info :"
 gin WindowsProductName , BiosFirmwareType , CsManufacturer , CsModel , CsChassisSKUNumber , CsProcessors , CsTotalPhysicalMemory , OsName , OsVersion, OsLanguage, OsMuiLanguages , CsNetworkAdapters , CsName , CsUserName , OsPagingFiles , TimeZone
 echo "UserProfile`t      : $ENV:USERPROFILE"
 echo ""
+echo "=> AD Info :"
+Get-ADComputer $env:COMPUTERNAME
+Get-ADUser $env:USERNAME
+Get-ADDomainController -Discover | % HostName
+echo $env:LOGONSERVER.Substring(2)
 echo "=> Network Maps :"
 Get-SMBMapping | Format-Table
 echo "=> Network Drives Usage :"
