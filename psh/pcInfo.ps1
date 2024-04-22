@@ -27,4 +27,6 @@ echo "=> Software List :"
 #Get-WmiObject -Class Win32_Product | Select Name , Version , InstallDate | Sort Name | Format-Table
 #Get-Package | ? Name -notMatch "update|microsoft" | Select Name , Version , InstallDate | Sort Name | Format-Table -AutoSize
 ls HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall | % { gp $_.PsPath } | Select Displayname , DisplayVersion , InstallDate | Sort -u Displayname | Format-Table
+echo "=> Running Services :"
+Get-Service | ? Status -eq "Running" | select Status , Name , DisplayName
 } | Tee "$env:COMPUTERNAME-$today.txt"
