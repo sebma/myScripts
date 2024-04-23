@@ -5,9 +5,9 @@ gin WindowsProductName , BiosFirmwareType , CsManufacturer , CsModel , CsChassis
 echo "UserProfile`t      : $ENV:USERPROFILE"
 echo ""
 echo "=> AD Info :"
-Get-ADComputer $env:COMPUTERNAME
-Get-ADUser $env:USERNAME
-Get-ADDomainController -Discover | % HostName
+Get-ADComputer $env:COMPUTERNAME 2>$null
+Get-ADUser $env:USERNAME 2>$null
+Get-ADDomainController -Discover 2>$null | % HostName
 echo $env:LOGONSERVER.Substring(2)
 echo "=> Network Maps :"
 Get-SMBMapping | Format-Table
