@@ -1,0 +1,1 @@
+ldapsearch -LLL -x -H ldap://myDOMAIN.lan -D userName@myDOMAIN.LAN -W -b "CN=ServerName,OU=SERVERS,OU=Infrastructure,OU=T1-Servers,OU=Tier 1,OU=Admin,DC=myDOMAIN,DC=lan" servicePrincipalName
