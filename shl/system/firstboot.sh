@@ -47,7 +47,7 @@ if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
 	done
 	echo "=> done."
 	systemctl start syslog.socket
-	syslogSERVER=172.16.5.231
+	syslogSERVER=x.y.z.t1
 	grep $syslogSERVER /etc/rsyslog.conf /etc/rsyslog.d/* -q || echo "*.* @$syslogSERVER" | tee -a /etc/rsyslog.d/$companyNAME-rsyslog.conf
 	systemctl restart rsyslog
 fi
