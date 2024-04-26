@@ -21,7 +21,7 @@ https_proxy=$http_proxy/HTTPS///
 apt="$(which apt) -V"
 if $isDebianLike;then
 	$sudo sysctl -w kernel.dmesg_restrict=0 # Allows users to run "dmesg"
-	echo kernel.dmesg_restrict=0 | sudo tee -a /etc/sysctl.d/99-pluriad.conf
+	echo kernel.dmesg_restrict=0 | sudo tee -a /etc/sysctl.d/99-$companyNAME.conf
 	$sudo systemctl restart systemd-sysctl.service
 	$sudo ufw allow ssh
 
@@ -121,7 +121,7 @@ EOF
 			$sudo grep "^agent[Aa]ddress.*127.0.0.1" /etc/snmp/snmpd.conf -q && $sudo sed -i.orig "/^agent[Aa]ddress.*/s/^/#/" /etc/snmp/snmpd.conf
 			$sudo grep ^rocommunity /etc/snmp/snmpd.conf -q && $sudo sed -i.orig2 "/^rocommunity/s/^/#/" /etc/snmp/snmpd.conf
 			$sudo mkdir -pv /etc/snmp/snmpd.conf.d/
-			$sudo grep includeAllDisks /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.d/pluriad_snmpd.conf -q  2>/dev/null || echo includeAllDisks 20% | sudo tee -a /etc/snmp/snmpd.conf.d/pluriad_snmpd.conf
+			$sudo grep includeAllDisks /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.d/$companyNAME-snmpd.conf -q  2>/dev/null || echo includeAllDisks 20% | sudo tee -a /etc/snmp/snmpd.conf.d/$companyNAME-snmpd.conf
 			egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q && sudo sed -i.BACKUP "/^sysLocation.*/s/^sysLocation.*/sysLocation    Hosted on our VMware ESX Cluster/" /etc/snmp/snmpd.conf
 			$sudo systemctl start snmpd
 		fi
@@ -169,7 +169,7 @@ EOF
 
 		# CONFIG SYSLOG
 		syslogSERVER=X.Y.Z.T3
-		grep $syslogSERVER /etc/rsyslog.conf /etc/rsyslog.d/* -q || echo "*.* @$syslogSERVER" | $sudo tee -a /etc/rsyslog.d/pluriad-rsyslog.conf
+		grep $syslogSERVER /etc/rsyslog.conf /etc/rsyslog.d/* -q || echo "*.* @$syslogSERVER" | $sudo tee -a /etc/rsyslog.d/$companyNAME-rsyslog.conf
 		$sudo systemctl restart rsyslog
 
 		mkdir -p $HOME/.vim
