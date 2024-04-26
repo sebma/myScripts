@@ -127,7 +127,7 @@ if   $isRedHatLike;then
 
 	# CONF RSYSLOG HORS SERVEURS SCALITY
 	syslogSERVER=X.Y.Z.T3
-	grep $syslogSERVER /etc/rsyslog.conf /etc/rsyslog.d/* -q || echo "*.* @$syslogSERVER" | $sudo tee -a /etc/rsyslog.d/pluriad-rsyslog.conf
+	grep $syslogSERVER /etc/rsyslog.conf /etc/rsyslog.d/* -q || echo "*.* @$syslogSERVER" | $sudo tee -a /etc/rsyslog.d/$companyNAME-rsyslog.conf
 	$sudo systemctl restart rsyslog
 
 	if grep -i virtual /sys/class/dmi/id/product_name -q;then
@@ -202,7 +202,7 @@ EOF
 		ss -4nul | grep :161
 		$sudo grep "^agent[Aa]ddress.*127.0.0.1" /etc/snmp/snmpd.conf -q && $sudo sed -i.orig "s/^agent[Aa]ddress.*/agentAddress udp:161/" /etc/snmp/snmpd.conf
 		$sudo grep ^rocommunity /etc/snmp/snmpd.conf -q && $sudo sed -i.orig2 "/^rocommunity/s/^/#/" /etc/snmp/snmpd.conf # A DEMANDER A MIGUEL POURQUOI
-		grep includeAllDisks /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.d/pluriad_snmpd.conf -q  2>/dev/null || echo includeAllDisks 20% | $sudo tee -a /etc/snmp/snmpd.conf.d/pluriad_snmpd.conf
+		grep includeAllDisks /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.d/$companyNAME-snmpd.conf -q  2>/dev/null || echo includeAllDisks 20% | $sudo tee -a /etc/snmp/snmpd.conf.d/$companyNAME-snmpd.conf
 		$sudo systemctl start snmpd
 		$sudo ufw allow snmp
 
