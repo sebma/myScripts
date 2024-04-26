@@ -230,7 +230,7 @@ EOF
 
 		# CONF RSYSLOG HORS SERVEURS SCALITY
 		syslogSERVER=X.Y.Z.T3
-		grep $syslogSERVER /etc/rsyslog.conf /etc/rsyslog.d/* -q || echo "*.* @$syslogSERVER" | $sudo tee -a /etc/rsyslog.d/pluriad-rsyslog.conf
+		grep $syslogSERVER /etc/rsyslog.conf /etc/rsyslog.d/* -q || echo "*.* @$syslogSERVER" | $sudo tee -a /etc/rsyslog.d/$companyNAME-rsyslog.conf
 		$sudo systemctl restart rsyslog
 
 		mkdir -p $HOME/.vim
