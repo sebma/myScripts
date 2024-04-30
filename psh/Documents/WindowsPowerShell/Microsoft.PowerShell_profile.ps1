@@ -108,6 +108,8 @@ function setAliases {
 setAliases 
 
 if( $IsWindows ) {
+	function msinfo { msinfo32.exe -nfo "$env:COMPUTERNAME-$(get-date -f "yyyyMMdd").nfo" }
+
 	if( ! (Test-Path $HOME/Desktop/$env:COMPUTERNAME.nfo) ) { msinfo32 -nfo $HOME/Desktop/$env:COMPUTERNAME.nfo }
 
 	if( ! (isInstalled("grep.exe")) ) {
