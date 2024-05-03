@@ -1,5 +1,5 @@
 function groups {
-	$DC = (Get-ADDomainController).Name
+	$DC = Get-ADDomainController 2>$null | % Name
 	$DC = $env:LOGONSERVER.Substring(2)
 	$argc=$args.Count
 	if ( $argc -eq 0) {
