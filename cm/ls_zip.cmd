@@ -7,7 +7,8 @@ if not defined zipfile (
   exit/b 1
 )
 
-set zipfile="%~dp0%zipfile%"
+set scriptDIR=%~dp0
+set zipfile="%scriptDIR%%zipfile%"
 
 set APP_HOME=D:\Produits\Appli
 
