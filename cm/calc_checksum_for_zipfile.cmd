@@ -6,7 +6,8 @@ if not defined zipfile (
   exit/b 1
 )
 
-set zipfile="%~dp0\%1"
+set scriptDIR=%~dp0
+set zipfile="%scriptDIR%%1"
 if not exist temp mkdir temp
 pushd temp
 for /f "skip=1 tokens=2" %%f in ('unzip -o %zipfile%') do (sha512sum %%f) 2>nul
