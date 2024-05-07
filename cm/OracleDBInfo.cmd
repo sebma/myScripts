@@ -1,6 +1,7 @@
 @echo off
-set logFile=%~dp0\%computername%_%~n0.log
-set sqlFile=%~dp0\%computername%_%~n0.sql
+set scriptDIR=%~dp0
+set logFile=%scriptDIR%%computername%_%~n0.log
+set sqlFile=%scriptDIR%%computername%_%~n0.sql
 set expUser=exp
 
 echo. >nul && (
