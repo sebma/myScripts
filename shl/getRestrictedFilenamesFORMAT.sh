@@ -242,7 +242,7 @@ getRestrictedFilenamesFORMAT () {
 
 			thumbnailExtension=$(echo "${thumbnailURL/*\//}" | awk -F"[.]" '{print$2}')
 			thumbnailExtension="${thumbnailExtension/\?*/}"
-			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -Lqs "$thumbnailURL" | file -bi - | awk -F ';' '{sub(".*/","",$1);sub("jpeg","jpg",$1);print$1}')
+			[ -z "$thumbnailExtension" ] && thumbnailExtension=$(\curl -qLs "$thumbnailURL" | file -bi - | awk -F ';' '{sub(".*/","",$1);sub("jpeg","jpg",$1);print$1}')
 			[ -n "$thumbnailExtension" ] && artworkFileName=${fileName/%.$extension/.$thumbnailExtension}
 
 			echo $formatString | $grep -v '+' | $grep "audio only" -q && ytdlExtraOptions+=( -x ) && audioOnly=true
@@ -265,7 +265,7 @@ getRestrictedFilenamesFORMAT () {
 			[ "$debugLevel" = 1 ] && echo "=> acodec = <$acodec> fileName = <$fileName> extension = <$extension> isLIVE = <$isLIVE> formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName> firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url>" && echo
 
 			if [ $thumbnailerName = AtomicParsley ];then
-				thumbnailFormatString=$(\curl -Lqs "$thumbnailURL" | file -b -)
+				thumbnailFormatString=$(\curl -qLs "$thumbnailURL" | file -b -)
 				if echo $thumbnailFormatString | $grep -q JPEG && ! echo $thumbnailFormatString | $grep -q JFIF;then
 					#Because of https://bitbucket.org/wez/atomicparsley/issues/63
 					echo "${effects[bold]}${colors[blue]}=> WARNING: The remote thumbnail is not JFIF compliant, downloading it to converting it to JPEG JFIF ...$normal"
