@@ -16,7 +16,7 @@ function main {
 		$baseDir = $args[$i].TrimEnd('\').TrimEnd('/')
 		$subDirsList = $(ls -dir -force $baseDir | % FullName)
 		foreach ($subDir in $subDirsList) {
-#			( Measure-Command { dirSize $baseDir\$subDir | Out-Default } ).toString()
+#			( Measure-Command { dirSize $baseDir\$subDir | Out-Default } ).toString("hh\:mm\:ss\.ff")
 			dirSize $subDir
 		}
 	}
