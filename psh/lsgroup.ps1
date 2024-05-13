@@ -5,7 +5,7 @@ function lsgroup {
 		for($i=0;$i -lt $argc;$i++) {
   			$group = $args[$i]
 			echo "=> Members of group $group :"
-			(Get-ADGroupMember $group).SamAccountName | sort
+			Get-ADGroupMember $group -server $DC | SamAccountName | sort
 		}
 	}
 }
