@@ -12,7 +12,7 @@ function dirSize {
 }
 
 function time {
-	$duration = ( "$args" | Measure-Command { Invoke-Expression $_ | Out-Default } ).toString()
+	$duration = ( "$args" | Measure-Command { Invoke-Expression $_ | Out-Default } ).toString("hh\:mm\:ss\.ff")
 	echo "`n"$duration"`n"
 }
 
