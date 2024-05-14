@@ -1,3 +1,15 @@
-$myPattern = '*'+$args[0]+'*'
 $DC = $env:LOGONSERVER.Substring(2)
-Get-ADComputer -Properties CanonicalName , Description , IPv4Address , OperatingSystem , ServicePrincipalNames -Filter { name -like $myPattern }
+"=> LOGONSERVER = $DC"
+
+$firstArg = $args[0]
+if( ! $firstArg.Contains("*") ) {
+	$myPattern = '*'+$firstArg+'*'
+} else {
+	$myPattern = $firstArg
+}
+
+"=> myPattern = $myPattern"
+
+Get-ADComputer -Server $DC -Properties CanonicalName , Description , IPv4Address , OperatingSystem , ServicePrincipalNames -Filter { Name -like $myPattern }
+
+# Get-ADComputer -Server $DC -Properties CanonicalName , Description , IPv4Address , OperatingSystem , ServicePrincipalNames -Filter { Name -like $myPattern } | ? Name -match $myRegExp
