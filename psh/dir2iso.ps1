@@ -1,9 +1,10 @@
 $scriptName = Split-Path -Leaf $PSCommandPath
-
+$scriptDIR = $PSScriptRoot
+$scriptPath  = $PSCommandPath
 function dis2iso {
 	$argc=$args.Count
 	if ( $argc -ne 2 ) {
-		echo "=> Usage $scriptName isoFileName directoryPath"
+		write-warning "Usage:$scriptName isoFileName directoryPath"
 		exit 1
 	}
 	$isoFileName = $args[0]
