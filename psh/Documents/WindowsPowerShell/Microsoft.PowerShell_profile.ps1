@@ -8,6 +8,10 @@ $dirSep = [io.path]::DirectorySeparatorChar
 
 function source($script) { . $script }
 
+function pow2($a,$n) {
+    return [math]::pow($a,$n)
+}
+
 function isInstalled($cmd) { return gcm "$cmd" 2>$null }
 
 # sudo Update-Help
