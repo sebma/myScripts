@@ -113,9 +113,9 @@ function setAliases {
 setAliases 
 
 if( $IsWindows ) {
-	Get-ADDomainController | % Name
+	"=> Default DC : " + (Get-ADDomainController).Name
 	$PSDefaultParameterValues = @{ "*-AD*:Server" = $env:LOGONSERVER.Substring(2) } # cf. https://serverfault.com/a/528834/312306
-	Get-ADDomainController | % Name
+	"=> Default DC : " + (Get-ADDomainController).Name
 
 	function time {
 		# See https://github.com/lukesampson/psutils/blob/master/time.ps1
