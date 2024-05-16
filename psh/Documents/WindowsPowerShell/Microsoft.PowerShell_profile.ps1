@@ -113,9 +113,9 @@ function setAliases {
 setAliases 
 
 if( $IsWindows ) {
-	"=> (Get-ADDomainController).Name is " + (Get-ADDomainController).Name
-	"=> nltest /dsgetdc:$ENV:USERDNSDOMAIN :"
-	nltest /dsgetdc:$ENV:USERDNSDOMAIN
+	"=> Current DC from Get-ADDomainController -Discover is : " + (Get-ADDomainController -Discover).Name
+	"=> Current DC from nltest /dsgetdc:" + $ENV:USERDNSDOMAIN
+	nltest /dsgetdc:$ENV:USERDNSDOMAIN | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
 
  	if( (Get-ADDomainController).Name -ne $env:LOGONSERVER.Substring(2) ) {
 	 	"=> Switching the default DC to " + $env:LOGONSERVER.Substring(2) + " ..."
