@@ -113,11 +113,11 @@ function setAliases {
 setAliases 
 
 if( $IsWindows ) {
-	"=> Default DC : " + (Get-ADDomainController).Name
+	"=> Default DC is " + (Get-ADDomainController).Name
  	if( (Get-ADDomainController).Name -ne $env:LOGONSERVER.Substring(2) ) {
 	 	"=> Switching the default DC to " + $env:LOGONSERVER.Substring(2) + " ..."
 		$PSDefaultParameterValues = @{ "*-AD*:Server" = $env:LOGONSERVER.Substring(2) } # cf. https://serverfault.com/a/528834/312306
-		"=> Default DC : " + (Get-ADDomainController).Name
+		"=> Default DC is " + (Get-ADDomainController).Name
   	}
 
 	function time {
