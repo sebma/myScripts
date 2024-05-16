@@ -11,7 +11,7 @@ function findfiles {
 		exit 1
 	}
 
-	dir -r -fo $dirName 2>$null | % FullName | sls $regexp
+	dir -r -fo $dirName 2>$null | ? FullName -match "$regexp" | % FullName
 }
 
 findfiles @args
