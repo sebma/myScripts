@@ -119,7 +119,7 @@ if( $IsWindows ) {
 	"=> Current DC from nltest /dsgetdc:" + $ENV:USERDNSDOMAIN
 	nltest /dsgetdc:$ENV:USERDNSDOMAIN | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
 
- 	$LogonDC = $env:LOGONSERVER.Substring(2)
+ 	$LogonDC = $ENV:LOGONSERVER.Substring(2)
 	if( $DC -ne $LogonDC ) {
 	 	"=> Switching the default DC to " + $LogonDC + " ..."
 		$PSDefaultParameterValues = @{ "*-AD*:Server" = $LogonDC } # cf. https://serverfault.com/a/528834/312306
