@@ -114,29 +114,29 @@ setAliases
 
 if( $IsWindows ) {
 	"=> Current DC from Get-ADDomainController is : "
- 	$DC = (Get-ADDomainController).Name
-  	echo $DC
+	$DC = (Get-ADDomainController).Name
+	echo $DC
 	"=> Current DC from nltest /dsgetdc:" + $ENV:USERDNSDOMAIN
 	nltest /dsgetdc:$ENV:USERDNSDOMAIN | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
 
- 	$LogonDC = $ENV:LOGONSERVER.Substring(2)
+	$LogonDC = $ENV:LOGONSERVER.Substring(2)
 	if( $DC -ne $LogonDC ) {
-	 	"=> Switching the default DC to " + $LogonDC + " ..."
+		"=> Switching the default DC to " + $LogonDC + " ..."
 		$PSDefaultParameterValues = @{ "*-AD*:Server" = $LogonDC } # cf. https://serverfault.com/a/528834/312306
 		"=> The default DC is now " + (Get-ADDomainController).Name
-  	}
+	}
 
 	function time {
 		# See https://github.com/lukesampson/psutils/blob/master/time.ps1
 		Set-StrictMode -Off;
-	
+
 		# see http://stackoverflow.com/a/3513669/87453
 		$cmd, $args = $args
 		$args = @($args)
 		$sw = [diagnostics.stopwatch]::startnew()
 		& $cmd @args
 		$sw.stop()
-	
+
 		"$($sw.elapsed)"
 	}
 
@@ -155,7 +155,7 @@ if( $IsWindows ) {
 		if( (Get-WinSystemLocale).Name -ne "en-UK" ) { Set-WinSystemLocale en-UK }
 #		if( (Get-WinUserLanguageList).LanguageTag -ne "en-GB" ) { Set-WinUserLanguageList en-GB -Force }
 	}
-	
+
 	changeLanguage2English
 
 	function RegInitUser {
