@@ -113,13 +113,16 @@ function setAliases {
 setAliases 
 
 if( $IsWindows ) {
-	"=> Current DC from Get-ADDomainController -Discover is : " + (Get-ADDomainController -Discover).Name
+	"=> Current DC from Get-ADDomainController is : "
+ 	$DC = (Get-ADDomainController).Name
+  	$DC
 	"=> Current DC from nltest /dsgetdc:" + $ENV:USERDNSDOMAIN
 	nltest /dsgetdc:$ENV:USERDNSDOMAIN | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
 
- 	if( (Get-ADDomainController).Name -ne $env:LOGONSERVER.Substring(2) ) {
-	 	"=> Switching the default DC to " + $env:LOGONSERVER.Substring(2) + " ..."
-		$PSDefaultParameterValues = @{ "*-AD*:Server" = $env:LOGONSERVER.Substring(2) } # cf. https://serverfault.com/a/528834/312306
+ 	$LogonDC = $env:LOGONSERVER.Substring(2)
+	if( $DC -ne $LogonDC ) {
+	 	"=> Switching the default DC to " + $LogonDC + " ..."
+		$PSDefaultParameterValues = @{ "*-AD*:Server" = $LogonDC } # cf. https://serverfault.com/a/528834/312306
 		"=> The default DC is now " + (Get-ADDomainController).Name
   	}
 
