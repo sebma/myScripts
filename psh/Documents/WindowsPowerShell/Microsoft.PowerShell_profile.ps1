@@ -314,7 +314,8 @@ if( $IsWindows ) {
 }
 
 function findfiles {
-	ls -r -fo | % FullName | sls $($args[0])
+	$regexp = $($args[0])
+	dir -r -fo 2>$null | ? FullName -match "$regexp" | % FullName
 }
 
 function dis2iso {
