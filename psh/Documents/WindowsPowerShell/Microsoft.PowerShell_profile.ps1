@@ -121,7 +121,7 @@ if( $IsWindows ) {
 	nltest /dsgetdc:$ENV:USERDNSDOMAIN | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
 
 	$LogonDC = $ENV:LOGONSERVER.Substring(2)
-	if( $DC -ne $LogonDC ) {
+	if( ! $DC.Contains( $LogonDC -replace "\d" ) ) {
 		"=> Switching the default DC to " + $LogonDC + " ..."
 		$PSDefaultParameterValues = @{ "*-AD*:Server" = $LogonDC } # cf. https://serverfault.com/a/528834/312306
 		"=> The default DC is now " + (Get-ADDomainController).Name
