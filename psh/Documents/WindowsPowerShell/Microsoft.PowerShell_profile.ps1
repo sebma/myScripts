@@ -178,7 +178,11 @@ if( $IsWindows ) {
 
 	if( (alias cd 2>$null | sls cd) ) { 
 		del alias:cd
-		function cd($dir) { if($dir -eq "-"){popd} else {pushd $dir} }
+		function cd($dir) {
+			if($dir -eq "-"){popd}
+			elseif( ! $args.Count ) {pushd ~}
+			else {pushd $dir}
+		}
 	}
 
 	function Set-ShortCut ($Source,$DestinationPath) {
