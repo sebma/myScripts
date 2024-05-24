@@ -180,7 +180,7 @@ if( $IsWindows ) {
 		del alias:cd
 		function cd($dir) {
 			if($dir -eq "-"){popd}
-			elseif( ! $args.Count ) {pushd ~}
+			elseif( ! $dir.Length ) {pushd ~}
 			else {pushd $dir}
 		}
 	}
