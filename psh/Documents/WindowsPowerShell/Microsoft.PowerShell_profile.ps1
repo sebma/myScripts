@@ -150,9 +150,11 @@ if( $IsWindows ) {
 	function viewPubKey($pubKey) {
 		& $openssl pkey -text -noout -in $pubKey
 	}
+ 
 	function openCert {
 		& $openssl x509 -notext -noout -in @args
 	}
+ 
 	function viewCert {
 		openCert @args -text
 	}
