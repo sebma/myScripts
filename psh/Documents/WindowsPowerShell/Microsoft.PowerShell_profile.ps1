@@ -108,13 +108,13 @@ function setAliases {
 	set-alias -Scope Global yt-dl youtube-dl
 	set-alias -Scope Global vi vim
 	set-alias -Scope Global l ls.exe
- 	set-alias -Scope Global openssl "${ENV:ProgramFiles(x86)}\LogMeIn\x64\openssl.exe"
+ 	set-alias -Scope Global openssl "${ENV:ProgramData}\scoop\apps\openssl-lts-light\current\bin\openssl.exe"
 }
 
 setAliases
 
 function setVariables {
-	Set-Variable -Scope global openssl "${ENV:ProgramFiles(x86)}\LogMeIn\x64\openssl.exe"
+	Set-Variable -Scope global openssl "${ENV:ProgramData}\scoop\apps\openssl-lts-light\current\bin\openssl.exe"
 }
 
 setVariables
