@@ -151,6 +151,18 @@ if( $IsWindows ) {
 		& $openssl pkey -text -noout -in $pubKey
 	}
  
+	function openCsr {
+		& $openssl req -noout -in @args
+	}
+
+	function viewCsr {
+		openCsr @args -text
+	}
+
+	function viewCsrSummary {
+		openCsr @args -subject -nameopt multiline
+	}
+
 	function openCert {
 		& $openssl x509 -notext -noout -in @args
 	}
