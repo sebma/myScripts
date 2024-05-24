@@ -183,6 +183,18 @@ if( $IsWindows ) {
 		viewFullCert($cert) | sls "CN|Not"
 	}
 
+	function openP12 {
+		& $openssl pkcs12 -noenc -in @args
+	}
+
+	function viewP12 {
+		openP12 @args | openssl x509 -noout -text
+	}
+
+	function viewP12Summary {
+		openP12 @args | openssl x509 -noout -subject -issuer -dates -nameopt multiline
+	}
+
 	function msinfo { msinfo32.exe -nfo "$env:COMPUTERNAME-$(get-date -f "yyyyMMdd").nfo" }
 
 	if( ! (Test-Path $HOME/Desktop/$env:COMPUTERNAME.nfo) ) { msinfo32 -nfo $HOME/Desktop/$env:COMPUTERNAME.nfo }
