@@ -147,6 +147,28 @@ if( $IsWindows ) {
 		"$($sw.elapsed)"
 	}
 
+	function viewPubKey($pubKey) {
+		& $openssl pkey -text -noout -in $pubKey
+	}
+	function openCert {
+		& $openssl x509 -notext -noout -in @args
+	}
+	function viewCert {
+		openCert @args -text
+	}
+
+	function viewCertSummary {
+		openCert @args -subject -issuer -dates -nameopt multiline
+	}
+
+	function viewFullCert($cert) {
+		& $openssl crl2pkcs7 -nocrl -certfile $cert | openssl pkcs7 -noout -text -print_certs
+	}
+
+	function viewFullCertSummary($cert) {
+		viewFullCert($cert) | sls "CN|Not"
+	}
+
 	function msinfo { msinfo32.exe -nfo "$env:COMPUTERNAME-$(get-date -f "yyyyMMdd").nfo" }
 
 	if( ! (Test-Path $HOME/Desktop/$env:COMPUTERNAME.nfo) ) { msinfo32 -nfo $HOME/Desktop/$env:COMPUTERNAME.nfo }
