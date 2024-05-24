@@ -111,7 +111,13 @@ function setAliases {
  	set-alias -Scope Global openssl "${ENV:ProgramFiles(x86)}\LogMeIn\x64\openssl.exe"
 }
 
-setAliases 
+setAliases
+
+function setVariables {
+	Set-Variable -Scope global openssl "${ENV:ProgramFiles(x86)}\LogMeIn\x64\openssl.exe"
+}
+
+setVariables
 
 if( $IsWindows ) {
 	"=> Current DC from Get-ADDomainController is : "
