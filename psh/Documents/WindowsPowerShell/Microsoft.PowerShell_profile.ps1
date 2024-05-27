@@ -133,6 +133,10 @@ if( $IsWindows ) {
 		"=> The default DC is now " + (Get-ADDomainController).Name
 	}
 
+	function netstat {
+		Get-NetTCPConnection | select local*,remote*,state,OwningProcess,@{Name="Process";Expression={(Get-Process -Id $_.OwningProcess).ProcessName}} | sort-object -property LocalPort | format-table | Out-String -Stream
+	}
+
 	function time {
 		# See https://github.com/lukesampson/psutils/blob/master/time.ps1
 		Set-StrictMode -Off;
