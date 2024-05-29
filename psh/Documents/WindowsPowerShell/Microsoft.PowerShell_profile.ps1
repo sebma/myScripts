@@ -191,7 +191,19 @@ if( $IsWindows ) {
 		& $openssl pkcs12 -noenc -in @args
 	}
 
-	function viewP12 {
+	function p12ToPEM($p12File) {
+		$ext = ls $p12File | % Extension
+		$pemFile = $p12File.replace( $ext , ".pem" )
+		& $openssl pkcs12 -noenc -in $p12File -out $pemFile
+	}
+
+	function pfx2PEM($pfxFile) {
+		$ext = ls $pfxFile | % Extension
+		$pemFile = $pfxFile.replace( $ext , ".pem" )
+		& $openssl pkcs12 -noenc -in $pfxFile -out $pemFile
+	}
+
+ 	function viewP12 {
 		openP12 @args | openssl x509 -noout -text
 	}
 
