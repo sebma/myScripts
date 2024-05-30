@@ -176,7 +176,7 @@ if( $IsWindows ) {
 	}
 
 	function viewCertSummary {
-		openCert @args -subject -issuer -dates -nameopt multiline
+		openCert @args -subject -issuer -dates -ocsp_uri -nameopt multiline
 	}
 
 	function viewFullCert($cert) {
@@ -191,15 +191,15 @@ if( $IsWindows ) {
 		& $openssl pkcs12 -noenc -in @args
 	}
 
-	function p12ToPEM($p12File) {
-		$ext = ls $p12File | % Extension
-		$pemFile = $p12File.replace( $ext , ".pem" )
+	function p12ToPEM($p12File, $pemFile) {
+#		$ext = ls $p12File | % Extension
+#		$pemFile = $p12File.replace( $ext , ".pem" )
 		& $openssl pkcs12 -noenc -in $p12File -out $pemFile
 	}
 
-	function pfx2PEM($pfxFile) {
-		$ext = ls $pfxFile | % Extension
-		$pemFile = $pfxFile.replace( $ext , ".pem" )
+	function pfx2PEM($pfxFile, $pemFile) {
+#		$ext = ls $pfxFile | % Extension
+#		$pemFile = $pfxFile.replace( $ext , ".pem" )
 		& $openssl pkcs12 -noenc -in $pfxFile -out $pemFile
 	}
 
