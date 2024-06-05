@@ -10,6 +10,6 @@ if( ! $firstArg.Contains("*") ) {
 
 "=> myPattern = $myPattern"
 
-Get-ADComputer -Server $DC -Properties CN , CanonicalName , Description , IPv4Address , lastLogon, msDS-SupportedEncryptionTypes , OperatingSystem , ServicePrincipalNames , whenCreated,whenChanged -Filter { Name -like $myPattern }
+Get-ADComputer -Server $DC -Properties CN , CanonicalName , Description , IPv4Address , lastLogon, msDS-SupportedEncryptionTypes , OperatingSystem , ServicePrincipalNames , whenCreated , whenChanged -Filter { Name -like $myPattern }
 
-# Get-ADComputer -Server $DC -Properties CN , CanonicalName , Description , IPv4Address , lastLogon , msDS-SupportedEncryptionTypes , OperatingSystem , ServicePrincipalNames , whenCreated,whenChanged -Filter { Name -like $myPattern } | ? Name -match $myRegExp
+# Get-ADComputer -Server $DC -Properties CN , CanonicalName , Description , IPv4Address , lastLogon , msDS-SupportedEncryptionTypes , OperatingSystem , ServicePrincipalNames , whenCreated , whenChanged -Filter { Name -like $myPattern } | ? Name -match $myRegExp
