@@ -59,16 +59,16 @@ EOF
 			timeout 5s /usr/lib/ubuntu-release-upgrader/check-new-release;echo $? # FLUX http-proxy a ouvrir vers X.Y.Z.T4
 		fi
 
-		$sudo $apt -V install ca-certificates
+		$sudo $apt install ca-certificates
 		sudo update-ca-certificates --fresh
 		ll /etc/ssl/certs/ | grep Gandi
 
-		$sudo $apt -V install net-tools -y $aptSimul # Pour netstat
-		$sudo $apt -V install ugrep btop plocate gh fd-find # UBUNTU >= 22.04
-		$sudo $apt -V install landscape-common # cf. https://github.com/canonical/landscape-client/blob/master/debian/landscape-common.install
-		$sudo $apt -V install ca-certificates debsecan ncdu ripgrep silversearcher-ag ack progress gcp shellcheck command-not-found nmon smartmontools iotop lsof net-tools pwgen ethtool smem sysstat fzf grep gawk sed curl remake wget jq jid vim dfc lshw screenfetch bc units lsscsi jq btop htop apt-file dlocate pv screen rsync x11-apps mc landscape-common parted gdisk ipcalc -y
+		$sudo $apt install net-tools -y $aptSimul # Pour netstat
+		$sudo $apt install ugrep btop plocate gh fd-find # UBUNTU >= 22.04
+		$sudo $apt install landscape-common # cf. https://github.com/canonical/landscape-client/blob/master/debian/landscape-common.install
+		$sudo $apt  install ca-certificates debsecan ncdu ripgrep silversearcher-ag ack progress gcp shellcheck command-not-found nmon smartmontools iotop lsof net-tools pwgen ethtool smem sysstat fzf grep gawk sed curl remake wget jq jid vim dfc lshw screenfetch bc units lsscsi jq btop htop apt-file dlocate pv screen rsync x11-apps mc landscape-common parted gdisk ipcalc -y
 
-		# $sudo $apt install -t $(lsb_release -sc)-backports smartmontools -V # On debian 10
+		# $sudo $apt install -t $(lsb_release -sc)-backports smartmontools # On debian 10
 		egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name -q || $sudo update-smart-drivedb -u github
 
 		if dpkg -l | grep sysstat -q;then
@@ -81,7 +81,7 @@ EOF
 
 		$sudo $apt install gpm
 		dpkg -s gpm | grep installed -q && systemctl -at service | grep gpm -q && sudo systemctl stop gpm && sudo systemctl disable gpm
-		$sudo $apt install glances -Vy && dpkg -s glances | grep installed -q && systemctl -at service | grep glances -q && sudo systemctl stop glances && sudo systemctl disable glances
+		$sudo $apt install glances -y && dpkg -s glances | grep installed -q && systemctl -at service | grep glances -q && sudo systemctl stop glances && sudo systemctl disable glances
 
 		if systemctl list-unit-files | grep cloud.*enabled.*enabled -q;then
 			systemctl list-unit-files | awk '/cloud-init\..*enabled.*enabled/{print$1}' | while read service;do
