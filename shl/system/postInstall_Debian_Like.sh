@@ -164,7 +164,7 @@ EOF
 		$sudo apt install -V ntpdate systemd-timesyncd
 		egrep -v "^$|^#" /etc/systemd/timesyncd.conf
 		sudo mkdir -p /etc/systemd/timesyncd.conf.d/
-		echo [Time] | sudo tee /etc/systemd/timesyncd.conf.d/pluriad-timesyncd.conf
+		echo [Time] | sudo tee /etc/systemd/timesyncd.conf.d/myConpany-timesyncd.conf
 		grep "^NTP=$NTP_SERVER1" /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.d/* -q || echo "NTP=$NTP_SERVER1" | sudo tee -a /etc/systemd/timesyncd.conf.d/myConpany-timesyncd.conf
 		grep "^FallbackNTP=$FALLBACK_NTP" /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.d/* -q || echo "FallbackNTP=$FALLBACK_NTP" | sudo tee -a /etc/systemd/timesyncd.conf.d/myConpany-timesyncd.conf
 		grep "^RootDistanceMaxSec=$RootDistanceMaxSec" /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.d/* -q || echo "RootDistanceMaxSec=$RootDistanceMaxSec" | sudo tee -a /etc/systemd/timesyncd.conf.d/myConpany-timesyncd.conf
