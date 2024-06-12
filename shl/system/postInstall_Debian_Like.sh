@@ -185,7 +185,7 @@ EOF
 
 		mkdir -p $HOME/.vim
 		touch $HOME/.vim/vimrc
-		$sudo mkdir /root/.vim
+		$sudo mkdir -p /root/.vim
 		$sudo touch /root/.vim/vimrc
 
 		cat > $HOME/.bash_aliases <<-EOF
