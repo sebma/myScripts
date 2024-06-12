@@ -162,7 +162,7 @@ EOF
 		fi
 
 		$sudo apt purge -V ntp
-		$sudo apt install -V ntpdate systemd-timesyncd
+		$sudo apt install -V systemd-timesyncd
 
 		sudo mkdir -p /etc/systemd/timesyncd.conf.d/
 		echo [Time] | sudo tee /etc/systemd/timesyncd.conf.d/myConpany-timesyncd.conf
@@ -172,11 +172,10 @@ EOF
 		grep "^RootDistanceMaxSec=$RootDistanceMaxSec" /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.d/* -q || echo "RootDistanceMaxSec=$RootDistanceMaxSec" | sudo tee -a /etc/systemd/timesyncd.conf.d/myConpany-timesyncd.conf
 
 		$sudo systemctl restart systemd-timesyncd
-		$sudo timedatectl set-ntp false; sudo timedatectl set-ntp true
+		$sudo timedatectl set-ntp false; sudo timedatectl set-ntp true # Relance une synchro NTP
 		timedatectl timesync-status
 		timedatectl status
 
-		time sudo ntpdate $NTP_SERVER1
 		egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name -q || $sudo hwclock --systohc
 
 		# CONFIG SYSLOG
