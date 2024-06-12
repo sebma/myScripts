@@ -23,7 +23,7 @@ if $isDebianLike;then
 	$sudo sysctl -w kernel.dmesg_restrict=0 # Allows users to run "dmesg"
 	echo kernel.dmesg_restrict=0 | sudo tee -a /etc/sysctl.d/99-$companyNAME.conf
 	$sudo systemctl restart systemd-sysctl.service
-	$sudo ufw allow ssh
+	$sudo ufw allow OpenSSH || $sudo ufw allow ssh
 
 	if : < /dev/tcp/$proxyIP/http;then
 		# CONFIG PROXY
