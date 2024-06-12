@@ -185,6 +185,9 @@ EOF
 
 		mkdir -p $HOME/.vim
 		touch $HOME/.vim/vimrc
+		$sudo mkdir /root/.vim
+		$sudo touch /root/.vim/vimrc
+
 		cat > $HOME/.bash_aliases <<-EOF
 			# vim: ft=sh noet:
 			which fd &>/dev/null && fd_find=fd || { which fdfind &>/dev/null && fd_find=fdfind; }
