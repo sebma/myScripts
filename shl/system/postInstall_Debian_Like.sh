@@ -59,16 +59,16 @@ EOF
 			timeout 5s /usr/lib/ubuntu-release-upgrader/check-new-release;echo $? # FLUX http-proxy a ouvrir vers X.Y.Z.T4
 		fi
 
-		$sudo apt -V install ca-certificates
+		$sudo $apt -V install ca-certificates
 		sudo update-ca-certificates --fresh
 		ll /etc/ssl/certs/ | grep Gandi
 
-		$sudo apt -V install net-tools -y $aptSimul # Pour netstat
-		$sudo apt -V install ugrep btop plocate gh fd-find # UBUNTU >= 22.04
-		$sudo apt -V install landscape-common # cf. https://github.com/canonical/landscape-client/blob/master/debian/landscape-common.install
-		$sudo apt -V install ca-certificates debsecan ncdu ripgrep silversearcher-ag ack progress gcp shellcheck command-not-found nmon smartmontools iotop lsof net-tools pwgen ethtool smem sysstat fzf grep gawk sed curl remake wget jq jid vim dfc lshw screenfetch bc units lsscsi jq btop htop apt-file dlocate pv screen rsync x11-apps mc landscape-common parted gdisk ipcalc -y
+		$sudo $apt -V install net-tools -y $aptSimul # Pour netstat
+		$sudo $apt -V install ugrep btop plocate gh fd-find # UBUNTU >= 22.04
+		$sudo $apt -V install landscape-common # cf. https://github.com/canonical/landscape-client/blob/master/debian/landscape-common.install
+		$sudo $apt -V install ca-certificates debsecan ncdu ripgrep silversearcher-ag ack progress gcp shellcheck command-not-found nmon smartmontools iotop lsof net-tools pwgen ethtool smem sysstat fzf grep gawk sed curl remake wget jq jid vim dfc lshw screenfetch bc units lsscsi jq btop htop apt-file dlocate pv screen rsync x11-apps mc landscape-common parted gdisk ipcalc -y
 
-		# $sudo apt install -t $(lsb_release -sc)-backports smartmontools -V # On debian 10
+		# $sudo $apt install -t $(lsb_release -sc)-backports smartmontools -V # On debian 10
 		egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name -q || $sudo update-smart-drivedb -u github
 
 		if dpkg -l | grep sysstat -q;then
@@ -81,7 +81,7 @@ EOF
 
 		$sudo $apt install gpm
 		dpkg -s gpm | grep installed -q && systemctl -at service | grep gpm -q && sudo systemctl stop gpm && sudo systemctl disable gpm
-		$sudo apt install glances -Vy && dpkg -s glances | grep installed -q && systemctl -at service | grep glances -q && sudo systemctl stop glances && sudo systemctl disable glances
+		$sudo $apt install glances -Vy && dpkg -s glances | grep installed -q && systemctl -at service | grep glances -q && sudo systemctl stop glances && sudo systemctl disable glances
 
 		if systemctl list-unit-files | grep cloud.*enabled.*enabled -q;then
 			systemctl list-unit-files | awk '/cloud-init\..*enabled.*enabled/{print$1}' | while read service;do
@@ -99,8 +99,8 @@ EOF
 		$sudo update-grub
 
 		# CONFIG SNMP
-		$sudo apt install snmp snmpd -y $aptSimul 
-		$sudo apt install snmp-mibs-downloader -y $aptSimul # Necessaire depuis Ubuntu 12.04 cf. https://thejoyofstick.com/blog/2019/05/28/installing-snmp-mib-files-in-linux-ubuntu-12-04-lts/
+		$sudo $apt install snmp snmpd -y $aptSimul 
+		$sudo $apt install snmp-mibs-downloader -y $aptSimul # Necessaire depuis Ubuntu 12.04 cf. https://thejoyofstick.com/blog/2019/05/28/installing-snmp-mib-files-in-linux-ubuntu-12-04-lts/
 
 		ss -4nul | grep :161
 		$sudo systemctl stop snmpd
@@ -108,7 +108,7 @@ EOF
 			grep rouser.svc_snmp /usr/share/snmp/snmpd.conf -q    || sudo net-snmp-create-v3-user -ro -X AES -A MD5 svc_snmp # Les MDPs sont a saisir de maniere interactive
 			grep rouser.svc_snmp_v3 /usr/share/snmp/snmpd.conf -q || sudo net-snmp-create-v3-user -ro -X AES -A SHA-512 svc_snmp_v3 # Les MDPs sont a saisir de maniere interactive
 		else
-  			$sudo apt libsnmp-dev -y $aptSimul # Pour "net-snmp-config"
+  			$sudo $apt libsnmp-dev -y $aptSimul # Pour "net-snmp-config"
 			# For Ubuntu XY.04 and older
 			MDP_SNMP_V3=ohqua7ke6Cain6aeb9au;MDP_SNMP_ENC_V3=aiChiimeegah8eejaele
 #			sudo net-snmp-config --create-snmpv3-user -v3 -ro -A $MDP_SNMP_V3 -X $MDP_SNMP_ENC_V3 -a SHA-512 -x AES svc_snmp_v3
@@ -161,8 +161,8 @@ EOF
 			$sudo dpkg-reconfigure tzdata
 		fi
 
-		$sudo apt purge -V ntp
-		$sudo apt install -V systemd-timesyncd
+		$sudo $apt purge -V ntp
+		$sudo $apt install -V systemd-timesyncd
 
 		sudo mkdir -p /etc/systemd/timesyncd.conf.d/
 		echo [Time] | sudo tee /etc/systemd/timesyncd.conf.d/myConpany-timesyncd.conf
