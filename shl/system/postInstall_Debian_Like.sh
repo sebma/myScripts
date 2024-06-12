@@ -161,8 +161,8 @@ EOF
 			$sudo dpkg-reconfigure tzdata
 		fi
 
-		$sudo $apt purge -V ntp
-		$sudo $apt install -V systemd-timesyncd
+		$sudo $apt purge ntp
+		$sudo $apt install systemd-timesyncd
 
 		sudo mkdir -p /etc/systemd/timesyncd.conf.d/
 		echo [Time] | sudo tee /etc/systemd/timesyncd.conf.d/myConpany-timesyncd.conf
