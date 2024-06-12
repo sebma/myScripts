@@ -86,6 +86,7 @@ EOF
 		if systemctl list-unit-files | grep cloud.*enabled.*enabled -q;then
 			systemctl list-unit-files | awk '/cloud-init\..*enabled.*enabled/{print$1}' | while read service;do
 				$sudo systemctl stop $service
+    				$sudo systemctl disable $service
 				$sudo systemctl mask $service
 			done
 		fi
