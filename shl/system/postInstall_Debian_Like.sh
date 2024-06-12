@@ -154,14 +154,21 @@ EOF
 		NTP_SERVER1=X.Y.Z.T1
 		FALLBACK_NTP=X.Y.Z.T2
 		RootDistanceMaxSec=20
+  
+		if ! timedatectl status | grep Time.zone:.Europe/Paris -q;then
+			$sudo timedatectl set-timezone Europe/Paris
+			$sudo dpkg-reconfigure tzdata
+		fi
+
 		$sudo apt purge -V ntp
 		$sudo apt install -V ntpdate systemd-timesyncd
-		timedatectl status | grep Time.zone:.Europe/Paris -q || $sudo timedatectl set-timezone Europe/Paris
 		egrep -v "^$|^#" /etc/systemd/timesyncd.conf
-		grep "^NTP=$NTP_SERVER1" /etc/systemd/timesyncd.conf -q || $sudo sed -i 's/^#\?NTP=.*/NTP='"$NTP_SERVER1/" /etc/systemd/timesyncd.conf
-		grep "^FallbackNTP=$FALLBACK_NTP" /etc/systemd/timesyncd.conf -q || $sudo sed -i 's/^#\?FallbackNTP=.*/FallbackNTP='"$FALLBACK_NTP/" /etc/systemd/timesyncd.conf
-		grep "^RootDistanceMaxSec=$RootDistanceMaxSec" /etc/systemd/timesyncd.conf -q || $sudo sed -i 's/^#\?RootDistanceMaxSec=.*/RootDistanceMaxSec='"$RootDistanceMaxSec/" /etc/systemd/timesyncd.conf
-		$sudo timedatectl set-ntp false; $sudo timedatectl set-ntp true
+		sudo mkdir -p /etc/systemd/timesyncd.conf.d/
+		echo [Time] | sudo tee /etc/systemd/timesyncd.conf.d/pluriad-timesyncd.conf
+		grep "^NTP=$NTP_SERVER1" /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.d/* -q || echo "NTP=$NTP_SERVER1" | sudo tee -a /etc/systemd/timesyncd.conf.d/myConpany-timesyncd.conf
+		grep "^FallbackNTP=$FALLBACK_NTP" /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.d/* -q || echo "FallbackNTP=$FALLBACK_NTP" | sudo tee -a /etc/systemd/timesyncd.conf.d/myConpany-timesyncd.conf
+		grep "^RootDistanceMaxSec=$RootDistanceMaxSec" /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.d/* -q || echo "RootDistanceMaxSec=$RootDistanceMaxSec" | sudo tee -a /etc/systemd/timesyncd.conf.d/myConpany-timesyncd.conf
+		$sudo timedatectl set-ntp false; sudo timedatectl set-ntp true
 
 		$sudo systemctl restart systemd-timesyncd
 		timedatectl timesync-status
