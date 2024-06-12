@@ -69,7 +69,7 @@ EOF
 		$sudo apt -V install ca-certificates debsecan ncdu ripgrep silversearcher-ag ack progress gcp shellcheck command-not-found nmon smartmontools iotop lsof net-tools pwgen ethtool smem sysstat fzf grep gawk sed curl remake wget jq jid vim dfc lshw screenfetch bc units lsscsi jq btop htop apt-file dlocate pv screen rsync x11-apps mc landscape-common parted gdisk ipcalc -y
 
 		# $sudo apt install -t $(lsb_release -sc)-backports smartmontools -V # On debian 10
-		$sudo update-smart-drivedb -u github
+		egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name -q || $sudo update-smart-drivedb -u github
 
 		if dpkg -l | grep sysstat -q;then
 			debconf-show sysstat 2>/dev/null | grep sysstat/enable
