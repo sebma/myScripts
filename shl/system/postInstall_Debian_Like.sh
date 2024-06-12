@@ -131,6 +131,7 @@ EOF
 		ss -4nul | grep :161
 
 		$sudo ufw allow snmp
+  		$sudo ufw status numbered
 
 #		MDP_SNMP=q37uYXFqhy27eQeM97C7
 #		MDP_SNMP_V3=ohqua7ke6Cain6aeb9au
