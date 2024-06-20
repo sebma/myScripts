@@ -35,11 +35,6 @@ EOF
 		$sudo $apt update
 		$sudo $apt upgrade -y $aptSimul
 
-		# CONFIG KEYBOARD
-		localectl set-locale LANG=en_US.UTF-8
-		localectl set-keymap fr
-		localectl set-x11-keymap fr pc105
-
 		# CONFIG DNS
 		resolvectl status
 		DNS_SERVER1=X.Y.Z.T1
