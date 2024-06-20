@@ -106,6 +106,7 @@ $OSVersion = (osVersion)
 
 function setAliases {
 	set-alias -Scope Global yt-dl youtube-dl
+ 	set-alias -Scope Global reboot restart-computer
 	set-alias -Scope Global vi vim
 	set-alias -Scope Global l ls.exe
  	set-alias -Scope Global openssl "${ENV:ProgramData}\scoop\apps\openssl-lts-light\current\bin\openssl.exe"
