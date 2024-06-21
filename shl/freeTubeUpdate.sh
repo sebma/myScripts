@@ -35,8 +35,11 @@ else
 	freeTubeLatestGitHubReleaseURL=$(\curl -qLs $protocol://$gitHubAPIRepoURL/releases | jq -r ".[0].assets[] | select( .name | contains( \"$arch.deb\") ) | .browser_download_url")
 	if [ -n "$freeTubeLatestGitHubReleaseURL" ];then
 		freeTubeLatestGitHubReleaseName=$(basename $freeTubeLatestGitHubReleaseURL)
-		wget -nv -O $freeTubeLatestGitHubReleaseName "$freeTubeLatestGitHubReleaseURL"
-		sudo apt install -V ./$freeTubeLatestGitHubReleaseName && rm -v $freeTubeLatestGitHubReleaseName
+		mkdir -pv ~/deb/freetube
+		cd ~/deb/freetube
+		\wget -nv -O $freeTubeLatestGitHubReleaseName "$freeTubeLatestGitHubReleaseURL"
+		sudo apt install -V ./$freeTubeLatestGitHubReleaseName || rm -v ./$freeTubeLatestGitHubReleaseName
 		sync
+		cd - >/dev/null
 	fi
 fi
