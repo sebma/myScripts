@@ -22,12 +22,14 @@ http_proxy=http://$proxyIP:$http_proxy_port
 https_proxy=$http_proxy/HTTPS///
 if   $isRedHatLike;then
 	timedatectl status | grep Time.zone:.Europe/Paris -q || timedatectl set-timezone Europe/Paris
+ 
  	# CONFIG KEYBOARD LAYOUT
 	localectl set-keymap fr
 	localectl set-x11-keymap fr pc105
  	localectl set-locale LANG=en_US.UTF-8
  
 	hostnamectl status
+ 
 	grep ^proxy\s*= /etc/yum.conf -q || echo proxy = $http_proxy | tee -a /etc/yum.conf
 	yum clean expire-cache
 	systemctl stop NetworkManager
