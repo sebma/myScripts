@@ -22,9 +22,11 @@ http_proxy=http://$proxyIP:$http_proxy_port
 https_proxy=$http_proxy/HTTPS///
 if   $isRedHatLike;then
 	timedatectl status | grep Time.zone:.Europe/Paris -q || timedatectl set-timezone Europe/Paris
+ 	# CONFIG KEYBOARD LAYOUT
 	localectl set-keymap fr
-	localectl set-x11-keymap fr
-	localectl set-locale en_GB.utf8
+	localectl set-x11-keymap fr pc105
+ 	localectl set-locale LANG=en_US.UTF-8
+ 
 	hostnamectl status
 	grep ^proxy\s*= /etc/yum.conf -q || echo proxy = $http_proxy | tee -a /etc/yum.conf
 	yum clean expire-cache
@@ -38,11 +40,6 @@ if   $isRedHatLike;then
 	grep ^BOOTPROTO=dhcp /etc/sysconfig/network-scripts/ifcfg-bond0 -q || sed -i "s/BOOTPROTO=.*/BOOTPROTO=none/" /etc/sysconfig/network-scripts/ifcfg-bond0
 	grep NOZEROCONF /etc/sysconfig/network -q || echo NOZEROCONF=yes | tee -a /etc/sysconfig/network # Disable APIPA
 	systemctl restart network
-
-	# CONFIG KEYBOARD
-	localectl set-locale LANG=en_US.UTF-8
-	localectl set-keymap fr
-	localectl set-x11-keymap fr pc105
 
 	# CONFIG DNS
 	resolvectl status
