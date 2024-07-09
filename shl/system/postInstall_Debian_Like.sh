@@ -23,7 +23,20 @@ if $isDebianLike;then
 	$sudo sysctl -w kernel.dmesg_restrict=0 # Allows users to run "dmesg"
 	echo kernel.dmesg_restrict=0 | sudo tee -a /etc/sysctl.d/99-$companyNAME.conf
 	$sudo systemctl restart systemd-sysctl.service
+
+	# CONFIG UFW
+ 	$sudo sed -i "s/IPV6.*/IPV6=no/" /etc/default/ufw
 	$sudo ufw allow OpenSSH || $sudo ufw allow ssh
+	$sudo ufw allow 1022/tcp comment "do-release-upgrade alternate SSH port"
+#	sudo ufw allow "Nginx HTTPS"
+
+	timedatectl status | grep Time.zone:.Europe/Paris -q || timedatectl set-timezone Europe/Paris
+	# CONFIG KEYBOARD LAYOUT
+	localectl set-keymap fr
+	localectl set-x11-keymap fr pc105
+	localectl set-locale LANG=en_US.UTF-8
+
+	hostnamectl status
 
 	if : < /dev/tcp/$proxyIP/http;then
 		# CONFIG PROXY
