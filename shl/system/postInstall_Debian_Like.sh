@@ -30,6 +30,8 @@ if $isDebianLike;then
 	$sudo ufw allow 1022/tcp comment "do-release-upgrade alternate SSH port"
 #	sudo ufw allow "Nginx HTTPS"
 
+	sudo touch /etc/cloud/cloud-init.disabled # To Disable Cloud-Init
+
 	timedatectl status | grep Time.zone:.Europe/Paris -q || timedatectl set-timezone Europe/Paris
 	# CONFIG KEYBOARD LAYOUT
 	localectl set-keymap fr
