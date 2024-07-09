@@ -84,6 +84,7 @@ EOF
 		# $sudo $apt install -t $(lsb_release -sc)-backports smartmontools # On debian 10
 		egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name -q || $sudo update-smart-drivedb -u github
 
+		# CONFIG SYSSTAT
 		if dpkg -l | grep sysstat -q;then
 			debconf-show sysstat 2>/dev/null | grep sysstat/enable
 			# $sudo debconf-set-selections <<< "sysstat sysstat/enable boolean true" # get overwritten by the ENABLED parameter in /etc/default/sysstat
