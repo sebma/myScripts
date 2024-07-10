@@ -51,8 +51,13 @@ EOF
 		$sudo $apt update
 		$sudo $apt upgrade -y $aptSimul
 
+		# CONFIG SNAPD
+		sudo snap set system proxy.http=$http_proxy
+		sudo snap set system proxy.https=$http_proxy/HTTPS///
+		snap debug connectivity
+
 		# CONFIG DNS
-		resolvectl status
+		resolvectl status $iface
 		DNS_SERVER1=X.Y.Z.T1
 		FallBack_DNS_SERVER=X.Y.Z.T2
 		DOMAIN=my.domain
