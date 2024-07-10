@@ -46,14 +46,14 @@ if $isDebianLike;then
 		# man apt-transport-http
 		grep ^Acquire.*$http_proxy /etc/apt/apt.conf.d/*proxy -q || $sudo cat <<-EOF | sudo tee /etc/apt/apt.conf.d/00aptproxy
 			Acquire::http::proxy "$http_proxy";
-			Acquire::http::proxy "$http_proxy/HTTPS///";
+			Acquire::http::proxy "$https_proxy";
 EOF
 		$sudo $apt update
 		$sudo $apt upgrade -y $aptSimul
 
 		# CONFIG SNAPD
 		sudo snap set system proxy.http=$http_proxy
-		sudo snap set system proxy.https=$http_proxy/HTTPS///
+		sudo snap set system proxy.https=$https_proxy
 		snap debug connectivity
 
 		# CONFIG DNS
