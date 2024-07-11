@@ -26,11 +26,12 @@ if $isDebianLike;then
 
 	# CONFIG UFW
  	$sudo sed -i "s/IPV6.*/IPV6=no/" /etc/default/ufw
+	$sudo ufw reload
 	$sudo ufw allow OpenSSH || $sudo ufw allow ssh
 	$sudo ufw allow 1022/tcp comment "do-release-upgrade alternate SSH port"
 #	sudo ufw allow "Nginx HTTPS"
 
-	sudo sed -i "s/preserve_hostname: true/preserve_hostname: false/" /etc/cloud/cloud.cfg
+	grep "preserve_hostname:\s*true" /etc/cloud/cloud.cfg -q && sudo sed -i "s/preserve_hostname: true/preserve_hostname: false/" /etc/cloud/cloud.cfg
 	sudo touch /etc/cloud/cloud-init.disabled # To Disable Cloud-Init
 
 	timedatectl status | grep Time.zone:.Europe/Paris -q || timedatectl set-timezone Europe/Paris
