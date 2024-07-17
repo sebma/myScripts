@@ -36,7 +36,6 @@ if $isDebianLike;then
 	grep "preserve_hostname:\s*true" /etc/cloud/cloud.cfg -q && sudo sed -i "s/preserve_hostname: true/preserve_hostname: false/" /etc/cloud/cloud.cfg
 	sudo touch /etc/cloud/cloud-init.disabled # To Disable Cloud-Init
 
-	timedatectl status | grep Time.zone:.Europe/Paris -q || timedatectl set-timezone Europe/Paris
 	# CONFIG KEYBOARD LAYOUT
 	sudo localectl set-keymap fr
 	sudo localectl set-x11-keymap fr pc105
@@ -181,10 +180,8 @@ EOF
 		FALLBACK_NTP=X.Y.Z.T2
 		RootDistanceMaxSec=20
   
-		if ! timedatectl status | grep Time.zone:.Europe/Paris -q;then
-			$sudo timedatectl set-timezone Europe/Paris
-			$sudo dpkg-reconfigure tzdata
-		fi
+		# CONFIG TIMEZONE
+		timedatectl status | grep Time.zone:.Europe/Paris -q || { $sudo timedatectl set-timezone Europe/Paris; sudo dpkg-reconfigure tzdata; }
 
 		$sudo $apt purge ntp
 		$sudo $apt install systemd-timesyncd
@@ -200,6 +197,7 @@ EOF
 		$sudo timedatectl set-ntp false; sudo timedatectl set-ntp true # Relance une synchro NTP
 		timedatectl timesync-status
 		timedatectl status
+		timedatectl show
 
 		egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name -q || $sudo hwclock --systohc
 
