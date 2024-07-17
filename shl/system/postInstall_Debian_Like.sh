@@ -29,6 +29,8 @@ if $isDebianLike;then
 	$sudo ufw reload
 	$sudo ufw allow OpenSSH || $sudo ufw allow ssh
 	$sudo ufw allow 1022/tcp comment "do-release-upgrade alternate SSH port"
+ 	$sudo ufw allow from $ourIP to any port 1022 proto tcp comment "do-release-upgrade alternate SSH port"
+  
 #	sudo ufw allow "Nginx HTTPS"
 
 	grep "preserve_hostname:\s*true" /etc/cloud/cloud.cfg -q && sudo sed -i "s/preserve_hostname: true/preserve_hostname: false/" /etc/cloud/cloud.cfg
