@@ -37,8 +37,8 @@ if $isDebianLike;then
 	sudo touch /etc/cloud/cloud-init.disabled # To Disable Cloud-Init
 
 	# CONFIG KEYBOARD LAYOUT
+	localectl set-x11-keymap fr pc105
 	sudo localectl set-keymap fr
-	sudo localectl set-x11-keymap fr pc105
 	sudo localectl set-locale LANG=en_US.UTF-8
 
 	hostnamectl status
