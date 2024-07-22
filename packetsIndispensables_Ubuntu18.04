@@ -228,6 +228,7 @@ plasma-workspace
 pm-utils
 pmount
 ppa-purge
+progress
 pulseaudio-module-bluetooth
 pulsemixer
 putty
