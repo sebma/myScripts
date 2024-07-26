@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+
+architecture=$(uname -m)
+case $architecture in
+	x86_64) ;;
+	i686) architecture=i386;;
+	*) echo "=> Unsupported architecture.";exit;;
+esac
+
+ventoyROOT=/opt/ventoy
+VentoyGUIScriptName=VentoyGUI.$architecture
+VentoyGUIScriptPath=$ventoyROOT/VentoyGUI.$architecture
+
+ls -l $VentoyGUIScriptPath | grep -q "root $USER" || sudo chgrp $USER $VentoyGUIScriptPath
+test ! -x $VentoyGUIScriptPath && sudo chmod g+x $VentoyGUIScriptPath
+
+if cd $ventoyROOT;then
+	if [ $(id -u) != 0 ];then
+		sudo ./$VentoyGUIScriptName "$@"
+	else
+		./$VentoyGUIScriptName "$@"
+	fi
+fi
+
+sudo touch $ventoyROOT/log.txt
+tac $ventoyROOT/log.txt | sed "/^#* Ventoy2Disk/q" | tac
