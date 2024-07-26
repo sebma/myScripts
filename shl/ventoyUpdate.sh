@@ -1,1 +1,0 @@
-system/ventoyUpdate.sh
