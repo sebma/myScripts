@@ -1,1 +1,1 @@
-system/ventoyUpdate.sh
+system/ventoyInstallOrUpdate.sh
