@@ -27,6 +27,20 @@ fi
 echo "=> Searching for the latest release on $protocol://$gitHubURL/$gitHubUser/$gitHubRepo ..."
 freeTubeLatestRelease=$(\curl -qLs -H "Accept: application/vnd.github.v3+json" $protocol://$gitHubAPIRepoURL/tags | jq -r '.[0].name' | sed 's/v//;s/-beta//')
 echo "=> Found the $freeTubeLatestRelease version."
+
+osType=$(uname -s)
+if [ $osType = Linux ];then
+	distribID=$(source /etc/os-release;echo $ID)
+	if echo $distribID | egrep "debian|ubuntu" -q;then
+		isDebianLike=true
+	fi
+elif [ $osType = Darwin ];then
+	echo "=> TO DO !"
+	exit 3
+fi
+
+test $(id -u) == 0 && sudo="" || sudo=sudo
+
 freeTubeInstalledVersion=$(dpkg-query --showformat='${Version}' -W freetube 2>/dev/null)
 
 if [ "$freeTubeLatestRelease" = "$freeTubeInstalledVersion" ];then
