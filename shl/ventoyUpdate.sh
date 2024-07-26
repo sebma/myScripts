@@ -30,7 +30,7 @@ else
 		cp2ext234="$rsync -ogpuv -lSH"
 		test -d $ventoyROOT/ || sudo mkdir -pv $ventoyROOT/
 		time sudo $cp2ext234 -r /tmp/ventoy-$ventoyLatestRelease/* /opt/ventoy
-		sudo chown root -R $ventoyROOT/*
+		sudo chown -R root $ventoyROOT/*
 		rm -fr /tmp/ventoy-$ventoyLatestRelease/
 		test -f $ventoyROOT/tool/x86_64/ash && sudo rm -v $ventoyROOT/tool/x86_64/ash
 
