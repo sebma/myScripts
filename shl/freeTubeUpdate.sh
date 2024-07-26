@@ -24,10 +24,6 @@ if ! type -P jq >/dev/null;then
 	exit 2
 fi
 
-echo "=> Searching for the latest release on $protocol://$gitHubURL/$gitHubUser/$gitHubRepo ..."
-freeTubeLatestRelease=$(\curl -qLs -H "Accept: application/vnd.github.v3+json" $protocol://$gitHubAPIRepoURL/tags | jq -r '.[0].name' | sed 's/v//;s/-beta//')
-echo "=> Found the $freeTubeLatestRelease version."
-
 osType=$(uname -s)
 if [ $osType = Linux ];then
 	distribID=$(source /etc/os-release;echo $ID)
@@ -35,9 +31,13 @@ if [ $osType = Linux ];then
 		isDebianLike=true
 	fi
 elif [ $osType = Darwin ];then
-	echo "=> TO DO !"
+	echo "=> macOS not support Yet : TO DO !"
 	exit 3
 fi
+
+echo "=> Searching for the latest release on $protocol://$gitHubURL/$gitHubUser/$gitHubRepo ..."
+freeTubeLatestRelease=$(\curl -qLs -H "Accept: application/vnd.github.v3+json" $protocol://$gitHubAPIRepoURL/tags | jq -r '.[0].name' | sed 's/v//;s/-beta//')
+echo "=> Found the $freeTubeLatestRelease version."
 
 test $(id -u) == 0 && sudo="" || sudo=sudo
 
