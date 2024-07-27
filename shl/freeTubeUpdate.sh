@@ -31,8 +31,8 @@ if [ $osType = Linux ];then
 		isDebianLike=true
 	fi
 elif [ $osType = Darwin ];then
-	echo "=> macOS not support Yet : TO DO !"
-	exit 3
+	brew upgrade freetube
+	exit
 fi
 
 echo "=> Searching for the latest release on $protocol://$gitHubURL/$gitHubUser/$gitHubRepo ..."
