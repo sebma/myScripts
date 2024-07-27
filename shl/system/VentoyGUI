@@ -12,7 +12,7 @@ VentoyGUIScriptName=VentoyGUI.$architecture
 VentoyGUIScriptPath=$ventoyROOT/VentoyGUI.$architecture
 
 ls -l $VentoyGUIScriptPath | grep -q "root $USER" || sudo chgrp $USER $VentoyGUIScriptPath
-test ! -x $VentoyGUIScriptPath && sudo chmod g+x $VentoyGUIScriptPath
+test -x $VentoyGUIScriptPath || sudo chmod g+x $VentoyGUIScriptPath
 
 if cd $ventoyROOT;then
 	if [ $(id -u) != 0 ];then
