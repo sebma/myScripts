@@ -41,19 +41,25 @@ echo "=> Found the $freeTubeLatestRelease version."
 
 test $(id -u) == 0 && sudo="" || sudo=sudo
 
-freeTubeInstalledVersion=$(dpkg-query --showformat='${Version}' -W freetube 2>/dev/null)
+freeTubeInstalledVersion=null
+if echo $distribID | egrep "debian|ubuntu" -q;then
+	isDebianLike=true
+	freeTubeInstalledVersion=$(dpkg-query --showformat='${Version}' -W freetube 2>/dev/null)
+fi
 
 if [ "$freeTubeLatestRelease" = "$freeTubeInstalledVersion" ];then
 	echo "=> [$scriptBaseName] INFO : You already have the latest release, which is $freeTubeLatestRelease."
 else
-	freeTubeLatestGitHubReleaseURL=$(\curl -qLs $protocol://$gitHubAPIRepoURL/releases | jq -r ".[0].assets[] | select( .name | contains( \"$arch.deb\") ) | .browser_download_url")
-	if [ -n "$freeTubeLatestGitHubReleaseURL" ];then
-		freeTubeLatestGitHubReleaseName=$(basename $freeTubeLatestGitHubReleaseURL)
-		mkdir -pv ~/deb/freetube
-		cd ~/deb/freetube
-		\wget -nv -O $freeTubeLatestGitHubReleaseName "$freeTubeLatestGitHubReleaseURL"
-		sudo apt install -V ./$freeTubeLatestGitHubReleaseName || rm -v ./$freeTubeLatestGitHubReleaseName
-		sync
-		cd - >/dev/null
+	if $isDebianLike;then
+		freeTubeLatestGitHubReleaseURL=$(\curl -qLs $protocol://$gitHubAPIRepoURL/releases | jq -r ".[0].assets[] | select( .name | contains( \"$arch.deb\") ) | .browser_download_url")
+		if [ -n "$freeTubeLatestGitHubReleaseURL" ];then
+			freeTubeLatestGitHubReleaseName=$(basename $freeTubeLatestGitHubReleaseURL)
+			mkdir -pv ~/deb/freetube
+			cd ~/deb/freetube
+			\wget -nv -O $freeTubeLatestGitHubReleaseName "$freeTubeLatestGitHubReleaseURL"
+			sudo apt install -V ./$freeTubeLatestGitHubReleaseName || rm -v ./$freeTubeLatestGitHubReleaseName
+			sync
+			cd - >/dev/null
+		fi
 	fi
 fi
