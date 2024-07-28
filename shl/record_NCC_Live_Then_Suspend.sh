@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-scriptDir=$(dirname $0)
+scriptDir=$(dirname $(readlink -f $0))
 scriptDir=$(cd $scriptDir;pwd)
 echo $PATH | grep /usr/local/bin -q || export PATH+=:/usr/local/bin
 echo $PATH | grep $scriptDir -q || export PATH+=:$scriptDir
