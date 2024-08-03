@@ -56,7 +56,7 @@ hw_probeInstall () {
 	local retCode=0
 
 	if [ $osFamily != Linux ];then
-		echo "=> $osFamily is not supported !"
+		echo "=> $distribName is not supported !"
 		exit 1
 	fi
 
