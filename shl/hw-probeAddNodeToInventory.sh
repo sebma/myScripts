@@ -19,7 +19,12 @@ hw_probeAddNodeToInventory ()
 			return 2
 		fi
 	fi
-	\sudo -E \hw-probe -all -upload -i $inventoryID && echo "=> INFO: Check your email to add confirm adding the new node to your inventory : https://linux-hardware.org/index.php?view=computers&inventory=$inventoryID" 1>&2
+
+	[ -n "$sudo" ] && local sudo="$sudo -E"
+	local architecture=$(uname)
+	test $architecture = Darwin && architecture=bsd
+	hwprobe=$(which hw-probe)
+	$sudo $hwprobe -all -upload -i $inventoryID && echo "=> INFO: Check your email to add confirm adding the new node to your inventory : https://$architecture-hardware.org/index.php?view=computers&inventory=$inventoryID" 1>&2
 }
 
 hw_probeAddNodeToInventory "$@"
