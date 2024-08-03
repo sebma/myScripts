@@ -20,7 +20,7 @@ hw_probeAddNodeToInventory ()
 		fi
 	fi
 
-	[ -n "$sudo" ] && local sudo="$sudo -E"
+	[ -n "$sudo" ] && local sudo="sudo -E"
 	local architecture=$(uname)
 	test $architecture = Darwin && architecture=bsd
 	hwprobe=$(which hw-probe)
