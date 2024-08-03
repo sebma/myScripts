@@ -22,8 +22,16 @@ distribName () {
 	echo $osName | awk '{print tolower($0)}'
 }
 hw_probeInstallFromSource () {
+	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
 	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo="command sudo" || local sudo=""
+	local distribName=$(distribName)
+
 	local gitREPO=https://github.com/linuxhw/hw-probe
+
+	if [ $osFamily != Linux ];then
+		echo "=> $distribName is not supported !"
+		exit 1
+	fi
 
 	local forceInstall=false
 	test $# != 0 && [ "$1" == "-f" ] && forceInstall=true
