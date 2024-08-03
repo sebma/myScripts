@@ -61,10 +61,10 @@ hw_probeInstall () {
 	fi
 
 	if [ $distribName = ubuntu ]; then
-		local ubuntuSources=/etc/apt/sources.list
+		local ubuntuSources="/etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources"
 		local distribMajorNumber=$(source /etc/os-release;echo $VERSION_ID | cut -d. -f1)
-		grep -q universe $ubuntuSources   || $sudo add-apt-repository universe -y
-		grep -q multiverse $ubuntuSources || $sudo add-apt-repository multiverse -y
+		grep -wq universe $ubuntuSources   || $sudo add-apt-repository universe -y
+		grep -wq multiverse $ubuntuSources || $sudo add-apt-repository multiverse -y
 		[ $distribMajorNumber -lt 20 ] && ! grep -q "^deb .*mikhailnov/hw-probe" /etc/apt/sources.list.d/*.list && $sudo add-apt-repository ppa:mikhailnov/hw-probe -y
 		apt-cache policy hw-probe | grep -q mikhailnov/hw-probe || $sudo apt update
 		dpkg -l hw-probe | grep -q ^.i || $sudo apt install -V hw-probe
