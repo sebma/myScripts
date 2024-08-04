@@ -8,6 +8,6 @@ case $# in
 	3) estimatedDuration=$1; format=$2; url=$3;;
 	*) echo "=> Usage: ${0##*/} [ estimatedDuration=0m ] [ format=231+233 ] URL" >&2;exit 1;;
 esac
-url="$(ytdlGetLiveURL.sh "$url")"
+#url="$(ytdlGetLiveURL.sh "$url")"
 set -x
 timeout -s SIGINT $estimatedDuration getRestrictedFilenamesFORMAT.sh $format $url
