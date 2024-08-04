@@ -7,4 +7,4 @@ echo $PATH | grep /usr/local/bin -q || export PATH+=:/usr/local/bin
 echo $PATH | grep $scriptDir -q || export PATH+=:$scriptDir
 url=https://www.youtube.com/user/NewCreationChurch/live
 #url="$(ytdlGetLiveURL.sh "$url")"
-cd ~/Videos/ENGLISH/CHRIST/Joseph_Prince/Live_sermons/Live_NCC/ && timeout -s SIGINT $estimatedDuration getRestrictedFilenamesFORMAT.sh 231+139 "$url"
+cd ~/Videos/ENGLISH/CHRIST/Joseph_Prince/Live_sermons/Live_NCC/ && timeout -s SIGINT $estimatedDuration getRestrictedFilenamesFORMAT.sh 231+233 "$url"
