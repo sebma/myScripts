@@ -448,7 +448,8 @@ addURLs2mp4Metadata() {
 		fi
 
 		echo "[ffmpeg] Adding '$url' to '$fileName' description metadata"
-		time $ffmpeg -loglevel $ffmpegLogLevel -i "$fileName" -map 0 -c copy -metadata $metadataURLFieldName="$url" "$outputVideo"
+		movflags="+frag_keyframe"
+		time $ffmpeg -loglevel $ffmpegLogLevel -i "$fileName" -map 0 -c copy -movflags $movflags -metadata $metadataURLFieldName="$url" "$outputVideo"
 		retCode=$?
 		[ $retCode = 0 ] && sync && \mv -f "$outputVideo" "$fileName"
 	elif type -P mp4tags >/dev/null 2>&1;then
