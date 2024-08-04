@@ -3,4 +3,4 @@
 estimatedDuration=150m
 url=https://www.youtube.com/c/JusticedeDieuMinistry/live
 url="$(ytdlGetLiveURL.sh "$url")"
-timeout -s SIGINT $estimatedDuration getRestrictedFilenamesFORMAT.sh 231+139 https://www.youtube.com/c/JusticedeDieuMinistry/live
+timeout -s SIGINT $estimatedDuration getRestrictedFilenamesFORMAT.sh 231+233 https://www.youtube.com/c/JusticedeDieuMinistry/live
