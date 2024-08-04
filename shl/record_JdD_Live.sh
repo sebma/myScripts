@@ -2,4 +2,4 @@
 
 url=https://www.youtube.com/c/JusticedeDieuMinistry/live
 url="$(ytdlGetLiveURL.sh "$url")"
-getRestrictedFilenamesFORMAT.sh 94 https://www.youtube.com/c/JusticedeDieuMinistry/live
+getRestrictedFilenamesFORMAT.sh 94/231 https://www.youtube.com/c/JusticedeDieuMinistry/live
