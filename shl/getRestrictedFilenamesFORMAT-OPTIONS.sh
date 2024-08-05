@@ -65,7 +65,7 @@ function parseArgs {
 				shift
 				;;
 			-t|--timeout) shift
-				estimatedDuration=$1
+				timeout=$1
 				shift
 				;;
 			-v|--verbose) shift
@@ -97,12 +97,12 @@ declare -i verboseLevel=0
 debug="set +x"
 formats=18
 playlistFileName=unset
-estimatedDuration=150m
+timeout=150m
 downloader=yt-dlp
 overwrite=false
 
 parseArgs "$@"
 
-set | egrep "^(getopt|verboseLevel|debug|formats|playlistFileName|estimatedDuration|downloader|overwrite|ytdlInitialOptions|TEMP)=" | sort
+set | egrep "^(getopt|verboseLevel|debug|formats|playlistFileName|timeout|downloader|overwrite|ytdlInitialOptions|TEMP)=" | sort
 
 [ $usage = true ] && usage
