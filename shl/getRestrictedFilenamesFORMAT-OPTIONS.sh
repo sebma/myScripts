@@ -96,4 +96,4 @@ while true; do
 	esac
 done
 [ $usage = true ] && usage
-set | egrep "(verboseLevel|debug|playlistFileName|estimatedDuration|downloader|overwrite|ytdlInitialOptions)="
+set | egrep "(verboseLevel|debug|playlistFileName|estimatedDuration|downloader|overwrite|ytdlInitialOptions)=" | sort
