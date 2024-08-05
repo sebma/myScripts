@@ -37,7 +37,6 @@ function parseArgs {
 		export getopt=/usr/local/opt/gnu-getopt/bin/getopt
 	fi
 
-	#echo "=> getopt = $(which $getopt)"
 	TEMP=$($getopt -o 'dhp:t:vy' --long 'playlist:,debug,help,overwrite,timeout:,verbose,yt-dl,ytdl-k,ytdl-x,ytdl-v' -- "$@")
 
 	if [ $? -ne 0 ]; then
@@ -99,4 +98,4 @@ declare -i verboseLevel=0
 #downloader=yt-dlp
 #overwrite=false
 parseArgs "$@"
-set | egrep "^(verboseLevel|debug|playlistFileName|estimatedDuration|downloader|overwrite|ytdlInitialOptions)=" | sort
+set | egrep "^(getopt|verboseLevel|debug|playlistFileName|estimatedDuration|downloader|overwrite|ytdlInitialOptions)=" | sort
