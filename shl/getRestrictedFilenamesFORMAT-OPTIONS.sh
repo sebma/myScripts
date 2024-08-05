@@ -97,4 +97,4 @@ while true; do
 	esac
 done
 [ $usage = true ] && usage
-set | egrep -w "(debugLevel|debug|playlistFileName|estimatedDuration|downloader|overwrite)="
+set | egrep "(debugLevel|debug|playlistFileName|estimatedDuration|downloader|overwrite)="
