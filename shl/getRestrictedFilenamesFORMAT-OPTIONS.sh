@@ -90,15 +90,19 @@ function parseArgs {
 			* ) break ;;
 		esac
 	done
-	[ $usage = true ] && usage
 }
 
 usage=false
 declare -i verboseLevel=0
-#debug="set +x"
-#playlistFileName=unset
-#estimatedDuration=150m
-#downloader=yt-dlp
-#overwrite=false
+debug="set +x"
+formats=18
+playlistFileName=unset
+estimatedDuration=150m
+downloader=yt-dlp
+overwrite=false
+
 parseArgs "$@"
+
 set | egrep "^(getopt|verboseLevel|debug|formats|playlistFileName|estimatedDuration|downloader|overwrite|ytdlInitialOptions|TEMP)=" | sort
+
+[ $usage = true ] && usage
