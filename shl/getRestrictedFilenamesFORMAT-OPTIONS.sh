@@ -36,19 +36,19 @@ function parseArgs {
 	elif [ $osType = Darwin ];then
 		export getopt=/usr/local/opt/gnu-getopt/bin/getopt
 	fi
-	
+
 	#echo "=> getopt = $(which $getopt)"
 	TEMP=$($getopt -o 'dhp:t:vy' --long 'playlist:,debug,help,overwrite,timeout:,verbose,yt-dl,ytdl-k,ytdl-x,ytdl-v' -- "$@")
-	
+
 	if [ $? -ne 0 ]; then
 		echo 'Terminating...' >&2
 		exit 1
 	fi
-	
+
 	# Note the quotes around "$TEMP": they are essential!
 	eval set -- "$TEMP"
 	unset TEMP
-	
+
 	while true; do
 		case "$1" in
 			-d|--debug) shift
