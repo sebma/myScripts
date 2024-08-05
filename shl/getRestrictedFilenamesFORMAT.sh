@@ -44,8 +44,8 @@ getRestrictedFilenamesFORMAT () {
 	local jsonResults=null
 	local channel_id=null
 	local channel_url=null
-	local metadataURLFieldName=description
 	local embedThumbnail="--write-thumbnail"
+	local estimatedDuration=150m
 	local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__%(extractor)s.%(ext)s"
 	local thumbnailerName=$(basename $(type -P AtomicParsley 2>/dev/null || type -P ffmpeg 2>/dev/null))
 	local thumbnailerExecutable="command $thumbnailerName 2>/dev/null"
@@ -59,6 +59,7 @@ getRestrictedFilenamesFORMAT () {
 	local errorLogFile=null
 	local scriptOptions=null
 	local initialSiteVideoFormat=null
+	local metadataURLFieldName=description
 	local numberOfURLsToDownload=null
 	local formats=null
 	local formatsIDs=null
@@ -325,7 +326,12 @@ getRestrictedFilenamesFORMAT () {
 			errorLogFile="${downloader}_errors_$$.log"
 			trap - INT
 			$debug
-			time videoDownloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+			if [ $isLIVE == false ];then
+				time videoDownloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+			else
+				time timeout -s SIGINT $estimatedDuration videoDownloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+			fi
+
 			downloadOK=$?
 			$undebug
 			sync
