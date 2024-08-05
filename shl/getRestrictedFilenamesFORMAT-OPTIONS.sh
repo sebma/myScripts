@@ -36,7 +36,7 @@ function parseArgs {
 		export getopt=/usr/local/opt/gnu-getopt/bin/getopt
 	fi
 
-	TEMP=$($getopt -o 'dhp:t:vy' --long 'playlist:,debug,help,overwrite,timeout:,verbose,yt-dl,ytdl-k,ytdl-x,ytdl-v' -- "$@")
+	TEMP=$($getopt -o 'df:hp:t:vy' --long 'debug,formats:,playlist:,help,overwrite,timeout:,verbose,yt-dl,ytdl-k,ytdl-x,ytdl-v' -- "$@")
 
 	if [ $? -ne 0 ]; then
 		echo 'Terminating...' >&2
@@ -45,7 +45,7 @@ function parseArgs {
 
 	# Note the quotes around "$TEMP": they are essential!
 	eval set -- "$TEMP"
-#	unset TEMP
+	unset TEMP
 
 	while true; do
 		case "$1" in
@@ -53,11 +53,12 @@ function parseArgs {
 				debug="set -x"
 				ytdlInitialOptions+=( -v )
 				;;
+			-f|--formats) shift
+				formats=$1
+				shift
+				;;
 			-h|--help) shift
 				usage=true
-				;;
-			-v|--verbose) shift
-				verboseLevel+=1
 				;;
 			-p|--playlist) shift
 				playlistFileName=$1
@@ -66,6 +67,9 @@ function parseArgs {
 			-t|--timeout) shift
 				estimatedDuration=$1
 				shift
+				;;
+			-v|--verbose) shift
+				verboseLevel+=1
 				;;
 			--yt-dl) shift
 				downloader=youtube-dl
@@ -97,4 +101,4 @@ declare -i verboseLevel=0
 #downloader=yt-dlp
 #overwrite=false
 parseArgs "$@"
-set | egrep "^(getopt|verboseLevel|debug|playlistFileName|estimatedDuration|downloader|overwrite|ytdlInitialOptions|TEMP)=" | sort
+set | egrep "^(getopt|verboseLevel|debug|formats|playlistFileName|estimatedDuration|downloader|overwrite|ytdlInitialOptions|TEMP)=" | sort
