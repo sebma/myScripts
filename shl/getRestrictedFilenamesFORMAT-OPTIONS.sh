@@ -48,7 +48,12 @@ eval set -- "$TEMP"
 unset TEMP
 
 debugLevel=0
+debug=""
 usage=false
+playlistFileName=unset
+estimatedDuration=150m
+downloader=yt-dlp
+overwrite=false
 while true; do
 	case "$1" in
 		-d|--debug) shift
@@ -71,7 +76,7 @@ while true; do
 			shift
 			;;
 		--yt-dl) shift
-			downloader=yt-dl
+			downloader=youtube-dl
 			;;
 		--ytdl-k) shift
 			ytdlInitialOptions+=( -k )
