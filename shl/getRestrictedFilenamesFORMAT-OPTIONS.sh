@@ -26,7 +26,6 @@ EOF
 function parseArgs {
 	osType=$(uname -s)
 	if [ $osType = Linux ];then
-		#getopt=$(getopt -V | grep getopt.*enhanced -q && getopt || getopts)
 		if getopt -V | grep getopt.*util-linux -q;then
 			export getopt=getopt
 		else
