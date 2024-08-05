@@ -28,7 +28,7 @@ Usage: $scriptName [STRING]...
 	-d|--debug		be even more verbose
 	-p|--playlist	create M3U playlist
 	-t|--timeout	timeout the recording by speficied value (150m by default)
-	--ytdl			change downloader to "youtube-dl" (default is "yt-dlp")
+	--yt-dl			change downloader to "youtube-dl" (default is "yt-dlp")
 	--ytdl-k		keep downloaded intermediate files
 	--ytdl-x		extract audio
 	--ytdl-v		set downloader in verbose mode
@@ -38,7 +38,7 @@ EOF
 }
 
 #echo "=> getopt = $(which $getopt)"
-TEMP=$($getopt -o 'dhp:t:vy' --long 'playlist:,debug,help,overwrite,timeout:,verbose,yt-dlp,ytdl-k,ytdl-x,ytdl-v' -- "$@")
+TEMP=$($getopt -o 'dhp:t:vy' --long 'playlist:,debug,help,overwrite,timeout:,verbose,yt-dl,ytdl-k,ytdl-x,ytdl-v' -- "$@")
 
 if [ $? -ne 0 ]; then
 	echo 'Terminating...' >&2
