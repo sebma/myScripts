@@ -49,9 +49,10 @@ getRestrictedFilenamesFORMAT () {
 	local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__%(extractor)s.%(ext)s"
 	local thumbnailerName=$(basename $(type -P AtomicParsley 2>/dev/null || type -P ffmpeg 2>/dev/null))
 	local thumbnailerExecutable="command $thumbnailerName 2>/dev/null"
-	local ffmpegNormalLogLevel=repeat+error
+	local ffmpegErrorLogLevel=repeat+error
+	local ffmpegWarningLogLevel=repeat+warning
 	local ffmpegInfoLogLevel=repeat+info
-	local ffmpegLogLevel=$ffmpegNormalLogLevel
+	local ffmpegLogLevel=$ffmpegErrorLogLevel
 	local timestampFileRef=null
 	local domainStringForFilename=null
 	local fqdn=null domain=null sld=null
@@ -434,9 +435,10 @@ addURLs2mp4Metadata() {
 		ffprobe+=" -hide_banner"
 		local jq="command jq"
 
-		local ffmpegNormalLogLevel=repeat+error
+		local ffmpegErrorLogLevel=repeat+error
+		local ffmpegWarningLogLevel=repeat+warning
 		local ffmpegInfoLogLevel=repeat+info
-		local ffmpegLogLevel=$ffmpegNormalLogLevel
+		local ffmpegLogLevel=$ffmpegInfoLogLevel
 
 		local ffprobeJSON_File_Info=$($ffprobe -v error -show_format -show_streams -print_format json "$fileName")
 		local videoContainer=$(echo $ffprobeJSON_File_Info | $jq -r .format.format_name | cut -d, -f1)
@@ -449,7 +451,7 @@ addURLs2mp4Metadata() {
 
 		echo "[ffmpeg] Adding '$url' to '$fileName' description metadata"
 		movflags="+frag_keyframe"
-		echo "=> time $ffmpeg -loglevel $ffmpegLogLevel -i $fileName -map 0 -c copy -movflags $movflags -metadata $metadataURLFieldName=$url $outputVideo ..."
+		echo "=> time $ffmpeg -loglevel $ffmpegLogLevel -i $fileName -map 0 -c copy -movflags $movflags -metadata $metadataURLFieldName=\"$url\" $outputVideo ..."
 		time $ffmpeg -loglevel $ffmpegLogLevel -i "$fileName" -map 0 -c copy -movflags $movflags -metadata $metadataURLFieldName="$url" "$outputVideo"
 		retCode=$?
 		[ $retCode = 0 ] && sync && \mv -f "$outputVideo" "$fileName"
@@ -481,9 +483,10 @@ function addSubtitles2media {
 
 	local ffmpeg="command ffmpeg"
 	ffmpeg+=" -hide_banner"
-	local ffmpegNormalLogLevel=repeat+error
+	local ffmpegErrorLogLevel=repeat+error
+	local ffmpegWarningLogLevel=repeat+warning
 	local ffmpegInfoLogLevel=repeat+info
-	local ffmpegLogLevel=$ffmpegNormalLogLevel
+	local ffmpegLogLevel=$ffmpegErrorLogLevel
 
 	local outputVideo="${inputVideo/.$extension/_NEW.$extension}"
 	shift
@@ -518,9 +521,10 @@ addThumbnail2media() {
 	ffprobe+=" -hide_banner"
 	local jq="command jq"
 
-	local ffmpegNormalLogLevel=repeat+error
+	local ffmpegErrorLogLevel=repeat+error
+	local ffmpegWarningLogLevel=repeat+warning
 	local ffmpegInfoLogLevel=repeat+info
-	local ffmpegLogLevel=$ffmpegNormalLogLevel
+	local ffmpegLogLevel=$ffmpegErrorLogLevel
 
 	local ffprobeJSON_File_Info=$($ffprobe -v error -show_format -show_streams -print_format json "$fileName")
 	local videoContainer=$(echo $ffprobeJSON_File_Info | $jq -r .format.format_name | cut -d, -f1)
