@@ -48,7 +48,7 @@ eval set -- "$TEMP"
 unset TEMP
 
 debugLevel=0
-debug=""
+debug="set +x"
 usage=false
 playlistFileName=unset
 estimatedDuration=150m
