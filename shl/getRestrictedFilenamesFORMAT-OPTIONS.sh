@@ -26,7 +26,7 @@ Usage: $scriptName [STRING]...
 	-d|--debug		be even more verbose
 	-p|--playlist	create M3U playlist
 	-t|--timeout	timeout the recording by speficied value (150m by default)
-	--ytdl			change downloader to "ytdl" (default is "yt-dlp")
+	--ytdl			change downloader to "youtube-dl" (default is "yt-dlp")
 	--ytdl-k		keep downloaded intermediate files
 	--ytdl-x		extract audio
 	--ytdl-v		set downloader in verbose mode
