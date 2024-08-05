@@ -152,7 +152,6 @@ getRestrictedFilenamesFORMAT () {
 		youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__$domainStringForFilename.%(ext)s"
 		jsonResults=null
 		ytdlExtraOptions=( "${ytdlInitialOptions[@]}" )
-		echo "$url" | grep -q /live$ && ytdlExtraOptions+=( --playlist-items 1 )
 		[ $downloader = yt-dlp ] && ytdlExtraOptions+=( --embed-metadata --format-sort +proto )
 
 		printf "=> Fetching the generated destination filename(s) for \"$url\" with ${effects[bold]}${colors[blue]}$downloader$normal at %s ...\n" "$(LC_MESSAGES=en date)"
@@ -258,10 +257,14 @@ getRestrictedFilenamesFORMAT () {
 
 			echo "=> title = <$title>" && echo
 			printf "=> chosenFormatID = <${effects[bold]}${colors[blue]}$chosenFormatID$normal> resolution = <${effects[bold]}${colors[blue]}$resolution$normal> "
-			if [ $isLIVE == false ];then
-				echo "remoteFileSizeMiB = <$remoteFileSizeMiB MiB> duration = <$($date -u -d @$duration +%H:%M:%S)>" && echo
-			else
+			if [ $isLIVE == true ];then
 				echo "isLIVE = <${effects[bold]}${colors[blue]}$isLIVE$normal>" && echo
+				ytdlExtraOptions+=( --hls-use-mpegts --hls-prefer-ffmpeg )
+				ytdlExtraOptions+=( --playlist-items 1 )
+				url="$webpage_url"
+			else
+				echo "remoteFileSizeMiB = <$remoteFileSizeMiB MiB> duration = <$($date -u -d @$duration +%H:%M:%S)>" && echo
+				ytdlExtraOptions+=( --hls-prefer-native )
 			fi
 
 			[ "$debugLevel" = 1 ] && echo "=> acodec = <$acodec> fileName = <$fileName> extension = <$extension> isLIVE = <$isLIVE> formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName> firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url>" && echo
@@ -283,8 +286,6 @@ getRestrictedFilenamesFORMAT () {
 				fi
 			fi
 
-
-			[ $isLIVE = true ] && url="$webpage_url"
 			echo "=> Downloading <$url> ..."
 			echo
 
@@ -294,11 +295,6 @@ getRestrictedFilenamesFORMAT () {
 				ytdlExtraOptions+=( --embed-subs --write-auto-sub --sub-lang='en,fr,es,de' )
 			fi
 
-			if [ $isLIVE = true ];then
-				ytdlExtraOptions+=( --hls-use-mpegts --hls-prefer-ffmpeg )
-			else
-				ytdlExtraOptions+=( --hls-prefer-native )
-			fi
 
 #			$undebug
 			[ "$debugLevel" = 1 ] && echo "=> ytdlExtraOptions = ${ytdlExtraOptions[@]}" && echo
