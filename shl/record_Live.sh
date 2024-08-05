@@ -10,4 +10,4 @@ case $# in
 esac
 #url="$(ytdlGetLiveURL.sh "$url")"
 set -x
-timeout -s SIGINT $estimatedDuration getRestrictedFilenamesFORMAT.sh $format $url
+getRestrictedFilenamesFORMAT.sh --timeout $estimatedDuration $format $url
