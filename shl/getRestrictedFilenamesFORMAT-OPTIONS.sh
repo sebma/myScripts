@@ -45,7 +45,7 @@ function parseArgs {
 
 	# Note the quotes around "$TEMP": they are essential!
 	eval set -- "$TEMP"
-	unset TEMP
+#	unset TEMP
 
 	while true; do
 		case "$1" in
@@ -97,4 +97,4 @@ declare -i verboseLevel=0
 #downloader=yt-dlp
 #overwrite=false
 parseArgs "$@"
-set | egrep "^(getopt|verboseLevel|debug|playlistFileName|estimatedDuration|downloader|overwrite|ytdlInitialOptions)=" | sort
+set | egrep "^(getopt|verboseLevel|debug|playlistFileName|estimatedDuration|downloader|overwrite|ytdlInitialOptions|TEMP)=" | sort
