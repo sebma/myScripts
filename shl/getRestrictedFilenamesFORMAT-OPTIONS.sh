@@ -35,6 +35,7 @@ EOF
 	exit 1
 }
 
+echo "=> getopt = $(ls $getopt)"
 TEMP=$($getopt -o 'dhp:t:vy' --long 'playlist:,debug,help,overwrite,timeout:,verbose,yt-dlp,ytdl-k,ytdl-x,ytdl-v' -- "$@")
 
 if [ $? -ne 0 ]; then
