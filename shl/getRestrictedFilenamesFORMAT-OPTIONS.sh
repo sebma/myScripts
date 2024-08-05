@@ -49,13 +49,13 @@ fi
 eval set -- "$TEMP"
 unset TEMP
 
-debugLevel=0
-debug="set +x"
+#debugLevel=0
+#debug="set +x"
 usage=false
-playlistFileName=unset
-estimatedDuration=150m
-downloader=yt-dlp
-overwrite=false
+#playlistFileName=unset
+#estimatedDuration=150m
+#downloader=yt-dlp
+#overwrite=false
 while true; do
 	case "$1" in
 		-d|--debug) shift
@@ -97,4 +97,4 @@ while true; do
 	esac
 done
 [ $usage = true ] && usage
-set | egrep "(debugLevel|debug|playlistFileName|estimatedDuration|downloader|overwrite)="
+set | egrep "(debugLevel|debug|playlistFileName|estimatedDuration|downloader|overwrite|ytdlInitialOptions)="
