@@ -49,7 +49,7 @@ fi
 eval set -- "$TEMP"
 unset TEMP
 
-#debugLevel=0
+declare -i verboseLevel=0
 #debug="set +x"
 usage=false
 #playlistFileName=unset
@@ -59,7 +59,6 @@ usage=false
 while true; do
 	case "$1" in
 		-d|--debug) shift
-			debugLevel=2
 			debug="set -x"
 			ytdlInitialOptions+=( -v )
 			;;
@@ -67,7 +66,7 @@ while true; do
 			usage=true
 			;;
 		-v|--verbose) shift
-			debugLevel=1
+			verboseLevel+=1
 			;;
 		-p|--playlist) shift
 			playlistFileName=$1
@@ -97,4 +96,4 @@ while true; do
 	esac
 done
 [ $usage = true ] && usage
-set | egrep "(debugLevel|debug|playlistFileName|estimatedDuration|downloader|overwrite|ytdlInitialOptions)="
+set | egrep "(verboseLevel|debug|playlistFileName|estimatedDuration|downloader|overwrite|ytdlInitialOptions)="
