@@ -7,7 +7,9 @@ scriptName=$(basename $0)
 osType=$(uname -s)
 if [ $osType = Linux ];then
 	#getopt=$(getopt -V | grep getopt.*enhanced -q && getopt || getopts)
-	if ! getopt -V | grep getopt.*util-linux -q && export getopt=getopt;then
+	if getopt -V | grep getopt.*util-linux -q;then
+		export getopt=getopt
+	else
 		echo "=> ERROR : You must use getopt from util-linux." >&2
 		exit 2
 	fi
