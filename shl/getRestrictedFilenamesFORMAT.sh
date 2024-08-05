@@ -425,7 +425,12 @@ addURLs2mp4Metadata() {
 	local retCode=-1
 	local timestampFileRef=$(mktemp)
 	touch -r "$fileName" $timestampFileRef
-	if type -P ffmpeg >/dev/null 2>&1;then
+
+	if type -P mp4tags >/dev/null 2>&1;then
+		echo "[mp4tags] Adding '$url' to '$fileName' description metadata"
+		time mp4tags -m "$url" "$fileName"
+		retCode=$?
+	elif type -P ffmpeg >/dev/null 2>&1;then
 		local extension="${fileName/*./}"
 		local outputVideo="${fileName/.$extension/_NEW.$extension}"
 
@@ -451,14 +456,10 @@ addURLs2mp4Metadata() {
 
 		echo "[ffmpeg] Adding '$url' to '$fileName' description metadata"
 		movflags="+frag_keyframe"
-		echo "=> time $ffmpeg -loglevel $ffmpegLogLevel -i $fileName -map 0 -c copy -movflags $movflags -metadata $metadataURLFieldName=\"$url\" $outputVideo ..."
-		time $ffmpeg -loglevel $ffmpegLogLevel -i "$fileName" -map 0 -c copy -movflags $movflags -metadata $metadataURLFieldName="$url" "$outputVideo"
+		echo "=> time $ffmpeg -loglevel $ffmpegLogLevel -i \"$fileName\" -map 0 -c copy -movflags $movflags -metadata $metadataURLFieldName=\"$url\" \"$outputVideo\" -y ..."
+		time $ffmpeg -loglevel $ffmpegLogLevel -i "$fileName" -map 0 -c copy -movflags $movflags -metadata $metadataURLFieldName="$url" "$outputVideo" -y
 		retCode=$?
 		[ $retCode = 0 ] && sync && \mv -f "$outputVideo" "$fileName"
-	elif type -P mp4tags >/dev/null 2>&1;then
-		echo "[mp4tags] Adding '$url' to '$fileName' description metadata"
-		time mp4tags -m "$url" "$fileName"
-		retCode=$?
 	fi
 
 	[ $retCode = 0 ] && touch -r $timestampFileRef "$fileName"
