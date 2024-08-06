@@ -104,15 +104,6 @@ getRestrictedFilenamesFORMAT () {
 	grepColor=$grep
 	grep --help 2>&1 | grep -q -- --color && grepColor+=" --color"
 
-#	echo $1 | $grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
-#	echo $scriptOptions | $grep -q -- "-k" && ytdlInitialOptions+=( -k )
-#	echo $scriptOptions | $grep -q -- "-x" && ytdlInitialOptions+=( -x )
-#	echo $scriptOptions | $grep -q -- "-y" && downloader=yt-dl
-#	echo $scriptOptions | $grep -q -- "-p" && playlistFileName=$2 && shift 2
-#	echo $scriptOptions | $grep -q -- "-v" && debugLevel=1
-#	echo $scriptOptions | $grep -q -- "-vv" && debugLevel=2 && debug="set -x" && ytdlInitialOptions+=( -v )
-#	echo $scriptOptions | $grep -q -- "-vvv" && debugLevel=3 && ffmpegLogLevel=$ffmpegInfoLogLevel
-
 	function parseArgs {
 		osType=$(uname -s)
 		if [ $osType = Linux ];then
