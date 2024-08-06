@@ -121,6 +121,8 @@ function parseArgs {
 			* ) break ;;
 		esac
 	done
+#	lastArgs="$@"
+	lastArgs=${@/*-- /}
 }
 
 nbOptions=0
@@ -136,17 +138,11 @@ ffmpegLogLevel=repeat+error
 
 echo "=> @ = $@"
 parseArgs "$@"
-eval set -- "$TEMP"
 set | egrep "^(getopt|nbOptions|ffmpegLogLevel|verboseLevel|debug|formats|playlistFileName|timeout|downloader|overwrite|ytdlInitialOptions|TEMP)=" | sort
-declare -p TEMP
-lastArgs=${TEMP/*-- /}
-unset TEMP
-
-shift $nbOptions
+eval set -- "$lastArgs"
 echo "=> @ = $@"
 
-echo "=> lastArgs = $lastArgs"
-for arg in $lastArgs;do
+for arg in $@;do
 	echo "-> arg = $arg"
 done
 
