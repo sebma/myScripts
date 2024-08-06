@@ -20,16 +20,35 @@ scriptBaseName=${0/*\//}
 scriptExtension=${0/*./}
 funcName=${scriptBaseName/.$scriptExtension/}
 
+function usage {
+	cat <<-EOF >&2
+Usage: $scriptBaseName [STRING]...
+  or:  $scriptBaseName OPTION
+
+	-d|--debug		be even more verbose
+	-h|--help 		display this help and exit
+	-f|--formats	format(s) of video(s) to download
+	-p|--playlist	create M3U playlist
+	-t|--timeout	timeout the recording by speficied value (150m by default)
+	-v|--verbose	output version information and exit
+	-y|--overwite	overwrite all downloaded/generated files
+	--ffmpeg-i		ffmpeg information log level
+	--ffmpeg-w		ffmpeg warning log level
+	--ffmpeg-e		ffmpeg error log level
+	--yt-dl			change downloader to "youtube-dl" (default is "yt-dlp")
+	--ytdl-k		keep downloaded intermediate files
+	--ytdl-x		extract audio
+	--ytdl-v		set downloader in verbose mode
+
+EOF
+	exit 1
+}
+
 unset -f getRestrictedFilenamesFORMAT
 getRestrictedFilenamesFORMAT () {
 	trap 'rc=127;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;exit $rc' INT
 
 	set_colors 2>/dev/null
-
-	if [ $# -le 1 ];then
-		echo "=> [$FUNCNAME] Usage : $scriptBaseName initialSiteVideoFormat url1 url2 ..." 1>&2
-		return 1
-	fi
 
 	local ytdlExtraOptions=()
 	local ytdlInitialOptions=()
@@ -45,7 +64,6 @@ getRestrictedFilenamesFORMAT () {
 	local channel_id=null
 	local channel_url=null
 	local embedThumbnail="--write-thumbnail"
-	local estimatedDuration=150m
 	local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__%(extractor)s.%(ext)s"
 	local thumbnailerName=$(basename $(type -P AtomicParsley 2>/dev/null || type -P ffmpeg 2>/dev/null))
 	local thumbnailerExecutable="command $thumbnailerName 2>/dev/null"
@@ -71,6 +89,7 @@ getRestrictedFilenamesFORMAT () {
 	local debug="set -x"
 	local undebug="set +x"
 	local downloader=yt-dlp
+	local timeout=150m
 
 	startTime="$(LC_MESSAGES=en date)"
 
@@ -152,7 +171,7 @@ getRestrictedFilenamesFORMAT () {
 					shift
 					;;
 				-h|--help) shift
-					usage=true
+					usage
 					;;
 				-p|--playlist) shift
 					playlistFileName=$1
@@ -189,6 +208,8 @@ getRestrictedFilenamesFORMAT () {
 
 	parseArgs "$@"
 	eval set -- "$lastArgs"
+
+#	set | egrep "^(getopt|ffmpegLogLevel|verboseLevel|debug|formats|playlistFileName|timeout|downloader|overwrite|ytdlInitialOptions)=" | sort
 
 	echo "=> Started <$scriptBaseName> on $@ at : $startTime ..."
 	echo
@@ -394,11 +415,12 @@ getRestrictedFilenamesFORMAT () {
 			echo
 			errorLogFile="${downloader}_errors_$$.log"
 			trap - INT
-			$debug
 			if [ $isLIVE == false ];then
+				$debug
 				time videoDownloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 			else
-				time timeout -s SIGINT $estimatedDuration videoDownloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+				$debug
+				time timeout -s SIGINT $timeout videoDownloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 			fi
 
 			downloadOK=$?
