@@ -13,6 +13,7 @@ gitHubAPIURL=api.$gitHubURL
 gitHubUser=ventoy
 gitHubRepo=Ventoy
 gitHubAPIRepoURL=$gitHubAPIURL/repos/$gitHubUser/$gitHubRepo
+type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo="command sudo" || local sudo=""
 
 echo "=> Searching for the latest release on $protocol://$gitHubURL/$gitHubUser/$gitHubRepo ..."
 ventoyLatestRelease=$(\curl -qLs $protocol://$gitHubAPIRepoURL/tags | jq -r '.[0].name' | sed 's/v//;s/-beta//')
@@ -28,14 +29,14 @@ else
 		\curl -Ls "$Ventoy2DiskLatestGitHubReleaseURL" | tar -C /tmp -xz || exit
 		rsync="$(type -P rsync) -uth -P -z --skip-compress=$RSYNC_SKIP_COMPRESS_LIST"
 		cp2ext234="$rsync -ogpuv -lSH"
-		test -d $ventoyROOT/ || sudo mkdir -pv $ventoyROOT/
-		time sudo $cp2ext234 -r /tmp/ventoy-$ventoyLatestRelease/* /opt/ventoy
-		sudo chown -R root $ventoyROOT/*
+		test -d $ventoyROOT/ || $sudo mkdir -pv $ventoyROOT/
+		time $sudo $cp2ext234 -r /tmp/ventoy-$ventoyLatestRelease/* /opt/ventoy
+		$sudo chown -R root $ventoyROOT/*
 		rm -fr /tmp/ventoy-$ventoyLatestRelease/
-		test -f $ventoyROOT/tool/x86_64/ash && sudo rm -v $ventoyROOT/tool/x86_64/ash
+		test -f $ventoyROOT/tool/x86_64/ash && $sudo rm -v $ventoyROOT/tool/x86_64/ash
 
 		if cd $ventoyROOT && [ $# != 0 ];then
-			sudo ./Ventoy2Disk.sh -l "$@"
+			$sudo ./Ventoy2Disk.sh -l "$@"
 			tac $ventoyROOT/log.txt | sed "/^#* Ventoy2Disk/q" | tac
 		fi
 		sync
