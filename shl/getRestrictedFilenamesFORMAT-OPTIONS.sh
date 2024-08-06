@@ -55,76 +55,60 @@ function parseArgs {
 			-d|--debug) shift
 				debug="set -x"
 				ytdlInitialOptions+=( -v )
-				let nbOptions++
 				;;
 			--downloader) shift
 				downloader=$1
 				shift
-				let nbOptions+=2
 				;;
 			--ffmpeg-e) shift
 				ffmpegLogLevel=repeat+error
-				let nbOptions++
 				;;
 			--ffmpeg-i) shift
 				ffmpegLogLevel=repeat+info
-				let nbOptions++
 				;;
 			--ffmpeg-w) shift
 				ffmpegLogLevel=repeat+warning
-				let nbOptions++
 				;;
 			-f|--formats) shift
 				formats=$1
 				shift
-				let nbOptions+=2
 				;;
 			-h|--help) shift
 				usage=true
-				let nbOptions++
 				;;
 			-p|--playlist) shift
 				playlistFileName=$1
 				shift
-				let nbOptions+=2
 				;;
 			-t|--timeout) shift
 				timeout=$1
 				shift
-				let nbOptions+=2
 				;;
 			-v|--verbose) shift
 				let verboseLevel++
-				let nbOptions++
 				;;
 			--yt-dl) shift
 				downloader=youtube-dl
-				let nbOptions++
 				;;
 			--ytdl-k) shift
 				ytdlInitialOptions+=( -k )
-				let nbOptions++
 				;;
 			--ytdl-x) shift
 				ytdlInitialOptions+=( -x )
-				let nbOptions++
 				;;
 			--ytdl-v) shift
 				ytdlInitialOptions+=( -v )
-				let nbOptions++
 				;;
 			-y|--overwrite) shift
 				overwrite=true
-				let nbOptions++
 				;;
-			-- ) shift; let nbOptions++; break ;;
+			-- ) shift; break ;;
 			* ) break ;;
 		esac
 	done
 	lastArgs="$@"
 }
 
-nbOptions=0
 usage=false
 verboseLevel=0
 debug="set +x"
@@ -137,7 +121,7 @@ ffmpegLogLevel=repeat+error
 
 echo "=> @ = $@"
 parseArgs "$@"
-set | egrep "^(getopt|nbOptions|ffmpegLogLevel|verboseLevel|debug|formats|playlistFileName|timeout|downloader|overwrite|ytdlInitialOptions|TEMP)=" | sort
+set | egrep "^(getopt|ffmpegLogLevel|verboseLevel|debug|formats|playlistFileName|timeout|downloader|overwrite|ytdlInitialOptions|TEMP)=" | sort
 eval set -- "$lastArgs"
 echo "=> @ = $@"
 
