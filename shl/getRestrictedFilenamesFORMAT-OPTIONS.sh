@@ -40,7 +40,7 @@ function parseArgs {
 		export getopt=/usr/local/opt/gnu-getopt/bin/getopt
 	fi
 
-	TEMP=$($getopt -o 'df:hp:t:vy' --long 'debug,ffmpeg-e,ffmpeg-i,ffmpeg-w,formats:,help,playlist:,overwrite,timeout:,verbose,yt-dl,ytdl-k,ytdl-x,ytdl-v' -- "$@")
+	TEMP=$($getopt -o 'df:hp:t:vy' --long 'debug,downloader:,ffmpeg-e,ffmpeg-i,ffmpeg-w,formats:,help,playlist:,overwrite,timeout:,verbose,yt-dl,ytdl-k,ytdl-x,ytdl-v' -- "$@")
 
 	if [ $? -ne 0 ]; then
 		echo 'Terminating...' >&2
@@ -49,13 +49,18 @@ function parseArgs {
 
 	# Note the quotes around "$TEMP": they are essential!
 	eval set -- "$TEMP"
-	unset TEMP
+#	unset TEMP
 
 	while true; do
 		case "$1" in
 			-d|--debug) shift
 				debug="set -x"
 				ytdlInitialOptions+=( -v )
+				let nbOptions++
+				;;
+			--downloader) shift
+				downloader=$1
+				shift
 				let nbOptions++
 				;;
 			--ffmpeg-e) shift
