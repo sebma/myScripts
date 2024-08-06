@@ -105,7 +105,6 @@ getRestrictedFilenamesFORMAT () {
 	grep --help 2>&1 | grep -q -- --color && grepColor+=" --color"
 
 	echo $1 | $grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
-
 	echo $scriptOptions | $grep -q -- "-k" && ytdlInitialOptions+=( -k )
 	echo $scriptOptions | $grep -q -- "-x" && ytdlInitialOptions+=( -x )
 	echo $scriptOptions | $grep -q -- "-y" && downloader=yt-dl
