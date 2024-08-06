@@ -49,7 +49,6 @@ function parseArgs {
 
 	# Note the quotes around "$TEMP": they are essential!
 	eval set -- "$TEMP"
-#	unset TEMP
 
 	while true; do
 		case "$1" in
@@ -61,7 +60,7 @@ function parseArgs {
 			--downloader) shift
 				downloader=$1
 				shift
-				let nbOptions++
+				let nbOptions+=2
 				;;
 			--ffmpeg-e) shift
 				ffmpegLogLevel=repeat+error
@@ -78,7 +77,7 @@ function parseArgs {
 			-f|--formats) shift
 				formats=$1
 				shift
-				let nbOptions++
+				let nbOptions+=2
 				;;
 			-h|--help) shift
 				usage=true
@@ -87,12 +86,12 @@ function parseArgs {
 			-p|--playlist) shift
 				playlistFileName=$1
 				shift
-				let nbOptions++
+				let nbOptions+=2
 				;;
 			-t|--timeout) shift
 				timeout=$1
 				shift
-				let nbOptions++
+				let nbOptions+=2
 				;;
 			-v|--verbose) shift
 				let verboseLevel++
@@ -135,10 +134,20 @@ downloader=yt-dlp
 overwrite=false
 ffmpegLogLevel=repeat+error
 
-echo "=> lastArgs = $@"
+echo "=> @ = $@"
 parseArgs "$@"
-set | egrep "^(getopt|ffmpegLogLevel|verboseLevel|debug|formats|playlistFileName|timeout|downloader|overwrite|ytdlInitialOptions|TEMP)=" | sort
+eval set -- "$TEMP"
+set | egrep "^(getopt|nbOptions|ffmpegLogLevel|verboseLevel|debug|formats|playlistFileName|timeout|downloader|overwrite|ytdlInitialOptions|TEMP)=" | sort
+declare -p TEMP
+lastArgs=${TEMP/*-- /}
+unset TEMP
+
 shift $nbOptions
-echo "=> lastArgs = $@"
+echo "=> @ = $@"
+
+echo "=> lastArgs = $lastArgs"
+for arg in $lastArgs;do
+	echo "-> arg = $arg"
+done
 
 [ $usage = true ] && usage
