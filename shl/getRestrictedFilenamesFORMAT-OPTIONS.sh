@@ -47,7 +47,7 @@ function parseArgs {
 		exit 1
 	fi
 
-	set | grep ^TEMP=
+#	set | grep ^TEMP=
 
 	# Note the quotes around "$TEMP": they are essential!
 	eval set -- "$TEMP"
@@ -77,7 +77,7 @@ function parseArgs {
 				shift
 				;;
 			-h|--help) shift
-				usage=true
+				usage
 				;;
 			-p|--playlist) shift
 				playlistFileName=$1
@@ -134,5 +134,3 @@ echo "=> @ = $@"
 for arg in $@;do
 	echo "-> arg = $arg"
 done
-
-[ $usage = true ] && usage
