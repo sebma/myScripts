@@ -47,8 +47,11 @@ function parseArgs {
 		exit 1
 	fi
 
+	set | grep ^TEMP=
+
 	# Note the quotes around "$TEMP": they are essential!
 	eval set -- "$TEMP"
+	unset TEMP
 
 	while true; do
 		case "$1" in
@@ -119,10 +122,13 @@ downloader=yt-dlp
 overwrite=false
 ffmpegLogLevel=repeat+error
 
-echo "=> @ = $@"
+echo
 parseArgs "$@"
-set | egrep "^(getopt|ffmpegLogLevel|verboseLevel|debug|formats|playlistFileName|timeout|downloader|overwrite|ytdlInitialOptions|TEMP)=" | sort
 eval set -- "$lastArgs"
+
+set | egrep "^(getopt|ffmpegLogLevel|verboseLevel|debug|formats|playlistFileName|timeout|downloader|overwrite|ytdlInitialOptions)=" | sort
+echo
+
 echo "=> @ = $@"
 
 for arg in $@;do
