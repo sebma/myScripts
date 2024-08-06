@@ -18,6 +18,7 @@ gitHubAPIURL=api.$gitHubURL
 gitHubUser=FreeTubeApp
 gitHubRepo=FreeTube
 gitHubAPIRepoURL=$gitHubAPIURL/repos/$gitHubUser/$gitHubRepo
+test $(id -u) == 0 && sudo="" || sudo=sudo
 
 if ! type -P jq >/dev/null;then
 	echo "=> $0 : ERROR : You need to first install jq." >&2
@@ -39,8 +40,6 @@ echo "=> Searching for the latest release on $protocol://$gitHubURL/$gitHubUser/
 freeTubeLatestRelease=$(\curl -qLs -H "Accept: application/vnd.github.v3+json" $protocol://$gitHubAPIRepoURL/tags | jq -r '.[0].name' | sed 's/v//;s/-beta//')
 echo "=> Found the $freeTubeLatestRelease version."
 
-test $(id -u) == 0 && sudo="" || sudo=sudo
-
 freeTubeInstalledVersion=null
 if echo $distribID | egrep "debian|ubuntu" -q;then
 	isDebianLike=true
@@ -50,13 +49,17 @@ fi
 if [ "$freeTubeLatestRelease" = "$freeTubeInstalledVersion" ];then
 	echo "=> [$scriptBaseName] INFO : You already have the latest release, which is $freeTubeLatestRelease."
 else
+	echo "=> Fetching the latest freetube package URL ..."
 	if $isDebianLike;then
-		freeTubeLatestGitHubReleaseURL=$(\curl -qLs $protocol://$gitHubAPIRepoURL/releases | jq -r ".[0].assets[] | select( .name | contains( \"$arch.deb\") ) | .browser_download_url")
+		freeTubeLatestGitHubReleaseURL=$(time \curl -qLs -H "Accept: application/vnd.github.v3+json" $protocol://$gitHubAPIRepoURL/releases | jq -r ".[0].assets[] | select( .name | contains( \"$arch.deb\") ) | .browser_download_url")
+		set +x
 		if [ -n "$freeTubeLatestGitHubReleaseURL" ];then
+			echo "=> Downloading $freeTubeLatestGitHubReleaseURL ..."
+			echo
 			freeTubeLatestGitHubReleaseName=$(basename $freeTubeLatestGitHubReleaseURL)
 			mkdir -pv ~/deb/freetube
 			cd ~/deb/freetube
-			\wget -nv -O $freeTubeLatestGitHubReleaseName "$freeTubeLatestGitHubReleaseURL"
+			time \wget -c -O $freeTubeLatestGitHubReleaseName "$freeTubeLatestGitHubReleaseURL"
 			sudo apt install -V ./$freeTubeLatestGitHubReleaseName || rm -v ./$freeTubeLatestGitHubReleaseName
 			sync
 			cd - >/dev/null
