@@ -121,8 +121,7 @@ function parseArgs {
 			* ) break ;;
 		esac
 	done
-#	lastArgs="$@"
-	lastArgs=${@/*-- /}
+	lastArgs="$@"
 }
 
 nbOptions=0
