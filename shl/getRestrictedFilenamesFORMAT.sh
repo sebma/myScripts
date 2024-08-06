@@ -418,13 +418,14 @@ getRestrictedFilenamesFORMAT () {
 			if [ $isLIVE == false ];then
 				$debug
 				time videoDownloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+				$undebug
 			else
 				$debug
 				time timeout -s SIGINT $timeout videoDownloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+				$undebug
 			fi
 
 			downloadOK=$?
-			$undebug
 			sync
 			echo
 
@@ -523,7 +524,7 @@ addURLs2mp4Metadata() {
 	local timestampFileRef=$(mktemp)
 	touch -r "$fileName" $timestampFileRef
 
-	if type -P mp4tags >/dev/null 2>&1;then
+	if type -P mp4tags2 >/dev/null 2>&1;then
 		echo "[mp4tags] Adding '$url' to '$fileName' description metadata"
 		time mp4tags -m "$url" "$fileName"
 		retCode=$?
@@ -537,11 +538,6 @@ addURLs2mp4Metadata() {
 		ffprobe+=" -hide_banner"
 		local jq="command jq"
 
-		local ffmpegErrorLogLevel=repeat+error
-		local ffmpegWarningLogLevel=repeat+warning
-		local ffmpegInfoLogLevel=repeat+info
-		local ffmpegLogLevel=$ffmpegInfoLogLevel
-
 		local ffprobeJSON_File_Info=$($ffprobe -v error -show_format -show_streams -print_format json "$fileName")
 		local videoContainer=$(echo $ffprobeJSON_File_Info | $jq -r .format.format_name | cut -d, -f1)
 
@@ -553,9 +549,10 @@ addURLs2mp4Metadata() {
 
 		echo "[ffmpeg] Adding '$url' to '$fileName' description metadata"
 		movflags="+frag_keyframe"
-		echo "=> time $ffmpeg -loglevel $ffmpegLogLevel -i \"$fileName\" -map 0 -c copy -movflags $movflags -metadata $metadataURLFieldName=\"$url\" \"$outputVideo\" -y ..."
-		time $ffmpeg -loglevel $ffmpegLogLevel -i "$fileName" -map 0 -c copy -movflags $movflags -metadata $metadataURLFieldName="$url" "$outputVideo" -y
+#		$debug
+		$ffmpeg -loglevel $ffmpegLogLevel -i "$fileName" -map 0 -c copy -movflags $movflags -metadata $metadataURLFieldName="$url" "$outputVideo"
 		retCode=$?
+		$undebug
 		[ $retCode = 0 ] && sync && \mv -f "$outputVideo" "$fileName"
 	fi
 
@@ -581,10 +578,6 @@ function addSubtitles2media {
 
 	local ffmpeg="command ffmpeg"
 	ffmpeg+=" -hide_banner"
-	local ffmpegErrorLogLevel=repeat+error
-	local ffmpegWarningLogLevel=repeat+warning
-	local ffmpegInfoLogLevel=repeat+info
-	local ffmpegLogLevel=$ffmpegErrorLogLevel
 
 	local outputVideo="${inputVideo/.$extension/_NEW.$extension}"
 	shift
