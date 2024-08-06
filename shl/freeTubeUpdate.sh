@@ -60,7 +60,7 @@ else
 			mkdir -pv ~/deb/freetube
 			cd ~/deb/freetube
 			time \wget -c -O $freeTubeLatestGitHubReleaseName "$freeTubeLatestGitHubReleaseURL"
-			sudo apt install -V ./$freeTubeLatestGitHubReleaseName || rm -v ./$freeTubeLatestGitHubReleaseName
+			$sudo apt install -V ./$freeTubeLatestGitHubReleaseName || rm -v ./$freeTubeLatestGitHubReleaseName
 			sync
 			cd - >/dev/null
 		fi
