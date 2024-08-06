@@ -126,84 +126,69 @@ getRestrictedFilenamesFORMAT () {
 
 		# Note the quotes around "$TEMP": they are essential!
 		eval set -- "$TEMP"
+		unset TEMP
 
 		while true; do
 			case "$1" in
 				-d|--debug) shift
 					debug="set -x"
 					ytdlInitialOptions+=( -v )
-					let nbOptions++
 					;;
 				--downloader) shift
 					downloader=$1
 					shift
-					let nbOptions+=2
 					;;
 				--ffmpeg-e) shift
 					ffmpegLogLevel=$ffmpegErrorLogLevel
-					let nbOptions++
 					;;
 				--ffmpeg-i) shift
 					ffmpegLogLevel=$ffmpegInfoLogLevel
-					let nbOptions++
 					;;
 				--ffmpeg-w) shift
 					ffmpegLogLevel=$ffmpegWarningLogLevel
-					let nbOptions++
 					;;
 				-f|--formats) shift
 					initialSiteVideoFormat="$1"
 					shift
-					let nbOptions+=2
 					;;
 				-h|--help) shift
 					usage=true
-					let nbOptions++
 					;;
 				-p|--playlist) shift
 					playlistFileName=$1
 					shift
-					let nbOptions+=2
 					;;
 				-t|--timeout) shift
 					timeout=$1
 					shift
-					let nbOptions+=2
 					;;
 				-v|--verbose) shift
 					let verboseLevel++
-					let nbOptions++
 					;;
 				--yt-dl) shift
 					downloader=youtube-dl
-					let nbOptions++
 					;;
 				--ytdl-k) shift
 					ytdlInitialOptions+=( -k )
-					let nbOptions++
 					;;
 				--ytdl-x) shift
 					ytdlInitialOptions+=( -x )
-					let nbOptions++
 					;;
 				--ytdl-v) shift
 					ytdlInitialOptions+=( -v )
-					let nbOptions++
 					;;
 				-y|--overwrite) shift
 					overwrite=true
-					let nbOptions++
 					;;
-				-- ) shift; let nbOptions++; break ;;
+				-- ) shift; break ;;
 				* ) break ;;
 			esac
 		done
+		lastArgs="$@"
 	}
 
 	parseArgs "$@"
-	eval set -- "$TEMP"
-	unset TEMP
-	shift $nbOptions
+	eval set -- "$lastArgs"
 
 	echo "=> Started <$scriptBaseName> on $@ at : $startTime ..."
 	echo
