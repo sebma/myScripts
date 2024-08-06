@@ -18,7 +18,7 @@ gitHubAPIURL=api.$gitHubURL
 gitHubUser=FreeTubeApp
 gitHubRepo=FreeTube
 gitHubAPIRepoURL=$gitHubAPIURL/repos/$gitHubUser/$gitHubRepo
-test $(id -u) == 0 && sudo="" || sudo=sudo
+type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo="command sudo" || local sudo=""
 
 if ! type -P jq >/dev/null;then
 	echo "=> $0 : ERROR : You need to first install jq." >&2
