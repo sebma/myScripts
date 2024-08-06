@@ -8,12 +8,16 @@ function usage {
 Usage: $scriptName [STRING]...
   or:  $scriptName OPTION
 
-	-h|--help 		display this help and exit
-	-v|--verbose	output version information and exit
-	-y|--overwite	overwrite all downloaded/generated files
 	-d|--debug		be even more verbose
+	-h|--help 		display this help and exit
+	-f|--formats	format(s) of video(s) to download
 	-p|--playlist	create M3U playlist
 	-t|--timeout	timeout the recording by speficied value (150m by default)
+	-v|--verbose	output version information and exit
+	-y|--overwite	overwrite all downloaded/generated files
+	--ffmpeg-i		ffmpeg information log level
+	--ffmpeg-w		ffmpeg warning log level
+	--ffmpeg-e		ffmpeg error log level
 	--yt-dl			change downloader to "youtube-dl" (default is "yt-dlp")
 	--ytdl-k		keep downloaded intermediate files
 	--ytdl-x		extract audio
@@ -36,7 +40,7 @@ function parseArgs {
 		export getopt=/usr/local/opt/gnu-getopt/bin/getopt
 	fi
 
-	TEMP=$($getopt -o 'df:hp:t:vy' --long 'debug,formats:,playlist:,help,overwrite,timeout:,verbose,yt-dl,ytdl-k,ytdl-x,ytdl-v' -- "$@")
+	TEMP=$($getopt -o 'df:hp:t:vy' --long 'debug,ffmpeg-e,ffmpeg-i,ffmpeg-w,formats:,help,playlist:,overwrite,timeout:,verbose,yt-dl,ytdl-k,ytdl-x,ytdl-v' -- "$@")
 
 	if [ $? -ne 0 ]; then
 		echo 'Terminating...' >&2
@@ -52,57 +56,84 @@ function parseArgs {
 			-d|--debug) shift
 				debug="set -x"
 				ytdlInitialOptions+=( -v )
+				let nbOptions++
+				;;
+			--ffmpeg-e) shift
+				ffmpegLogLevel=repeat+error
+				let nbOptions++
+				;;
+			--ffmpeg-i) shift
+				ffmpegLogLevel=repeat+info
+				let nbOptions++
+				;;
+			--ffmpeg-w) shift
+				ffmpegLogLevel=repeat+warning
+				let nbOptions++
 				;;
 			-f|--formats) shift
 				formats=$1
 				shift
+				let nbOptions++
 				;;
 			-h|--help) shift
 				usage=true
+				let nbOptions++
 				;;
 			-p|--playlist) shift
 				playlistFileName=$1
 				shift
+				let nbOptions++
 				;;
 			-t|--timeout) shift
 				timeout=$1
 				shift
+				let nbOptions++
 				;;
 			-v|--verbose) shift
-				verboseLevel+=1
+				let verboseLevel++
+				let nbOptions++
 				;;
 			--yt-dl) shift
 				downloader=youtube-dl
+				let nbOptions++
 				;;
 			--ytdl-k) shift
 				ytdlInitialOptions+=( -k )
+				let nbOptions++
 				;;
 			--ytdl-x) shift
 				ytdlInitialOptions+=( -x )
+				let nbOptions++
 				;;
 			--ytdl-v) shift
 				ytdlInitialOptions+=( -v )
+				let nbOptions++
 				;;
 			-y|--overwrite) shift
 				overwrite=true
+				let nbOptions++
 				;;
-			-- ) shift; break ;;
+			-- ) shift; let nbOptions++; break ;;
 			* ) break ;;
 		esac
 	done
 }
 
+nbOptions=0
 usage=false
-declare -i verboseLevel=0
+verboseLevel=0
 debug="set +x"
 formats=18
 playlistFileName=unset
 timeout=150m
 downloader=yt-dlp
 overwrite=false
+ffmpegLogLevel=repeat+error
 
+echo "=> lastArgs = $@"
 parseArgs "$@"
-
-set | egrep "^(getopt|verboseLevel|debug|formats|playlistFileName|timeout|downloader|overwrite|ytdlInitialOptions|TEMP)=" | sort
+set | egrep "^(getopt|ffmpegLogLevel|verboseLevel|debug|formats|playlistFileName|timeout|downloader|overwrite|ytdlInitialOptions|TEMP)=" | sort
+shift $nbOptions
+echo "=> lastArgs = $@"
 
 [ $usage = true ] && usage
