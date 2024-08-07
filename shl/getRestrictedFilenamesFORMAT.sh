@@ -290,7 +290,7 @@ getRestrictedFilenamesFORMAT () {
 			fi
 
 			# Les resultats ci-dessous ne dependent pas du format selectionne
-			isLIVE=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .is_live)')
+			isLIVE=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .is_live)'| sed "s/null/false/")
 			title=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .title)')
 			webpage_url=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .webpage_url)')
 			duration=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .duration)' | sed "s/null/0/")
