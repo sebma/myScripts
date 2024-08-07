@@ -85,7 +85,7 @@ getRestrictedFilenamesFORMAT () {
 	local artworkFileName=null
 	local userAgent=null
 	local tool=null
-	local debugLevel=0
+	local verboseLevel=0
 	local debug="set -x"
 	local undebug="set +x"
 	local downloader=yt-dlp
@@ -361,7 +361,7 @@ getRestrictedFilenamesFORMAT () {
 				ytdlExtraOptions+=( --hls-prefer-native )
 			fi
 
-			[ "$debugLevel" = 1 ] && echo "=> acodec = <$acodec> fileName = <$fileName> extension = <$extension> isLIVE = <$isLIVE> formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName> firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url>" && echo
+			[ "$verboseLevel" = 1 ] && echo "=> acodec = <$acodec> fileName = <$fileName> extension = <$extension> isLIVE = <$isLIVE> formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName> firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url>" && echo
 
 			if [ $thumbnailerName = AtomicParsley ];then
 				thumbnailFormatString=$(\curl -qLs "$thumbnailURL" | file -b -)
@@ -373,8 +373,8 @@ getRestrictedFilenamesFORMAT () {
 						convert "$artworkFileName.tmp" "$artworkFileName" && rm -f "$artworkFileName.tmp"
 						echo "=> Done."
 						echo
-						[ "$debugLevel" ] && file "$artworkFileName"
-						[ "$debugLevel" ] && ls -l --time-style=+'%Y-%m-%d %T' "$artworkFileName"
+						[ "$verboseLevel" ] && file "$artworkFileName"
+						[ "$verboseLevel" ] && ls -l --time-style=+'%Y-%m-%d %T' "$artworkFileName"
 						echo
 					fi
 				fi
@@ -391,7 +391,7 @@ getRestrictedFilenamesFORMAT () {
 
 
 #			$undebug
-			[ "$debugLevel" = 1 ] && echo "=> ytdlExtraOptions = ${ytdlExtraOptions[@]}" && echo
+			[ "$verboseLevel" = 1 ] && echo "=> ytdlExtraOptions = ${ytdlExtraOptions[@]}" && echo
 
 			if [ -f "$newFileName" ] && [ $isLIVE != true ]; then
 				echo "=> The file <$newFileName> already exists, comparing it's size with the remote file ..." 1>&2
