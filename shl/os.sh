@@ -14,12 +14,17 @@ osCodeName() {
 			osx_major=$(sw_vers -productVersion | cut -d. -f1)
 			osx_minor=$(sw_vers -productVersion| awk -F '[.]' '{print $2}')
 			if [ $osx_major -gt 10 ];then
-#				echo "=> ERROR: This function supports only OS X/macOS versions 10.x." >&2
-				osCodeName="$(awk '/SOFTWARE LICENSE AGREEMENT FOR /{gsub(/\\/,"");print$NF}' '/System/Library/CoreServices/Setup Assistant.app/Contents/Resources/en.lproj/OSXSoftwareLicense.rtf')"
-				echo "$osCodeName"
-				exit 1
-			fi
-			OSX_MARKETING=(
+#				osCodeName="$(awk '/SOFTWARE LICENSE AGREEMENT FOR /{gsub(/\\/,"");print$NF}' '/System/Library/CoreServices/Setup Assistant.app/Contents/Resources/en.lproj/OSXSoftwareLicense.rtf')"
+				OSX_MARKETING=(
+						[11]="Big Sur"
+						[12]=Monterey
+						[13]=Ventura
+						[14]=Sonoma
+						[15]=Sequoia
+						)
+				osCodeName="${OSX_MARKETING[$osx_major]}"
+			else
+				OSX_MARKETING=(
 							[0]=Cheetah
 							[1]=Puma
 							[2]=Jaguar
@@ -37,12 +42,12 @@ osCodeName() {
 							[14]=Mojave
 							[15]=Catalina
 						)
-			osCodeName="${OSX_MARKETING[$osx_minor]}"
+				osCodeName="${OSX_MARKETING[$osx_minor]}"
+			fi
 			;;
 	esac
 	echo $osCodeName
 }
-
 os() {
 	local OSTYPE=$(bash -c 'echo $OSTYPE')
 	local osFamily=unknown
