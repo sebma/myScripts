@@ -6,14 +6,13 @@ distribType () {
 	local distribType=unknown
 	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
 
-	local distribName=$(distribName.sh)
-
 	if [ $osFamily = Linux ]; then
-		if grep ID_LIKE /etc/os-release -q; then
+		if grep ID_LIKE /etc/os-release -q 2>/dev/null; then
 			distribType=$(source /etc/os-release && echo $ID_LIKE)
 		elif [ ls /etc/*_version >/dev/null 2>&1 ]; then
 			distribType=$(echo /etc/*version | sed 's,/etc/\|_version,,g')
 		else
+			distribName=$(distribName.sh)
 			case $distribName in
 				sailfishos|rhel|fedora|centos) distribType=redhat ;;
 				ubuntu) distribType=debian;;
@@ -27,7 +26,7 @@ distribType () {
 	elif [ $osFamily = VMkernel ]; then # ESXi
 		distribType=ESXi
  	else
-		type -P bash >/dev/null 2>&1 && distribType=$(bash -c 'echo $OSTYPE') || distribType=$osFamily
+		distribType=$(bash -c 'echo $OSTYPE') || distribType=$osFamily
 	fi
 
 	echo $distribType
