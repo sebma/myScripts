@@ -9,6 +9,8 @@ distribName () {
 		if type -P lsb_release >/dev/null 2>&1; then
 			osName=$(lsb_release -si | awk '{print tolower($0)}')
 			[ $osName = "n/a" ] && osName=$(source /etc/os-release && echo $ID)
+		elif type -P hostnamectl >/dev/null 2>&1; then
+			osName=$(hostnamectl status | awk '/Operating System/{print tolower($3)}')
 		elif [ -s /etc/os-release ]; then
 			osName=$(source /etc/os-release && echo $ID)
 		fi
@@ -34,11 +36,15 @@ distribType () {
 	distribName=$(distribName)
 
 	if [ $osFamily = Linux ]; then
-		case $distribName in
-			sailfishos|rhel|fedora|centos) distribType=redhat ;;
-			ubuntu) distribType=debian;;
-			*) distribType=$distribName ;;
-		esac
+		if [ -s /etc/os-release ]; then
+			distribType=$(source /etc/os-release && echo $ID_LIKE)
+		else
+			case $distribName in
+				sailfishos|rhel|fedora|centos) distribType=redhat ;;
+				ubuntu) distribType=debian;;
+				*) distribType=$distribName ;;
+			esac
+		fi
 	elif [ $osFamily = Darwin ]; then
 		distribType=Darwin
 	elif [ $osFamily = Android ]; then
