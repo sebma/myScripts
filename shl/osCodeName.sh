@@ -46,10 +46,10 @@ osCodeName() {
 			fi
 			;;
 		Linux)
-			if which lsb_release >/dev/null 2>&1;then
-				osCodeName=$(lsb_release -sc)
-			elif grep VERSION_CODENAME /etc/os-release -q 2>/dev/null;then
+			if grep VERSION_CODENAME /etc/os-release -q 2>/dev/null;then
 				osCodeName=$(source /etc/os-release;echo $VERSION_CODENAME)
+			elif which lsb_release >/dev/null 2>&1;then
+				osCodeName=$(lsb_release -sc)
 			else
 				distribType=$(distribType.sh)
 				distribName=$(distribName.sh)
