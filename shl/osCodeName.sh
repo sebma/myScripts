@@ -1,62 +1,5 @@
 #!/usr/bin/env bash
 
-distribName () {
-	local OSTYPE=$(bash -c 'echo $OSTYPE')
-	local osName=unknown
-	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
-
-	if [ $osFamily = Linux ]; then
-		if type -P lsb_release >/dev/null 2>&1; then
-			osName=$(lsb_release -si | awk '{print tolower($0)}')
-			[ $osName = "n/a" ] && osName=$(source /etc/os-release && echo $ID)
-		elif type -P hostnamectl >/dev/null 2>&1; then
-			osName=$(hostnamectl status | awk '/Operating System/{print tolower($3)}')
-		elif [ -s /etc/os-release ]; then
-			osName=$(source /etc/os-release && echo $ID)
-		fi
-	elif [ $osFamily = Darwin ]; then
-		osName="$(sw_vers -productName)"
-	elif [ $osFamily = Android ]; then
-		osName=Android
-	elif [ $osFamily = VMkernel ]; then # ESXi
-		osName=ESXi
-  	else
-		osName=$OSTYPE
-	fi
-
-	echo $osName | awk '{print tolower($0)}'
-}
-
-distribType () {
-	local OSTYPE=$(bash -c 'echo $OSTYPE')
-	local distribName=unknown
-	local distribType=unknown
-	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
-
-	distribName=$(distribName)
-
-	if [ $osFamily = Linux ]; then
-		if [ -s /etc/os-release ]; then
-			distribType=$(source /etc/os-release && echo $ID_LIKE)
-		else
-			case $distribName in
-				sailfishos|rhel|fedora|centos) distribType=redhat ;;
-				ubuntu) distribType=debian;;
-				*) distribType=$distribName ;;
-			esac
-		fi
-	elif [ $osFamily = Darwin ]; then
-		distribType=Darwin
-	elif [ $osFamily = Android ]; then
-		distribType=Android
-	elif [ $osFamily = VMkernel ]; then # ESXi
-		distribType=ESXi
- 	else
-		type -P bash >/dev/null 2>&1 && distribType=$(bash -c 'echo $OSTYPE') || distribType=$osFamily
-	fi
-
-	echo $distribType
-}
 osCodeName() {
 	local OSTYPE=$(bash -c 'echo $OSTYPE')
 	local osFamily=unknown
@@ -105,13 +48,15 @@ osCodeName() {
 		Linux)
 			if which lsb_release >/dev/null 2>&1;then
 				osCodeName=$(lsb_release -sc)
-			elif [ -f /etc/os-release ];then
+			elif grep VERSION_CODENAME /etc/os-release -q 2>/dev/null;then
 				osCodeName=$(source /etc/os-release;echo $VERSION_CODENAME)
 			else
-				distribType=$(distribType)
-				distribName=$(distribName)
+				distribType=$(distribType.sh)
+				distribName=$(distribName.sh)
 				case $distribType in
 					debian)
+						;;
+					redhat)
 						;;
 				esac
 			fi
@@ -119,4 +64,5 @@ osCodeName() {
 	esac
 	echo $osCodeName
 }
+
 osCodeName
