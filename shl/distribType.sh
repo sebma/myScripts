@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-distribType () {
+function distribType {
 	local OSTYPE=$(bash -c 'echo $OSTYPE')
 	local distribName=unknown
 	local distribType=unknown
@@ -25,7 +25,7 @@ distribType () {
 		distribType=Android
 	elif [ $osFamily = VMkernel ]; then # ESXi
 		distribType=ESXi
- 	else
+	else
 		distribType=$(bash -c 'echo $OSTYPE') || distribType=$osFamily
 	fi
 
