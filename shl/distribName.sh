@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-distribName () {
+function distribName {
 	local OSTYPE=$(bash -c 'echo $OSTYPE')
 	local osName=unknown
 	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
@@ -19,7 +19,7 @@ distribName () {
 		osName="$(sw_vers -productName)"
 	elif [ $osFamily = Android ]; then
 		osName=Android
-  	elif [ $osFamily = VMkernel ]; then # ESXi
+	elif [ $osFamily = VMkernel ]; then # ESXi
 		osName=ESXi
 	else
 		osName=$OSTYPE
