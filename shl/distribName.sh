@@ -9,6 +9,8 @@ distribName () {
 		if type -P lsb_release >/dev/null 2>&1; then
 			osName=$(lsb_release -si | awk '{print tolower($0)}')
 			[ $osName = "n/a" ] && osName=$(source /etc/os-release && echo $ID)
+		elif type -P hostnamectl >/dev/null 2>&1; then
+			osName=$(hostnamectl status | awk '/Operating System/{print tolower($3)}')
 		elif [ -s /etc/os-release ]; then
 			osName=$(source /etc/os-release && echo $ID)
 		fi
