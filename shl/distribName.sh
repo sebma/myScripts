@@ -6,13 +6,14 @@ distribName () {
 	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
 
 	if [ $osFamily = Linux ]; then
-		if type -P lsb_release >/dev/null 2>&1; then
+		if ! lsb_release -si 2>/dev/null | grep -i "n/a" -q; then
 			osName=$(lsb_release -si | awk '{print tolower($0)}')
-			[ $osName = "n/a" ] && osName=$(source /etc/os-release && echo $ID)
 		elif type -P hostnamectl >/dev/null 2>&1; then
 			osName=$(hostnamectl status | awk '/Operating System/{print tolower($3)}')
-		elif [ -s /etc/os-release ]; then
+		elif grep -w ID /etc/os-release -q 2>/dev/null; then
 			osName=$(source /etc/os-release && echo $ID)
+		elif [ -s /etc/issue.net ]; then
+			osName=$(awk '{print tolower($1)}' /etc/issue.net)
 		fi
 	elif [ $osFamily = Darwin ]; then
 		osName="$(sw_vers -productName)"
