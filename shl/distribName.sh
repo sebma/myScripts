@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 function distribName {
-	local OSTYPE=$(bash -c 'echo $OSTYPE')
 	local osName=unknown
 	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
 
@@ -22,7 +21,7 @@ function distribName {
 	elif [ $osFamily = VMkernel ]; then # ESXi
 		osName=ESXi
 	else
-		osName=$OSTYPE
+		test -n $OSTYPE && osName=$OSTYPE || osName=$osFamily
 	fi
 
 	echo $osName | awk '{print tolower($0)}'
