@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 
-anyTimeWithTZ2LocalTimeZone ()
-{
+anyTimeWithTZ2LocalTimeZone () {
 	local remoteTime=to_be_defined
 	local remoteTZ=to_be_defined
 	local destinationTZ
 	local date=date
-#	local localTZ=$(date +%Z)
-	local localTZ=CET
+	local localTZ=$(date +%Z | sed 's/ST$/T/')
 	test $osFamily = Darwin && date=gdate
+
 	if [ $# = 0 ]; then
 		echo "=> Usage : $FUNCNAME remoteTime [destinationTZ=$localTZ]" 1>&2
 		return 1
@@ -20,16 +19,16 @@ anyTimeWithTZ2LocalTimeZone ()
 					return 1
 					;;
 				*)
-					remoteTime=$1
+					remoteTime=${1/./:}
 					destinationTZ=$localTZ
 					;;
 			esac
 		else
-			remoteTime=$1
-			destinationTZ=$2
+			remoteTime=${1/./:}
+			destinationTZ=${2/%ST/T}
 		fi
 	fi
-	remoteTime=${remoteTime/./:}
+
 	remoteTZ=$(echo $remoteTime | awk '{printf$NF}')
 	case $remoteTZ in
 		AT)
@@ -60,6 +59,7 @@ anyTimeWithTZ2LocalTimeZone ()
 
 		;;
 	esac
+
 	TZ=$destinationTZ $date -d "$remoteTime"
 }
 
