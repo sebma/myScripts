@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-anyTimeWithTZ2LocalTimeZone () {
+function anyTimeWithTZ2LocalTimeZone {
 	local remoteTime=to_be_defined
 	local remoteTZ=to_be_defined
 	local destinationTZ
