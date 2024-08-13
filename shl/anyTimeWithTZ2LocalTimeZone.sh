@@ -18,11 +18,11 @@ anyTimeWithTZ2LocalTimeZone ()
 				-h | --h | -help | --help)
 					echo "=> Usage : $FUNCNAME remoteTime [destinationTZ=$localTZ]" 1>&2
 					return 1
-				;
+					;;
 				*)
 					remoteTime=$1
 					destinationTZ=$localTZ
-				;
+					;;
 			esac
 		else
 			remoteTime=$1
