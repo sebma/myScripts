@@ -13,7 +13,7 @@ gitHubAPIURL=api.$gitHubURL
 gitHubUser=ventoy
 gitHubRepo=Ventoy
 gitHubAPIRepoURL=$gitHubAPIURL/repos/$gitHubUser/$gitHubRepo
-type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo="command sudo" || local sudo=""
+type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo="command sudo" || sudo=""
 
 echo "=> Searching for the latest release on $protocol://$gitHubURL/$gitHubUser/$gitHubRepo ..."
 ventoyLatestRelease=$(\curl -qLs $protocol://$gitHubAPIRepoURL/tags | jq -r '.[0].name' | sed 's/v//;s/-beta//')
