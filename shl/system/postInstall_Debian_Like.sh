@@ -186,7 +186,6 @@ EOF
 		# CONFIG TIMEZONE
 		timedatectl status | grep Time.zone:.Europe/Paris -q || { $sudo timedatectl set-timezone Europe/Paris; sudo dpkg-reconfigure tzdata; }
 
-		$sudo $apt purge ntp
 		$sudo $apt install systemd-timesyncd
 
 		sudo mkdir -p /etc/systemd/timesyncd.conf.d/
