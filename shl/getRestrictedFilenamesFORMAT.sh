@@ -94,7 +94,7 @@ getRestrictedFilenamesFORMAT () {
 	startTime="$(LC_MESSAGES=en date)"
 
 #	local youtube_dl="eval LANG=C.UTF-8 command youtube-dl" # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
-	videoDownloader () {
+	function videoDownloader {
 		LANG=C.UTF-8 $downloader "$@"
 	}
 
@@ -421,7 +421,7 @@ getRestrictedFilenamesFORMAT () {
 				$undebug
 			else
 				$debug
-				time timeout -s SIGINT $timeout videoDownloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+				LANG=C.UTF-8 time timeout -s SIGINT $timeout $downloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 				$undebug
 			fi
 
