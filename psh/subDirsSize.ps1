@@ -11,6 +11,11 @@ function dirSize {
 	}
 }
 
+function time {
+	$duration = ( "$args" | Measure-Command { Invoke-Expression $_ | Out-Default } ).toString("hh\:mm\:ss\.ff")
+	echo "`n"$duration"`n"
+}
+
 function main {
 	$argc = $args.Count
 	for($i=0;$i -lt $argc;$i++) {
@@ -18,7 +23,7 @@ function main {
 		$subDirsList = $(ls -dir -force $baseDir | % FullName)
 		foreach ($subDir in $subDirsList) {
 #			( Measure-Command { dirSize $baseDir\$subDir | Out-Default } ).toString("hh\:mm\:ss\.ff")
-			dirSize $subDir
+			time { dirSize $subDir }
 		}
 	}
 }
