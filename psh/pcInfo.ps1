@@ -1,3 +1,4 @@
+# vim: set syn=ps1
 $today = $( get-date -f "yyyyMMdd" )
 & {
 echo "=> PC Summary info :"
