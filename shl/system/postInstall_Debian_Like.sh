@@ -21,7 +21,8 @@ https_proxy=$http_proxy/HTTPS///
 apt="$(which apt) -V"
 if $isDebianLike;then
 	# CONFIG du Swap
-	grep /dev/vgOS/swap /etc/fstab -q || echo -e '/dev/vgOS/swap\tnone\tswap\tsw\t0\t0' | sudo tee -a /etc/fstab # Ajout du "swap" dans le /etc/fstab
+ 	vgOS=$(findmnt / -n -o source | awk -F '[/-]' '{print$4}')
+	grep /dev/$vgOS/swap /etc/fstab -q || echo -e "/dev/$vgOS/swap\tnone\tswap\tsw\t0\t0" | sudo tee -a /etc/fstab # Ajout du "swap" dans le /etc/fstab
 
 	$sudo sysctl -w kernel.dmesg_restrict=0 # Allows users to run "dmesg"
 	echo kernel.dmesg_restrict=0 | sudo tee -a /etc/sysctl.d/99-$companyNAME.conf
@@ -30,7 +31,10 @@ if $isDebianLike;then
 	# CONFIG UFW
  	$sudo sed -i "s/IPV6.*/IPV6=no/" /etc/default/ufw
 	$sudo ufw reload
-	$sudo ufw allow OpenSSH || $sudo ufw allow ssh
+#	$sudo ufw allow OpenSSH || $sudo ufw allow ssh
+	localNetwork=$(ip -4 route | awk "/^[0-9].*dev $(ip -4 route | awk '/default/{print$5}')/"'{print$1}')
+	$sudo ufw allow from $localNetwork to any app OpenSSH
+ 	$sudo ufw allow from $bastion to any app OpenSSH
 	$sudo ufw allow 1022/tcp comment "do-release-upgrade alternate SSH port"
  	$sudo ufw allow from $ourIP to any port 1022 proto tcp comment "do-release-upgrade alternate SSH port"
   
