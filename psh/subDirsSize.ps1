@@ -16,15 +16,13 @@ function size2iec {
 function dirSize {
 	$dirName = $args[0]
  	Write-Host -NoNewline "$dirName`t"
-	$dirSize = ( dir "$dirName" -force -recurse | measure -property length -sum ).Sum
+	$size = ( dir "$dirName" -force -recurse | measure -property length -sum ).Sum
  	$dirSize2iec = ( size2iec($size) )
 }
-
 function time {
 	$duration = ( "$args" | Measure-Command { Invoke-Expression $_ | Out-Default } ).toString("hh\:mm\:ss\.ff")
 	echo "`n"$duration"`n"
 }
-
 function main {
 	$argc = $args.Count
 	for($i=0;$i -lt $argc;$i++) {
