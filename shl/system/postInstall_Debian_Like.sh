@@ -21,7 +21,7 @@ https_proxy=$http_proxy/HTTPS///
 apt="$(which apt) -V"
 if $isDebianLike;then
 	# CONFIG du Swap
- 	vgOS=$(findmnt / -n -o source | awk -F '[/-]' '{print$4}')
+	vgOS=$(findmnt / -n -o source | awk -F '[/-]' '{print$4}')
 	grep /dev/$vgOS/swap /etc/fstab -q || echo -e "/dev/$vgOS/swap\tnone\tswap\tsw\t0\t0" | sudo tee -a /etc/fstab # Ajout du "swap" dans le /etc/fstab
 
 	$sudo sysctl -w kernel.dmesg_restrict=0 # Allows users to run "dmesg"
@@ -29,15 +29,15 @@ if $isDebianLike;then
 	$sudo systemctl restart systemd-sysctl.service
 
 	# CONFIG UFW
- 	$sudo sed -i "s/IPV6.*/IPV6=no/" /etc/default/ufw
+	$sudo sed -i "s/IPV6.*/IPV6=no/" /etc/default/ufw
 	$sudo ufw reload
 #	$sudo ufw allow OpenSSH || $sudo ufw allow ssh
 	localNetwork=$(ip -4 route | awk "/^[0-9].*dev $(ip -4 route | awk '/default/{print$5}')/"'{print$1}')
 	$sudo ufw allow from $localNetwork to any app OpenSSH
- 	$sudo ufw allow from $bastion to any app OpenSSH
+	$sudo ufw allow from $bastion to any app OpenSSH
 	$sudo ufw allow 1022/tcp comment "do-release-upgrade alternate SSH port"
- 	$sudo ufw allow from $ourIP to any port 1022 proto tcp comment "do-release-upgrade alternate SSH port"
-  
+	$sudo ufw allow from $ourIP to any port 1022 proto tcp comment "do-release-upgrade alternate SSH port"
+
 #	sudo ufw allow "Nginx HTTPS"
 
 	grep "preserve_hostname:\s*true" /etc/cloud/cloud.cfg -q && sudo sed -i "s/preserve_hostname: true/preserve_hostname: false/" /etc/cloud/cloud.cfg
@@ -63,7 +63,7 @@ EOF
 		# CONFIG SNAPD
 		sudo snap set system proxy.http=$http_proxy
 		sudo snap set system proxy.https=$https_proxy
-  		sudo snap get system proxy
+		sudo snap get system proxy
 		snap debug connectivity
 
 		# CONFIG DNS
@@ -118,7 +118,7 @@ EOF
 		if systemctl list-unit-files | grep cloud.*enabled.*enabled -q;then
 			systemctl list-unit-files | awk '/cloud-init\..*enabled.*enabled/{print$1}' | while read service;do
 				$sudo systemctl stop $service
-    				$sudo systemctl disable $service
+				$sudo systemctl disable $service
 				$sudo systemctl mask $service
 			done
 		fi
@@ -140,7 +140,7 @@ EOF
 			grep rouser.svc_snmp /usr/share/snmp/snmpd.conf -q    || sudo net-snmp-create-v3-user -ro -X AES -A MD5 svc_snmp # Les MDPs sont a saisir de maniere interactive
 			grep rouser.svc_snmp_v3 /usr/share/snmp/snmpd.conf -q || sudo net-snmp-create-v3-user -ro -X AES -A SHA-512 svc_snmp_v3 # Les MDPs sont a saisir de maniere interactive
 		else
-  			$sudo $apt libsnmp-dev -y $aptSimul # Pour "net-snmp-config"
+			$sudo $apt libsnmp-dev -y $aptSimul # Pour "net-snmp-config"
 			# For Ubuntu XY.04 and older
 			MDP_SNMP_V3=ohqua7ke6Cain6aeb9au;MDP_SNMP_ENC_V3=aiChiimeegah8eejaele
 #			sudo net-snmp-config --create-snmpv3-user -v3 -ro -A $MDP_SNMP_V3 -X $MDP_SNMP_ENC_V3 -a SHA-512 -x AES svc_snmp_v3
@@ -163,7 +163,7 @@ EOF
 		ss -4nul | grep :161
 
 		$sudo ufw allow snmp
-  		$sudo ufw status numbered
+		$sudo ufw status numbered
 
 #		MDP_SNMP=q37uYXFqhy27eQeM97C7
 #		MDP_SNMP_V3=ohqua7ke6Cain6aeb9au
@@ -187,7 +187,7 @@ EOF
 		NTP_SERVER1=X.Y.Z.T1
 		FALLBACK_NTP=X.Y.Z.T2
 		RootDistanceMaxSec=20
-  
+
 		# CONFIG TIMEZONE
 		timedatectl status | grep Time.zone:.Europe/Paris -q || { $sudo timedatectl set-timezone Europe/Paris; sudo dpkg-reconfigure tzdata; }
 
@@ -195,7 +195,7 @@ EOF
 
 		sudo mkdir -p /etc/systemd/timesyncd.conf.d/
 		echo [Time] | sudo tee /etc/systemd/timesyncd.conf.d/myConpany-timesyncd.conf
-  
+
 		grep "^NTP=$NTP_SERVER1" /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.d/* -q || echo "NTP=$NTP_SERVER1" | sudo tee -a /etc/systemd/timesyncd.conf.d/myConpany-timesyncd.conf
 		grep "^FallbackNTP=$FALLBACK_NTP" /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.d/* -q || echo "FallbackNTP=$FALLBACK_NTP" | sudo tee -a /etc/systemd/timesyncd.conf.d/myConpany-timesyncd.conf
 		grep "^RootDistanceMaxSec=$RootDistanceMaxSec" /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.d/* -q || echo "RootDistanceMaxSec=$RootDistanceMaxSec" | sudo tee -a /etc/systemd/timesyncd.conf.d/myConpany-timesyncd.conf
