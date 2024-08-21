@@ -44,8 +44,8 @@ if $isDebianLike;then
 	sudo touch /etc/cloud/cloud-init.disabled # To Disable Cloud-Init
 
 	# CONFIG KEYBOARD LAYOUT
-	localectl set-x11-keymap fr pc105
-	sudo localectl set-keymap fr
+	localectl set-x11-keymap fr pc105 latin9
+	sudo localectl set-keymap fr # Ne marche plus depuis Ubuntu 22.04
 	sudo localectl set-locale LANG=en_US.UTF-8
 
 	hostnamectl status
@@ -63,6 +63,7 @@ EOF
 		# CONFIG SNAPD
 		sudo snap set system proxy.http=$http_proxy
 		sudo snap set system proxy.https=$https_proxy
+  		sudo snap get system proxy
 		snap debug connectivity
 
 		# CONFIG DNS
