@@ -52,7 +52,7 @@ if $isDebianLike;then
 
 	if : < /dev/tcp/$proxyIP/http;then
 		# CONFIG PROXY
-		# man apt-transport-http
+		# man apt-transport-http apt-transport-https
 		grep ^Acquire.*$http_proxy /etc/apt/apt.conf.d/*proxy -q || $sudo cat <<-EOF | sudo tee /etc/apt/apt.conf.d/00aptproxy
 			Acquire::http::proxy "$http_proxy";
 			Acquire::https::proxy "$https_proxy";
