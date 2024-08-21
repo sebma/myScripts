@@ -55,7 +55,7 @@ if $isDebianLike;then
 		# man apt-transport-http
 		grep ^Acquire.*$http_proxy /etc/apt/apt.conf.d/*proxy -q || $sudo cat <<-EOF | sudo tee /etc/apt/apt.conf.d/00aptproxy
 			Acquire::http::proxy "$http_proxy";
-			Acquire::http::proxy "$https_proxy";
+			Acquire::https::proxy "$https_proxy";
 EOF
 		$sudo $apt update
 		$sudo $apt upgrade -y $aptSimul
