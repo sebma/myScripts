@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+ffmpeg="command ffmpeg -hide_banner"
 function video2AnyBitrate {
 	test $# = 0 || test $# -gt 2 && {
 		echo "=> $FUNCNAME [bitrate=500k] video" 1>&2
