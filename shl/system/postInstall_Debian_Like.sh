@@ -66,6 +66,10 @@ EOF
 		sudo snap get system proxy
 		snap debug connectivity
 
+		# CONFIG GIT
+		git config http.proxy  $http_proxy
+		git config https.proxy $https_proxy
+
 		# CONFIG DNS
 		resolvectl status $iface
 		DNS_SERVER1=X.Y.Z.T1
