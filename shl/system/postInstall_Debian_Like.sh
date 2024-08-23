@@ -54,6 +54,7 @@ if $isDebianLike;then
 
 	if : < /dev/tcp/$proxyIP/http;then
 		# CONFIG PROXY
+  		egrep https?_proxy= $HOME/.profile -q || echo -e "\nexport https_proxy=$https_proxy" >> $HOME/.profile
   		sudo sed "/env_keep.*https\?_proxy/ s/^#//g" -i /etc/sudoers
 		# man apt-transport-http apt-transport-https
 		grep ^Acquire.*$http_proxy /etc/apt/apt.conf.d/*proxy -q || $sudo cat <<-EOF | sudo tee /etc/apt/apt.conf.d/00aptproxy
