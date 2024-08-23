@@ -16,8 +16,10 @@ test $(id -u) == 0 && sudo="" || sudo=sudo
 #aptSimul="-s"
 proxyIP=X.Y.Z.T4
 http_proxy_port=80
-http_proxy=http://$proxyIP:$http_proxy_port
-https_proxy=$http_proxy/HTTPS///
+
+export http_proxy=http://$proxyIP:$http_proxy_port
+export https_proxy=$http_proxy
+
 apt="$(which apt) -V"
 if $isDebianLike;then
 	# CONFIG du Swap
@@ -52,11 +54,13 @@ if $isDebianLike;then
 
 	if : < /dev/tcp/$proxyIP/http;then
 		# CONFIG PROXY
+  		sudo sed "/env_keep.*https\?_proxy/ s/^#//g" -i /etc/sudoers
 		# man apt-transport-http apt-transport-https
 		grep ^Acquire.*$http_proxy /etc/apt/apt.conf.d/*proxy -q || $sudo cat <<-EOF | sudo tee /etc/apt/apt.conf.d/00aptproxy
 			Acquire::http::proxy "$http_proxy";
 			Acquire::https::proxy "$https_proxy";
 EOF
+
 		$sudo $apt update
 		$sudo $apt upgrade -y $aptSimul
 
