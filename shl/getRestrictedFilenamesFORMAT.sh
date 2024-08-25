@@ -29,7 +29,7 @@ Usage: $scriptBaseName [STRING]...
 	-h|--help 		display this help and exit
 	-f|--formats	format(s) of video(s) to download
 	-p|--playlist	create M3U playlist
-	-t|--timeout	timeout the recording by speficied value (150m by default)
+	-t|--timeout	timeout the recording by speficied value (180m by default)
 	-v|--verbose	output version information and exit
 	-y|--overwite	overwrite all downloaded/generated files
 	--ffmpeg-i		ffmpeg information log level
@@ -89,7 +89,7 @@ getRestrictedFilenamesFORMAT () {
 	local debug="set -x"
 	local undebug="set +x"
 	local downloader=yt-dlp
-	local timeout=150m
+	local timeout=180m
 
 	startTime="$(LC_MESSAGES=en date)"
 
