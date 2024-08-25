@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-estimatedDuration=150m
+estimatedDuration=180m
 scriptDir=$(dirname $(readlink -f $0))
 scriptDir=$(cd $scriptDir;pwd)
 echo $PATH | grep /usr/local/bin -q || export PATH+=:/usr/local/bin
