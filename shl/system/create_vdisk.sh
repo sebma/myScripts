@@ -32,36 +32,36 @@ if which omreport >/dev/null;then
 	id=$(omreport storage controller -fmt ssv | awk -F';' '/^[0-9];/{printf$1;exit}')
 
 	if $listReadyPhysicalDisks;then
-		omreport storage pdisk controller=$id | egrep '^(ID|Status|Capacity|Sector Size|Bus|Power|Media|State|Vendor|Product|Serial|Part.Number|^$)' | awk -v myPATTERN=Ready -v RS='' -v ORS='\n\n' '$0 ~ myPATTERN'
-  		pdisk=$(omreport storage pdisk controller=$id -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/Ready;/{value=$1;print value;exit}')
+		omreport storage pdisk controller=$controllerID | egrep '^(ID|Status|Capacity|Sector Size|Bus|Power|Media|State|Vendor|Product|Serial|Part.Number|^$)' | awk -v myPATTERN=Ready -v RS='' -v ORS='\n\n' '$0 ~ myPATTERN'
+  		pdisk=$(omreport storage pdisk controller=$controllerID -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/Ready;/{value=$1;print value;exit}')
     		[ -z "$pdisk" ] && echo "=> There is no more physical disk in <Ready> state." >&2
 		exit 3
 	fi
 
-	if omreport storage vdisk controller=$id | grep VirtualDisk$virtualDiskNumber -q;then
+	if omreport storage vdisk controller=$controllerID | grep VirtualDisk$virtualDiskNumber -q;then
 		echo "=> ERROR [$scriptName] : VirtualDisk$virtualDiskNumber is already in use :" >&2
-		vdiskID=$(omreport storage vdisk controller=$id -fmt ssv | awk -F ';' "/VirtualDisk$virtualDiskNumber/"'{print$1;exit}')
-		omreport storage vdisk controller=$id vdisk=$vdiskID
+		vdiskID=$(omreport storage vdisk controller=$controllerID -fmt ssv | awk -F ';' "/VirtualDisk$virtualDiskNumber/"'{print$1;exit}')
+		omreport storage vdisk controller=$controllerID vdisk=$vdiskID
 		exit 4
 	fi
 
-	pdisk=$(omreport storage pdisk controller=$id -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/Ready;/{value=$1;print value;exit}')
+	pdisk=$(omreport storage pdisk controller=$controllerID -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/Ready;/{value=$1;print value;exit}')
 	if [ -z "$pdisk" ];then
 		echo "=> There is no more physical disk in <Ready> state for this operation." >&2
 		exit 5
 	fi
 
 	echo "=> The first physical disk in <Ready> state selected is <$pdisk> :"
-	omreport storage pdisk controller=$id pdisk=$pdisk| egrep '^(ID|Status|Capacity|Sector Size|Bus|Power|Media|State|Vendor|Product|Serial|Part.Number|^$)'
+	omreport storage pdisk controller=$controllerID pdisk=$pdisk| egrep '^(ID|Status|Capacity|Sector Size|Bus|Power|Media|State|Vendor|Product|Serial|Part.Number|^$)'
 
 	# Fetching the RAID and Policy values from the latest Virtual Disk
-	latestVirtualDiskID=$(omreport storage vdisk controller=$id -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/virtual\s*disk\s*[0-9]+/{value=$1}END{printf value}')
+	latestVirtualDiskID=$(omreport storage vdisk controller=$controllerID -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/virtual\s*disk\s*[0-9]+/{value=$1}END{printf value}')
  
-	raid=$(omreport storage vdisk controller=$id vdisk=$latestVirtualDiskID | awk '/Layout/{value=$NF;printf tolower(gensub("RAID-","r",1,value))}')
-	readpolicy=$(omreport storage vdisk controller=$id vdisk=$latestVirtualDiskID | awk '/Read Policy/{value=$(NF-1)" "$NF;printf tolower(value)}')
-	writepolicy=$(omreport storage vdisk controller=$id vdisk=$latestVirtualDiskID | awk '/Write Policy/{value=$(NF-1)" "$NF;printf tolower(value)}')
-	stripesize=$(omreport storage vdisk controller=$id vdisk=$latestVirtualDiskID | awk '/Stripe Element Size/{value=$(NF-1)$NF;printf tolower(value)}')
-	diskcachepolicy=$(omreport storage vdisk controller=$id vdisk=$latestVirtualDiskID | awk '/Disk Cache Policy/{value=$NF}END{printf tolower(value)}')
+	raid=$(omreport storage vdisk controller=$controllerID vdisk=$latestVirtualDiskID | awk '/Layout/{value=$NF;printf tolower(gensub("RAID-","r",1,value))}')
+	readpolicy=$(omreport storage vdisk controller=$controllerID vdisk=$latestVirtualDiskID | awk '/Read Policy/{value=$(NF-1)" "$NF;printf tolower(value)}')
+	writepolicy=$(omreport storage vdisk controller=$controllerID vdisk=$latestVirtualDiskID | awk '/Write Policy/{value=$(NF-1)" "$NF;printf tolower(value)}')
+	stripesize=$(omreport storage vdisk controller=$controllerID vdisk=$latestVirtualDiskID | awk '/Stripe Element Size/{value=$(NF-1)$NF;printf tolower(value)}')
+	diskcachepolicy=$(omreport storage vdisk controller=$controllerID vdisk=$latestVirtualDiskID | awk '/Disk Cache Policy/{value=$NF}END{printf tolower(value)}')
 
 	case $readpolicy in
 		"read ahead") readpolicy=ra;;
@@ -82,29 +82,29 @@ if which omreport >/dev/null;then
 	esac
 
 	if $lastest;then
-		last=$(omreport storage vdisk controller=$id -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1;last=1}/virtual\s*disk\s*[0-9]+;/{last+=1}END{printf last}')
+		last=$(omreport storage vdisk controller=$controllerID -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1;last=1}/virtual\s*disk\s*[0-9]+;/{last+=1}END{printf last}')
 		last+=1
 		virtualDiskNumber=$last
 	fi
 	name=VirtualDisk$virtualDiskNumber
 
 	echo '=> Checking if there is "Preserved Cache" on the controller' " $id ..."
-	if ! omreport storage controller controller=$id | grep Preserved.Cache.*Not.Applicable -q;then
+	if ! omreport storage controller controller=$controllerID | grep Preserved.Cache.*Not.Applicable -q;then
 		echo "=> ERROR : There is Preserved Cache on the controller $id." >&2
 		echo "=> You need to flush the Preserved Cache of the controller $id." >&2
 		exit 8
 	fi
 
 	echo "=> Creating $name for Physical Disk $pdisk ..."
-	echo "=> omconfig storage controller action=createvdisk controller=$id raid=$raid size=max pdisk=$pdisk stripesize=$stripesize diskcachepolicy=$diskcachepolicy readpolicy=$readpolicy writepolicy=$writepolicy name=$name ..."
-	time omconfig storage controller action=createvdisk controller=$id raid=$raid size=max pdisk=$pdisk stripesize=$stripesize diskcachepolicy=$diskcachepolicy readpolicy=$readpolicy writepolicy=$writepolicy name=$name
+	echo "=> omconfig storage controller action=createvdisk controller=$controllerID raid=$raid size=max pdisk=$pdisk stripesize=$stripesize diskcachepolicy=$diskcachepolicy readpolicy=$readpolicy writepolicy=$writepolicy name=$name ..."
+	time omconfig storage controller action=createvdisk controller=$controllerID raid=$raid size=max pdisk=$pdisk stripesize=$stripesize diskcachepolicy=$diskcachepolicy readpolicy=$readpolicy writepolicy=$writepolicy name=$name
 	retCode=$?
 	echo "=> retCode = $retCode"
 
 	if [ $retCode = 0 ];then
 		echo "=> The new created Virtual Disk is :"
-		vdiskID=$(omreport storage vdisk controller=$id -fmt ssv | awk -F ';' "/VirtualDisk$virtualDiskNumber/"'{print$1;exit}')
-		omreport storage vdisk controller=$id vdisk=$vdiskID
+		vdiskID=$(omreport storage vdisk controller=$controllerID -fmt ssv | awk -F ';' "/VirtualDisk$virtualDiskNumber/"'{print$1;exit}')
+		omreport storage vdisk controller=$controllerID vdisk=$vdiskID
 	fi
 else
 	echo "=> ERROR [$scriptName] : DELL OpenManage omreport is not installed." >&2
