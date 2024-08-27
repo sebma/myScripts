@@ -74,8 +74,8 @@ if $isDebianLike;then
 		snap debug connectivity
 
 		# CONFIG GIT
-		git config http.proxy  $http_proxy
-		git config https.proxy $https_proxy
+		git config --global http.proxy  $http_proxy
+		git config --global https.proxy $https_proxy
 
 		# CONFIG DNS
 		resolvectl status $iface
