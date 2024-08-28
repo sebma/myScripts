@@ -9,7 +9,7 @@ $dirSep = [io.path]::DirectorySeparatorChar
 function source($script) { . $script }
 
 function pow2($a,$n) {
-    return [math]::pow($a,$n)
+	return [math]::pow($a,$n)
 }
 
 function isInstalled($cmd) { return gcm "$cmd" 2>$null }
@@ -106,10 +106,10 @@ $OSVersion = (osVersion)
 
 function setAliases {
 	set-alias -Scope Global yt-dl youtube-dl
- 	set-alias -Scope Global reboot restart-computer
+	set-alias -Scope Global reboot restart-computer
 	set-alias -Scope Global vi vim
 	set-alias -Scope Global l ls.exe
- 	set-alias -Scope Global openssl "${ENV:ProgramData}\scoop\apps\openssl-lts-light\current\bin\openssl.exe"
+	set-alias -Scope Global openssl "${ENV:ProgramData}\scoop\apps\openssl-lts-light\current\bin\openssl.exe"
 }
 
 setAliases
@@ -155,7 +155,7 @@ if( $IsWindows ) {
 	function viewPubKey($pubKey) {
 		& $openssl pkey -text -noout -in $pubKey
 	}
- 
+
 	function openCsr {
 		& $openssl req -noout -in @args
 	}
@@ -171,7 +171,7 @@ if( $IsWindows ) {
 	function openCert {
 		& $openssl x509 -notext -noout -in @args
 	}
- 
+
 	function viewCert {
 		openCert @args -text
 	}
@@ -212,7 +212,7 @@ if( $IsWindows ) {
 		& $openssl pkcs12 -noenc -in $pfxFile -out $pemFile
 	}
 
- 	function viewP12 {
+	function viewP12 {
 		openP12 @args | openssl x509 -noout -text
 	}
 
@@ -311,7 +311,8 @@ if( $IsWindows ) {
 	function cdr {pushd $HOME/AppData/Roaming/Microsoft/Windows/Recent}
 	function cdsd {pushd $HOME/AppData/Roaming/Microsoft/Windows/SendTo}
 	function cdst {pushd "$HOME/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup"}
- 	function cfind { choco find @args }
+	function cfind { choco find @args }
+	function chome { choco info @args | sls "Site:" }
 	function dirname($path) { Split-Path -Path $path }
 	function getInterFaceInfos($name) { Get-NetIPAddress -InterfaceAlias $name }
 #	function grepps($pattern) { Out-String -Stream | sls "$pattern" }
@@ -323,7 +324,7 @@ if( $IsWindows ) {
 	function pingps($remote) { Test-NetConnection $remote }
 	function renamePC($newName) { Rename-Computer -NewName $newName }
 	function runThroughArgs { $argc=$args.Count;for($i=0;$i -lt $argc;$i++) { echo "=> args[$i] = $($args[$i])"} }
- 	function sysinfo { Get-ComputerInfo CsManufacturer , CsModel | % { $_.CsManufacturer , $_.CsModel } }
+	function sysinfo { Get-ComputerInfo CsManufacturer , CsModel | % { $_.CsManufacturer , $_.CsModel } }
 
 	function groups {
 		$argc=$args.Count
@@ -472,7 +473,7 @@ function showNTPServers {
 	if( $IsWindows ) {
 #		(Get-ItemPropertyValue -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Parameters -Name NtpServer).split(',')[0]
 		(w32tm -query -status | sls ^Source).ToString().Split()[1] + " = " + (w32tm -query -status | sls ^ID.*IP).ToString().Split()[-1].Split(')')[0]
- 	}
+	}
 }
 
 function macAddr {
@@ -512,5 +513,5 @@ function .....{pushd ../../../..}
 # See https://ch0.co/tab-completion for details.
 $ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
 if (Test-Path($ChocolateyProfile)) {
-  Import-Module "$ChocolateyProfile"
+	Import-Module "$ChocolateyProfile"
 }
