@@ -284,8 +284,7 @@ if( $IsWindows ) {
 		set-alias -Scope Global reboot restart-computer
 		if( ! (alias wget 2>$null | sls wget) ) { set-alias -Scope Global wget Invoke-WebRequest }
 		set-alias -Scope Global  ex
-		set-alias -Scope Global more less
-  		function sysinfo { Get-ComputerInfo CsManufacturer , CsModel | % { $_.CsManufacturer , $_.CsModel } }
+		set-alias -Scope Global more less  		
 	}
 
 	SetWindowsAliases
@@ -323,6 +322,7 @@ if( $IsWindows ) {
 	function pingps($remote) { Test-NetConnection $remote }
 	function renamePC($newName) { Rename-Computer -NewName $newName }
 	function runThroughArgs { $argc=$args.Count;for($i=0;$i -lt $argc;$i++) { echo "=> args[$i] = $($args[$i])"} }
+ 	function sysinfo { Get-ComputerInfo CsManufacturer , CsModel | % { $_.CsManufacturer , $_.CsModel } }
 
 	function groups {
 		$argc=$args.Count
