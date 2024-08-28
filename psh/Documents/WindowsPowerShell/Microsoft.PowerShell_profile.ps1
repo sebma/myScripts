@@ -285,6 +285,7 @@ if( $IsWindows ) {
 		if( ! (alias wget 2>$null | sls wget) ) { set-alias -Scope Global wget Invoke-WebRequest }
 		set-alias -Scope Global  ex
 		set-alias -Scope Global more less
+  		set-alias sysinfo Get-ComputerInfo CsManufacturer , CsModel | % { $_.CsManufacturer , $_.CsModel }
 	}
 
 	SetWindowsAliases
