@@ -76,6 +76,7 @@ if $isDebianLike;then
 		# CONFIG GIT
 		git config --global http.proxy  $http_proxy
 		git config --global https.proxy $https_proxy
+  		git config --global -l | egrep https?.proxy
 
 		# CONFIG DNS
 		resolvectl status $iface
@@ -241,6 +242,8 @@ if $isDebianLike;then
 			test \$fd_find && alias findBiggerThan='$fd_find -H --xdev -t f -E /dev,/proc,/sys -ls . $PWD -S'
 			alias journalctlErrors='\journalctl -p emerg..err --no-pager'
 			alias l=ls
+			alias lastfiles="$find . -xdev -type f -mmin -2"
+			alias lastfilestoday="$find . -type f -ctime -1"
 			alias ll >/dev/null 2>&1 || alias ll='ls -l --color=auto'
 			alias llh='ll -h'
 			alias ls='ls -F'
