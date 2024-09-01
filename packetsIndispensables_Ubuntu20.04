@@ -83,7 +83,6 @@ fdupes
 feh
 ffmpeg
 ffmpegthumbs
-firefox-globalmenu
 flpsed
 gawk
 gcal
@@ -279,7 +278,6 @@ testdisk
 texlive-extra-utils
 texlive-luatex
 thunderbird
-thunderbird-globalmenu
 tlp
 tmpreaper
 tmux
