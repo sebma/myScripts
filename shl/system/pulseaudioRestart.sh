@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-initPath=$(ps -p 1 -o cmd= | cut -d" " -f1)
+initName=$(ps -p 1 -o cmd= | cut -d" " -f1)
+initPath=$(type -P $initName)
 set -o pipefail
 systemType=$(strings $initPath | egrep -o "upstart|sysvinit|systemd|launchd" | head -1 || echo unknown)
 set +o pipefail
