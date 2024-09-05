@@ -30,6 +30,8 @@ if $isDebianLike;then
 	echo kernel.dmesg_restrict=0 | sudo tee -a /etc/sysctl.d/99-$companyNAME.conf
 	$sudo systemctl restart systemd-sysctl.service
 
+	hostnamectl status | grep 'Chassis: laptop'
+
 	# CONFIG UFW
 	$sudo sed -i "s/IPV6.*/IPV6=no/" /etc/default/ufw
 	$sudo ufw reload
