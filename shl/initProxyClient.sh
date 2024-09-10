@@ -28,6 +28,7 @@ fi
 if which git &>/dev/null;then
 	git config --global http.proxy  $http_proxy
 	git config --global https.proxy $https_proxy
+ 	git config --global -l | egrep https?.proxy
 fi
 
 if which snap &>/dev/null;then
