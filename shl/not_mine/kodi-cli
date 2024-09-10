@@ -18,9 +18,11 @@
 function xbmc_req {
     output=$(curl -s -i -X POST --header "Content-Type: application/json" -d "$1" http://$KODI_USER:$KODI_PASS@$KODI_HOST:$KODI_PORT/jsonrpc)
 
-    if [[ $2 = true ]];
+    http_code=$(echo "$output" | awk '/HTTP/{print $2}')
+
+    if [[ $2 = true ]] || [[ $http_code != 200 ]];
     then
-        echo $output
+        echo "$output"
     fi
 }
 

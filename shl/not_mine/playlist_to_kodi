@@ -26,26 +26,26 @@ if [ "$2" == "-nostop" ];then
     NOSTOP="TRUE"
 fi
 
-youtube-dl "$szAnswer" --netrc --cookies /path/to/cookies.txt --skip-download -j |  tee >(zenity --progress  --title="Fetching playlist" --text="Please be patient..." --pulsate --auto-close --auto-kill)  | jq -M --unbuffered '@text "\(.fulltitle)@@\(.webpage_url)"' > "$TEMPFILE" 
+time youtube-dl "$szAnswer" --netrc --cookies /tmp/cookies4kodi_cli.txt -j |  tee >(zenity --progress  --title="Fetching playlist items" --text="Please be patient..." --pulsate --auto-close --auto-kill)  | jq -r --unbuffered '.fulltitle+"@@"+.webpage_url' > "$TEMPFILE"
 
 while read line; do
     if [ -z "$NOSTOP" ];then
-        vidtitle=$(echo "$line" | awk -F '"' '{print $2}' | awk -F '@@' '{print $1}')
+        vidtitle=$(echo "$line" | sed 's/"//;s/"$//' | awk -F '@@' '{print $1}')
         zenity --info --timeout=60 --text="Playing $vidtitle"     
-        vidurl=$(echo "$line" | awk -F '"' '{print $2}' | awk -F '@@' '{print $2}') 
+        vidurl=$(echo "$line" | sed 's/"//;s/"$//' | awk -F '@@' '{print $2}')
         kodi-cli -y "$vidurl"
         zenity --info --timeout=60 --text="Marking $vidtitle watched"
         # Marking video watched
         #echo "Marking video watched"
-        youtube-dl "$vidurl" --netrc --cookies /path/to/cookies.txt --quiet --skip-download --mark-watched
+#        time youtube-dl "$vidurl" --netrc --cookies /tmp/cookies4kodi_cli.txt --quiet --skip-download --mark-watched
         zenity --question --text="Press Yes to continue"
         if [ $? = 1 ]; then
             exit
         fi
     else
-        vidurl=$(echo "$line" | awk -F '"' '{print $2}' | awk -F '@@' '{print $2}') 
+        vidurl=$(echo "$line" | sed 's/"//;s/"$//' | awk -F '@@' '{print $2}')
         kodi-cli -q "$vidurl"        
-        youtube-dl "$vidurl" --netrc --cookies /path/to/cookies.txt --quiet --skip-download --mark-watched
+#        time youtube-dl "$vidurl" --netrc --cookies /tmp/cookies4kodi_cli.txt --quiet --skip-download --mark-watched
     fi
 done < "$TEMPFILE"
 
