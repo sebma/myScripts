@@ -17,7 +17,7 @@ if [ $# != 1 ];then
 fi
 
 variableDefinitionFile="$1"
-source "$variableDefinitionFile"
+source "$variableDefinitionFile" || exit
 
 if $isDebianLike;then
 	grep ^Acquire.*$http_proxy /etc/apt/apt.conf.d/*proxy -q  || echo "Acquire::http::proxy  \"$http_proxy\";"  | $sudo tee /etc/apt/apt.conf.d/00aptproxy
