@@ -2,8 +2,8 @@
 
 scriptBaseName=${0/*\//}
 if ! which adcli &>/dev/null;then
-	echo "==> Installing realmd adcli ..."
-	sudo apt-get install realmd adcli -y >/dev/null
+	echo "==> Installing realmd adcli krb5-user krb5-doc ..."
+	sudo apt-get install realmd adcli krb5-user krb5-doc -y >/dev/null
 fi
 
 NAME=$(source /etc/os-release;echo $NAME)
@@ -30,7 +30,11 @@ if ! sudo adcli testjoin >/dev/null;then
 	sudo pam-auth-update --enable mkhomedir 2>&1 | tee -a $logDIR/$HOSTNAME-join-$(date +%Y%m%d).log # Au cas ou le homedir n'est pas cree
 fi
 
-{
+if sudo adcli testjoin >/dev/null;then
+	if ! grep "renew_lifetime\s*=\s*7d" /etc/krb5.conf -q;then
+		echo "renew_lifetime = 7d" | sudo tee -a /etc/krb5.conf >/dev/null
+	fi
+
 	echo "=> Parametrage du homedir SSSD en /home/$domainLowercase ..."
 	sudo grep "_homedir.*/home/%d/%u$" /etc/sssd/sssd.conf -q || sudo sed -i-$(date +%Y%m%d-%H%M%S).conf "/_homedir/s|=.*|= /home/%d/%u|" /etc/sssd/sssd.conf
 	sudo sed -i 's/use_fully_qualified_names.*[Ff]alse/use_fully_qualified_names = True/' /etc/sssd/sssd.conf
@@ -41,8 +45,9 @@ fi
 	fi
 
 	if ! sudo grep "ad_access_filter" /etc/sssd/sssd.conf -q;then
-		echo "=> Ajout du group autorisee dans /etc/sssd/sssd.conf ..."
-		echo "ad_access_filter = (memberOf:1.2.840.113556.1.4.1941:=$allowedGroupsDN)"| sudo tee -a /etc/sssd/sssd.conf
+#		echo "=> Ajout du group autorisee dans /etc/sssd/sssd.conf ..."
+#		echo "ad_access_filter = (memberOf:1.2.840.113556.1.4.1941:=$allowedGroupsDN)" | sudo tee -a /etc/sssd/sssd.conf # Pour autoriser les membres du groupe $allowedGroupsDN a s_authentifier
+		:
 	fi
 
 	if ! sudo grep -i "$adminGroup.*ALL=" /etc/sudoers /etc/sudoers.d/* -q;then
@@ -62,4 +67,4 @@ fi
 		sudo sed -i "/systemd-journal:/s/$/,$adminGroup@$domainLowercase/" /etc/group
 		grep systemd-journal: /etc/group
 	fi
-} | tee $logDIR/$HOSTNAME-join-$(date +%Y%m%d).log
+fi | tee $logDIR/$HOSTNAME-join-$(date +%Y%m%d).log
