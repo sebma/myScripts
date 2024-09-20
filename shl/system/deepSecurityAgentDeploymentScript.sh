@@ -48,7 +48,6 @@ if [[ $isRPM == 1 ]]; then package='agent.rpm'
     else package='agent.deb'
 fi
 
-# [ $(echo $runningPlatform | tr -d "[_\-]") = Ubuntu ] && [ $(echo $majorVersion | cut -d. -f1) -ge 24 ] && majorVersion=22.04 # FORCE Ubuntu 22.04
 test -n "$ubuntuVersion" && majorVersion=$ubuntuVersion
 curl -H "Agent-Version-Control: on" -L $MANAGERURL/software/agent/${runningPlatform}${majorVersion}/${archType}/$package?tenantID=80751 -o /tmp/$package $CURLOPTIONS --insecure
 
