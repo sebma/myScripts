@@ -2,8 +2,6 @@
 
 ytdlpUpdate ()
 {
-	[ $osFamily = Darwin ] && local sed="command sed -E"
-	[ $osFamily = Linux ]  && local sed="command sed -r"
 	if [ $# -gt 1 ]; then
 		echo "=> Usage: $FUNCNAME [ytdlGitURL]"
 		return 1
@@ -15,24 +13,18 @@ ytdlpUpdate ()
 			local ytdlpPyPI_URL=https://pypi.org/pypi/yt-dlp
 		fi
 	fi
-
 	local sudo=""
 	test -z "$isAdmin" && isAdmin=$(groups 2>/dev/null | \egrep -wq "sudo|adm|admin|root|wheel" && echo true || echo false)
 	if $isAdmin; then
 		sudo="command sudo -H"
 	fi
-
 	local package=yt-dlp
-	local module=yt_dlp
 	local yt_dlp="$(type -P $package)"
 	if [ -n "$yt_dlp" ]; then
-		local ytdlpCurrentRelease=$(python3 -c "import $module; print($module.version.__version__)")
+		local ytdlpCurrentRelease=$($package --version)
 		echo "=> The current version of $package is <$ytdlpCurrentRelease>."
-
-		local gitHub_API_Repo_URL=$(echo $ytdlpGitURL | $sed "s|github.com|api.github.com/repos|")
-		echo "=> Searching for the latest release on $gitHub_API_Repo_URL/tags ..." 1>&2
-
-		local ytdlpLatestRelease=$(\curl -qLs -H "Accept: application/vnd.github.v3+json" $gitHub_API_Repo_URL/tags | jq -r '.[0].name')
+		echo "=> Searching for the latest release on $ytdlpPyPI_URL ..." 1>&2
+		local ytdlpLatestRelease=$(\curl -qLs $ytdlpPyPI_URL/json | jq -r .info.version)
 		if [ -z "$ytdlpLatestRelease" ]; then
 			set -o pipefail
 			echo "=> Couldn't find the latest release on $ytdlpPyPI_URL, checking the $ytdlpGitURL repository ..." 1>&2
@@ -46,11 +38,9 @@ ytdlpUpdate ()
 			fi
 			echo "=> Found the <$ytdlpLatestRelease> version." 1>&2
 		fi
-
 		if [ "$ytdlpLatestRelease" != $ytdlpCurrentRelease ]; then
 			local ytdlPythonVersion=$($yt_dlp --ignore-config -v 2>&1 | awk -F "[ .]" '/Python version/{printf$4"."$5}')
 			$sudo pip$ytdlPythonVersion install -U $package
-
 			ytdlpTestURLs="https://youtu.be/vWYp2iGMDcM https://www.dailymotion.com/video/x5850if https://vimeo.com/groups/57545/videos/13262021 https://ok.ru/video/2091889462009"
 			echo "=> Checking if $package can parse these URLs : $ytdlpTestURLs ..."
 			if time ! yt-dlp -q -F $ytdlpTestURLs > /dev/null; then
