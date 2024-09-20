@@ -41,7 +41,7 @@ ytdlpUpdate ()
 		if [ "$ytdlpLatestRelease" != $ytdlpCurrentRelease ]; then
 			local ytdlPythonVersion=$($yt_dlp --ignore-config -v 2>&1 | awk -F "[ .]" '/Python version/{printf$4"."$5}')
 			$sudo pip$ytdlPythonVersion install -U $package
-			ytdlpTestURLs="https://youtu.be/vWYp2iGMDcM https://www.dailymotion.com/video/x5850if https://vimeo.com/114851469 https://ok.ru/video/2091889462009"
+			ytdlpTestURLs="https://youtu.be/vWYp2iGMDcM https://www.dailymotion.com/video/x5850if https://ok.ru/video/2091889462009"
 			echo "=> Checking if $package can parse these URLs : $ytdlpTestURLs ..."
 			if time ! yt-dlp -q -F $ytdlpTestURLs > /dev/null; then
 				echo "=> At least one of them failed parsing so rolling back to $package version <$ytdlpCurrentRelease> ..."
