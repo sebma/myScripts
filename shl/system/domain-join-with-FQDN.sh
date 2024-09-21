@@ -23,9 +23,8 @@ domainUppercase=${domain^^}
 logDIR=../log
 mkdir -p $logDIR
 
-echo "=> The hostname is : " $(hostnamectl hostname)
 hostnamectl hostname | grep -i $domain -q || sudo hostnamectl hostname $HOSTNAME.$domainLowercase
-echo "=> The hostname is now : " $(hostnamectl hostname)
+echo "=> The hostname is : " $(hostnamectl hostname)
 
 echo "=> Test de jonction au domain $domainLowercase ..." | tee $logDIR/$HOSTNAME-join-$(date +%Y%m%d).log
 if ! sudo adcli testjoin >/dev/null;then
@@ -42,13 +41,15 @@ if sudo adcli testjoin >/dev/null;then
 	echo "=> Parametrage du homedir SSSD en /home/$domainLowercase ..."
 	sudo grep "_homedir.*/home/%d/%u$" /etc/sssd/sssd.conf -q || sudo sed -i-$(date +%Y%m%d-%H%M%S).conf "/_homedir/s|=.*|= /home/%d/%u|" /etc/sssd/sssd.conf
 	sudo sed -i 's/use_fully_qualified_names.*[Ff]alse/use_fully_qualified_names = True/' /etc/sssd/sssd.conf
-	sudo pam-auth-update --enable mkhomedir # Au cas ou le homedir n'est pas cree
 
 	if ! sudo grep "ad_access_filter" /etc/sssd/sssd.conf -q;then
 #		echo "=> Ajout du group autorisee dans /etc/sssd/sssd.conf ..."
 #		echo "ad_access_filter = (memberOf:1.2.840.113556.1.4.1941:=$allowedGroupsDN)" | sudo tee -a /etc/sssd/sssd.conf # Pour autoriser les membres du groupe $allowedGroupsDN a s_authentifier
 		:
 	fi
+
+	sudo systemctl restart sssd
+	sudo pam-auth-update --enable mkhomedir # Au cas ou le homedir n'est pas cree
 
 	if ! sudo grep -i "$adminGroup.*ALL=" /etc/sudoers /etc/sudoers.d/* -q;then
 		echo "=> Ajout de $adminGroup dans les /etc/sudoers.d/ ..."
@@ -67,5 +68,4 @@ if sudo adcli testjoin >/dev/null;then
 		sudo sed -i "/systemd-journal:/s/$/,$adminGroup@$domainLowercase/" /etc/group
 		grep systemd-journal: /etc/group
 	fi
-	sudo systemctl restart sssd
 fi 2>&1 | tee -a $logDIR/$HOSTNAME-join-$(date +%Y%m%d).log
