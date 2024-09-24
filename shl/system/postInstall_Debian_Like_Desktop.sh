@@ -1,15 +1,19 @@
 #!/usr/bin/env bash
-
+set -u
 declare {isDebian,isRedHat}Like=false
 
 distribID=$(source /etc/os-release;echo $ID)
+majorNumber=$(source /etc/os-release;echo $VERSION_ID | cut -d. -f1)
+
 if   echo $distribID | egrep "centos|rhel|fedora" -q;then
 	isRedHatLike=true
 elif echo $distribID | egrep "debian|ubuntu" -q;then
 	isDebianLike=true
+	if echo $distribID | egrep "ubuntu" -q;then
+		isUbuntuLike=true
+	fi
 fi
 
-scriptBaseName=${0/*\//}
 if [ $# != 1 ];then
 	echo "=> Usage $scriptBaseName variablesDefinitionFile" >&2
 	exit 1
@@ -21,30 +25,13 @@ source "$variablesDefinitionFile" || exit
 #aptSimul="-s"
 
 apt="$(which apt) -V"
+aptOtions="-V"
 if $isDebianLike;then
 	test $(id -u) == 0 && sudo="" || sudo=sudo
-	# CONFIG du Swap
-	vgOS=$(findmnt / -n -o source | awk -F '[/-]' '{print$4}')
-	grep /dev/$vgOS/swap /etc/fstab -q || echo -e "/dev/$vgOS/swap\tnone\tswap\tsw\t0\t0" | sudo tee -a /etc/fstab # Ajout du "swap" dans le /etc/fstab
 
 	$sudo sysctl -w kernel.dmesg_restrict=0 # Allows users to run "dmesg"
 	echo kernel.dmesg_restrict=0 | sudo tee -a /etc/sysctl.d/99-$company.conf
 	$sudo systemctl restart systemd-sysctl.service
-
-	# CONFIG UFW
-	$sudo sed -i "s/IPV6.*/IPV6=no/" /etc/default/ufw
-	$sudo ufw reload
-#	$sudo ufw allow OpenSSH || $sudo ufw allow ssh
-	$sudo ufw allow 1022/tcp comment "do-release-upgrade alternate SSH port"
-	$sudo ufw allow 62354/tcp comment "GLPI-Agent"
-	$sudo ufw allow 2002/tcp comment "LogMeIn Host"
-	localNetwork=$(ip -4 route | awk "/^[0-9].*dev $(ip -4 route | awk '/default/{print$5}')/"'{print$1}')
-	$sudo ufw allow from $localNetwork to any app OpenSSH
-	$sudo ufw allow from $bastion to any app OpenSSH
-
-	wanIP=$(dig -4 +short @resolver1.opendns.com A myip.opendns.com)
-	sudo ufw allow from $wanIP to any port 1022 proto tcp comment "do-release-upgrade alternate SSH port"
-#	sudo ufw allow "Nginx HTTPS"
 
 	grep "preserve_hostname: true" /etc/cloud/cloud.cfg -q && sudo sed -i "s/preserve_hostname: true/preserve_hostname: false/" /etc/cloud/cloud.cfg
 	sudo touch /etc/cloud/cloud-init.disabled # To Disable Cloud-Init
@@ -57,20 +44,21 @@ if $isDebianLike;then
 	sudo localectl set-locale LANG=en_US.UTF-8
 
 	hostnamectl status
+	hostnamectl chassis 2>/dev/null || hostnamectl status | awk '/Chassis/{print$2}'
 
 	if : < /dev/tcp/$proxyIP/http;then
 		# CONFIG PROXY
-		egrep http_proxy= $HOME/.profile -q  || echo -e "\nexport http_proxy=$http_proxy"   >> $HOME/.profile
-		egrep https_proxy= $HOME/.profile -q || echo -e "\nexport https_proxy=$https_proxy" >> $HOME/.profile
+#		egrep http_proxy= $HOME/.profile -q  || echo -e "\nexport http_proxy=$http_proxy"   >> $HOME/.profile
+#		egrep https_proxy= $HOME/.profile -q || echo -e "\nexport https_proxy=$https_proxy" >> $HOME/.profile
 		# Propagation des variables "http_proxy" et "https_proxy" aux "sudoers"
-		sudo grep '^[^#]\s*.*env_keep.*https_proxy' /etc/sudoers /etc/sudoers.d/* -q || echo 'Defaults:%sudo env_keep += "http_proxy https_proxy ftp_proxy all_proxy no_proxy"' | sudo tee -a /etc/sudoers.d/proxy
+		sudo grep '^[^#]\s*.*env_keep.*https_proxy' /etc/sudoers /etc/sudoers.d/* -q || echo 'Defaults:%sudo env_keep += "http_proxy https_proxy ftp_proxy all_proxy no_proxy"' | sudo tee -a /etc/sudoers.d/proxy_env
 
 		# man apt-transport-http apt-transport-https
-		grep ^Acquire.*$http_proxy /etc/apt/apt.conf.d/*proxy -q  || echo "Acquire::http::proxy  \"$http_proxy\";"  | sudo tee /etc/apt/apt.conf.d/00aptproxy
-		grep ^Acquire.*$https_proxy /etc/apt/apt.conf.d/*proxy -q || echo "Acquire::https::proxy \"$https_proxy\";" | sudo tee -a /etc/apt/apt.conf.d/00aptproxy
+		grep ^Acquire.*$http_proxy  /etc/apt/apt.conf.d/*aptproxy -q || echo "Acquire::http::proxy  \"$http_proxy\";"  | sudo tee /etc/apt/apt.conf.d/00aptproxy
+		grep ^Acquire.*$https_proxy /etc/apt/apt.conf.d/*aptproxy -q || echo "Acquire::https::proxy \"$https_proxy\";" | sudo tee -a /etc/apt/apt.conf.d/00aptproxy
 
 		$sudo $apt update
-		$sudo $apt upgrade -y $aptSimul
+#		$sudo $apt upgrade -y $aptSimul
 
 		# CONFIG SNAPD
 		$sudo snap get system proxy.http  || $sudo snap set system proxy.http=$http_proxy
@@ -89,7 +77,7 @@ if $isDebianLike;then
 		if ! resolvectl dns | grep "$DNS_SERVER1" -q;then
 			iface=$(\ls /sys/class/net/ | grep -vw lo)
 			$sudo resolvectl dns $iface $DNS_SERVER1 $FallBack_DNS_SERVER
-			$sudo resolvectl domain $iface $DOMAIN
+			$sudo resolvectl domain $iface $searchDOMAIN
 			resolvectl dns $iface
 			resolvectl status $iface
 		fi
@@ -98,19 +86,12 @@ if $isDebianLike;then
 		grep -i virtual /sys/class/dmi/id/product_name -q && ! dpkg -s open-vm-tools 2>/dev/null | grep installed -q && $sudo $apt install open-vm-tools -y $aptSimul
 		$sudo systemctl start vmtoolsd
 
-		if [ $distribID == ubuntu ];then
-			test -n "$http_proxy" && $sudo sed -i.orig "s|https://|http://|" /etc/update-manager/meta-release
-			$sudo rm -fv /var/lib/ubuntu-release-upgrader/release-upgrade-available
-			$sudo /usr/lib/ubuntu-release-upgrader/release-upgrade-motd
-			timeout 5s /usr/lib/ubuntu-release-upgrader/check-new-release;echo $? # FLUX http-proxy a ouvrir vers $http_proxy
-		fi
-
 		$sudo $apt install ca-certificates
 		sudo update-ca-certificates --fresh
 		ll /etc/ssl/certs/ | grep Gandi
 
 		$sudo $apt install net-tools -y $aptSimul # Pour netstat
-		$sudo $apt install ugrep btop plocate gh fd-find # UBUNTU >= 22.04
+		$isUbuntuLike && [ $majorNumber -ge 22 ] && $sudo $apt install ugrep btop plocate gh fd-find # UBUNTU >= 22.04
 		$sudo $apt install landscape-common # cf. https://github.com/canonical/landscape-client/blob/master/debian/landscape-common.install
 		$sudo $apt install ca-certificates debsecan ncdu ripgrep silversearcher-ag ack progress gcp shellcheck command-not-found nmon smartmontools iotop lsof net-tools pwgen ethtool smem sysstat fzf grep gawk sed curl remake wget jq jid vim dfc lshw screenfetch bc units lsscsi jq btop htop apt-file dlocate pv screen rsync x11-apps mc landscape-common parted gdisk ipcalc -y
 
@@ -152,16 +133,17 @@ if $isDebianLike;then
 
 		ss -4nul | grep :161
 		$sudo systemctl stop snmpd
-		if which net-snmp-create-v3-user >/dev/null 2>&1;then
-			grep rouser.svc_snmp /usr/share/snmp/snmpd.conf -q    || sudo net-snmp-create-v3-user -ro -X AES -A MD5 svc_snmp # Les MDPs sont a saisir de maniere interactive
-			grep rouser.svc_snmp_v3 /usr/share/snmp/snmpd.conf -q || sudo net-snmp-create-v3-user -ro -X AES -A SHA-512 svc_snmp_v3 # Les MDPs sont a saisir de maniere interactive
+		if $isUbuntuLike && [ $majorNumber -ge 20 ] && which net-snmp-create-v3-user >/dev/null 2>&1;then
+			grep rouser.svc_snmp /usr/share/snmp/snmpd.conf -q     || sudo net-snmp-create-v3-user -ro -X AES -A MD5 svc_snmp # Les MDPs sont a saisir de maniere interactive
+			grep rouser.svc_coservit /usr/share/snmp/snmpd.conf -q || sudo net-snmp-create-v3-user -ro -X AES -A SHA svc_coservit # Les MDPs sont a saisir de maniere interactive
+			grep rouser.svc_snmp_v3 /usr/share/snmp/snmpd.conf -q  || sudo net-snmp-create-v3-user -ro -X AES -A SHA-512 svc_snmp_v3 # Les MDPs sont a saisir de maniere interactive
 		else
 			# For Ubuntu 18.04 and older
 			$sudo $apt libsnmp-dev -y $aptSimul # Pour "net-snmp-config"
-			MDP_SNMP_V3=ohqua7ke6Cain6aeb9au;MDP_SNMP_ENC_V3=aiChiimeegah8eejaele
+
 #			sudo net-snmp-config --create-snmpv3-user -v3 -ro -A $MDP_SNMP_V3 -X $MDP_SNMP_ENC_V3 -a SHA-512 -x AES svc_snmp_v3
 #			sudo net-snmp-create-v3-user -ro -A $MDP_SNMP_V3 -X $MDP_SNMP_ENC_V3 -a SHA-512 -x AES svc_snmp_v3 # On Ubuntu 14.04,16.04
-			MDP_SNMP=q37uYXFqhy27eQeM97C7;MDP_SNMP_ENC=8nbU2PuqK327uLSb5P7u
+
 			sudo net-snmp-create-v3-user -ro -A $MDP_SNMP -X $MDP_SNMP_ENC -a MD5 -x AES svc_snmp # Car les algo supportes par le script sur Ubuntu 14.04,16.04,18.04 sont MD5/SHA
 		fi
 		$sudo egrep "^(rouser|createUser|usmUser)" /var/lib/snmp/snmpd.conf /usr/share/snmp/snmpd.conf 2>/dev/null
@@ -172,14 +154,11 @@ if $isDebianLike;then
 			$sudo grep "^agent[Aa]ddress.*127.0.0.1" /etc/snmp/snmpd.conf -q && $sudo sed -i.orig "/^agent[Aa]ddress.*/s/^/#/" /etc/snmp/snmpd.conf
 			$sudo grep ^rocommunity /etc/snmp/snmpd.conf -q && $sudo sed -i.orig2 "/^rocommunity/s/^/#/" /etc/snmp/snmpd.conf
 			$sudo mkdir -pv /etc/snmp/snmpd.conf.d/
-			$sudo grep includeAllDisks /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.d/$company_snmpd.conf -q  2>/dev/null || echo includeAllDisks 20% | sudo tee -a /etc/snmp/snmpd.conf.d/$company_snmpd.conf
+			$sudo grep includeAllDisks /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.d/pluriad_snmpd.conf -q  2>/dev/null || echo includeAllDisks 20% | sudo tee -a /etc/snmp/snmpd.conf.d/pluriad_snmpd.conf
 			egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q && sudo sed -i.BACKUP "/^sysLocation.*/s/^sysLocation.*/sysLocation    Hosted on our VMware ESX Cluster/" /etc/snmp/snmpd.conf
 			$sudo systemctl start snmpd
 		fi
 		ss -4nul | grep :161
-
-		$sudo ufw allow snmp
-		$sudo ufw status numbered
 
 		# CONFIG NTP
 		if ! timedatectl status | grep Time.zone:.Europe/Paris -q;then
@@ -199,10 +178,13 @@ if $isDebianLike;then
 
 		$sudo systemctl restart systemd-timesyncd
 		$sudo timedatectl set-ntp false; sudo timedatectl set-ntp true # Relance une synchro NTP
-		timedatectl timesync-status # A partir de Ubuntu 20.04
+		if $isUbuntuLike && [ $majorNumber -ge 20 ];then
+			# A partir de Ubuntu 20.04
+			timedatectl timesync-status
+			timedatectl show
+			timedatectl show-timesync
+		fi
 		timedatectl status
-		timedatectl show
-		timedatectl show-timesync
 
 		egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name -q || $sudo hwclock --systohc
 
@@ -211,8 +193,6 @@ if $isDebianLike;then
 		$sudo systemctl restart rsyslog
 
 		mkdir -p $HOME/.vim
-		touch $HOME/.vim/vimrc
 		$sudo mkdir -p /root/.vim
-		$sudo touch /root/.vim/vimrc
 	fi
 fi
