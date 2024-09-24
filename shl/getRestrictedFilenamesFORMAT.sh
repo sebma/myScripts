@@ -86,7 +86,7 @@ getRestrictedFilenamesFORMAT () {
 	local userAgent=null
 	local tool=null
 	local verboseLevel=0
-	local debug="set -x"
+	local debug=""
 	local undebug="set +x"
 	local downloader=yt-dlp
 	local timeout=180m
@@ -136,7 +136,7 @@ getRestrictedFilenamesFORMAT () {
 			export getopt=/usr/local/opt/gnu-getopt/bin/getopt
 		fi
 
-		TEMP=$($getopt -o 'df:hp:t:vy' --long 'debug,downloader:,ffmpeg-e,ffmpeg-i,ffmpeg-w,formats:,help,playlist:,overwrite,timeout:,verbose,yt-dl,ytdl-k,ytdl-x,ytdl-v' -- "$@")
+		TEMP=$($getopt -o 'df:hp:t:vxy' --long 'debug,downloader:,ffmpeg-e,ffmpeg-i,ffmpeg-w,formats:,help,playlist:,overwrite,timeout:,verbose,xtrace,yt-dl,ytdl-k,ytdl-x,ytdl-v' -- "$@")
 
 		if [ $? -ne 0 ]; then
 			echo 'Terminating...' >&2
@@ -151,6 +151,7 @@ getRestrictedFilenamesFORMAT () {
 			case "$1" in
 				-d|--debug) shift
 					debug="set -x"
+					undebug=""
 					ytdlInitialOptions+=( -v )
 					;;
 				--downloader) shift
@@ -195,6 +196,10 @@ getRestrictedFilenamesFORMAT () {
 					;;
 				--ytdl-v) shift
 					ytdlInitialOptions+=( -v )
+					;;
+				-x|--xtrace) shift
+					debug="set -x"
+					undebug=""
 					;;
 				-y|--overwrite) shift
 					overwrite=true
@@ -281,7 +286,9 @@ getRestrictedFilenamesFORMAT () {
 			acodec=$(echo $acodec | cut -d. -f1)
 			protocolForDownload=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$videoFormatID\")).protocol")
 
+			$debug
 			remoteFileSize=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize" | sed "s/null/-1/")
+			set +x
 			if [ $remoteFileSize != -1 ]; then
 				remoteFileSizeMiB=$(echo $remoteFileSize | awk \$1/=2^20)
 			else
@@ -416,11 +423,11 @@ getRestrictedFilenamesFORMAT () {
 			errorLogFile="${downloader}_errors_$$.log"
 			trap - INT
 			if [ $isLIVE == false ];then
-				$debug
+#				$debug
 				time videoDownloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 				$undebug
 			else
-				$debug
+#				$debug
 				LANG=C.UTF-8 time timeout -s SIGINT $timeout $downloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 				$undebug
 			fi
@@ -438,8 +445,10 @@ getRestrictedFilenamesFORMAT () {
 
 			fileSizeOnFS=$($stat -c %s "$fileName" || echo 0)
 			if [ $fileSizeOnFS -ge $remoteFileSize ] || [ $downloadOK = 0 ]; then
+				set +x
 				addThumbnail2media "$fileName" "$artworkFileName"
 			else
+				set +x
 				time videoDownloader -o $fileName -f "$chosenFormatID" "$url" 2>$errorLogFile
 				downloadOK=$?
 				echo
