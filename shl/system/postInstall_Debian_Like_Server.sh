@@ -90,7 +90,13 @@ if $isDebianLike;then
 		grep -i virtual /sys/class/dmi/id/product_name -q && ! dpkg -s open-vm-tools 2>/dev/null | grep installed -q && $sudo $apt install open-vm-tools -y
 		$sudo systemctl start vmtoolsd
 
-		dpkg -s dra >/dev/null || { wget -c -nv https://github.com/devmatteini/dra/releases/latest/download/dra_0.6.2-1_amd64.deb && sudo apt install -V ./dra_0.6.2-1_amd64.deb && rm ./dra_0.6.2-1_amd64.deb; }
+		architecture=$(dpkg --print-architecture)
+		dpkg -s dra >/dev/null || { https_proxy=10.10.30.90:80 wget -c -nv https://github.com/devmatteini/dra/releases/latest/download/dra_0.6.2-1_$architecture.deb && sudo apt install -V ./dra_0.6.2-1_$architecture.deb && rm ./dra_0.6.2-1_$architecture.deb; }
+		if which dra &>/dev/null;then
+			which yq &>/dev/null || http_proxy=10.10.30.90:80 dra download -a mikefarah/yq -I yq_linux_$architecture
+			sudo install -vpm 755 ./yq_linux_$architecture /usr/local/bin/yq
+			rm -y ./yq_linux_$architecture
+		fi
 
 		$sudo $apt install ca-certificates
 		sudo update-ca-certificates --fresh
@@ -98,7 +104,6 @@ if $isDebianLike;then
 
 		$sudo $apt install net-tools -y # Pour netstat
 		$isUbuntuLike && [ $majorNumber -ge 22 ] && $sudo $apt install ugrep btop plocate gh fd-find # UBUNTU >= 22.04
-		$isUbuntuLike && [ $majorNumber -ge 24 ] && $sudo $apt install yq # UBUNTU >= 24.04
 		$sudo $apt install landscape-common # cf. https://github.com/canonical/landscape-client/blob/master/debian/landscape-common.install
 		$sudo $apt install ca-certificates debsecan ncdu ripgrep silversearcher-ag ack progress gcp shellcheck command-not-found nmon smartmontools iotop lsof net-tools pwgen ethtool smem sysstat fzf grep gawk sed curl remake wget jq jid vim dfc lshw screenfetch bc units lsscsi jq btop htop apt-file dlocate pv screen rsync x11-apps mc landscape-common parted gdisk ipcalc -y
 
