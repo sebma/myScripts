@@ -91,9 +91,14 @@ if $isDebianLike;then
 		$sudo systemctl start vmtoolsd
 
 		architecture=$(dpkg --print-architecture)
-		dpkg -s dra >/dev/null || { https_proxy=10.10.30.90:80 wget -c -nv https://github.com/devmatteini/dra/releases/latest/download/dra_0.6.2-1_$architecture.deb && sudo apt install -V ./dra_0.6.2-1_$architecture.deb && rm ./dra_0.6.2-1_$architecture.deb; }
+		if ! dpkg -s dra >/dev/null;then
+			https_proxy=$https_proxy wget -c -nv https://github.com/devmatteini/dra/releases/latest/download/dra_0.6.2-1_$architecture.deb
+			sudo apt install -V ./dra_0.6.2-1_$architecture.deb
+			rm ./dra_0.6.2-1_$architecture.deb
+		fi
+
 		if which dra &>/dev/null;then
-			which yq &>/dev/null || http_proxy=10.10.30.90:80 dra download -a mikefarah/yq -I yq_linux_$architecture
+			which yq &>/dev/null || http_proxy=$http_proxy dra download -a mikefarah/yq -I yq_linux_$architecture
 			sudo install -vpm 755 ./yq_linux_$architecture /usr/local/bin/yq
 			rm -y ./yq_linux_$architecture
 		fi
