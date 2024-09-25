@@ -13,12 +13,15 @@ test $(id -u) == 0 && sudo="" || sudo=sudo
 scriptBaseName=${0/*\//}
 if [ $# = 1 ];then
 	if [ $1 = -h ];then
-		echo "=> Usage $scriptBaseName [ubuntuVersion]" >&2
+		echo "=> Usage $scriptBaseName variablesDefinitionFile" >&2
 		exit -1
 	else
-		ubuntuVersion=$1
+		variablesDefinitionFile=$1
 	fi
 fi
+
+variablesDefinitionFile="$1"
+source "$variablesDefinitionFile" || exit
 
 if ! type curl >/dev/null 2>&1; then
     echo "Please install CURL before running this script."
@@ -48,8 +51,8 @@ if [[ $isRPM == 1 ]]; then package='agent.rpm'
     else package='agent.deb'
 fi
 
-test -n "$ubuntuVersion" && majorVersion=$ubuntuVersion
-curl -H "Agent-Version-Control: on" -L $MANAGERURL/software/agent/${runningPlatform}${majorVersion}/${archType}/$package?tenantID=80751 -o /tmp/$package $CURLOPTIONS --insecure
+[ $ubuntuVersion != current ] && majorVersion=$ubuntuVersion
+curl -H "Agent-Version-Control: on" -L $MANAGERURL/software/agent/${runningPlatform}${majorVersion}/${archType}/$package -o /tmp/$package $CURLOPTIONS --insecure
 
 echo Installing agent package...
 rc=1
@@ -77,4 +80,4 @@ rm -f /tmp/$package /tmp/PlatformDetection
 sleep 15
 dsa_control=/opt/ds_agent/dsa_control
 $sudo $dsa_control -r
-$sudo $dsa_control -a $ACTIVATIONURL "tenantID:$tenantID" "token:$token" "policyid:38"
+$sudo $dsa_control -a $ACTIVATIONURL "tenantID:$tenantID" "token:$token" "policyid:$policyid"
