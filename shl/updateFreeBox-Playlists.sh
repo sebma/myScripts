@@ -9,7 +9,7 @@ elif [ $osType = Darwin ];then
 	egrep="ggrep -E"
 fi
 
-wget -c http://mafreebox.freebox.fr/freeboxtv/playlist.m3u
+wget -nv -N http://mafreebox.freebox.fr/freeboxtv/playlist.m3u
 $egrep -w -B1 --no-group-separator "EXTM3U|hd" playlist.m3u > FreeBoxTV-HD.m3u
 $egrep -w -B1 --no-group-separator "EXTM3U|sd" playlist.m3u > FreeBoxTV-SD.m3u
 $egrep -w -B1 --no-group-separator "EXTM3U|ld" playlist.m3u > FreeBoxTV-LD.m3u
