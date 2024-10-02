@@ -103,7 +103,7 @@ if $isDebianLike;then
 			rm -y ./yq_linux_$architecture
 		fi
 
-		$sudo $apt install ca-certificates
+		$sudo $apt install ca-certificates apt-transport-https
 		sudo update-ca-certificates --fresh
 		ls -l /etc/ssl/certs/ | grep Gandi
 
