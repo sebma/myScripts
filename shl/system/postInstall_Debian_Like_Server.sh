@@ -110,7 +110,7 @@ if $isDebianLike;then
 		$sudo $apt install net-tools -y # Pour netstat
 		$isUbuntuLike && [ $majorNumber -ge 22 ] && $sudo $apt install ugrep btop plocate gh fd-find # UBUNTU >= 22.04
 		$sudo $apt install landscape-common # cf. https://github.com/canonical/landscape-client/blob/master/debian/landscape-common.install
-		$sudo $apt install ca-certificates debsecan ncdu ripgrep silversearcher-ag ack progress gcp shellcheck command-not-found nmon smartmontools iotop lsof net-tools pwgen ethtool smem sysstat fzf grep gawk sed curl remake wget jq jid vim dfc lshw screenfetch bc units lsscsi jq btop htop apt-file dlocate pv screen rsync x11-apps mc landscape-common parted gdisk ipcalc -y
+		$sudo $apt install ca-certificates debsecan ncdu ripgrep silversearcher-ag ack progress gcp shellcheck command-not-found nmon smartmontools iotop lsof net-tools pwgen ethtool smem sysstat fzf grep gawk sed curl remake wget jq jid vim dfc lshw screenfetch bc units lsscsi jq btop htop apt-file dlocate pv screen rsync x11-apps mc landscape-common parted gdisk ipcalc aptitude aria2 hub lynx ppa-purge rclone w3m w3m-img xclip xsel -y
 
 		# $sudo $apt install -t $(lsb_release -sc)-backports smartmontools # On debian 10
 		egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name -q || $sudo update-smart-drivedb -u github
@@ -139,6 +139,7 @@ if $isDebianLike;then
 		# CONFIG GRUB
 #		grep GRUB_TIMEOUT_STYLE=hidden /etc/default/grub -q && $sudo sed -i.ORIG "s/GRUB_TIMEOUT_STYLE=.*/GRUB_TIMEOUT_STYLE=menu/;s/GRUB_TIMEOUT=.*/GRUB_TIMEOUT=15/" /etc/default/grub
 		grep GRUB_TIMEOUT_STYLE=hidden /etc/default/grub /etc/default/grub.d/* -q && echo -e "GRUB_TIMEOUT_STYLE=menu\nGRUB_TIMEOUT=15" | sudo tee -a /etc/default/grub.d/$company-grub.cfg
+		grep ^GRUB_RECORDFAIL_TIMEOUT= /etc/default/grub /etc/default/grub.d/* -q && || echo 'GRUB_RECORDFAIL_TIMEOUT=$GRUB_TIMEOUT' | sudo tee -a /etc/default/grub.d/$company-grub.cfg
 #		grep '\#GRUB_GFX_MODE=' /etc/default/grub -q && $sudo sed -i.ORIG.2 "s/#GRUB_GFX_MODE=.*/GRUB_GFX_MODE=1152x864/" /etc/default/grub
 		grep '\#GRUB_GFX_MODE=' /etc/default/grub /etc/default/grub.d/* -q && echo "GRUB_GFX_MODE=1152x864" | sudo tee -a /etc/default/grub.d/$company-grub.cfg
 		$sudo update-grub
