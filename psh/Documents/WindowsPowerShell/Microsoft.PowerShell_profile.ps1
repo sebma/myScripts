@@ -122,7 +122,8 @@ setVariables
 
 if( $IsWindows ) {
 	"=> Current DC from Get-ADDomainController is : "
-	(Get-ADDomainController -Discover).Name
+	$DC = (Get-ADDomainController -Discover).Name
+ 	echo $DC
  	"=> Current Site from (Get-ADDomainController -Discover).Site is :"
 	(Get-ADDomainController -Discover).Site
 
