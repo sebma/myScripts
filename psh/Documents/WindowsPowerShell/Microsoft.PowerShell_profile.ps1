@@ -122,8 +122,7 @@ setVariables
 
 if( $IsWindows ) {
 	"=> Current DC from Get-ADDomainController is : "
-	$DC = (Get-ADDomainController).Name
-	echo $DC
+	(Get-ADDomainController).Name
 	"=> Current DC from nltest /dsgetdc:" + $ENV:USERDNSDOMAIN
 	nltest /dsgetdc:$ENV:USERDNSDOMAIN | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
 
