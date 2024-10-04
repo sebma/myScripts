@@ -260,7 +260,7 @@ if( $IsWindows ) {
 		sudo Set-ItemProperty -Path "Registry::HKU\.DEFAULT\Control Panel\Keyboard" -Name InitialKeyboardIndicators -Value 2
 	}
 
-	if( (alias cd 2>$null | sls cd) ) { 
+	if( $(alias cd >$null 2>&1;$?) ) { 
 		del alias:cd
 		function cd($dir) {
 			if($dir -eq "-"){popd}
