@@ -139,6 +139,10 @@ if( $IsWindows ) {
 		"=> The default DC is now " + (Get-ADDomainController).Name
 	}
 
+	function nocomment {
+		sls -n "^\s*(#|$|;|//)" @args | % Line
+	}
+ 
 	function netstat {
 		Get-NetTCPConnection | select local*,remote*,state,OwningProcess,@{Name="Process";Expression={(Get-Process -Id $_.OwningProcess).ProcessName}} | sort-object -property LocalPort | format-table | Out-String -Stream
 	}
@@ -260,7 +264,7 @@ if( $IsWindows ) {
 		sudo Set-ItemProperty -Path "Registry::HKU\.DEFAULT\Control Panel\Keyboard" -Name InitialKeyboardIndicators -Value 2
 	}
 
-	if( $(alias cd >$null 2>&1;$?) ) { 
+	if( $(alias cd *>$null;$?) ) { 
 		del alias:cd
 		function cd($dir) {
 			if($dir -eq "-"){popd}
