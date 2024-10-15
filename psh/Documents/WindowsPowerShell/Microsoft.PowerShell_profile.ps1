@@ -1,5 +1,6 @@
 # $HOME/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1
 #
+Set-PSReadlineKeyHandler -Key ctrl+d -Function DeleteCharOrExit
 
 # Create Profile directory if not exists
 if( ! ( Test-Path -Path (Split-Path "$PROFILE") ) ) { mkdir (Split-Path "$PROFILE");exit }
