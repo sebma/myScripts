@@ -1,6 +1,5 @@
 # $HOME/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1
 #
-Set-PSReadlineKeyHandler -Key ctrl+d -Function DeleteCharOrExit
 
 # Create Profile directory if not exists
 if( ! ( Test-Path -Path (Split-Path "$PROFILE") ) ) { mkdir (Split-Path "$PROFILE");exit }
@@ -122,6 +121,15 @@ function setVariables {
 setVariables
 
 if( $IsWindows ) {
+	Set-PSReadlineKeyHandler -Key ctrl+d -Function DeleteCharOrExit
+
+	function sdiff {
+		$argc=$args.Count
+		if ( $argc -eq 2 ) {
+			diff $(cat $args[0]) $(cat $args[1])
+		}
+	}
+
 	"=> Current DC from Get-ADDomainController is : "
 	$DC = (Get-ADDomainController -Discover).Name
  	echo $DC
@@ -220,6 +228,14 @@ if( $IsWindows ) {
 #		$ext = ls $pfxFile | % Extension
 #		$pemFile = $pfxFile.replace( $ext , ".pem" )
 		& $openssl pkcs12 -noenc -in $pfxFile -out $pemFile
+	}
+
+	function pfx2PKEY($pfxFile, $pkeyFile) {
+	#	$ext = ls $pfxFile | % Extension
+	#	$pemFile = $pfxFile.replace( $ext , ".pem" )
+		& $openssl pkcs12 -nocerts -nodes -in $pfxFile -out "$pkeyFile.new"
+		& $openssl pkey   -in "$pkeyFile.new" -out $pkeyFile
+		remove-item "$pkeyFile.new"
 	}
 
 	function viewP12 {
