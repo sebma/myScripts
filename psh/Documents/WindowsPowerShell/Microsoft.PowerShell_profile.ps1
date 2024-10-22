@@ -136,10 +136,12 @@ if( $IsWindows ) {
  	"=> Current Site from (Get-ADDomainController -Discover).Site is :"
 	(Get-ADDomainController -Discover).Site
 
-	"=> Current DC from nltest /dsgetdc:" + $ENV:USERDNSDOMAIN
-	nltest /dsgetdc:$ENV:USERDNSDOMAIN | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
-	"=> Current Site Name from nltest /dsgetdc:" + $ENV:USERDNSDOMAIN
-	nltest /dsgetdc:$ENV:USERDNSDOMAIN | sls Site.Name: | % { ( $_ -split('\s+|:') )[5] }
+	"=> Current DC from `"nltest /dsgetdc:`""
+	nltest /dsgetdc: | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
+	"=> Current Site Name from `"nltest /dsgetdc:`""
+	nltest /dsgetdc: | sls Site.Name: | % { ( $_ -split('\s+|:') )[5] }
+	"=> List of DCs via `"nltest /dclist:`""
+	nltest /dclist:
 
 	$LogonDC = $ENV:LOGONSERVER.Substring(2)
 	if( ! $DC.Contains( $LogonDC -replace "\d" ) ) {
