@@ -109,7 +109,7 @@ if $isDebianLike;then
 
 		$sudo $apt install net-tools -y # Pour netstat
 		$isUbuntuLike && [ $majorNumber -ge 22 ] && $sudo $apt install ugrep btop plocate gh fd-find # UBUNTU >= 22.04
-		$sudo $apt install landscape-common # cf. https://github.com/canonical/landscape-client/blob/master/debian/landscape-common.install
+		$sudo $apt install sockstat landscape-common # cf. https://github.com/canonical/landscape-client/blob/master/debian/landscape-common.install
 		$sudo $apt install ca-certificates debsecan ncdu ripgrep silversearcher-ag ack progress gcp shellcheck command-not-found nmon smartmontools iotop lsof net-tools pwgen ethtool smem sysstat fzf grep gawk sed curl remake wget jq jid vim dfc lshw screenfetch bc units lsscsi jq btop htop apt-file dlocate pv screen rsync x11-apps mc landscape-common parted gdisk ipcalc aptitude aria2 hub lynx ppa-purge rclone w3m w3m-img xclip xsel -y
 
 		# $sudo $apt install -t $(lsb_release -sc)-backports smartmontools # On debian 10
