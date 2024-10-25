@@ -24,7 +24,7 @@ if $isDebianLike;then
 		packageList="$@"
 		firstPackage=${packageList[0]}
 		$sudo add-apt-repository ppa:$ppa
-		apt-cache policy $firstPackage | grep $ppa -q || sudo apt update
+		apt-cache policy $firstPackage | grep $ppa -q || $sudo apt update
 		$sudo apt install -V ${packageList[@]}
 	fi
 fi
