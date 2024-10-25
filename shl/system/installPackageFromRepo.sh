@@ -19,12 +19,16 @@ if $isDebianLike;then
 		echo "= Usage: $scriptBaseName <user>/<ppa-name> packageList"
 		exit 1
 	else
-		ppa=$1
+		ppa=${1/ppa:/}
 		shift
 		packageList="$@"
 		firstPackage=${packageList[0]}
 		$sudo add-apt-repository ppa:$ppa
 		apt-cache policy $firstPackage | grep $ppa -q || $sudo apt update
-		apt-cache policy $firstPackage | grep $ppa -q && $sudo apt install -V ${packageList[@]}
+		if apt-cache policy $firstPackage | grep $ppa -q;then
+			$sudo apt install -V ${packageList[@]}
+		else
+			$sudo add-apt-repository ppa:$ppa -r
+		fi
 	fi
 fi
