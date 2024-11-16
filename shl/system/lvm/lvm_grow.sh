@@ -4,13 +4,13 @@ set -u
 scriptBaseName=${0/*\//}
 
 if [ $# != 1 ] && [ $# != 2 ];then
-	echo "=> USAGE: $scriptBaseName filesystemPath [size]" >&2
+	echo "=> USAGE: $scriptBaseName filesystemPath [newSize]" >&2
 	exit 1
 fi
 
 filesystemPath="$1"
-[ $# == 2 ] && size=$2 || size=-1
-sizeUpperCase=${size^^}
+[ $# == 2 ] && newSize=$2 || newSize=-1
+newSizeUpperCase=${newSize^^}
 
 vgName=$(findmnt -no source "$filesystemPath" | awk -F '[/-]' '{print$4}')
 if [ -z "$vgName" ];then
@@ -44,21 +44,21 @@ if [ $diskSizeAfter != $diskSizeBefore ];then
 fi
 
 vgFree=$(sudo vgs --noheadings $vgName -o vg_free | awk '{print toupper($1)}')
-sizeInBytes=$(echo $sizeUpperCase | numfmt --from=iec --to=none --format=%f)
+newSizeInBytes=$(echo $newSizeUpperCase | numfmt --from=iec --to=none --format=%f)
 freeInBytes=$(echo $vgFree | numfmt --from=iec --to=none --format=%f)
-if [ $vgFree == 0 ] || [ $sizeInBytes -gt $freeInBytes ];then
+if [ $vgFree == 0 ] || [ $newSizeInBytes -gt $freeInBytes ];then
 	echo "=> ERROR: There is not enough free space on the $disk."
 	exit 3
 fi
 
 lvName=$(findmnt -no SOURCE "$filesystemPath" | cut -d- -f2)
 echo "=> lvName = $lvName"
-if [ $size == -1 ];then
+if [ $newSize == -1 ];then
 	echo "=> Extending $lvName LV to the rest of the remaining space on the $vgName VG."
 	sudo lvextend -r -l +100%FREE /dev/$vgName/$lvName
 else
-	echo "=> Extending $lvName LV by $size."
-	sudo lvextend -r -L +$size /dev/$vgName/$lvName
+	echo "=> Extending $lvName LV by $newSize."
+	sudo lvextend -r -L +$newSize /dev/$vgName/$lvName
 fi
 echo "=> FINISHED."
 trap - SIGINT
