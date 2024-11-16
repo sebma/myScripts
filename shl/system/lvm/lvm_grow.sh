@@ -33,7 +33,6 @@ echo "- - -" | $sudo tee /sys/class/scsi_host/host*/scan >/dev/null
 
 trap 'echo "=> SIGINT Received, cannot interrupt $scriptBaseName starting from this point, continuing ...";' SIGINT
 diskSizeAfter=$(cat /sys/block/$disk/size)
-set -x
 if [ $diskSizeAfter != $diskSizeBefore ];then
 	echo "=> Taking the new $diskDevicePath disk size into account."
 	echo Fix | $sudo parted ---pretend-input-tty $diskDevicePath print free
