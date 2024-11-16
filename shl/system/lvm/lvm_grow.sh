@@ -45,9 +45,10 @@ fi
 
 vgFree=$(sudo vgs --noheadings $vgName -o vg_free | awk '{print toupper($1)}')
 newSizeInBytes=$(echo $newSizeUpperCase | numfmt --from=iec --to=none --format=%f)
-freeInBytes=$(echo $vgFree | numfmt --from=iec --to=none --format=%f)
-if [ $vgFree == 0 ] || [ $newSizeInBytes -gt $freeInBytes ];then
+freeSpaceInBytes=$(echo $vgFree | numfmt --from=iec --to=none --format=%f)
+if [ $vgFree == 0 ] || [ $newSizeInBytes -gt $freeSpaceInBytes ];then
 	echo "=> ERROR: There is not enough free space on the $disk."
+	sudo vgs $vgName
 	exit 3
 fi
 
