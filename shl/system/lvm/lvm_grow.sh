@@ -10,6 +10,8 @@ fi
 
 filesystemPath="$1"
 [ $# == 2 ] && size=$2 || size=-1
+sizeUpperCase=${size^^}
+
 vgName=$(findmnt -no source "$filesystemPath" | awk -F '[/-]' '{print$4}')
 if [ -z "$vgName" ];then
 	echo "=> ERROR: Could not find the LVM VG for the <$filesystemPath> filesystem."
@@ -41,8 +43,10 @@ if [ $diskSizeAfter != $diskSizeBefore ];then
 	sudo pvresize $partitionDevicePath
 fi
 
-vgFree=$(sudo vgs --noheadings $vgName -o vg_free | awk '{print$1}')
-if [ $vgFree == 0 ]
+vgFree=$(sudo vgs --noheadings $vgName -o vg_free | awk '{print toupper($1)}')
+sizeInBytes=$(echo $sizeUpperCase | numfmt --from=iec --to=none --format=%f)
+freeInBytes=$(echo $vgFree | numfmt --from=iec --to=none --format=%f)
+if [ $vgFree == 0 ] || [ $sizeInBytes -gt $freeInBytes ];then
 	echo "=> ERROR: There is not enough free space on the $disk."
 	exit 3
 fi
