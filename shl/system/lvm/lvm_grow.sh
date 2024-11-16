@@ -28,7 +28,7 @@ echo 1 | sudo tee /sys/class/block/sd?/device/rescan >/dev/null
 echo "=> Re-scanning SCSI hosts for new disks, just in case ..."
 echo "- - -" | sudo tee /sys/class/scsi_host/host*/scan >/dev/null
 
-trap 'echo "=> SIGINT Received, cannot interrupt $scriptBaseName starting from this point, continuing ...";' INT
+trap 'echo "=> SIGINT Received, cannot interrupt $scriptBaseName starting from this point, continuing ...";' SIGINT
 diskSizeAfter=$(cat /sys/block/$disk/size)
 set -x
 if [ $diskSizeAfter != $diskSizeBefore ];then
