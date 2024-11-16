@@ -17,38 +17,39 @@ if [ -z "$vgName" ];then
 	echo "=> ERROR: Could not find the LVM VG for the <$filesystemPath> filesystem."
 	exit 2
 fi
-
 echo "=> vgName = $vgName"
-partitionDevicePath=$(sudo vgs --noheadings $vgName -o pv_name | awk '{print$1}')
+
+test $(id -u) == 0 && sudo="" || sudo=sudo
+partitionDevicePath=$($sudo vgs --noheadings $vgName -o pv_name | awk '{print$1}')
 echo "=> partitionDevicePath = $partitionDevicePath"
 diskDevicePath=${partitionDevicePath/[0-9]*/}
 disk=$(echo $diskDevicePath | cut -d/ -f3)
 
 diskSizeBefore=$(cat /sys/block/$disk/size)
 echo "=> Re-scanning existing disks for changes (such as size for virtual disks), just in case ..."
-echo 1 | sudo tee /sys/class/block/sd?/device/rescan >/dev/null
+echo 1 | $sudo tee /sys/class/block/sd?/device/rescan >/dev/null
 echo "=> Re-scanning SCSI hosts for new disks, just in case ..."
-echo "- - -" | sudo tee /sys/class/scsi_host/host*/scan >/dev/null
+echo "- - -" | $sudo tee /sys/class/scsi_host/host*/scan >/dev/null
 
 trap 'echo "=> SIGINT Received, cannot interrupt $scriptBaseName starting from this point, continuing ...";' SIGINT
 diskSizeAfter=$(cat /sys/block/$disk/size)
 set -x
 if [ $diskSizeAfter != $diskSizeBefore ];then
 	echo "=> Taking the new $diskDevicePath disk size into account."
-	echo Fix | sudo parted ---pretend-input-tty $diskDevicePath print free
+	echo Fix | $sudo parted ---pretend-input-tty $diskDevicePath print free
 	partNum=$(echo $partitionDevicePath | sed "s/.dev.//;s/[a-z]*//")
 	echo "=> Upsizing the LVM disk $partitionDevicePath partition."
-	sudo parted -s $diskDevicePath resizepart $partNum 100%
+	$sudo parted -s $diskDevicePath resizepart $partNum 100%
 	echo "=> Upsizing the $partitionDevicePath PV LVM structure."
-	sudo pvresize $partitionDevicePath
+	$sudo pvresize $partitionDevicePath
 fi
 
-vgFree=$(sudo vgs --noheadings $vgName -o vg_free | awk '{print toupper($1)}')
+vgFree=$($sudo vgs --noheadings $vgName -o vg_free | awk '{print toupper($1)}')
 newSizeInBytes=$(echo $newSizeUpperCase | numfmt --from=iec --to=none --format=%f)
 freeSpaceInBytes=$(echo $vgFree | numfmt --from=iec --to=none --format=%f)
 if [ $vgFree == 0 ] || [ $newSizeInBytes -gt $freeSpaceInBytes ];then
 	echo "=> ERROR: There is not enough free space on the $disk."
-	sudo vgs $vgName
+	$sudo vgs $vgName
 	exit 3
 fi
 
@@ -56,10 +57,10 @@ lvName=$(findmnt -no SOURCE "$filesystemPath" | cut -d- -f2)
 echo "=> lvName = $lvName"
 if [ $newSize == -1 ];then
 	echo "=> Extending $lvName LV to the rest of the remaining space on the $vgName VG."
-	sudo lvextend -r -l +100%FREE /dev/$vgName/$lvName
+	$sudo lvextend -r -l +100%FREE /dev/$vgName/$lvName
 else
 	echo "=> Extending $lvName LV by $newSize."
-	sudo lvextend -r -L +$newSize /dev/$vgName/$lvName
+	$sudo lvextend -r -L +$newSize /dev/$vgName/$lvName
 fi
 echo "=> FINISHED."
 trap - SIGINT
