@@ -18,6 +18,8 @@ if [ -z "$vgName" ];then
 	exit 2
 fi
 echo "=> vgName = $vgName"
+echo "=> BEFORE: "
+df -h "$filesystemPath"
 
 test $(id -u) == 0 && sudo="" || sudo=sudo
 partitionDevicePath=$($sudo vgs --noheadings $vgName -o pv_name | awk '{print$1}')
@@ -61,5 +63,7 @@ else
 	echo "=> Extending $lvName LV by $newSize."
 	$sudo lvextend -r -L +$newSize /dev/$vgName/$lvName
 fi
+echo "=> AFTER: "
+df -h "$filesystemPath"
 echo "=> FINISHED."
 trap - SIGINT
