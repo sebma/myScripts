@@ -23,6 +23,11 @@ df -h "$filesystemPath"
 
 test $(id -u) == 0 && sudo="" || sudo=sudo
 partitionDevicePath=$($sudo vgs --noheadings -o pv_name $vgName | awk '{print$1}')
+if [ $(echo $partitionDevicePath | grep /dev/md -q) ];then
+	echo "=> ERROR: LVM on MD devices is not supported by this script." >&2
+	exit 3
+fi
+
 echo "=> partitionDevicePath = $partitionDevicePath"
 diskDevicePath=${partitionDevicePath/[0-9]*/}
 disk=$(echo $diskDevicePath | cut -d/ -f3)
@@ -49,9 +54,9 @@ vgFree=$($sudo vgs --noheadings -o vg_free $vgName | awk '{print toupper($1)}')
 newSizeInBytes=$(echo $newSizeUpperCase | numfmt --from=iec --to=none --format=%f)
 freeSpaceInBytes=$(echo $vgFree | numfmt --from=iec --to=none --format=%f)
 if [ $vgFree == 0 ] || [ $newSizeInBytes -gt $freeSpaceInBytes ];then
-	echo "=> ERROR: There is not enough free space on the $disk."
+	echo "=> ERROR: There is not enough free space on the $disk." >&2
 	$sudo vgs $vgName
-	exit 3
+	exit 4
 fi
 
 lvName=$(findmnt -no SOURCE "$filesystemPath" | cut -d- -f2)
@@ -65,8 +70,8 @@ else
 fi
 retCode=$?
 if [ $retCode != 0 ];then
-    echo "=> ERROR: There has been an erreur during the <lvextend> operation." >&2
-    exit $retCode
+	echo "=> ERROR: There has been an erreur during the <lvextend> operation." >&2
+	exit $retCode
 fi
 
 echo "=> AFTER: "
