@@ -63,6 +63,12 @@ else
 	echo "=> Extending $lvName LV by $newSize."
 	$sudo lvextend -r -L +$newSize /dev/$vgName/$lvName
 fi
+retCode=$?
+if [ $retCode != 0 ];then
+    echo "=> ERROR: There has been an erreur during the <lvextend> operation." >&2
+    exit $retCode
+fi
+
 echo "=> AFTER: "
 df -h "$filesystemPath"
 echo "=> FINISHED."
