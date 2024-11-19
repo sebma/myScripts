@@ -14,7 +14,7 @@ newSizeUpperCase=${newSize^^}
 
 vgName=$(findmnt -no source "$filesystemPath" | awk -F '[/-]' '{print$4}')
 if [ -z "$vgName" ];then
-	echo "=> ERROR: Could not find the LVM VG for the <$filesystemPath> filesystem."
+	echo "=> ERROR: Could not find the LVM VG for the <$filesystemPath> filesystem." >&2
 	exit 2
 fi
 echo "=> vgName = $vgName"
