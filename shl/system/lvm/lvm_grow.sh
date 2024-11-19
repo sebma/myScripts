@@ -22,7 +22,7 @@ echo "=> BEFORE: "
 df -h "$filesystemPath"
 
 test $(id -u) == 0 && sudo="" || sudo=sudo
-partitionDevicePath=$($sudo vgs --noheadings $vgName -o pv_name | awk '{print$1}')
+partitionDevicePath=$($sudo vgs --noheadings -o pv_name $vgName | awk '{print$1}')
 echo "=> partitionDevicePath = $partitionDevicePath"
 diskDevicePath=${partitionDevicePath/[0-9]*/}
 disk=$(echo $diskDevicePath | cut -d/ -f3)
@@ -45,7 +45,7 @@ if [ $diskSizeAfter != $diskSizeBefore ];then
 	$sudo pvresize $partitionDevicePath
 fi
 
-vgFree=$($sudo vgs --noheadings $vgName -o vg_free | awk '{print toupper($1)}')
+vgFree=$($sudo vgs --noheadings -o vg_free $vgName | awk '{print toupper($1)}')
 newSizeInBytes=$(echo $newSizeUpperCase | numfmt --from=iec --to=none --format=%f)
 freeSpaceInBytes=$(echo $vgFree | numfmt --from=iec --to=none --format=%f)
 if [ $vgFree == 0 ] || [ $newSizeInBytes -gt $freeSpaceInBytes ];then
