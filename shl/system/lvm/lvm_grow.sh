@@ -23,7 +23,7 @@ df -h "$filesystemPath"
 
 test $(id -u) == 0 && sudo="" || sudo=sudo
 partitionDevicePath=$($sudo vgs --noheadings -o pv_name $vgName | awk '{print$1}')
-if [ $(echo $partitionDevicePath | grep /dev/md -q) ];then
+if echo $partitionDevicePath | grep /dev/md -q;then
 	echo "=> ERROR: LVM on MD devices is not supported by this script." >&2
 	exit 3
 fi
