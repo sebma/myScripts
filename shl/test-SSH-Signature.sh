@@ -20,7 +20,7 @@ If they did change the SFTP server SSH host key, then you need to type these two
 
 ssh-keygen -R $sftpServer
 
-timeout 1s ssh -o StrictHostKeyChecking=accept-new $sshUser@$sftpServer : # Works since OpenSSH 7.6/Ubuntu 18.04 cf.
+timeout 1s ssh -o StrictHostKeyChecking=accept-new $sshUser@$sftpServer : # Works since OpenSSH 7.6/Ubuntu 18.04 cf. https://serverfault.com/a/903635/312306
 " | mail -s "ERROR: The $sftpServer SFTP server SSH key signature has changed !" -c "$CCs" $Recipients
 	exit 255
 fi
