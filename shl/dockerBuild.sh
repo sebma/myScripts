@@ -2,6 +2,7 @@
 
 set -u
 scriptBaseName=${0/*\//}
+test $(id -u) == 0 && sudo="" || sudo=sudo
 
 dockerBuild () {
 	local imageName=""
@@ -24,7 +25,7 @@ dockerBuild () {
 
 	( [ ! -f "$dockerFile" ] || [ ! -d "$dir" ] ) && echo "[$FUNCNAME] => ERROR: <$dockerFile> or <$dir> does not exits.">&2 && return 1
 	set -x
-	time docker build --no-cache -t "$imageName" -f "$dockerFile" "$dir" "$@" && echo && docker images "$imageName" && echo && echo "=> docker run -it -h pc1 --rm $imageName"
+	time $sudo docker build --no-cache -t "$imageName" -f "$dockerFile" "$dir" "$@" && echo && docker images "$imageName" && echo && echo "=> docker run -it -h pc1 --rm $imageName"
 	return $?
 }
 
