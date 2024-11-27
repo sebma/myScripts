@@ -9,12 +9,14 @@ dockerBuild () {
 	local dir="."
 
 	if [ $# = 2 ];then
-		imageName="$1"
+		imageName="${1,,}"
         	dockerFile="$2"
+	 	shift 2
 	elif [ $# = 3 ];then
-		imageName="$1"
+		imageName="${1,,}"
         	dockerFile="$2"
 	 	dir="$3"
+   		shift 3
 	elif [ $# -lt 2 ];then
 		echo "[function $FUNCNAME] => INFO: Usage: $scriptBaseName imageName dockerFile [dir = .]" >&2
 		return -1
