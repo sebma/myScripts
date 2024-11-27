@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
-docker images | awk '/^<none>\s+<none>/{printf" "$3}' | \xargs -rt docker rmi
+test $(id -u) == 0 && sudo="" || sudo=sudo
+$sudo docker images | awk '/^<none>\s+<none>/{printf" "$3}' | $sudo xargs -rt docker rmi
