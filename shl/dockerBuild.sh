@@ -1,21 +1,22 @@
 #!/usr/bin/env bash
 
+set -u
 scriptBaseName=${0/*\//}
 
 dockerBuild () {
-	set +u
-	local imageName="$1"
-	local dockerFile="$2"
-	local dir="$3"
+	local imageName=""
+	local dockerFile=""
+	local dir="."
 
-	set -u
 	if [ $# = 2 ];then
-		dir=.
-		shift 2
+		imageName="$1"
+        	dockerFile="$2"
 	elif [ $# = 3 ];then
-		shift 3
+		imageName="$1"
+        	dockerFile="$2"
+	 	dir="$3"
 	elif [ $# -lt 2 ];then
-		echo "[$FUNCNAME] => INFO: Usage: $scriptBaseName imageName dockerFile [dir = .]" >&2
+		echo "[function $FUNCNAME] => INFO: Usage: $scriptBaseName imageName dockerFile [dir = .]" >&2
 		return -1
 	fi
 
