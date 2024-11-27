@@ -3,10 +3,12 @@
 scriptBaseName=${0/*\//}
 
 dockerBuild () {
+	set +u
 	local imageName="$1"
 	local dockerFile="$2"
 	local dir="$3"
 
+	set -u
 	if [ $# = 2 ];then
 		dir=.
 		shift 2
