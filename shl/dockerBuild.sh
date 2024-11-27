@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+scriptBaseName=${0/*\//}
+
 dockerBuild () {
 	local imageName="$1"
 	local dockerFile="$2"
@@ -11,7 +13,7 @@ dockerBuild () {
 	elif [ $# = 3 ];then
 		shift 3
 	elif [ $# -lt 2 ];then
-		echo "[$FUNCNAME] => INFO: Usage: imageName dockerFile [dir = .]" >&2
+		echo "[$FUNCNAME] => INFO: Usage: $scriptBaseName imageName dockerFile [dir = .]" >&2
 		return -1
 	fi
 
