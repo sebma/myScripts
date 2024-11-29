@@ -29,7 +29,8 @@ dockerBuild () {
 	fi
 
 	set -x
-	time $sudo docker build --no-cache -t "$imageName" -f "$dockerFile" "$dir" "$@"
+#	time $sudo docker build --no-cache -t "$imageName" -f "$dockerFile" "$dir" "$@"
+	time $sudo docker build -t "$imageName" -f "$dockerFile" "$dir" "$@"
 	retCode=$?
 	set +x
 
