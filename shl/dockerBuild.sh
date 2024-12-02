@@ -35,7 +35,7 @@ dockerBuild () {
 	set +x
 
 	if [ $retCode == 0 ];then
-		echo && $sudo docker images "$imageName" && echo && echo "=> $sudo docker run -it -h pc1 --rm $imageName"
+		echo && $sudo docker images "$imageName" && echo && echo "=> $sudo docker run -it -h pc1 --rm --network=host $imageName"
 	fi
 	return $retCode
 }
