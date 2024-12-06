@@ -1,9 +1,10 @@
 #!/usr/bin/env sh
 
+set -u
 ventoyROOT=/opt/ventoy
 Ventoy2DiskScriptName=Ventoy2Disk.sh
 Ventoy2DiskScriptPath=$ventoyROOT/Ventoy2Disk.sh
-test $(id -u) == 0 && sudo="" || sudo=sudo
+test $(id -u) = 0 && sudo="" || sudo=sudo
 
 if ! test -x $Ventoy2DiskScriptPath;then
 	$sudo chgrp $(id -gn) $Ventoy2DiskScriptPath
