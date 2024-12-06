@@ -3,23 +3,24 @@
 ventoyROOT=/opt/ventoy
 Ventoy2DiskScriptName=Ventoy2Disk.sh
 Ventoy2DiskScriptPath=$ventoyROOT/Ventoy2Disk.sh
+test $(id -u) == 0 && sudo="" || sudo=sudo
 
 if ! test -x $Ventoy2DiskScriptPath;then
-	sudo chgrp $(id -gn) $Ventoy2DiskScriptPath
-	sudo chmod g+x $Ventoy2DiskScriptPath
+	$sudo chgrp $(id -gn) $Ventoy2DiskScriptPath
+	$sudo chmod g+x $Ventoy2DiskScriptPath
 fi
 
 if cd $ventoyROOT;then
 	if [ $(id -u) != 0 ];then
 		if set -o | \grep -q xtrace.*on;then
-			sudo bash -x ./$Ventoy2DiskScriptName "$@"
+			$sudo bash -x ./$Ventoy2DiskScriptName "$@"
 		else
-			sudo ./$Ventoy2DiskScriptName "$@"
+			$sudo ./$Ventoy2DiskScriptName "$@"
 		fi
 	else
 		./$Ventoy2DiskScriptName "$@"
 	fi
 fi
 
-sudo touch $ventoyROOT/log.txt
+$sudo touch $ventoyROOT/log.txt
 tac $ventoyROOT/log.txt | sed "/^#* Ventoy2Disk/q" | tac
