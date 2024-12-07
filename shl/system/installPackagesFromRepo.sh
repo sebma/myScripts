@@ -20,12 +20,13 @@ if $isDebianLike;then
 		exit 1
 	else
 		ppa=${1}
+		ppaWithoutPrefix=${1/ppa:}
 		shift
 		packageList=( $@ )
 		firstPackage="${packageList[0]}"
 		yes | $sudo add-apt-repository $ppa
-		apt-cache policy $firstPackage | grep $ppa -q || $sudo apt update
-		if apt-cache policy $firstPackage | grep $ppa -q;then
+		apt-cache policy $firstPackage | grep $ppaWithoutPrefix -q || $sudo apt update
+		if apt-cache policy $firstPackage | grep $ppaWithoutPrefix -q;then
 			$sudo apt install -V ${packageList[@]}
 		else
 			yes | $sudo add-apt-repository $ppa -r
