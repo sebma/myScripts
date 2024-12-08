@@ -228,6 +228,7 @@ pypy-dev
 python
 python-gnuplot
 python-matplotlib
+python-mutagen
 python-pisa
 python-pkg-resources
 python-pyx
