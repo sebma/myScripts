@@ -93,7 +93,7 @@ if which omreport >/dev/null;then
 		echo "=> ERROR : There is Preserved Cache on the controller $controllerID." >&2
 		echo "=> You need to flush the Preserved Cache of the controller $controllerID." >&2
 		echo "=> You can flush the Preserved Cache of the controller $controllerID with this command :" >&2
-		echo "=> omconfig storage controller action=discardpreservedcache controller=$controllerID"
+		echo "=> omconfig storage controller action=discardpreservedcache controller=$controllerID force=disabled"
 		exit 8
 	fi
 	echo
