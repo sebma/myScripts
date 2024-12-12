@@ -244,6 +244,7 @@ python-pyx
 python-scapy
 python2
 python3
+python3-argcomplete
 python3-distutils
 python3-mutagen
 python3-pip
