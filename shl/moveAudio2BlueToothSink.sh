@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 function moveAudioToBluetoothSink {
-	! pidof pulseaudio >/dev/null && echo "=> Pulseaudio is down, restarting Pulseaudio ..." && pulseaudio --start --log-target=syslog
+#	! pidof pulseaudio >/dev/null && echo "=> Pulseaudio is down, restarting Pulseaudio ..." && pulseaudio --start --log-target=syslog
 
 	( echo $1 | egrep -q -- "^--?(h|u)" ) && echo "=> Usage : $FUNCNAME connected|bluetoothDeviceName|bluetoothDeviceMacAddr" 1>&2 && return 1
 	local firstArg=$1
