@@ -63,7 +63,7 @@ else
 			time \wget -c -O $freeTubeLatestGitHubReleaseName "$freeTubeLatestGitHubReleaseURL"
 			$sudo apt install -V ./$freeTubeLatestGitHubReleaseName || rm -v ./$freeTubeLatestGitHubReleaseName
 			sync
-			[ $majorVersion -ge 24 ] && $sudo chmod -v 4755 /opt/FreeTube/chrome-sandbox
+			[ $majorVersion -ge 24 ] && chrome_sandbox=$(dpkg -L freetube | grep /chrome-sandbox$) && $sudo chmod -v 4755 $chrome_sandbox
 			cd - >/dev/null
 		fi
 	fi
