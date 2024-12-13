@@ -22,7 +22,7 @@ dockerBuild () {
 		dockerFileName="$2"
 		dir="$3"
 		shift 3
-	elif [ $# -lt 2 ];then
+	elif [ $# = 0 ];then
 		echo "[function $FUNCNAME] => INFO: Usage: $scriptBaseName [imageRelease=v0.0.1] [dir = .] dockerFileName" >&2
 		return -1
 	fi
