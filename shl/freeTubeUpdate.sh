@@ -44,6 +44,7 @@ freeTubeInstalledVersion=null
 if echo $distribID | egrep "debian|ubuntu" -q;then
 	isDebianLike=true
 	freeTubeInstalledVersion=$(dpkg-query --showformat='${Version}' -W freetube 2>/dev/null)
+	majorVersion=$(lsb_release -sr | cut -d. -f1)
 fi
 
 if [ "$freeTubeLatestRelease" = "$freeTubeInstalledVersion" ];then
@@ -62,6 +63,7 @@ else
 			time \wget -c -O $freeTubeLatestGitHubReleaseName "$freeTubeLatestGitHubReleaseURL"
 			$sudo apt install -V ./$freeTubeLatestGitHubReleaseName || rm -v ./$freeTubeLatestGitHubReleaseName
 			sync
+			[ $majorVersion -ge 24 ] && $sudo chmod -v 4755 /opt/FreeTube/chrome-sandbox
 			cd - >/dev/null
 		fi
 	fi
