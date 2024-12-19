@@ -238,7 +238,7 @@ Options:
  -t, --no-booted      Does not detect or protect the booted kernel. This
 					  is a dangerous option meant to be used when run
 					  inside a container.
- -v, --version        Print version.
+ -V, --version        Print version.
  -y, --yes            Purge without user confirmation.
 
 Report bugs at: <https://bugs.launchpad.net/linux-purge/+filebug>
@@ -978,7 +978,7 @@ operate() {
 env -u GETOPT_COMPATIBLE getopt --test >/dev/null ||
 [[ $? -eq 4 ]] || error '`getopt --test` failed in this environment.' 4
 # This should not happen with util-linux's getopt.
-params=$(env -u GETOPT_COMPATIBLE getopt -o abcd::fhi:k:lmnostrvy -l \
+params=$(env -u GETOPT_COMPATIBLE getopt -o abcd::fhi:k:lmnostrVy -l \
 auto-only,clear-boot,choose,debug::,fix,help,info,no-booted,\
 interface:,keep:,list,manual,no-legend,optimize,remove,simulate,\
 version,yes --name "[$program_name] ERROR" -- "$@") \
