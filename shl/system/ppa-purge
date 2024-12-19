@@ -32,7 +32,7 @@ usage() {
 	echo "Options:"
 	echo "	-p [ppaname]		PPA name to be disabled (default: ppa)"
 	echo "	-o [ppaowner]		PPA owner"
-	echo "	-s [host]		Repository server (default: ppa.launchpad.net)"
+	echo "	-s [host]		Repository server (default: ppa.launchpadcontent.net)"
 	echo "	-d [distribution]	Override the default distribution choice."
 	echo "	-y 			Pass "-y --force-yes" to apt-get or "-y" to aptitude"
 	echo "	-i			Reverse preference of apt-get upon aptitude."
@@ -49,15 +49,17 @@ usage() {
 	echo "	will remove https://launchpad.net/~ubuntu-x-swat/+archive/x-updates"
 	echo
 	echo "Notice: If ppa-purge fails for some reason and you wish to try again,"
-	echo "(For example: you left synaptic open while attempting to run it) simply"
-	echo "uncomment the PPA from your sources, run apt-get update and try again."
+	echo "(For example: you left synaptic open while attempting to run it) remove"
+	echo "the line \"Enabled: no\" from the Components section in the PPA \".sources\""
+	echo "file or uncomment the PPA from its \".list\" file, run apt-get update and"
+	echo "try again."
 	echo
 	exit $1
 }
 
 
 # Command line options
-while getopts "p:o:s:d:yih\?" opt; do
+while getopts "p:o:s:d:yivh\?" opt; do
 	case "$opt" in
 		p ) PPANAME="$OPTARG"				;;
 		o ) PPAOWNER="$OPTARG"				;;
@@ -65,6 +67,7 @@ while getopts "p:o:s:d:yih\?" opt; do
 		d ) DIST="$OPTARG"					;;
 		y ) FORCEINSTALL="true"				;;
 		i ) APTALT="true"					;;
+		v ) APTARG="-V "					;;
 		h ) usage 0;						;;
 		\?) usage 1;						;;
 		* ) warn "Unknown option '$opt'"; usage 1;	;;
@@ -76,7 +79,6 @@ if [ -z "$PPAOWNER" ]; then
     PPAOWNER=$1
 fi
 
-APTARG="-V "
 if [ ! -z "$APTALT" ]; then
 	if [ ! -z "$FORCEINSTALL" ]; then
 	APTARG+="-y"
@@ -105,7 +107,7 @@ if [ -z "$PPAOWNER" ]; then
 fi
 
 # If not set, using defaults
-[ -z "$PPAHOST" ] && PPAHOST="ppa.launchpad.net"
+[ -z "$PPAHOST" ] && PPAHOST="ppa.launchpadcontent.net"
 [ -z "$PPANAME" ] && PPANAME="ppa"
 [ -z "$DIST" ] && DIST=$(lsb_release -c -s)
 
@@ -177,6 +179,14 @@ for LIST in $(find /etc/apt/ -name "*.list" -exec readlink -f '{}' \;); do
 	if [ -e $LIST ] && grep -q $PPAOWNER/$PPANAME $LIST; then
 		msg "Disabling $PPAOWNER PPA from $LIST"
 		sed -ri "\:^[^#]+/${PPAOWNER}/${PPANAME}/:s/^deb/# deb/" $LIST
+	fi
+done
+
+# Disable PPA using the deb822 .sources files
+for LIST in $(find /etc/apt/ -name "*.sources" -exec readlink -f '{}' \;); do
+	if [ -e $LIST ] && grep -q $PPAOWNER/$PPANAME $LIST; then
+		sed -i '/^Enabled:/d' "$LIST"
+		sed -i '/^Components:/aEnabled: no' "$LIST"
 	fi
 done
 
