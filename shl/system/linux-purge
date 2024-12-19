@@ -238,6 +238,7 @@ Options:
  -t, --no-booted      Does not detect or protect the booted kernel. This
 					  is a dangerous option meant to be used when run
 					  inside a container.
+ -v, --verbose        add -V to APT operations
  -V, --version        Print version.
  -y, --yes            Purge without user confirmation.
 
@@ -978,7 +979,7 @@ operate() {
 env -u GETOPT_COMPATIBLE getopt --test >/dev/null ||
 [[ $? -eq 4 ]] || error '`getopt --test` failed in this environment.' 4
 # This should not happen with util-linux's getopt.
-params=$(env -u GETOPT_COMPATIBLE getopt -o abcd::fhi:k:lmnostrVy -l \
+params=$(env -u GETOPT_COMPATIBLE getopt -o abcd::fhi:k:lmnostrVvy -l \
 auto-only,clear-boot,choose,debug::,fix,help,info,no-booted,\
 interface:,keep:,list,manual,no-legend,optimize,remove,simulate,\
 version,yes --name "[$program_name] ERROR" -- "$@") \
@@ -1050,8 +1051,11 @@ while :; do
 		-t|--no-booted)
 			no_booted=1
 			;;
-		-v|--version)
+		-V|--version)
 			show_version; exit
+			;;
+		-v|--verbose)
+			operation+=" -V"
 			;;
 		-y|--yes)
 			yes='-y'
