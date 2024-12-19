@@ -36,6 +36,7 @@ usage() {
 	echo "	-d [distribution]	Override the default distribution choice."
 	echo "	-y 			Pass "-y --force-yes" to apt-get or "-y" to aptitude"
 	echo "	-i			Reverse preference of apt-get upon aptitude."
+	echo "	-v			Add -V to APT reinstall/purge commands."
 	echo "	-h			Display this help text"
 	echo
 	echo "Example usage commands:"
