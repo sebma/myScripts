@@ -4,7 +4,7 @@ set -u
 
 test $(id -u) == 0 && sudo="" || sudo=sudo
 
-biosAddress=$($sudo dmidecode | awk '/BIOS Information/{section_found=1}/Address:/&&section_found{printf$2;exit}')
+biosAddress=$($sudo dmidecode -t bios | awk '/BIOS Information/{section_found=1}/Address:/&&section_found{printf$2;exit}')
 case $biosAddress in
 	"0xE8480" ) echo "ESX 2.5" ;;
 	"0xE7C70" ) echo "ESX 3.0" ;;
