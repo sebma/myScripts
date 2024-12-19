@@ -78,6 +78,10 @@ echo Install the agent package successfully
 rm -f /tmp/$package /tmp/PlatformDetection
 
 sleep 15
-dsa_control=/opt/ds_agent/dsa_control
+if [ $isRPM == 1 ];then
+	dsa_control=$(rpm -ql ds_agent | grep /dsa_control$)
+else
+	dsa_control=$(dpkg -L ds-agent | grep /dsa_control$)
+fi
 $sudo $dsa_control -r
 $sudo $dsa_control -a $ACTIVATIONURL "tenantID:$tenantID" "token:$token" "policyid:$policyid"
