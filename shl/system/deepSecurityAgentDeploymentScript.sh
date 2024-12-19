@@ -32,7 +32,7 @@ fi
 curl -L $MANAGERURL/software/deploymentscript/platform/linuxdetectscriptv1/ -o /tmp/PlatformDetection $CURLOPTIONS --insecure
 
 if [ -s /tmp/PlatformDetection ]; then
-    . /tmp/PlatformDetection
+    source /tmp/PlatformDetection
 else
     echo "Failed to download the agent installation support script."
     logger -t Failed to download the Deep Security Agent installation support script
