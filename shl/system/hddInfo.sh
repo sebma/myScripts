@@ -36,7 +36,7 @@ fi
 
 smartctlDiskInfo="$($sudo smartctl -i $diskDevice)"
 which hdparm >/dev/null 2>&1 && hdparmDiskInfo="$($sudo hdparm -i $diskDevice)" && hdparmDiskMoreInfo="$($sudo hdparm -I $diskDevice)"
-diskModel="$(echo "$smartctlDiskInfo" |  awk '/Model:/{gsub("/","_");for(i=4;i<NF;++i)printf $i"_";print$i}')"
+diskModel="$(echo "$smartctlDiskInfo" |  awk '/Model:|Model Number:/{gsub("/","_");for(i=4;i<NF;++i)printf $i"_";print$i}')"
 test -z $diskModel && diskModel="$(echo "$smartctlDiskInfo" |  awk '/Model:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
 test -z $diskModel && which hdparm >/dev/null 2>&1 && diskModel="$(echo "$hdparmDiskInfo" | awk -F'[=,]' '/Model=/{print$2}')"
 test -z $diskModel && echo "=> ERROR : Could not infer diskModel." 2>/dev/null && exit 2
@@ -123,17 +123,21 @@ blue=$(tput setaf 4)
 	echo "=> SMART Pre-fail non-zero values :"
 	echo
 	$sudo smartctl -A $diskDevice | egrep -v " 0$" | egrep "Pre-fail" | egrep --color=always " [0-9]+$" && echo
-	echo "=> journalctl \"smartd\" errors :"
-	echo
-	sudo journalctl -e -q -p 3 | grep --color=always smartd.*$diskDevice.*
-	echo
+	if type -P journalctl >/dev/null 2>&1;then
+		echo "=> journalctl \"smartd\" errors :"
+		echo
+		sudo journalctl -e -q -p 3 | grep --color=always smartd.*$diskDevice.*
+		echo
+	fi
 	echo "=> Disk temperature using smartctl :"
 	echo
 	$sudo smartctl -A $diskDevice | egrep "VALUE|Temperature_Cel"
 	echo
 	$sudo smartctl -l scttempsts $diskDevice | tail -n +5
-	printf "=> Disk temperature using hddtemp $diskDevice :"
-	sudo hddtemp $diskDevice 2>&1 | cut -d: -f3 | tr -s ' ' | grep --color=always .
+	if type -P hddtemp >/dev/null 2>&1;then
+		printf "=> Disk temperature using hddtemp $diskDevice :"
+		sudo hddtemp $diskDevice 2>&1 | cut -d: -f3 | tr -s ' ' | grep --color=always .
+	fi
 } 2>&1 | tee $logFile
 
 echo
