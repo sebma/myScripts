@@ -2,7 +2,6 @@
 
 scriptBaseName=${0##*/}
 #set -o errexit
-set -o nounset
 type smartctl >/dev/null || exit
 type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo="command sudo" || sudo=""
 diskDevice=""
@@ -45,8 +44,11 @@ diskFamily="$(echo "$smartctlDiskInfo" |  awk '/Family:/{gsub("/","_");for(i=3;i
 test -z $diskFamily && diskFamily="$(echo "$smartctlDiskInfo" |  awk '/Model:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
 diskFamily="$(echo $diskFamily | sed -E "s/[.]+$|\"//g")"
 
-vendor=$(sed 's/ $//;s/ /_/g' < /sys/block/$(readlink /sys/block/$diskName)/../../vendor)
-model=$(sed 's/ $//;s/ /_/g' < /sys/block/$(readlink /sys/block/$diskName)/../../model)
+osFamily=$(uname -s)
+if [ $osFamily == Linux ];then
+	vendor=$(sed 's/ $//;s/ /_/g' < /sys/block/$(readlink /sys/block/$diskName)/../../vendor)
+	model=$(sed 's/ $//;s/ /_/g' < /sys/block/$(readlink /sys/block/$diskName)/../../model)
+fi
 model_family=$(sudo smartctl -i $diskDevice -j | jq -r .model_family | sed 's/ $//;s/ /_/g')
 model_name=$(sudo smartctl -i $diskDevice -j | jq -r .model_name | sed 's/ $//;s/ /_/g')
 serial_number=$(sudo smartctl -i $diskDevice -j | jq -r .serial_number | sed 's/ $//;s/ /_/g')
@@ -65,13 +67,14 @@ blue=$(tput setaf 4)
 {
 	echo "=> Disk general info for $diskFamily model $diskModel on $diskDevice :"
 	echo
-	deviceType=$(test $(</sys/block/${diskName}/queue/rotational) = 0 && echo SSD || echo HDD)
+	[ $osFamily == Linux ] && deviceType=$(test $(</sys/block/${diskName}/queue/rotational) = 0 && echo SSD || echo HDD)
 	printf $blue$bold
 	echo "=> $diskFamily model $diskModel is a $deviceType drive."
 	echo $normal
 	echo "$smartctlDiskInfo"
 	echo
-	test $deviceType = SSD && $sudo smartctl -l ssd $diskDevice && echo
+	test "$deviceType" = SSD && $sudo smartctl -l ssd $diskDevice && echo
+set -o nounset
 	echo "=> Enabling SMART on $diskFamily model $diskModel on $diskDevice ..."
 	echo
 	$sudo smartctl --smart=on --offlineauto=on --saveauto=on $diskDevice >/dev/null
