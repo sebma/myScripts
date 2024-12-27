@@ -23,11 +23,13 @@ if [ $osFamily == Linux ];then
 		$sudo add-apt-repository -y -u "https://download.docker.com/linux/ubuntu $(lsb_release -sc) stable"
 		$sudo apt install -V -y docker-ce
 	fi
-elif [ $osFamily == Darwin ];then # https://stackoverflow.com/q/78839954/5649639
+elif [ $osFamily == Darwin ];then # https://osxdaily.com/2023/10/13/native-macos-docker-containers-are-now-possible
 	brew=$(type -P brew)
 	for formula in macfuse docker docker-buildx darwin-containers/formula/containerd darwin-containers/formula/dockerd;do
 		$brew info $formula | grep Installed -q || $brew install $formula
 	done
 	$sudo $brew services list | grep containerd -q || $sudo $brew services start darwin-containers/formula/containerd
 	$sudo $brew services list | grep dockerd -q    || $sudo $brew services start darwin-containers/formula/dockerd
+	mkdir -p ~/.docker/cli-plugins
+	ln -sfn /usr/local/bin/docker-buildx ~/.docker/cli-plugins/docker-buildx
 fi
