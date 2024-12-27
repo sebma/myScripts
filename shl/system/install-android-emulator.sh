@@ -2,6 +2,8 @@
 set -u
 declare {isDebian,isRedHat}Like=false
 
+test $(id -u) == 0 && sudo="" || sudo=sudo
+
 echo $OSTYPE | grep -q android && osFamily=Android || osFamily=$(uname -s)
 
 if [ $osFamily == Linux ];then
@@ -16,7 +18,19 @@ if [ $osFamily == Linux ];then
 			isUbuntuLike=true
 		fi
 	fi
-elif [ $osFamily == Darwin ];then
+
+	if [ $isUbuntuLike ];then
+		$sudo add-apt-repository -y -u ppa:bastif/google-android-installers
+		$sudo apt install -V google-android-cmdline-tools-12.0-installer -y
+
+		yes | sdkmanager --licenses >/dev/null
+		if ! which emulator;then
+			sdkmanager --install emulator
+			ANDROID_SDK_ROOT=/usr/local/share/android-commandlinetools
+			PATH="$ANDROID_SDK_ROOT/emulator:$PATH"
+		fi
+	fi
+elif [ $osFamily == Darwin ];then # https://stackoverflow.com/q/78839954/5649639
 	$brew ls openjdk | grep openjdk/.*/bin/java -q || $brew install openjdk
 	$brew info android-commandlinetools | grep android-commandlinetools/.*/bin/sdkmanager -q || $brew install android-commandlinetools
 	yes | sdkmanager --licenses >/dev/null
