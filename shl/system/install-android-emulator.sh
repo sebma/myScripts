@@ -31,6 +31,7 @@ if [ $osFamily == Linux ];then
 		fi
 	fi
 elif [ $osFamily == Darwin ];then # https://stackoverflow.com/q/78839954/5649639
+	brew=$(type -P brew)
 	$brew ls openjdk | grep openjdk/.*/bin/java -q || $brew install openjdk
 	$brew info android-commandlinetools | grep android-commandlinetools/.*/bin/sdkmanager -q || $brew install android-commandlinetools
 	yes | sdkmanager --licenses >/dev/null
