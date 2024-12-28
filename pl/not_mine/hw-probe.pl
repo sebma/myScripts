@@ -232,7 +232,8 @@ elsif($#ARGV_COPY==0 and grep { $ARGV_COPY[0] eq $_ } ("-snap", "-flatpak"))
     }
 }
 
-my $PROBE_DIR = "/root/HW_PROBE";
+[ $(uname -s) == Linux ] && my $PROBE_DIR = "/root/HW_PROBE";
+[ $(uname -s) == Darwin ] && my $PROBE_DIR = "/var/root/HW_PROBE";
 
 if($Opt{"Snap"}) {
     $PROBE_DIR = $ENV{"SNAP_USER_COMMON"}."/HW_PROBE";
