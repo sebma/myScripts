@@ -23,13 +23,16 @@ if [ $osFamily == Linux ];then
 		fi
 	fi
 
-	wget https://download.documentfoundation.org/libreoffice/stable/$libreofficeVersion/$packageType/x86_64/LibreOffice_${libreofficeVersion}_${osFamily}_x86-64_${packageType}_langpack_fr.tar.gz
+	languagePackFile=LibreOffice_${libreofficeVersion}_${osFamily}_x86-64_${packageType}_langpack_fr.tar.gz
+	wget https://download.documentfoundation.org/libreoffice/stable/$libreofficeVersion/$packageType/x86_64/$languagePackFile
 	if [ $isUbuntuLike ];then
 		:
 	fi
 elif [ $osFamily == Darwin ];then # https://osxdaily.com/2023/10/13/native-macos-docker-containers-are-now-possible
 	packageType=mac
 	osFamily=MacOS
-	wget https://download.documentfoundation.org/libreoffice/stable/$libreofficeVersion/$packageType/x86_64/LibreOffice_${libreofficeVersion}_${osFamily}_x86-64_langpack_fr.dmg
+	languagePackFile=LibreOffice_${libreofficeVersion}_${osFamily}_x86-64_langpack_fr.dmg
+	wget https://download.documentfoundation.org/libreoffice/stable/$libreofficeVersion/$packageType/x86_64/$languagePackFile
 	:
 fi
+rm -v $languagePackFile
