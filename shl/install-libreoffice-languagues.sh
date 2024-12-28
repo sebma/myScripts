@@ -36,4 +36,4 @@ elif [ $osFamily == Darwin ];then # https://osxdaily.com/2023/10/13/native-macos
 	wget https://download.documentfoundation.org/libreoffice/stable/$libreofficeVersion/$packageType/x86_64/$languagePackFile
 	:
 fi
-rm -v $languagePackFile
+rm -iv $languagePackFile
