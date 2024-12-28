@@ -6,7 +6,7 @@ test $(id -u) == 0 && sudo="" || sudo=sudo
 
 echo $OSTYPE | grep -q android && osFamily=Android || osFamily=$(uname -s)
 
-libreofficeVersion=$(loffice --version | awk '/LibreOffice/{print$2}' | cut -d. -f1-3)
+libreofficeVersion=$(soffice --version | awk '/LibreOffice/{print$2}' | cut -d. -f1-3)
 
 if [ $osFamily == Linux ];then
 	distribID=$(source /etc/os-release;echo $ID)
@@ -30,6 +30,6 @@ if [ $osFamily == Linux ];then
 elif [ $osFamily == Darwin ];then # https://osxdaily.com/2023/10/13/native-macos-docker-containers-are-now-possible
 	packageType=mac
 	osFamily=MacOS
-	wget https://download.documentfoundation.org/libreoffice/stable/$libreofficeVersion/$packageType/x86_64/LibreOffice_${libreofficeVersion}_${osFamily}_x86-64_${packageType}_langpack_fr.dmg
+	wget https://download.documentfoundation.org/libreoffice/stable/$libreofficeVersion/$packageType/x86_64/LibreOffice_${libreofficeVersion}_${osFamily}_x86-64_langpack_fr.dmg
 	:
 fi
