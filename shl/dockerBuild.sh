@@ -36,7 +36,7 @@ dockerBuild () {
 		return 1
 	fi
 
-	if [ -n "$apt_proxy" ];then
+	if env | grep apt_proxy -q ;then
 		set -x
 		time $sudo docker build --build-arg apt_proxy=$apt_proxy -t "$imageName" -f "$dockerFileName" "$dir" "$@"
 	else
