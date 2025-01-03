@@ -5,7 +5,7 @@ function lsNonPPAs {
 	awk -F "[ /]" 'BEGINFILE{if(ERRNO)nextfile}
 	/launchpad.*.net|esm.ubuntu.com|^#|^\s*$/{next}
 	{sub("^.*https?","https")}
-	/\s#/{print$1" # "$NF} !/\s#/{print$1}' /etc/apt/sources.list.d/*-$releaseCodeName.list /etc/apt/sources.list.d/*-$releaseCodeName.sources 2>/dev/null | sort -u
+	/\s#/{print$1" # "$NF} !/\s#/{print$1}' /etc/apt/sources.list.d/*-$releaseCodeName.list 2>/dev/null | sort -u
 }
 
 lsNonPPAs
