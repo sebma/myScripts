@@ -1,0 +1,15 @@
+Sur un laptop :
+
+hostnamectl | grep Chassis renvoie "laptop"
+
+Sur une tour :
+
+hostnamectl | grep Chassis renvoie "desktop"
+
+Sur un serveur Physique :
+
+hostnamectl | grep Chassis renvoie "server"
+
+Sur une VM :
+
+hostnamectl | grep Chassis renvoie "vm"
