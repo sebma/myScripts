@@ -98,7 +98,6 @@ if $isDebianLike;then
 		$sudo systemctl start vmtoolsd
 
 		if [ $distribID == ubuntu ];then
-			test -n "$http_proxy" && $sudo sed -i.orig "s|https://|http://|" /etc/update-manager/meta-release
 			$sudo rm -fv /var/lib/ubuntu-release-upgrader/release-upgrade-available
 			$sudo /usr/lib/ubuntu-release-upgrader/release-upgrade-motd
 			timeout 5s /usr/lib/ubuntu-release-upgrader/check-new-release;echo $? # FLUX http-proxy a ouvrir vers X.Y.Z.T4
