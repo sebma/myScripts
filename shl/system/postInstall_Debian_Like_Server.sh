@@ -90,6 +90,12 @@ if $isDebianLike;then
 		grep -i virtual /sys/class/dmi/id/product_name -q && ! dpkg -s open-vm-tools 2>/dev/null | grep installed -q && $sudo $apt install open-vm-tools -y
 		$sudo systemctl start vmtoolsd
 
+		if [ $distribID == ubuntu ];then
+			$sudo rm -fv /var/lib/ubuntu-release-upgrader/release-upgrade-available
+			$sudo /usr/lib/ubuntu-release-upgrader/release-upgrade-motd
+			timeout 5s /usr/lib/ubuntu-release-upgrader/check-new-release;echo $?
+		fi
+
 		architecture=$(dpkg --print-architecture)
 		if ! dpkg -s dra >/dev/null;then
 			https_proxy=$https_proxy wget -c -nv https://github.com/devmatteini/dra/releases/latest/download/dra_0.6.2-1_$architecture.deb
