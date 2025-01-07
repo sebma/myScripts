@@ -14,6 +14,6 @@ ExecStart=/firstboot.sh
 WantedBy=multi-user.target
 EOF
 
-	# $sudo systemctl enable firstboot.service # A saisir juste AVANT le clonage de la VM
 	$sudo chmod +x /firstboot.sh
+	# $sudo systemctl enable firstboot.service # A saisir juste AVANT le clonage de la VM
 fi
