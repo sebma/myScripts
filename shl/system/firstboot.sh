@@ -12,6 +12,8 @@ elif echo $distribID | egrep "debian|ubuntu" -q;then
     isDebianLike=true
 fi
 
+initName=$(ps -p 1 -o comm=)
+
 if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
 	if ! grep "^\s*kernel.dmesg_restrict\s*=\s*0" /etc/sysctl.conf /etc/sysctl.d/*.conf -q;then
 		echo kernel.dmesg_restrict=0 | tee -a /etc/sysctl.conf
