@@ -37,6 +37,7 @@ if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
 	fi
 
 	echo "=> Re-generating /etc/machine-id and /var/lib/dbus/machine-id ..."
+ 	# echo -n > /etc/machine-id
 	rm -f /etc/machine-id
 	dbus-uuidgen --ensure=/etc/machine-id
 	rm -f /var/lib/dbus/machine-id
