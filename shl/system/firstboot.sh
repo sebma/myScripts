@@ -34,7 +34,10 @@ if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
 			done
 			netplan apply
 		fi
-	elif $isRedHatLike;then
+		if $isUbuntuLike;then
+			rm -fv /var/lib/ubuntu-release-upgrader/release-upgrade-available
+		fi
+ 	elif $isRedHatLike;then
 		update-ca-trust extract
 		: # TO DO
 	fi
