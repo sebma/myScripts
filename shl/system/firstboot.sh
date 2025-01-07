@@ -17,6 +17,7 @@ fi
 
 if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
 	initName=$(ps -p 1 -o comm=)
+ 	localectl set-locale LANG=en_US.UTF-8
 	if ! grep "^\s*kernel.dmesg_restrict\s*=\s*0" /etc/sysctl.conf /etc/sysctl.d/*.conf -q;then
 		echo kernel.dmesg_restrict=0 | tee -a /etc/sysctl.conf
 		systemctl restart systemd-sysctl.service
