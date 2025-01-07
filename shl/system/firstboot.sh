@@ -7,9 +7,12 @@ fi
 declare {isDebian,isRedHat}Like=false
 distribID=$(source /etc/os-release;echo $ID)
 if   echo $distribID | egrep "centos|rhel|fedora" -q;then
-    isRedHatLike=true
+	isRedHatLike=true
 elif echo $distribID | egrep "debian|ubuntu" -q;then
-    isDebianLike=true
+	isDebianLike=true
+	if echo $distribID | egrep "ubuntu" -q;then
+		isUbuntuLike=true
+	fi
 fi
 
 if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
