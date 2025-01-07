@@ -12,9 +12,8 @@ elif echo $distribID | egrep "debian|ubuntu" -q;then
     isDebianLike=true
 fi
 
-initName=$(ps -p 1 -o comm=)
-
 if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
+	initName=$(ps -p 1 -o comm=)
 	if ! grep "^\s*kernel.dmesg_restrict\s*=\s*0" /etc/sysctl.conf /etc/sysctl.d/*.conf -q;then
 		echo kernel.dmesg_restrict=0 | tee -a /etc/sysctl.conf
 		systemctl restart systemd-sysctl.service
@@ -42,6 +41,7 @@ if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
 	dbus-uuidgen --ensure=/etc/machine-id
 	rm -f /var/lib/dbus/machine-id
 	dbus-uuidgen --ensure
+ 	[ $initName == systemd ] && systemd-machine-id-setup
 	echo "=> done."
 	echo "=> Re-generating ssh host keys ..."
 	for type in dsa ecdsa ed25519 rsa;do
