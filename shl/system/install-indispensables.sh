@@ -2,7 +2,7 @@
 
 sudo apt install -V apt-file aptitude aria2 bind9-dnsutils curl dconf-editor dfc dlocate fd-find gh git glances htop hub jq lynx mc neofetch plocate ppa-purge pv rclone ripgrep rsync vim w3m wget xclip xsel xxd
 sudo snap install yq
-sudo add-apt-repository ppa:libreoffice/ppa
+sudo add-apt-repository ppa:libreoffice/ppa || sudo -E add-apt-repository ppa:libreoffice/ppa # Si via la variable http_proxy/https_proxy
 sudo apt install -V doublecmd-gtk geany gnome-tweaks keepassxc libreoffice libreoffice-grammalecte libreoffice-style-breeze ttf-mscorefonts-installer
 dpkg -s dra >/dev/null || { wget -c -nv https://github.com/devmatteini/dra/releases/latest/download/dra_0.6.2-1_amd64.deb && sudo apt install -V ./dra_0.6.2-1_amd64.deb && rm ./dra_0.6.2-1_amd64.deb; }
 # sudo apt install -V vlc mpv
