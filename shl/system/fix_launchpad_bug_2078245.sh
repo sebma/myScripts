@@ -8,5 +8,6 @@ fi
 variablesDefinitionFile="$1"
 source "$variablesDefinitionFile" || exit
 
-sudo add-apt-repository ppa:ubuntu-enterprise-desktop/adsys
+sudo add-apt-repository ppa:ubuntu-enterprise-desktop/adsys || sudo -E add-apt-repository ppa:ubuntu-enterprise-desktop/adsys # Si via la variable http_proxy/https_proxy
+
 sudo apt install -V adsys
