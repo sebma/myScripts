@@ -76,6 +76,17 @@ if $isDebianLike;then
 		git config --global https.proxy $https_proxy
 		git config --global -l | egrep https?.proxy
 
+		# CONFIG DOCKER
+		cat <<EOF | sudo tee -a /etc/docker/daemon.json
+{
+  "proxies": {
+    "http-proxy": "$http_proxy",
+    "https-proxy": "$http_proxy",
+    "no-proxy": "localhost,127.0.0.1,localaddress,.localdomain.com"
+  }
+}
+EOF
+
 		# CONFIG DNS
 		if ! resolvectl dns | grep "$DNS_SERVER1" -q;then
 			iface=$(\ls /sys/class/net/ | grep -vw lo)
