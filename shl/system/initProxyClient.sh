@@ -45,6 +45,15 @@ if which git &>/dev/null;then
 	git config --global -l | egrep https?.proxy
 fi
 
+if which docker &>/dev/null;then
+	jq -n --arg http_proxy "$http_proxy" --arg https_proxy "$https_proxy" --arg no_proxy "$no_proxy" '.proxies = { "http-proxy":$http_proxy , "https-proxy":$https_proxy , "no-proxy":$no_proxy }'
+fi
+
+if which cpan &>/dev/null;then
+#	printf "o conf http_proxy $http_proxy\no conf commit" | cpan
+	:
+fi
+
 echo "=> MAJ des depots ..."
 sudo apt-get update >/dev/null
 
