@@ -143,12 +143,13 @@ if $isDebianLike;then
 		fi
 
 		# CONFIG GRUB
-#		grep GRUB_TIMEOUT_STYLE=hidden /etc/default/grub -q && $sudo sed -i.ORIG "s/GRUB_TIMEOUT_STYLE=.*/GRUB_TIMEOUT_STYLE=menu/;s/GRUB_TIMEOUT=.*/GRUB_TIMEOUT=15/" /etc/default/grub
-		grep GRUB_TIMEOUT_STYLE=hidden /etc/default/grub /etc/default/grub.d/* -q && echo -e "GRUB_TIMEOUT_STYLE=menu\nGRUB_TIMEOUT=15" | sudo tee -a /etc/default/grub.d/$company-grub.cfg
-		grep ^GRUB_RECORDFAIL_TIMEOUT= /etc/default/grub /etc/default/grub.d/* -q && || echo 'GRUB_RECORDFAIL_TIMEOUT=$GRUB_TIMEOUT' | sudo tee -a /etc/default/grub.d/$company-grub.cfg
-#		grep '\#GRUB_GFX_MODE=' /etc/default/grub -q && $sudo sed -i.ORIG.2 "s/#GRUB_GFX_MODE=.*/GRUB_GFX_MODE=1152x864/" /etc/default/grub
-		grep '\#GRUB_GFX_MODE=' /etc/default/grub /etc/default/grub.d/* -q && echo "GRUB_GFX_MODE=1152x864" | sudo tee -a /etc/default/grub.d/$company-grub.cfg
+
 		$sudo update-grub
+		for grubParameter in GRUB_TIMEOUT_STYLE=hidden GRUB_TIMEOUT=10 'GRUB_RECORDFAIL_TIMEOUT=$GRUB_TIMEOUT' GRUB_GFX_MODE=1152x864;do
+		if ! grep $grubParameter /etc/default/grub /etc/default/grub.d/* -q;then
+			echo $grubParameter | sudo tee -a /etc/default/grub.d/$company-grub.cfg
+		fi
+		done
 
 		# CONFIG SNMP
 		$sudo $apt install snmpd -V -y # Pour snmpd et net-snmp-create-v3-user
