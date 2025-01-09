@@ -46,7 +46,7 @@ if which git &>/dev/null;then
 fi
 
 if which docker &>/dev/null;then
-	jq -n --arg http_proxy "$http_proxy" --arg https_proxy "$https_proxy" --arg no_proxy "$no_proxy" '.proxies = { "http-proxy":$http_proxy , "https-proxy":$https_proxy , "no-proxy":$no_proxy }'
+	jq -n --arg http_proxy "$http_proxy" --arg https_proxy "$https_proxy" --arg no_proxy "$no_proxy" '.proxies = { "http-proxy":$http_proxy , "https-proxy":$https_proxy , "no-proxy":$no_proxy }' | sudo tee /etc/docker/daemon.json
 fi
 
 if which cpan &>/dev/null;then
