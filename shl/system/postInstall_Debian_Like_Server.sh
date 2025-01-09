@@ -86,6 +86,7 @@ if $isDebianLike;then
   }
 }
 EOF
+		$sudo systemctl restart docker.service
 
 		# CONFIG DNS
 		if ! resolvectl dns | grep "$DNS_SERVER1" -q;then
