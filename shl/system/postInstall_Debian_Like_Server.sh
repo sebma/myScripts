@@ -81,7 +81,7 @@ if $isDebianLike;then
 {
   "proxies": {
     "http-proxy": "$http_proxy",
-    "https-proxy": "$http_proxy",
+    "https-proxy": "$https_proxy",
     "no-proxy": "localhost,127.0.0.1,localaddress,.localdomain.com"
   }
 }
