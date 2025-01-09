@@ -25,6 +25,7 @@ firefoxPolicyDIR=/etc/firefox/policies
 sudo mkdir -pv $firefoxPolicyDIR
 sudo ln -vsf /usr/local/share/ca-certificates /etc/firefox/policies/certificates
 sudo touch /etc/firefox/policies/policies.json
+# Voir https://stackoverflow.com/q/76039855/5649639
 printf '{
   "policies": {
     "Certificates": {
