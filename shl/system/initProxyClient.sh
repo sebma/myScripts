@@ -49,6 +49,11 @@ if which docker &>/dev/null;then
 	jq -n --arg http_proxy "$http_proxy" --arg https_proxy "$https_proxy" --arg no_proxy "$no_proxy" '.proxies = { "http-proxy":$http_proxy , "https-proxy":$https_proxy , "no-proxy":$no_proxy }' | sudo tee /etc/docker/daemon.json
 fi
 
+if which npm &>/dev/null;then
+	npm config set proxy $http_proxy
+	npm config set proxy https-proxy $https_proxy
+fi
+
 if which cpan &>/dev/null;then
 #	printf "o conf http_proxy $http_proxy\no conf commit" | cpan
 	:
