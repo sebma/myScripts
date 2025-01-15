@@ -13,9 +13,8 @@ fi
 function systemType {
 	local ps=unset
 	ps --help 2>&1 | $grep -q "error while loading shared libraries" && ps="busybox ps" || ps="command ps"
- 	local initName=$($ps -p 1 -o comm=)
-	if [ -n "$initName" ];then
-		initPath=$(type -P $initName) #Needed for gentoo and maybe others
+ 	local initPath=$($ps -p 1 -o command= | $cut -d" " -f1)
+	if [ -n "$initPath" ];then
 		$strings $initPath | $egrep -o "upstart|sysvinit|systemd|launchd" | $head -1
 	else
 		echo unknown
