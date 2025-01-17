@@ -33,8 +33,8 @@ if $isDebianLike;then
 fi
 
 if which snap &>/dev/null;then
-	$sudo snap get system proxy.http  2>/dev/null | grep proxy.http -q  || $sudo snap set system proxy.http=$http_proxy
-	$sudo snap get system proxy.https 2>/dev/null | grep proxy.https -q || $sudo snap set system proxy.https=$https_proxy
+	$sudo snap get system proxy.http  2>/dev/null | grep proxy.http -q  || time $sudo snap set system proxy.http=$http_proxy
+	$sudo snap get system proxy.https 2>/dev/null | grep proxy.https -q || time $sudo snap set system proxy.https=$https_proxy
 	$sudo snap get system proxy
 	snap debug connectivity
 fi
@@ -46,8 +46,14 @@ if which git &>/dev/null;then
 fi
 
 if which docker &>/dev/null;then
-	jq -n --arg http_proxy "$http_proxy" --arg https_proxy "$https_proxy" --arg no_proxy "$no_proxy" '.proxies = { "http-proxy":$http_proxy , "https-proxy":$https_proxy , "no-proxy":$no_proxy }' | sudo tee /etc/docker/daemon.json
- 	which yq &>/dev/null && sudo yq -i '. + { "proxies": { "http-proxy": env(http_proxy), "https-proxy": env(https_proxy), "no-proxy": env(no_proxy) } }' /etc/docker/daemon.json
+	if ! which yq &>/dev/null;then
+		: 
+		 # $sudo dra install yq --classic # https://stackoverflow.com/a/78680139/5649639 : le snap de yq est cloisone
+	fi
+#	jq -n --arg http_proxy "$http_proxy" --arg https_proxy "$https_proxy" --arg no_proxy "$no_proxy" '.proxies = { "http-proxy":$http_proxy , "https-proxy":$https_proxy , "no-proxy":$no_proxy }' | sudo tee /etc/docker/daemon.json
+	if which yq &>/dev/null;then
+	$sudo yq -i '. + { "proxies": { "http-proxy": env(http_proxy), "https-proxy": env(https_proxy), "no-proxy": env(no_proxy) } }' /etc/docker/daemon.json
+	$sudo yq -i '. + { "proxies": { "default": { "httpProxy": env(http_proxy), "httpsProxy": env(https_proxy), "noProxy": env(no_proxy) } } }' /root/.docker/config.json
 fi
 
 if which npm &>/dev/null;then
