@@ -23,13 +23,17 @@ domainUppercase=${domain^^}
 
 if $isDebianLike;then
 	test $(id -u) == 0 && sudo="" || sudo=sudo
-	grep ^Acquire.*$http_proxy /etc/apt/apt.conf.d/*proxy -q 2>/dev/null  || echo "Acquire::http::proxy  \"$http_proxy\";"  | $sudo tee /etc/apt/apt.conf.d/00aptproxy
-	grep ^Acquire.*$https_proxy /etc/apt/apt.conf.d/*proxy -q 2>/dev/null || echo "Acquire::https::proxy \"$https_proxy\";" | $sudo tee -a /etc/apt/apt.conf.d/00aptproxy
+	grep ^Acquire.*$http_proxy /etc/apt/apt.conf.d/*proxy* -q 2>/dev/null  || echo "Acquire::http::proxy  \"$http_proxy\";"  | $sudo tee /etc/apt/apt.conf.d/00aptproxy
+	grep ^Acquire.*$https_proxy /etc/apt/apt.conf.d/*proxy* -q 2>/dev/null || echo "Acquire::https::proxy \"$https_proxy\";" | $sudo tee -a /etc/apt/apt.conf.d/00aptproxy
+elif $isRedHatLike;then
+	egrep "proxy\s*=\s*[0-9.]+" /etc/yum.conf || echo "proxy = $https_proxy" | $sudo tee -a /etc/yum.conf
+fi
 
+if test -f /etc/sudoers;then
 	# Propagation des variables "http_proxy" et "https_proxy" aux "sudoers"
 	$sudo grep '^\s*Defaults:%sudo env_keep.*https_proxy' /etc/sudoers /etc/sudoers.d/* 2>/dev/null -q || echo 'Defaults:%sudo env_keep += "http_proxy https_proxy ftp_proxy all_proxy no_proxy"' | $sudo tee -a /etc/sudoers.d/proxy_env
 	$sudo grep "^\s*Defaults:%$adminGroup env_keep.*https_proxy" /etc/sudoers /etc/sudoers.d/* 2>/dev/null -q || echo "Defaults:%$adminGroup@$domainLowercase env_keep += \"http_proxy https_proxy ftp_proxy all_proxy no_proxy\"" | $sudo tee -a /etc/sudoers.d/proxy_env
-	test -s /etc/sudoers.d/proxy_env  && sudo chmod 440 /etc/sudoers.d/proxy_env
+	test -s /etc/sudoers.d/proxy_env && sudo chmod 440 /etc/sudoers.d/proxy_env
 fi
 
 if which snap &>/dev/null;then
@@ -54,7 +58,7 @@ if which docker &>/dev/null;then
 	if which yq &>/dev/null;then
 		$sudo yq -i '. + { "proxies": { "http-proxy": env(http_proxy), "https-proxy": env(https_proxy), "no-proxy": env(no_proxy) } }' /etc/docker/daemon.json
 		$sudo yq -i '. + { "proxies": { "default": { "httpProxy": env(http_proxy), "httpsProxy": env(https_proxy), "noProxy": env(no_proxy) } } }' /root/.docker/config.json
-  	fi
+	fi
 fi
 
 if which npm &>/dev/null;then
