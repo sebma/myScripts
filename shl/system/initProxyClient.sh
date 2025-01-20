@@ -49,6 +49,7 @@ fi
 if which npm &>/dev/null;then
 	npm config set proxy $http_proxy
 	npm config set https-proxy $https_proxy
+	npm config get proxy https-proxy
 fi
 
 if which cpan &>/dev/null;then
