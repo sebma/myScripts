@@ -69,7 +69,4 @@ if which docker &>/dev/null;then
 	fi
 fi
 
-echo "=> MAJ des depots ..."
-sudo apt-get update >/dev/null
-
 exit
