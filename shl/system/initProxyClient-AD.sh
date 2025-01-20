@@ -49,6 +49,16 @@ if which git &>/dev/null;then
 	git config --global -l | egrep https?.proxy
 fi
 
+if which npm &>/dev/null;then
+	npm config set proxy $http_proxy
+	npm config set https-proxy $https_proxy
+fi
+
+if which cpan &>/dev/null;then
+#	printf "o conf http_proxy $http_proxy\no conf commit" | cpan
+	:
+fi
+
 if which docker &>/dev/null;then
 	if ! which yq &>/dev/null;then
 		: 
@@ -59,16 +69,6 @@ if which docker &>/dev/null;then
 		$sudo yq -i '. + { "proxies": { "http-proxy": env(http_proxy), "https-proxy": env(https_proxy), "no-proxy": env(no_proxy) } }' /etc/docker/daemon.json
 		$sudo yq -i '. + { "proxies": { "default": { "httpProxy": env(http_proxy), "httpsProxy": env(https_proxy), "noProxy": env(no_proxy) } } }' /root/.docker/config.json
 	fi
-fi
-
-if which npm &>/dev/null;then
-	npm config set proxy $http_proxy
-	npm config set https-proxy $https_proxy
-fi
-
-if which cpan &>/dev/null;then
-#	printf "o conf http_proxy $http_proxy\no conf commit" | cpan
-	:
 fi
 
 echo "=> MAJ des depots ..."
