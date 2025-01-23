@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-declare {isDebian,isRedHat}Like=false
+declare {isDebian,isRedHat,isAlpine}Like=false
 scriptBaseName=${0/*\//}
 
 distribID=$(source /etc/os-release;echo $ID)
@@ -8,6 +8,8 @@ if   echo $distribID | egrep "centos|rhel|fedora" -q;then
 	isRedHatLike=true
 elif echo $distribID | egrep "debian|ubuntu" -q;then
 	isDebianLike=true
+elif echo $distribID | egrep "alpine" -q;then
+	isAlpineLike=true
 fi
 
 if [ $# != 1 ];then
@@ -22,17 +24,19 @@ domainLowercase=${domain,,}
 domainUppercase=${domain^^}
 
 if $isDebianLike;then
-	test $(id -u) == 0 && sudo="" || sudo=sudo
+	test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 	grep ^Acquire.*$http_proxy /etc/apt/apt.conf.d/*proxy* -q 2>/dev/null  || echo "Acquire::http::proxy  \"$http_proxy\";"  | $sudo tee /etc/apt/apt.conf.d/00aptproxy
 	grep ^Acquire.*$https_proxy /etc/apt/apt.conf.d/*proxy* -q 2>/dev/null || echo "Acquire::https::proxy \"$https_proxy\";" | $sudo tee -a /etc/apt/apt.conf.d/00aptproxy
 elif $isRedHatLike;then
 	egrep "proxy\s*=\s*[0-9.]+" /etc/yum.conf || echo "proxy = $https_proxy" | $sudo tee -a /etc/yum.conf
+elif $isAlpineLike;then
+	: # apk utilise la variable "https_proxy"
 fi
 
 if test -f /etc/sudoers;then
 	# Propagation des variables "http_proxy" et "https_proxy" aux "sudoers"
-	$sudo grep '^\s*Defaults:%sudo env_keep.*https_proxy' /etc/sudoers /etc/sudoers.d/* 2>/dev/null -q || echo 'Defaults:%sudo env_keep += "http_proxy https_proxy ftp_proxy all_proxy no_proxy"' | $sudo tee -a /etc/sudoers.d/proxy_env
-	$sudo grep "^\s*Defaults:%$adminGroup env_keep.*https_proxy" /etc/sudoers /etc/sudoers.d/* 2>/dev/null -q || echo "Defaults:%$adminGroup@$domainLowercase env_keep += \"http_proxy https_proxy ftp_proxy all_proxy no_proxy\"" | $sudo tee -a /etc/sudoers.d/proxy_env
+	$sudo grep '^\s*Defaults:%sudo env_keep.*https_proxy' /etc/sudoers /etc/sudoers.d/* 2>/dev/null -q || echo 'Defaults:%sudo env_keep += "http_proxy https_proxy ftp_proxy all_proxy no_proxy HTTP_PROXY HTTPS_PROXY FTP_PROXY ALL_PROXY NO_PROXY"' | $sudo tee -a /etc/sudoers.d/proxy_env
+	$sudo grep "^\s*Defaults:%$adminGroup env_keep.*https_proxy" /etc/sudoers /etc/sudoers.d/* 2>/dev/null -q || echo "Defaults:%$adminGroup@$domainLowercase env_keep += \"http_proxy https_proxy ftp_proxy all_proxy no_proxy HTTP_PROXY HTTPS_PROXY FTP_PROXY ALL_PROXY NO_PROXY\"" | $sudo tee -a /etc/sudoers.d/proxy_env
 	test -s /etc/sudoers.d/proxy_env && sudo chmod 440 /etc/sudoers.d/proxy_env
 fi
 
@@ -71,5 +75,8 @@ if which docker &>/dev/null;then
 		$sudo yq -i '. + { "proxies": { "default": { "httpProxy": env(http_proxy), "httpsProxy": env(https_proxy), "noProxy": env(no_proxy) } } }' /root/.docker/config.json
 	fi
 fi
+
+echo "=> MAJ des depots ..."
+sudo apt-get update >/dev/null
 
 exit
