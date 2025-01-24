@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 
-declare {isDebian,isRedHat,isAlpine}Like=false
 scriptBaseName=${0/*\//}
+if [ $# != 1 ];then
+	echo "=> Usage $scriptBaseName variablesDefinitionFile" >&2
+	exit 1
+fi
+test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
+declare {isDebian,isRedHat,isAlpine}Like=false
 distribID=$(source /etc/os-release;echo $ID)
 if   echo $distribID | egrep "centos|rhel|fedora" -q;then
 	isRedHatLike=true
@@ -12,11 +17,6 @@ elif echo $distribID | egrep "alpine" -q;then
 	isAlpineLike=true
 fi
 
-if [ $# != 1 ];then
-	echo "=> Usage $scriptBaseName variablesDefinitionFile" >&2
-	exit 1
-fi
-
 variablesDefinitionFile="$1"
 source "$variablesDefinitionFile" || exit
 
@@ -24,7 +24,6 @@ domainLowercase=${domain,,}
 domainUppercase=${domain^^}
 
 if $isDebianLike;then
-	test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 	grep ^Acquire.*$http_proxy /etc/apt/apt.conf.d/*proxy* -q 2>/dev/null  || echo "Acquire::http::proxy  \"$http_proxy\";"  | $sudo tee /etc/apt/apt.conf.d/00aptproxy
 	grep ^Acquire.*$https_proxy /etc/apt/apt.conf.d/*proxy* -q 2>/dev/null || echo "Acquire::https::proxy \"$https_proxy\";" | $sudo tee -a /etc/apt/apt.conf.d/00aptproxy
 elif $isRedHatLike;then
