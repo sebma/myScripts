@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 
-declare {isDebian,isRedHat,isAlpine}Like=false
 scriptBaseName=${0/*\//}
+if [ $# != 0 ];then
+	echo "=> Usage $scriptBaseName" >&2
+	exit 1
+fi
+test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
+declare {isDebian,isRedHat,isAlpine}Like=false
 distribID=$(source /etc/os-release;echo $ID)
 if   echo $distribID | egrep "centos|rhel|fedora" -q;then
 	isRedHatLike=true
@@ -12,16 +17,10 @@ elif echo $distribID | egrep "alpine" -q;then
 	isAlpineLike=true
 fi
 
-if [ $# != 0 ];then
-	echo "=> Usage $scriptBaseName" >&2
-	exit 1
-fi
-
 test -z $http_proxy  && echo "=> [$scriptBaseName] ERROR : http_proxy is not defined." >&2 && exit 2
 test -z $https_proxy && echo "=> [$scriptBaseName] ERROR : https_proxy is not defined." >&2 && exit 3
 test -z $no_proxy    && echo "=> [$scriptBaseName] ERROR : no_proxy is not defined." >&2 && exit 4
 
-test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 if $isDebianLike;then
 	grep ^Acquire.*$http_proxy  /etc/apt/apt.conf.d/*proxy* -q 2>/dev/null || echo "Acquire::http::proxy  \"$http_proxy\";"  | $sudo tee /etc/apt/apt.conf.d/00aptproxy
 	grep ^Acquire.*$https_proxy /etc/apt/apt.conf.d/*proxy* -q 2>/dev/null || echo "Acquire::https::proxy \"$https_proxy\";" | $sudo tee -a /etc/apt/apt.conf.d/00aptproxy
