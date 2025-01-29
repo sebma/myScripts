@@ -27,4 +27,4 @@ connect2SSID () {
     set +x
 }
 
-connect2SSID "$1"
+connect2SSID "$@"
