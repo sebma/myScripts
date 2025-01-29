@@ -10,4 +10,4 @@ string2qrcode_with_zint ()
 	fi
 }
 
-string2qrcode_with_zint "$1"
+string2qrcode_with_zint "$@"
