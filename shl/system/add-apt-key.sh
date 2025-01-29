@@ -20,4 +20,5 @@ fi
 for fingerPrint
 do
 	$sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $fingerPrint
+	$sudo gpg --no-default-keyring --keyring /etc/apt/trusted.gpg.d/$gpgFileName  --keyserver keyserver.ubuntu.com --recv-keys $fingerPrint
 done
