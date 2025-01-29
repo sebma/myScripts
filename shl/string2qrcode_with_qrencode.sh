@@ -9,4 +9,4 @@ string2qrcode_with_qrencode ()
 	fi
 }
 
-string2qrcode_with_qrencode "$1"
+string2qrcode_with_qrencode "$@"
