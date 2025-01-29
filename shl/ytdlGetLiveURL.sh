@@ -9,4 +9,4 @@ function ytdlGetLiveURL {
 	echo "$url"
 }
 
-ytdlGetLiveURL "$1"
+ytdlGetLiveURL "$@"
