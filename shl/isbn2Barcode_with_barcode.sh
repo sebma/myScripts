@@ -14,4 +14,4 @@ ISBN2Barcode_with_barcode ()
 	fi
 }
 
-ISBN2Barcode_with_barcode "$1"
+ISBN2Barcode_with_barcode "$@"
