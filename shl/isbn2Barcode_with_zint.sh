@@ -9,4 +9,4 @@ ISBN2Barcode_with_zint ()
 	fi
 }
 
-ISBN2Barcode_with_zint "$1"
+ISBN2Barcode_with_zint "$@"
