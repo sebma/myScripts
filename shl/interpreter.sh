@@ -1,13 +1,9 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env sh
 
 get_interpreter() {
-	if which ps >/dev/null 2>&1;then
- 		interpreter=$(ps -o args= $$ | awk '{print sub("^/.*/","");print}')
-   	else
-    		interpreter=$(readlink -e /proc/$$/exe)
-		interpreter=$(basename $interpreter)
-    	fi
-	echo $interpreter  
+	interpreter=$(readlink /proc/$$/exe)
+	interpreter=$(basename $interpreter)
+	echo $interpreter
 }
 
 interpreter=$(get_interpreter)
