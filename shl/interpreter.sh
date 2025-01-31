@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 get_interpreter() {
-	interpreter=$(readlink /proc/$$/exe)
+	interpreter=$(readlink -f /proc/$$/exe)
 	interpreter=$(basename $interpreter)
 	echo $interpreter
 }
