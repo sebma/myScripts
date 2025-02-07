@@ -7,6 +7,7 @@ case $architecture in
 	*) echo "=> Unsupported architecture.";exit;;
 esac
 
+#scriptDirName=${0%/*}
 scriptDir=$(dirname $0)
 scriptDir=$(cd $scriptDir;pwd)
 scriptBaseName=${0##*/}
