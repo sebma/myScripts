@@ -68,7 +68,7 @@ os() {
 				( . /etc/os-release && echo $PRETTY_NAME )
 			else
 				if type -P lsb_release > /dev/null 2>&1; then
-					\lsb_release -scd | paste -sd" "
+					\lsb_release -scd | paste -sd" " -
 					echo
 				else
 					\sed -n 's/\\[nl]//g;1p' /etc/issue
