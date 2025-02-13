@@ -3,6 +3,8 @@ set -u
 declare {isDebian,isRedHat}Like=false
 
 distribID=$(source /etc/os-release;echo $ID)
+PRETTY_NAME=""
+PRETTY_NAME=$(source /etc/os-release;echo $PRETTY_NAME)
 if   echo $distribID | egrep "centos|rhel|fedora" -q;then
 	sudo=""
 	isRedHatLike=true
@@ -29,7 +31,9 @@ if $isDebianLike;then
 		if apt-cache policy $firstPackage | grep $ppaWithoutPrefix -q;then
 			$sudo apt install -V ${packageList[@]}
 		else
+			echo "=> No $firstPackage for $PRETTY_NAME, removing $ppa repository ..."
 			yes | $sudo add-apt-repository $ppa -r
 		fi
+		echo "=> Done."
 	fi
 fi
