@@ -28,10 +28,12 @@ if $isDebianLike;then
 		firstPackage="${packageList[0]}"
 		yes | $sudo add-apt-repository $ppa
 		apt-cache policy $firstPackage | grep $ppaWithoutPrefix -q || $sudo apt update
+		echo
 		if apt-cache policy $firstPackage | grep $ppaWithoutPrefix -q;then
 			$sudo apt install -V ${packageList[@]}
 		else
 			echo "=> No $firstPackage for $PRETTY_NAME, removing $ppa repository ..."
+			echo
 			yes | $sudo add-apt-repository $ppa -r
 		fi
 		echo "=> Done."
