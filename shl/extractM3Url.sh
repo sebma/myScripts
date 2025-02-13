@@ -1,4 +1,4 @@
-#!/usr/bin/env ksh
+#!/usr/bin/env bash
 
 mediaStreamFormats="\\.(m3u|m3u8)"
 baseUrl="$1"
