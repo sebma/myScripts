@@ -3,6 +3,7 @@ set -u
 declare {isDebian,isRedHat}Like=false
 
 distribID=$(source /etc/os-release;echo $ID)
+PRETTY_NAME=""
 PRETTY_NAME=$(source /etc/os-release;echo $PRETTY_NAME)
 if   echo $distribID | egrep "centos|rhel|fedora" -q;then
 	sudo=""
