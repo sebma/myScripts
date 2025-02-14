@@ -159,7 +159,7 @@ elif $isDebianLike;then
 		Acquire::http::proxy "$http_proxy";
 		#Acquire::https::proxy "$https_proxy";
 EOF
-	if : < /dev/tcp/$proxyIP/http;then
+	if < /dev/tcp/$proxyIP/http;then
 		$sudo $apt update
 		$sudo $apt upgrade -y $aptSimul
 		if grep -i virtual /sys/class/dmi/id/product_name -q;then
