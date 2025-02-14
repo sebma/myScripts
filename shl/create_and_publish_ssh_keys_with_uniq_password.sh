@@ -242,7 +242,7 @@ EOF
 	for remoteServer
 	do
 		echo "=> Testing the ssh route to <$remoteServer> ..."
-		if $(which bash) -c ": < /dev/tcp/$remoteServer/ssh"
+		if $(which bash) -c "< /dev/tcp/$remoteServer/ssh"
 		then
 			echo "=> Checking your remote public key on <$remoteServer> ..."
 			sshpass -f $tmpFile ssh -q $remoteServer "$(<$scriptToRunRemotely)"
