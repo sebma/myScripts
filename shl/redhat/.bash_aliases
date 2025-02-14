@@ -28,7 +28,7 @@ alias lastfiles="\find . -type f -cmin -5 -ls"
 type vim >/dev/null 2>&1 && alias view="vim -R"
 alias dig="\dig +search +short"
 #alias ssh="$(which ssh) -qAY"
-ssh () { $(which bash) -c ": < /dev/tcp/$1/ssh" && $(which ssh) -qAY $@; }
+ssh () { $(which bash) -c "< /dev/tcp/$1/ssh" && $(which ssh) -qAY $@; }
 
 isLinux=$(uname -s | grep -q Linux && echo true || echo false)
 if $isLinux
@@ -197,7 +197,7 @@ stelnet() {
 #  codeRet=$?
 #  echo "$message" | \egrep --color "CONNECTED|refused|connect:"
 
-	$(which bash) -c ": < /dev/tcp/$1/$2" && echo "=> The route to <$1:$2/tcp> is OK."
+	$(which bash) -c "< /dev/tcp/$1/$2" && echo "=> The route to <$1:$2/tcp> is OK."
 
   return $codeRet
 }
