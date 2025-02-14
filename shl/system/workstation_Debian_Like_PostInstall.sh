@@ -54,7 +54,7 @@ if $isDebianLike;then
 
 	hostnamectl status
 
-	if : < /dev/tcp/$proxyIP/http;then
+	if < /dev/tcp/$proxyIP/http;then
 		# CONFIG PROXY
   		egrep http_proxy= $HOME/.profile -q  || echo -e "\nexport http_proxy=$http_proxy"   >> $HOME/.profile
   		egrep https_proxy= $HOME/.profile -q || echo -e "\nexport https_proxy=$https_proxy" >> $HOME/.profile
