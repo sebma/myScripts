@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 
-#HOSTNAME=$(hostname) $(which mpv) "$@"
-HOSTNAME=$HOSTNAME $(which mpv) "$@"
+mpv=$(which mpv)
+#HOSTNAME=$(hostname) nohup $mpv "$@" &
+HOSTNAME=$HOSTNAME nohup $mpv "$@" &
