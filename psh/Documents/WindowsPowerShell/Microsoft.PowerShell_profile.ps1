@@ -519,7 +519,7 @@ function Prompt {
 	Write-Host "$osFamily $OSVersion " -NoNewline -ForegroundColor Green
 	Write-Host "PSv$PSHVersion " -NoNewline
 	Write-Host "$myCWD" -ForegroundColor Green
-	if( $isAdmin) { return "# " } else { return "> " }
+	if( $isAdmin) { return "# " } else { return "$ " }
 }
 
 function gitUpdate {
