@@ -509,8 +509,8 @@ function macAddr {
 }
 
 function Prompt {
-	$mywd = $PWD.path
-	$mywd = $mywd.Replace( $HOME, '~' )
+	$myCWD = $PWD.path
+	$myCWD = $myCWD.Replace( $HOME, '~' )
 #	$PSHVersion = $PSVersionTable.PSVersion.ToString()
 	$PSHVersion = ""+$PSVersionTable.PSVersion.Major + "." + $PSVersionTable.PSVersion.Minor
 	if( $isAdmin) { Write-Host "$username : " -NoNewline -ForegroundColor Red } else { Write-Host "$username : " -NoNewline }
@@ -518,7 +518,7 @@ function Prompt {
 	Write-Host "@ $domain / " -NoNewline -ForegroundColor Red
 	Write-Host "$osFamily $OSVersion " -NoNewline -ForegroundColor Green
 	Write-Host "PSv$PSHVersion " -NoNewline
-	Write-Host "$mywd" -ForegroundColor Green
+	Write-Host "$myCWD" -ForegroundColor Green
 	if( $isAdmin) { return "# " } else { return "> " }
 }
 
