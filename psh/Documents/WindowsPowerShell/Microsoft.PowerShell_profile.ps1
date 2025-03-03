@@ -344,7 +344,7 @@ if( $IsWindows ) {
 	function dirname($path) { Split-Path -Path $path }
 	function getInterFaceInfos($name) { Get-NetIPAddress -InterfaceAlias $name }
 #	function grepps($pattern) { Out-String -Stream | sls "$pattern" }
-	function host($name, $server) { (nslookup $name $server 2>$null | sls Nom,Name,Address)[-2..-1] | Out-String -stream | foreach { $_.split(' ')[-1] } }
+	function host1($name, $server) { (nslookup $name $server 2>$null | sls Nom,Name,Address)[-2..-1] | Out-String -stream | foreach { $_.split(' ')[-1] } }
 	function lock { rundll32.exe user32.dll,LockWorkStation }
 	function logoff { shutdown -l }
 #	function loopCommandThroughArgs($command) { $argc=$args.Count;for($i=0;$i -lt $argc;$i++) { $command $($args[$i]) } }
@@ -362,6 +362,45 @@ if( $IsWindows ) {
 			for($i=0;$i -lt $argc;$i++) {
 				echo "=> Memberships of $($args[$i]) :"
 				( ( Get-ADUser -Identity $($args[$i]) -Properties MemberOf ).memberof | Get-ADGroup ).name | sort
+			}
+		}
+	}
+	function host($name, $server, $type) {
+		$FUNCNAME = $MyInvocation.MyCommand.Name
+		$argc = $PSBoundParameters.Count
+		if ( $argc -lt 1 ) {
+			"=> Usage : $FUNCNAME `$name [`$server] [`$type=A]"
+		} else {
+			$ipv4RegExp = '\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}'
+			if( $name -match $ipv4RegExp ) {
+				$ip = $name -Replace('https?://|s?ftps?://','') -Replace('/.*$','')
+				#echo "=> $ip :"
+				if ( $argc -eq 1 ) {
+					(Resolve-DnsName $ip).NameHost
+				} elseif ( $argc -eq 2 ) {
+					(Resolve-DnsName -name $ip -server $server).NameHost
+				} else {
+					Write-Warning "=> Not supported for the moment."
+				}
+			}
+			else {
+				$fqdn = $name -Replace('https?://|s?ftps?://','') -Replace('/.*$','')
+				#echo "=> $name :"
+				if ( $argc -eq 1 ) {
+					(Resolve-DnsName $fqdn).IP4Address
+				} elseif ( $argc -eq 2 ) {
+					(Resolve-DnsName -name $fqdn -server $server).IP4Address
+				} elseif ( $argc -eq 3 ) {
+					if ( $type -eq "-4" ) {
+						$type = "A"
+						(Resolve-DnsName -type $type -name $fqdn -server $server).IP4Address
+					} elseif ( $type -eq "-6" ) {
+						$type = "AAAA"
+						(Resolve-DnsName -type $type -name $fqdn -server $server).IP6Address
+					}
+				} else {
+					Write-Warning "=> Not supported for the moment."
+				}
 			}
 		}
 	}
