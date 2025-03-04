@@ -373,7 +373,7 @@ if( $IsWindows ) {
 		} else {
 			$ipv4RegExp = '\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}'
 			if( $name -match $ipv4RegExp ) {
-				$ip = $name -Replace('https?://|s?ftps?://','') -Replace('/.*$','')
+				$ip = $name -Replace('https?://|s?ftps?://','') -Replace('(/|:\d+).*$','')
 				#echo "=> $ip :"
 				if ( $argc -eq 1 ) {
 					(Resolve-DnsName $ip).NameHost
@@ -384,7 +384,7 @@ if( $IsWindows ) {
 				}
 			}
 			else {
-				$fqdn = $name -Replace('https?://|s?ftps?://','') -Replace('/.*$','')
+				$fqdn = $name -Replace('https?://|s?ftps?://','') -Replace('(/|:\d+).*$','')
 				#echo "=> $name :"
 				if ( $argc -eq 1 ) {
 					(Resolve-DnsName $fqdn).IP4Address
