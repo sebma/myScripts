@@ -52,50 +52,54 @@ getRestrictedFilenamesFORMAT () {
 
 	set_colors 2>/dev/null
 
-	local ytdlExtraOptions=()
-	local ytdlInitialOptions=()
-	local audioOnly=false
-	local translate=cat
-	local siteVideoFormat downloadOK=-1 extension fqdn fileSizeOnFS=0 remoteFileSize=0
-	local protocolForDownload=null
-	local -i i=0
-	local -i j=0
 	local acodec=null
-	local isLIVE=false
-	local jsonResults=null
+	local artworkFileName=null
+	local audioOnly=false
 	local channel_id=null
 	local channel_url=null
+	local debug=""
+	local domainStringForFilename=null
+	local downloadOK=-1
+	local downloader=yt-dlp
 	local embedThumbnail="--write-thumbnail"
-	local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__%(extractor)s.%(ext)s"
-	local thumbnailerName=$(basename $(type -P AtomicParsley 2>/dev/null || type -P ffmpeg 2>/dev/null))
-	local thumbnailerExecutable="command $thumbnailerName 2>/dev/null"
+	local errorLogFile=null
+	local extension
 	local ffmpegErrorLogLevel=repeat+error
-	local ffmpegWarningLogLevel=repeat+warning
 	local ffmpegInfoLogLevel=repeat+info
 	local ffmpegLogLevel=$ffmpegErrorLogLevel
-	local timestampFileRef=null
-	local domainStringForFilename=null
-	local fqdn=null domain=null sld=null
-	local errorLogFile=null
-	local scriptOptions=null
-	local initialSiteVideoFormat=null
-	local metadataURLFieldName=description
-	local numberOfURLsToDownload=null
+	local ffmpegWarningLogLevel=repeat+warning
+	local fileSizeOnFS=0
 	local formats=null
 	local formatsIDs=null
-	local thumbnailExtension=null
-	local artworkFileName=null
-	local userAgent=null
-	local tool=null
-	local verboseLevel=0
-	local debug=""
-	local undebug="set +x"
-	local downloader=yt-dlp
-	local timeout=180m
-	local playlistFileName=""
 	local formatsNumber=-1
-
-	startTime="$(LC_MESSAGES=en date)"
+	local fqdn
+	local fqdn=null domain=null sld=null
+	local i=0
+	local initialSiteVideoFormat=null
+	local isLIVE=false
+	local j=0
+	local jsonResults=null
+	local metadataURLFieldName=description
+	local numberOfURLsToDownload=null
+	local playlistFileName=""
+	local protocolForDownload=null
+	local remoteFileSize=0
+	local scriptOptions=null
+	local siteVideoFormat
+	local startTime="$(LC_MESSAGES=en date)"
+	local thumbnailExtension=null
+	local thumbnailerName=$(basename $(type -P AtomicParsley 2>/dev/null || type -P ffmpeg 2>/dev/null))
+	local thumbnailerExecutable="command $thumbnailerName 2>/dev/null"
+	local timeout=180m
+	local timestampFileRef=null
+	local tool=null
+	local translate=cat
+	local undebug="set +x"
+	local userAgent=null
+	local verboseLevel=0
+	local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__%(extractor)s.%(ext)s"
+	local ytdlExtraOptions=()
+	local ytdlInitialOptions=()
 
 #	local youtube_dl="eval LANG=C.UTF-8 command youtube-dl" # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
 	function videoDownloader {
