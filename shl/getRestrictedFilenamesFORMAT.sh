@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-#set -o nounset
+set -o nounset
+
 [ $BASH_VERSINFO -lt 4 ] && echo "=> [WARNING] BASH_VERSINFO = $BASH_VERSINFO then continuing in bash4 ..." && exec bash4 $0 "$@"
 
 set_colors() {
@@ -91,6 +92,8 @@ getRestrictedFilenamesFORMAT () {
 	local undebug="set +x"
 	local downloader=yt-dlp
 	local timeout=180m
+	local playlistFileName=""
+	local formatsNumber=-1
 
 	startTime="$(LC_MESSAGES=en date)"
 
@@ -200,7 +203,6 @@ getRestrictedFilenamesFORMAT () {
 					;;
 				-x|--xtrace) shift
 					debug="set -x"
-					undebug=""
 					;;
 				-y|--overwrite) shift
 					overwrite=true
@@ -246,22 +248,23 @@ getRestrictedFilenamesFORMAT () {
 #			facebook) siteVideoFormat=$(echo $initialSiteVideoFormat+m4a | \sed -E "s/^(\(?)\w+/\1bestvideo/g") ;;
 			*) siteVideoFormat=$initialSiteVideoFormat ;;
 		esac
-		formats=( $(echo $siteVideoFormat | \sed "s/,/ /g") )
 
 		errorLogFile="${downloader}_errors_$$.log"
 		youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__$domainStringForFilename.%(ext)s"
 		jsonResults=null
 		ytdlExtraOptions=( "${ytdlInitialOptions[@]}" )
 		[ $downloader = yt-dlp ] && ytdlExtraOptions+=( --embed-metadata --format-sort +proto )
-
-		printf "=> Fetching the generated destination filename(s) for \"$url\" with ${effects[bold]}${colors[blue]}$downloader$normal at %s ...\n" "$(LC_MESSAGES=en date)"
-		jsonResults=$(time videoDownloader --ignore-config --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
 		# ytdlExtraOptions+= ( --exec 'basename %(filepath)s .%(ext)s' --write-info-json )
-		# jsonFileList=$(egrep -v "^(Deleting |\[)|\[download\]" ytdlpOutput.txt | sed -z "s/\n/.info.json /g")
+
+		printf "=> Fetching the formatsIDs list for \"$url\" for $siteVideoFormat format with ${effects[bold]}${colors[blue]}$downloader$normal at %s ...\n" "$(LC_MESSAGES=en date)"
+		jsonResults=$(time videoDownloader --ignore-config --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
 		formatsIDs=( $(echo "$jsonResults" | $jq -r .format_id | awk '!seen[$0]++') ) # Remove duplicate lines i.e: https://stackoverflow.com/a/1444448/5649639
+		formatsNumber=${#formatsIDs[@]}
 		echo
 
-		$grepColor -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && echo >&2 && continue || \rm $errorLogFile
+		[ "$verboseLevel" = 1 ] && echo "=> \$formatsNumber = $formatsNumber"
+		[ $formatsNumber = 0 ] && echo "=> ERROR : No format IDs found for $siteVideoFormat" >&2 && exit 1
+		[ "$verboseLevel" = 1 ] && echo "=> \${formatsIDs[@]} = ${formatsIDs[@]}"
 
 		test -n "$playlistFileName" && echo '#EXTM3U' > "$playlistFileName"
 
@@ -269,7 +272,6 @@ getRestrictedFilenamesFORMAT () {
 		do
 			let j++
 			let numberOfFilesToDownload=$numberOfURLsToDownload*${#formatsIDs[@]}
-#			$undebug
 
 			videoFormatID=${formatID/+*/}
 
@@ -287,9 +289,9 @@ getRestrictedFilenamesFORMAT () {
 			acodec=$(echo $acodec | cut -d. -f1)
 			protocolForDownload=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$videoFormatID\")).protocol")
 
-			$debug
+#			$debug
 			remoteFileSize=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize" | sed "s/null/-1/")
-			set +x
+			$undebug
 			if [ $remoteFileSize != -1 ]; then
 				remoteFileSizeMiB=$(echo $remoteFileSize | awk \$1/=2^20)
 			else
