@@ -122,6 +122,11 @@ setVariables
 
 if( $IsWindows ) {
 	Set-PSReadlineKeyHandler -Key ctrl+d -Function DeleteCharOrExit
+	if ( $(alias history *>$null;$?) ) { del alias:history }
+	function history($regExp) {
+		if( $regExp.Length -eq 0 ) { $regExp="." }
+		Get-Content (Get-PSReadlineOption).HistorySavePath | ? { $_ -match "$regExp" }
+	}
 
 	function sdiff {
 		$argc=$args.Count
