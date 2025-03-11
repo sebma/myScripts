@@ -2,6 +2,7 @@
 
 function videoRemoveMetaData {
 	local extension outputVideo
+	local ffmpeg="command ffmpeg -hide_banner -probesize 400M -analyzeduration 400M"
 	for video
 	do
 		extension="${video/*./}"
