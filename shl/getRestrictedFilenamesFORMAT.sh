@@ -260,7 +260,9 @@ getRestrictedFilenamesFORMAT () {
 		[ $downloader = yt-dlp ] && ytdlExtraOptions+=( --embed-metadata --format-sort +proto )
 		# ytdlExtraOptions+= ( --exec 'basename %(filepath)s .%(ext)s' --write-info-json )
 
+		$debug
 		printf "=> Fetching the formatsIDs list for \"$url\" for $siteVideoFormat format with ${effects[bold]}${colors[blue]}$downloader$normal at %s ...\n" "$(LC_MESSAGES=en date)"
+		$undebug
 		jsonResults=$(time videoDownloader --ignore-config --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
 		formatsIDs=( $(echo "$jsonResults" | $jq -r .format_id | awk '!seen[$0]++') ) # Remove duplicate lines i.e: https://stackoverflow.com/a/1444448/5649639
 		formatsNumber=${#formatsIDs[@]}
@@ -321,8 +323,7 @@ getRestrictedFilenamesFORMAT () {
 
 			if [ -z "$acodec" ] || [ $acodec = null ];then
 				# Preparing the User Agent for ffprobe
-#				type -P chromium-browser>/dev/null 2>&1 && chromeVersion=$(chromium-browser --version 2>/dev/null | awk '{printf$2}') || chromeVersion="73.0.3671.2"
-				test -z "$chromeVersion" && chromeVersion="85.0.4183.83"
+				type -P chromium-browser>/dev/null 2>&1 && chromeVersion=$(chromium-browser --version 2>/dev/null | awk '{printf$2}') || chromeVersion="85.0.4183.83"
 
 				userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36"
 				userAgent="$(printf "$userAgent" $chromeVersion)"
