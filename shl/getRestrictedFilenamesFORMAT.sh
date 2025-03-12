@@ -323,10 +323,7 @@ getRestrictedFilenamesFORMAT () {
 
 			if [ -z "$acodec" ] || [ $acodec = null ];then
 				# Preparing the User Agent for ffprobe
-				type -P chromium-browser>/dev/null 2>&1 && chromeVersion=$(chromium-browser --version 2>/dev/null | awk '{printf$2}') || chromeVersion="85.0.4183.83"
-
-				userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36"
-				userAgent="$(printf "$userAgent" $chromeVersion)"
+				userAgent="$(yt-dlp --dump-user-agent)"
 				echo "=> Fetching some information from remote stream with ffprobe ..."
 				if echo $chosenFormatID | \grep "[+]" -q;then
 					audioFormatID=$(echo $formatID | sed "s/.*+//")
