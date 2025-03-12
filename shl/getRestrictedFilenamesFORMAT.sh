@@ -386,8 +386,7 @@ getRestrictedFilenamesFORMAT () {
 						echo "=> Done."
 						echo
 						[ "$verboseLevel" = 1 ] && file "$artworkFileName"
-						[ "$verboseLevel" = 1 ] && ls -l --time-style=+'%Y-%m-%d %T' "$artworkFileName"
-						echo
+						[ "$verboseLevel" = 1 ] && ls -l --time-style=+'%Y-%m-%d %T' "$artworkFileName" && echo
 					fi
 				fi
 			fi
