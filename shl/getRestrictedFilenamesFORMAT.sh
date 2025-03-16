@@ -103,6 +103,9 @@ function getRestrictedFilenamesFORMAT() {
 	local ytdlExtraOptions=()
 	local ytdlInitialOptions=()
 
+	echo "=> Started <$scriptBaseName> on $@ at : $startTime ..."
+	echo
+
 #	local youtube_dl="eval LANG=C.UTF-8 command youtube-dl" # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
 	function videoDownloader() {
 		LANG=C.UTF-8 $downloader "$@"
@@ -223,10 +226,8 @@ function getRestrictedFilenamesFORMAT() {
 	parseArgs "$@"
 	eval set -- "$lastArgs"
 
-#	set | egrep "^(getopt|ffmpegLogLevel|verboseLevel|debug|formats|playlistFileName|timeout|downloader|overwrite|ytdlInitialOptions)=" | sort
-
-	echo "=> Started <$scriptBaseName> on $@ at : $startTime ..."
-	echo
+	[ $verboseLevel = 0 ] && echo "=> TERM = <$TERM>"
+	[ $verboseLevel = 0 ] && echo "=> tty is <$(tty)>"
 
 	time videoDownloader --ignore-config --rm-cache
 	for url
@@ -270,8 +271,9 @@ function getRestrictedFilenamesFORMAT() {
 		formatsNumber=${#formatsIDs[@]}
 		echo
 
-		[ $verboseLevel = 1 ] && echo "=> \$formatsNumber = $formatsNumber"
 		[ $formatsNumber = 0 ] && echo "=> ERROR : No format IDs found for $siteVideoFormat" >&2 && exit 1
+
+		[ $verboseLevel = 1 ] && echo "=> \$formatsNumber = $formatsNumber"
 		[ $verboseLevel = 1 ] && echo "=> \${formatsIDs[@]} = ${formatsIDs[@]}"
 
 		test -n "$playlistFileName" && echo '#EXTM3U' > "$playlistFileName"
