@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 
-#set -o nounset
+set -o nounset
 
 [ $BASH_VERSINFO -lt 4 ] && echo "=> [WARNING] BASH_VERSINFO = $BASH_VERSINFO then continuing in bash4 ..." && exec bash4 $0 "$@"
 
+LANG=C.UTF-8
+scriptBaseName=${0/*\//}
+scriptExtension=${0/*./}
+funcName=${scriptBaseName/.$scriptExtension/}
+
 function set_colors() {
-set -x
-	local normal=$(tput sgr0)
-set +x
+	[ $TERM == dumb ] && export TERM=xterm-256color
+	export normal=$(tput sgr0)
 	if [ $BASH_VERSINFO -ge 4 ];then
 		export escapeChar=$'\e'
 		export blinkOff=${escapeChar}'[25m'
@@ -17,11 +21,6 @@ set +x
 		export escapeChar=$'\033'
 	fi
 }
-
-LANG=C.UTF-8
-scriptBaseName=${0/*\//}
-scriptExtension=${0/*./}
-funcName=${scriptBaseName/.$scriptExtension/}
 
 function usage() {
 	cat <<-EOF >&2
