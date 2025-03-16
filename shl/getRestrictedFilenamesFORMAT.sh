@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 
-set -o nounset
+#set -o nounset
 
 [ $BASH_VERSINFO -lt 4 ] && echo "=> [WARNING] BASH_VERSINFO = $BASH_VERSINFO then continuing in bash4 ..." && exec bash4 $0 "$@"
 
-set_colors() {
+function set_colors() {
+set -x
 	local normal=$(tput sgr0)
+set +x
 	if [ $BASH_VERSINFO -ge 4 ];then
 		export escapeChar=$'\e'
 		export blinkOff=${escapeChar}'[25m'
@@ -21,7 +23,7 @@ scriptBaseName=${0/*\//}
 scriptExtension=${0/*./}
 funcName=${scriptBaseName/.$scriptExtension/}
 
-function usage {
+function usage() {
 	cat <<-EOF >&2
 Usage: $scriptBaseName [STRING]...
   or:  $scriptBaseName OPTION
@@ -47,10 +49,11 @@ EOF
 }
 
 unset -f getRestrictedFilenamesFORMAT
-getRestrictedFilenamesFORMAT () {
+function getRestrictedFilenamesFORMAT() {
 	trap 'rc=127;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;exit $rc' INT
 
-	set_colors 2>/dev/null
+	#set_colors 2>/dev/null
+	set_colors
 
 	local acodec=null
 	local artworkFileName=null
@@ -102,7 +105,7 @@ getRestrictedFilenamesFORMAT () {
 	local ytdlInitialOptions=()
 
 #	local youtube_dl="eval LANG=C.UTF-8 command youtube-dl" # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
-	function videoDownloader {
+	function videoDownloader() {
 		LANG=C.UTF-8 $downloader "$@"
 	}
 
@@ -131,7 +134,7 @@ getRestrictedFilenamesFORMAT () {
 	grepColor=$grep
 	grep --help 2>&1 | grep -q -- --color && grepColor+=" --color"
 
-	function parseArgs {
+	function parseArgs() {
 		osType=$(uname -s)
 		if [ $osType = Linux ];then
 			if getopt -V | grep getopt.*util-linux -q;then
@@ -489,7 +492,7 @@ Channel URL : $channelURL" "$fileName"
 	set +x
 	return $downloadOK
 }
-webp2jpg () {
+function webp2jpg() {
 	local image
 	for image
 	do
@@ -500,7 +503,7 @@ webp2jpg () {
 		fi
 	done
 }
-getAudioExtension () {
+function getAudioExtension() {
 	if [ $# != 1 ];then
 		echo "=> [$FUNCNAME] Usage: $FUNCNAME ffprobeAudioCodecName" 1>&2
 		return 1
@@ -525,7 +528,7 @@ getAudioExtension () {
 	fi
 	echo $audioExtension
 }
-addURLs2mp4Metadata() {
+function addURLs2mp4Metadata() {
 	if [ $# != 2 ];then
 		echo "=> Usage: $FUNCNAME url mediaFile" 1>&2
 		exit 1
@@ -573,7 +576,7 @@ addURLs2mp4Metadata() {
 	\rm $timestampFileRef
 	return $retCode
 }
-function addSubtitles2media {
+function addSubtitles2media() {
 	local inputVideo=$1
 	test $# -le 1 && {
 		echo "=> Usage: $FUNCNAME inputVideo subFile1 subFile2 subFile3 ..." 1>&2
@@ -603,7 +606,7 @@ function addSubtitles2media {
 	touch -r "$inputVideo" "$outputVideo"
 	[ $retCode = 0 ] && \mv -f "$outputVideo" "$inputVideo" && \rm "$@"
 }
-addThumbnail2media() {
+function addThumbnail2media() {
 	local scriptOptions=null
 	local debug=""
 	echo $1 | \grep -q -- "^-[a-z]" && scriptOptions=$1 && shift
@@ -683,46 +686,46 @@ addThumbnail2media() {
 }
 
 bestFormats="bestvideo[vcodec^=avc1]+bestaudio[ext=m4a]/best[ext=mp4]/best[ext=webm]/best[ext=avi]/best[ext=mov]/best[ext=flv]"
-function getRestrictedFilenamesBEST {
+function getRestrictedFilenamesBEST() {
 	getRestrictedFilenamesFORMAT -f "($bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
-function getRestrictedFilenamesFHD {
+function getRestrictedFilenamesFHD() {
 	local height=1080
 	local other_Formats=fhd
 	local possibleFormats="bestvideo[vcodec^=avc1][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
 	getRestrictedFilenamesFORMAT -f "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
-function getRestrictedFilenamesHD {
+function getRestrictedFilenamesHD() {
 	local height=720
 	local other_Formats=hd/high
 	local possibleFormats="22/bestvideo[vcodec^=avc1][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
 	getRestrictedFilenamesFORMAT -f "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
-function getRestrictedFilenamesHQ {
+function getRestrictedFilenamesHQ() {
 	local height=576
 	local other_Formats=hq/fsd/std/sd
 	local possibleFormats="bestvideo[vcodec^=avc1][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
 	getRestrictedFilenamesFORMAT -f "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
-function getRestrictedFilenamesFSD {
+function getRestrictedFilenamesFSD() {
 	local height=480
 	local other_Formats=fsd/std
 	local possibleFormats="bestvideo[vcodec^=avc1][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
 	getRestrictedFilenamesFORMAT -f "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
-function getRestrictedFilenamesSD {
+function getRestrictedFilenamesSD() {
 	local height=360
 	local other_Formats=low/sd/std
 	local possibleFormats="18/bestvideo[vcodec^=avc1][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
 	getRestrictedFilenamesFORMAT -f "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
-function getRestrictedFilenamesLD {
+function getRestrictedFilenamesLD() {
 	local height=240
 	local other_Formats=ld/low
 	local possibleFormats="bestvideo[vcodec^=avc1][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
 	getRestrictedFilenamesFORMAT -f "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
-function getRestrictedFilenamesVLD {
+function getRestrictedFilenamesVLD() {
 	local height=144
 	local other_Formats=vld/low
 	local possibleFormats="bestvideo[vcodec^=avc1][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
