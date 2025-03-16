@@ -10,7 +10,7 @@ scriptExtension=${0/*./}
 funcName=${scriptBaseName/.$scriptExtension/}
 
 function set_colors() {
-	[ $TERM == dumb ] && export TERM=xterm-256color
+	[ "$TERM" == dumb ] && export TERM=xterm-256color
 	export normal=$(tput sgr0)
 	if [ $BASH_VERSINFO -ge 4 ];then
 		export escapeChar=$'\e'
@@ -270,9 +270,9 @@ function getRestrictedFilenamesFORMAT() {
 		formatsNumber=${#formatsIDs[@]}
 		echo
 
-		[ "$verboseLevel" = 1 ] && echo "=> \$formatsNumber = $formatsNumber"
+		[ $verboseLevel = 1 ] && echo "=> \$formatsNumber = $formatsNumber"
 		[ $formatsNumber = 0 ] && echo "=> ERROR : No format IDs found for $siteVideoFormat" >&2 && exit 1
-		[ "$verboseLevel" = 1 ] && echo "=> \${formatsIDs[@]} = ${formatsIDs[@]}"
+		[ $verboseLevel = 1 ] && echo "=> \${formatsIDs[@]} = ${formatsIDs[@]}"
 
 		test -n "$playlistFileName" && echo '#EXTM3U' > "$playlistFileName"
 
@@ -375,7 +375,7 @@ function getRestrictedFilenamesFORMAT() {
 				ytdlExtraOptions+=( --hls-prefer-native )
 			fi
 
-			[ "$verboseLevel" = 1 ] && echo "=> acodec = <$acodec> fileName = <$fileName> extension = <$extension> isLIVE = <$isLIVE> formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName> firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url>" && echo
+			[ $verboseLevel = 1 ] && echo "=> acodec = <$acodec> fileName = <$fileName> extension = <$extension> isLIVE = <$isLIVE> formatString = <$formatString> thumbnailURL = <$thumbnailURL> thumbnailExtension = <$thumbnailExtension> artworkFileName = <$artworkFileName> firstAudioStreamCodecName = <$firstAudioStreamCodecName> webpage_url = <$webpage_url>" && echo
 
 			if [ $thumbnailerName = AtomicParsley ];then
 				thumbnailFormatString=$(\curl -qLs "$thumbnailURL" | file -b -)
@@ -387,8 +387,8 @@ function getRestrictedFilenamesFORMAT() {
 						convert "$artworkFileName.tmp" "$artworkFileName" && rm -f "$artworkFileName.tmp"
 						echo "=> Done."
 						echo
-						[ "$verboseLevel" = 1 ] && echo "=> <$artworkFileName> information :" && echo && file "$artworkFileName" && echo
-						[ "$verboseLevel" = 1 ] && ls -l --time-style=+'%Y-%m-%d %T' "$artworkFileName" && echo
+						[ $verboseLevel = 1 ] && echo "=> <$artworkFileName> information :" && echo && file "$artworkFileName" && echo
+						[ $verboseLevel = 1 ] && ls -l --time-style=+'%Y-%m-%d %T' "$artworkFileName" && echo
 					fi
 				fi
 			fi
@@ -404,7 +404,7 @@ function getRestrictedFilenamesFORMAT() {
 
 
 #			$undebug
-			[ "$verboseLevel" = 1 ] && echo "=> ytdlExtraOptions = ${ytdlExtraOptions[@]}" && echo
+			[ $verboseLevel = 1 ] && echo "=> ytdlExtraOptions = ${ytdlExtraOptions[@]}" && echo
 
 			if [ -f "$newFileName" ] && [ $isLIVE != true ]; then
 				echo "=> The file <$newFileName> already exists, comparing it's size with the remote file ..." 1>&2
