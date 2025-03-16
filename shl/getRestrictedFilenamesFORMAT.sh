@@ -10,7 +10,7 @@ scriptExtension=${0/*./}
 funcName=${scriptBaseName/.$scriptExtension/}
 
 function set_colors() {
-	[ "$TERM" == dumb ] && export TERM=xterm-256color
+	[ "$TERM" = dumb ] && export TERM=xterm-256color
 	export normal=$(tput sgr0)
 	if [ $BASH_VERSINFO -ge 4 ];then
 		export escapeChar=$'\e'
@@ -226,8 +226,8 @@ function getRestrictedFilenamesFORMAT() {
 	parseArgs "$@"
 	eval set -- "$lastArgs"
 
-	[ $verboseLevel = 0 ] && echo "=> TERM = <$TERM>"
-	[ $verboseLevel = 0 ] && echo "=> tty is <$(tty)>"
+	[ $verboseLevel = 1 ] && echo "=> TERM = <$TERM>"
+	[ $verboseLevel = 1 ] && echo "=> tty is <$(tty)>"
 
 	time videoDownloader --ignore-config --rm-cache
 	for url
@@ -311,7 +311,11 @@ function getRestrictedFilenamesFORMAT() {
 
 			# Les resultats ci-dessous ne dependent pas du format selectionne
 			isLIVE=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .is_live)'| sed "s/null/false/")
+
 			title=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .title)' | sed "s/\xf0\x9f\x9f\xa2\s//")
+#			title=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .title)' )
+			ytdlExtraOptions+=( --replace-in-metadata "title" r'\xf0\x9f\x9f\xa2\s' "" )
+
 			webpage_url=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .webpage_url)')
 			duration=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .duration)' | sed "s/null/0/")
 			thumbnailURL=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .thumbnail)')
