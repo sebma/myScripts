@@ -25,6 +25,7 @@ if   $isRedHatLike;then
  
  	# CONFIG KEYBOARD LAYOUT
 	localectl set-keymap fr
+ 	#$sudo localectl set-keymap fr-latin9 # sur Photon OS
 	localectl set-x11-keymap fr pc105
  	localectl set-locale LANG=en_US.UTF-8
  
