@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+set -o nounset
 declare {isDebian,isRedHat}Like=false
 
 distribID=$(source /etc/os-release;echo $ID)
@@ -192,8 +192,21 @@ EOF
 		fi
 
 		# CONFIG GRUB
-		grep GRUB_TIMEOUT_STYLE=hidden /etc/default/grub -q && $sudo sed -i.orig "s/GRUB_TIMEOUT_STYLE=.*/GRUB_TIMEOUT_STYLE=menu/;s/GRUB_TIMEOUT=.*/GRUB_TIMEOUT=10/" /etc/default/grub
-		$sudo update-grub
+		$sudo mkdir /etc/default/grub.d/
+		for grubParameter in GRUB_TIMEOUT_STYLE=menu GRUB_TIMEOUT=10 'GRUB_RECORDFAIL_TIMEOUT=$GRUB_TIMEOUT' GRUB_GFX_MODE=1152x864;do
+			if ! grep $grubParameter /etc/default/grub /etc/default/grub.d/* -q;then
+				echo $grubParameter | sudo tee -a /etc/default/grub.d/$company-grub.cfg
+			fi
+		done
+		if which update-grub >/dev/null;then
+  			$sudo update-grub
+     		else
+       			if [ -d /sys/firmware/efi ];then
+	  			$sudo grub2-mkconfig -o /boot/efi/EFI/$distribNAME/grub.cfg
+	  		else
+       				$sudo grub2-mkconfig -o /boot/grub2/grub.cfg
+	   		fi
+     		fi
 
 		# CONFIG SNMP
 		$sudo $apt install snmp snmpd -y $aptSimul # Pour la supervision SNMP
