@@ -3,7 +3,7 @@ set -o nounset
 declare {isDebian,isRedHat}Like=false
 
 distribID=$(source /etc/os-release;echo $ID)
-if   echo $distribID | egrep "centos|rhel|fedora" -q;then
+if   echo $distribID | egrep "centos|rhel|fedora|photon" -q;then
 	sudo=""
 	isRedHatLike=true
 elif echo $distribID | egrep "debian|ubuntu" -q;then
@@ -24,10 +24,10 @@ if   $isRedHatLike;then
 	timedatectl status | grep Time.zone:.Europe/Paris -q || timedatectl set-timezone Europe/Paris
  
  	# CONFIG KEYBOARD LAYOUT
-	localectl set-keymap fr
- 	#$sudo localectl set-keymap fr-latin9 # sur Photon OS
-	localectl set-x11-keymap fr pc105
- 	localectl set-locale LANG=en_US.UTF-8
+  	[ $distribID = photon ] && $sudo tdnf install kbd
+	$sudo localectl set-keymap fr-latin9
+	$sudo localectl set-x11-keymap fr pc105
+ 	$sudo localectl set-locale LANG=en_US.UTF-8
  
 	hostnamectl status
  
@@ -202,7 +202,7 @@ EOF
   			$sudo update-grub
      		else
        			if [ -d /sys/firmware/efi ];then
-	  			$sudo grub2-mkconfig -o /boot/efi/EFI/$distribNAME/grub.cfg
+	  			$sudo grub2-mkconfig -o /boot/efi/EFI/$distribID/grub.cfg
 	  		else
        				$sudo grub2-mkconfig -o /boot/grub2/grub.cfg
 	   		fi
