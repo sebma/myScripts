@@ -376,7 +376,7 @@ if( $IsWindows ) {
 		if ( $argc -lt 1 ) {
 			"=> Usage : $FUNCNAME `$name [`$server] [`$type=A]"
 		} else {
-			$ipv4RegExp = '\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}'
+			$ipv4RegExp = '^(https?://|s?ftps?://)?\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}'
 			if( $name -match $ipv4RegExp ) {
 				$ip = $name -Replace('https?://|s?ftps?://','') -Replace('(/|:\d+).*$','')
 				#echo "=> $ip :"
