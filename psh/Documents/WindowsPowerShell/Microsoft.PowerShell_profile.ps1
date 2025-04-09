@@ -128,6 +128,16 @@ if( $IsWindows ) {
 		Get-Content (Get-PSReadlineOption).HistorySavePath | ? { $_ -match "$regExp" }
 	}
 
+	if ( $(alias ip *>$null;$?) ) { del alias:ip }
+	set-alias ip ipv4
+ 	function IPv4 {
+		Get-NetIPAddress -AddressFamily IPv4 | ? IPv4Address -NotMatch 169.254. | select InterfaceAlias , IPv4Address , PrefixLength
+	}
+
+	function IPv6 {
+		Get-NetIPAddress -AddressFamily IPv6 | select InterfaceAlias , IPv6Address , PrefixLength
+	}
+
 	function sdiff {
 		$argc=$args.Count
 		if ( $argc -eq 2 ) {
