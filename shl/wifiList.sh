@@ -8,7 +8,7 @@ wifiList () {
 		if type -P nmcli > /dev/null; then
 			nmcliVersion=$(nmcli -v | awk -F"[. ]" '/version/{printf"%d.%d%02d\n", $4, $5, $6}')
 			nmcli -f ssid,bssid,mode,freq,rate,signal,security,active dev wifi list | grep 'SSID' 1>&2
-			nmcli -f ssid,bssid,mode,freq,rate,signal,security,active dev wifi list | grep -v 'SSID'
+			nmcli -f ssid,bssid,mode,freq,rate,signal,security,active,bars -c yes dev wifi list | grep -v 'SSID'
 		else
 			if type -P iw > /dev/null; then
 				$sudo iw dev $wifiInterface scan | grep SSID
