@@ -30,9 +30,11 @@ if $isDebianLike;then
 
 	# DESACTIVER l'IPv6 ("link-local: []") AVEC yq : WIP
 	# AJOUT L'OPTION "optional: true" AVEC yq : WIP
-	iface=docker0
-	$sudo sysctl -w net.ipv6.conf.$iface.disable_ipv6=1
-
+	# iface=docker0
+	# $sudo sysctl -w net.ipv6.conf.$iface.disable_ipv6=1
+	grep 'net.ipv6.conf.all.disable_ipv6=1' /etc/sysctl.conf /etc/sysctl.d/*.conf -q || echo net.ipv6.conf.all.disable_ipv6=1 | $sudo tee -a /etc/sysctl.d/99-$company.conf
+ 	$sudo sysctl -p
+  
 	# ACTIVATION DE dmesg
 	sysctl kernel.dmesg_restrict || grep "kernel.dmesg_restrict\s*=\s*0" -q || $sudo sysctl -w kernel.dmesg_restrict=0 # Allows users to run "dmesg"
 	grep "kernel.dmesg_restrict\s*=\s*0" /etc/sysctl.conf /etc/sysctl.d/*.conf -q || {
