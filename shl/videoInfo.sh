@@ -1,10 +1,6 @@
-#!/usr/bin/env bash
-
-#set -o nounset
+#!/usr/bin/env -S bash -u
 
 function videoInfo {
-	local columns=$COLUMNS
-#	local columns="" # To see more info than the width of the screen
 	local size=0
 	type -P ffprobe >/dev/null && {
 		local youtube_dl='command youtube-dl'
