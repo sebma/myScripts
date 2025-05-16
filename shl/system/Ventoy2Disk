@@ -1,6 +1,5 @@
-#!/usr/bin/env sh
+#!/usr/bin/env -S bash -u
 
-set -u
 ventoyROOT=/opt/ventoy
 Ventoy2DiskScriptName=Ventoy2Disk.sh
 Ventoy2DiskScriptPath=$ventoyROOT/Ventoy2Disk.sh
