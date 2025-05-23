@@ -28,6 +28,11 @@ aptSimul="-s"
 if $isDebianLike;then
 	test $(id -u) == 0 && sudo="" || sudo=sudo
 
+	# CONFIG KEYBOARD LAYOUT
+	localectl set-x11-keymap fr pc105 latin9
+	$isUbuntuLike && [ $majorNumber -le 20 ] && sudo localectl set-keymap fr # Ne marche plus depuis Ubuntu 22.04
+	sudo localectl set-locale LANG=en_US.UTF-8
+
 	# DESACTIVER l'IPv6 ("link-local: []") AVEC yq : WIP
 	# AJOUT L'OPTION "optional: true" AVEC yq : WIP
 	# iface=docker0
@@ -46,11 +51,6 @@ if $isDebianLike;then
 	sudo touch /etc/cloud/cloud-init.disabled # To Disable Cloud-Init
 
 	timedatectl status | grep Time.zone:.Europe/Paris -q || $sudo timedatectl set-timezone Europe/Paris
-
-	# CONFIG KEYBOARD LAYOUT
-	localectl set-x11-keymap fr pc105 latin9
-	$isUbuntuLike && [ $majorNumber -le 20 ] && sudo localectl set-keymap fr # Ne marche plus depuis Ubuntu 22.04
-	sudo localectl set-locale LANG=en_US.UTF-8
 
 	hostnamectl status
 	hostnamectl chassis 2>/dev/null || hostnamectl status | awk '/Chassis/{print$2}'
