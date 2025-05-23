@@ -170,7 +170,8 @@ EOF
 
 ######## INSTALLATION DU FUSIONINVENTORY-AGENT ########
 #		$sudo $apt install fusioninventory-agent{,-task-{collect,deploy,esx,network}} # STAND-BY car GLPIv10
-#		grep "^server = .*helpdesk" /etc/fusioninventory/agent.cfg -q || $sudo sed -r -i".ORIG" 's/.*httpd-trust.*/httpd-trust = 127.0.0.1\/32,X.Y.Z.T/;0,/server.*=/s|^#?server =.*|server = https://helpdesk.media-participations.com/plugins/fusioninventory/|;' /etc/fusioninventory/agent.cfg
+#		GLPI_Inventory_Server_FQDN=https://$publicCompanyFQDN
+#		grep "^server = .*helpdesk" /etc/fusioninventory/agent.cfg -q || $sudo sed -r -i".ORIG" 's/.*httpd-trust.*/httpd-trust = 127.0.0.1\/32,X.Y.Z.T/;0,/server.*=/s|^#?server =.*|server = $GLPI_Inventory_Server_FQDN/plugins/fusioninventory/|;' /etc/fusioninventory/agent.cfg
 #		$sudo systemctl restart fusioninventory-agent.service
 
 		$sudo $apt install ca-certificates
