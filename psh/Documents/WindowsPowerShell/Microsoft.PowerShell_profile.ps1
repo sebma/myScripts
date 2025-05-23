@@ -235,6 +235,10 @@ if( $IsWindows ) {
 		& $openssl x509 -in $pemFile -outform DER -out $derFile
 	}
 
+	function pem2P12($pemFile, $pemKey , $p12File ) {
+		& $openssl pkcs12 -in $pemFile -inkey $pemKey -export -out $p12File
+	}
+
 	function p12ToPEM($p12File, $pemFile) {
 #		$ext = ls $p12File | % Extension
 #		$pemFile = $p12File.replace( $ext , ".pem" )
