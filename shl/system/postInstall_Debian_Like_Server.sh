@@ -23,7 +23,7 @@ variablesDefinitionFile="$1"
 source "$variablesDefinitionFile" || exit
 
 apt="$(which apt) -V"
-aptOtions="-V"
+aptOptions="-V"
 aptSimul="-s"
 if $isDebianLike;then
 	test $(id -u) == 0 && sudo="" || sudo=sudo
