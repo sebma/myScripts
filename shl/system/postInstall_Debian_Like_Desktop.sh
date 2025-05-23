@@ -14,6 +14,7 @@ elif echo $distribID | egrep "debian|ubuntu" -q;then
 	fi
 fi
 
+scriptBaseName=${0/*\//}
 if [ $# != 1 ];then
 	echo "=> Usage $scriptBaseName variablesDefinitionFile" >&2
 	exit 1
