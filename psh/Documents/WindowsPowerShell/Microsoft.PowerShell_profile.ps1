@@ -235,8 +235,8 @@ if( $IsWindows ) {
 		& $openssl x509 -in $pemFile -outform DER -out $derFile
 	}
 
-	function pem2P12($pemFile, $pemKey , $p12File ) {
-		& $openssl pkcs12 -in $pemFile -inkey $pemKey -export -out $p12File
+	function pem2P12($pemFile, $CAfile, $pemKey , $p12File ) {
+		& $openssl pkcs12 -in $pemFile -CAfile $CAfile -inkey $pemKey -export -out $p12File
 	}
 
 	function p12ToPEM($p12File, $pemFile) {
