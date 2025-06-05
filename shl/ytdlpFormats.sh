@@ -1,18 +1,22 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 ytdlpFormats ()
 {
 	trap 'rc=130;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;return $rc' INT
+	local filterProto="\<(https?|m3u8?|dash)\>"
 	test $# = 0 && {
-		echo "=> Usage: $FUNCNAME [--filterFormats] url1 url2 ..." 1>&2
+		echo "=> Usage: $FUNCNAME [--filterFormats|-f=\"$filterProto\"] url1 url2 ..." 1>&2
 		return 1
 	}
-	local filterFormats="."
-	echo $1 | \grep -q -- "^--" && {
-		filterFormats=${1:2}
+	local filterFormats=""
+	if echo $1 | \grep -q -- "^--filterFormats|^-f";then
+		filterFormats="${1:2}"
 		shift
-	}
-	time yt-dlp -F "$@" | egrep --color=auto -vw "information|manifest|android player|automatic captions|Available formats|Checking .* video format URL" | \egrep "$filterFormats|Downloading|format code  extension  resolution note"
+	else
+		filterFormats=$filterProto
+	fi
+
+	time yt-dlp -F "$@" | egrep -w -v "information|manifest|android player|automatic captions|Available formats|Checking .* video format URL" | \egrep "$filterFormats|Downloading"
 	trap - INT
 }
 
