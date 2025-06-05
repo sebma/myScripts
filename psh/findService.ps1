@@ -10,7 +10,7 @@ function findService {
 		write-warning "Usage:$scriptName [regexp=.]"
 		exit 1
 	}
-	Get-WmiObject win32_service | ? Description -Match "$regexp" | Format-Table Name , DisplayName , Description , PathName , StartMode , Status
+	Get-WmiObject win32_service | ? Description -Match "$regexp" | Format-Table Name , DisplayName , Description , PathName , StartMode , State , ProcessId
 }
 
 findService @args
