@@ -11,6 +11,7 @@ function findService {
 		exit 1
 	}
 	Get-WmiObject win32_service | ? Description -Match "$regexp" | Format-Table Name , DisplayName , Description , PathName , StartMode , State , ProcessId
+# 	Get-WmiObject win32_service | select Name , DisplayName , Description , PathName , StartMode , State , ProcessId | ogv
 }
 
 findService @args
