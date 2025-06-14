@@ -14,7 +14,7 @@ function processENV_Variables ()
 	else
 		if [ $# = 2 ]; then
 			local varNAME=$2
-			[ $pid != 0 ] && tr '\0' '\n' < /proc/$pid/environ | \egrep -v "^hidden=" | \grep -P "^[^\s%]+=" | sort -u | egrep --color "$varNAME"
+			[ $pid != 0 ] && tr '\0' '\n' < /proc/$pid/environ | \egrep -v "^hidden=" | \grep -P "^[^\s%]+=" | sort -u | egrep "$varNAME"
 		fi
 	fi
 }
