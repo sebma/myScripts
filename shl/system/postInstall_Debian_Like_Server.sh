@@ -39,12 +39,13 @@ if $isDebianLike;then
 	# iface=docker0
 	# $sudo sysctl -w net.ipv6.conf.$iface.disable_ipv6=1
 	grep 'net.ipv6.conf.all.disable_ipv6=1' /etc/sysctl.conf /etc/sysctl.d/*.conf -q || echo net.ipv6.conf.all.disable_ipv6=1 | $sudo tee -a /etc/sysctl.d/99-$company.conf
- 	$sudo sysctl -p
+ 	$sudo sysctl -p /etc/sysctl.d/99-$company.conf
   
 	# ACTIVATION DE dmesg
 	sysctl kernel.dmesg_restrict || grep "kernel.dmesg_restrict\s*=\s*0" -q || $sudo sysctl -w kernel.dmesg_restrict=0 # Allows users to run "dmesg"
 	grep "kernel.dmesg_restrict\s*=\s*0" /etc/sysctl.conf /etc/sysctl.d/*.conf -q || {
 		echo kernel.dmesg_restrict=0 | sudo tee -a /etc/sysctl.d/99-$company.conf
+  		$sudo sysctl -p /etc/sysctl.d/99-$company.conf
 		$sudo systemctl restart systemd-sysctl.service
 	}
 
