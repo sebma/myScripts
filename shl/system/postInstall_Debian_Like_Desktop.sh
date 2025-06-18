@@ -32,6 +32,7 @@ if $isDebianLike;then
 
 	$sudo sysctl -w kernel.dmesg_restrict=0 # Allows users to run "dmesg"
 	echo kernel.dmesg_restrict=0 | sudo tee -a /etc/sysctl.d/99-$company.conf
+ 	$sudo sysctl -p /etc/sysctl.d/99-$company.conf
 	$sudo systemctl restart systemd-sysctl.service
 
 	grep "preserve_hostname: true" /etc/cloud/cloud.cfg -q && sudo sed -i "s/preserve_hostname: true/preserve_hostname: false/" /etc/cloud/cloud.cfg
