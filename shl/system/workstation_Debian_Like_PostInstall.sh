@@ -26,8 +26,8 @@ if $isDebianLike;then
 	vgOS=$(findmnt / -n -o source | awk -F '[/-]' '{print$4}')
 	grep /dev/$vgOS/swap /etc/fstab -q || echo -e "/dev/$vgOS/swap\tnone\tswap\tsw\t0\t0" | sudo tee -a /etc/fstab # Ajout du "swap" dans le /etc/fstab
 
-	$sudo sysctl -w kernel.dmesg_restrict=0 # Allows users to run "dmesg"
-	echo kernel.dmesg_restrict=0 | sudo tee -a /etc/sysctl.d/99-$companyNAME.conf
+	$sudo sysctl -w kernel.dmesg_restrict = 0 # Allows users to run "dmesg"
+	echo kernel.dmesg_restrict = 0 | sudo tee -a /etc/sysctl.d/99-$companyNAME.conf
 	$sudo systemctl restart systemd-sysctl.service
 
 	hostnamectl status | grep 'Chassis: laptop'
