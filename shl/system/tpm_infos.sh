@@ -7,7 +7,7 @@ echo "=> DMI Product name : "
 cat /sys/class/dmi/id/product_name
 echo "=> systemd-cryptenroll --tpm2-device=list ..."
 systemd-cryptenroll --tpm2-device=list
-sudo sysctl -w kernel.dmesg_restrict=0 -q
+sudo sysctl -w kernel.dmesg_restrict = 0 -q
 echo "=> dmesg | grep -i tpm ..."
 dmesg | grep -i tpm
 if ! which tpm2 &>/dev/null;then
