@@ -42,9 +42,9 @@ if $isDebianLike;then
  	$sudo sysctl -p /etc/sysctl.d/99-$company.conf
   
 	# ACTIVATION DE dmesg
-	sysctl kernel.dmesg_restrict || grep "kernel.dmesg_restrict\s*=\s*0" -q || $sudo sysctl -w kernel.dmesg_restrict=0 # Allows users to run "dmesg"
+	sysctl kernel.dmesg_restrict || grep "kernel.dmesg_restrict\s*=\s*0" -q || $sudo sysctl -w kernel.dmesg_restrict = 0 # Allows users to run "dmesg"
 	grep "kernel.dmesg_restrict\s*=\s*0" /etc/sysctl.conf /etc/sysctl.d/*.conf -q || {
-		echo kernel.dmesg_restrict=0 | sudo tee -a /etc/sysctl.d/99-$company.conf
+		echo kernel.dmesg_restrict = 0 | sudo tee -a /etc/sysctl.d/99-$company.conf
   		$sudo sysctl -p /etc/sysctl.d/99-$company.conf
 		$sudo systemctl restart systemd-sysctl.service
 	}
