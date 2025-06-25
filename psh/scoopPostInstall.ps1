@@ -12,7 +12,7 @@ if( $IsWindows ) {
 		if( ! (sudo scoop bucket list | sls extras) ) { sudo scoop bucket add extras }
 		sudo scoop install -g freetube kitty gow pshazz openssh psutils wget gsudo
 		sudo scoop shim rm putty plink pscp psftp peagent
-		sudo cache off
+		sudo -k
 	}
 	scoopPostInstall
 }
