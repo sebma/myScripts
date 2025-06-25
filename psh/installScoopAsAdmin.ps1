@@ -9,7 +9,7 @@ if( $IsWindows ) {
 			}
 			sudo iex "& {$(irm get.scoop.sh)} -RunAsAdmin -ScoopDir $env:ProgramData\scoop"
 		}
-		sudo cache off
+		sudo -k
 	}
 	InstallScoopAsAdmin
 }
