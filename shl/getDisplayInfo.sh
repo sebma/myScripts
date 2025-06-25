@@ -1,0 +1,1 @@
+system/getDisplayInfo.sh
