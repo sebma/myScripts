@@ -8,6 +8,6 @@ if ( $osVersion -eq 10 ) {
 		iex $getWindowsCapabilityCommand | sudo Add-WindowsCapability -Online
 		iex $getWindowsCapabilityCommand | Select-Object -Property name , displayname , state
 		sudo Set-ItemProperty -Path HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\Servicing -Name RepairContentServerSource -Type dword -Value 0
-		sudo cache off
+		sudo -k
 	}
 }
