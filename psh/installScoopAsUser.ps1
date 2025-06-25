@@ -9,7 +9,7 @@ if( $IsWindows ) {
 			}
 			iwr -useb get.scoop.sh | iex
 		}
-		sudo cache off
+		sudo -k
 	}
 	InstallScoopAsUser
 }
