@@ -30,8 +30,8 @@ aptOptions="-V"
 if $isDebianLike;then
 	test $(id -u) == 0 && sudo="" || sudo=sudo
 
-	$sudo sysctl -w kernel.dmesg_restrict=0 # Allows users to run "dmesg"
-	echo kernel.dmesg_restrict=0 | sudo tee -a /etc/sysctl.d/99-$company.conf
+	$sudo sysctl -w kernel.dmesg_restrict = 0 # Allows users to run "dmesg"
+	echo kernel.dmesg_restrict = 0 | sudo tee -a /etc/sysctl.d/99-$company.conf
  	$sudo sysctl -p /etc/sysctl.d/99-$company.conf
 	$sudo systemctl restart systemd-sysctl.service
 
