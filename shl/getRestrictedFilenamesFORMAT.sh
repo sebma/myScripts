@@ -1,6 +1,4 @@
-#!/usr/bin/env bash
-
-set -o nounset
+#!/usr/bin/env -S bash -u
 
 [ $BASH_VERSINFO -lt 4 ] && echo "=> [WARNING] BASH_VERSINFO = $BASH_VERSINFO then continuing in bash4 ..." && exec bash4 $0 "$@"
 
@@ -312,7 +310,7 @@ function getRestrictedFilenamesFORMAT() {
 			# Les resultats ci-dessous ne dependent pas du format selectionne
 			isLIVE=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .is_live)'| sed "s/null/false/")
 
-			title=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .title)' | sed "s/\xf0\x9f\x9f\xa2\s//")
+			title=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .title)' | sed 's/\xf0\x9f\x9f\xa2 \s//')
 #			title=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .title)' )
 			ytdlExtraOptions+=( --replace-in-metadata "title" r'\xf0\x9f\x9f\xa2\s' "" )
 
@@ -440,7 +438,7 @@ function getRestrictedFilenamesFORMAT() {
 				$undebug
 			else
 #				$debug
-				LANG=C.UTF-8 time timeout -s SIGINT $timeout $downloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+				env LANG=C.UTF-8 time timeout -s SIGINT $timeout $downloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 				$undebug
 			fi
 
