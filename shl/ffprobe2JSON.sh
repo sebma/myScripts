@@ -8,7 +8,6 @@ ffprobe2JSON ()
 	for arg in "$@"
 	do
 		echo "$arg" | \egrep -q "(https?|s?ftps?|ssh|rtmp|rtsp|mms)://" && $ffprobe $ffprobeUserAgentOption $ffprobeOptions "$(yt-dlp --ignore-config -g -- "$arg")" || $ffprobe $ffprobeOptions "$arg"
-#	done 2>&1 | cut -c 1-$(tput cols)
 	done
 }
 
