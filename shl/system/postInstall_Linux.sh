@@ -32,7 +32,11 @@ if   $isRedHatLike;then
 	hostnamectl status
  
 	grep ^proxy\s*= /etc/yum.conf -q || echo proxy = $http_proxy | tee -a /etc/yum.conf
+
 	yum clean expire-cache
+	yum repolist
+	yum check-update
+
 	systemctl stop NetworkManager
 	systemctl disable NetworkManager
 	systemctl mask NetworkManager
