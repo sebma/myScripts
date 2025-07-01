@@ -33,7 +33,7 @@ mp4StripEmojisFromTitle ()
 
 		timestampFileRef=$(mktemp) && touch -r "$mp4File" $timestampFileRef
 		test -w "$mp4File" || chmod -v u+w "$mp4File"
-		echo "=> Remoing the emojis present in the title of <$mp4File> ..." >&2
+		echo "=> Removing the emojis present in the title of <$mp4File> ..." >&2
 		time mp4tags -s "$title" "$mp4File"
 		touch -r $timestampFileRef "$mp4File" && \rm $timestampFileRef
 		chmod -v -w "$mp4File"
