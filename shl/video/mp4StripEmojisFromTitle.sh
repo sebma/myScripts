@@ -16,14 +16,14 @@ mp4StripEmojisFromTitle ()
 	do
 		echo "==> Processing $mp4File ..." >&2
 		set -o pipefail
-		title=$(bash -c "time ffprobe -v error -show_format -show_streams -of json \"$mp4File\"" | jq -r .format.tags.title | sed "s/null//") || exit
+		title=$(bash -c "ffprobe -v error -show_format -show_streams -of json \"$mp4File\"" | jq -r .format.tags.title | sed "s/null//") || exit
 		set +o pipefail
 
 		echo "==> title = <$title>"
 		test -z "$title" && exit
 
 		if perl -e "use utf8; exit 0 if '$title' =~ /$emojiRegExp/; exit 1;";then
-			echo "=> Emojis were found in <$title>." >&2
+			echo "==> Emojis were found in <$title>." >&2
 			title=$(echo "$title" | perl -C -pe "s/${emojiRegExp}\s*//g")
 			echo "==> title = <$title>" >&2
 		else
