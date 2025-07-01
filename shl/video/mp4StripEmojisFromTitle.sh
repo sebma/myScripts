@@ -27,7 +27,7 @@ mp4StripEmojisFromTitle ()
 			title=$(echo "$title" | perl -C -pe "s/${emojiRegExp}\s*//g")
 			echo "==> title = <$title>" >&2
 		else
-			echo "==> There is NO Emojis were found in <$title>, processing next file (if any) ..." >&2
+			echo "==> NO emojis were found in <$title>, processing next file (if any) ..." >&2
 			continue
 		fi
 
