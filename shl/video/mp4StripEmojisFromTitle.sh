@@ -28,6 +28,7 @@ mp4StripEmojisFromTitle ()
 			echo "==> title = <$title>" >&2
 		else
 			echo "==> NO emojis were found in <$title>, processing next file (if any) ..." >&2
+			echo >&2
 			continue
 		fi
 
