@@ -39,7 +39,7 @@ mp4StripEmojisFromTitle ()
 		time mp4tags -s "$title" "$mp4File"
 		touch -r $timestampFileRef "$mp4File" && \rm $timestampFileRef
 		chmod -v -w "$mp4File"
-		echo "==> Processing $mp4File is Done." >&2
+		echo "==> DONE processing $mp4File." >&2
 		echo >&2
 	done
 	echo "=> Finished !" >&2
