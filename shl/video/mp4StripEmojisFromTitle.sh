@@ -27,18 +27,17 @@ mp4StripEmojisFromTitle ()
 		fi
 
 		if perl -e "use utf8; exit 0 if '$title' =~ /$emojiRegExp/; exit 1;";then
-			echo "==> Emojis were found in <$title>." >&2
+			echo "==> Emojis were found in this title: <$title>." >&2
 			title=$(echo "$title" | perl -C -pe "s/${emojiRegExp}\s*//g")
 			echo "==> title = <$title>" >&2
 		else
-			echo "==> NO emojis were found in <$title>, processing next file (if any) ..." >&2
+			echo "==> NO emojis were found in this title: <$title>, processing next file (if any) ..." >&2
 			echo >&2
 			continue
 		fi
 
 		timestampFileRef=$(mktemp) && touch -r "$mp4File" $timestampFileRef
 		test -w "$mp4File" || chmod -v u+w "$mp4File"
-		echo >&2
 		echo "==> Removing the emojis present in the title of <$mp4File> ..." >&2
 		time mp4tags -s "$title" "$mp4File"
 		touch -r $timestampFileRef "$mp4File" && \rm $timestampFileRef
