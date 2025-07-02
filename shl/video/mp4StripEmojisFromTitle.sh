@@ -16,7 +16,11 @@ mp4StripEmojisFromTitle ()
 	do
 		echo "==> Processing $mp4File ..." >&2
 		set -o pipefail
-		title=$(bash -c "ffprobe -v error -show_format -show_streams -of json \"$mp4File\"" | jq -r .format.tags.title | sed "s/null//") || exit
+		if ! title=$(bash -c "ffprobe -v error -show_format -show_streams -of json \"$mp4File\"" | jq -r .format.tags.title | sed "s/null//");then
+			echo "==> The title <$title> is empty, processing next file (if any) ..." >&2
+			echo >&2
+			continue
+		fi
 		set +o pipefail
 
 		echo "==> title = <$title>"
