@@ -1,4 +1,4 @@
-#!/usr/bin/env -S bash -u -e
+#!/usr/bin/env -S bash -u
 
 mp4StripEmojisFromTitle ()
 {
