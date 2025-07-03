@@ -558,7 +558,9 @@ function gateWay {
 function showNTPServers {
 	if( $IsWindows ) {
 #		(Get-ItemPropertyValue -Path HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Parameters -Name NtpServer).split(',')[0]
-		(w32tm -query -status | sls ^Source).ToString().Split()[1] + " = " + (w32tm -query -status | sls ^ID.*IP).ToString().Split()[-1].Split(')')[0]
+		gpv HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DateTime\Servers -v 1
+  		gpv HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DateTime\Servers -v 2
+		(w32tm /query /status | sls "^Source:")[0].Line.Split()[1]
 	}
 }
 
