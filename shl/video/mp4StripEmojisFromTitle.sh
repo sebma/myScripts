@@ -8,6 +8,7 @@ mp4StripEmojisFromTitle ()
 	}
 
 	local ffprobe="command ffprobe -hide_banner"
+	local ffprobeJsonOutput="-v error -show_format -show_streams -of json"
 
 	echo >&2
 	echo "=> Starting $FUNCNAME $@ ..." >&2
@@ -17,13 +18,13 @@ mp4StripEmojisFromTitle ()
 	do
 		echo >&2
 		echo "==> Processing <$mp4File> ..." >&2
-		title=$(bash -c "ffprobe -v error -show_format -show_streams -of json \"$mp4File\"" | jq -r .format.tags.title | sed "s/null//")
+		title=$(bash -c "ffprobe $ffprobeJsonOutput \"$mp4File\"" | jq -r .format.tags.title | sed "s/null//")
 
 		test -z "$title" && echo "==> The is no title for this video, processing next file (if any) ..." >&2 && continue
 
-		if perl -e "use utf8; exit 0 if '$title' =~ /$emojiRegExp/; exit 1;";then
+		if perl -e $"use utf8; exit 0 if '$title' =~ /$emojiRegExp/; exit 1;";then
 			echo "==> Emojis were found in this title: <$title>." >&2
-			title=$(echo "$title" | perl -C -pe "s/${emojiRegExp}\s*//g")
+			title=$(echo "$title" | perl -C -pe "s/\s*${emojiRegExp}\s*//g")
 			echo "==> Cleaned up title = <$title>" >&2
 		else
 			echo "==> NO emojis were found in this title: <$title>, processing next file (if any) ..." >&2
