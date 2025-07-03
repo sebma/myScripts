@@ -20,9 +20,8 @@ videoResetExtension ()
 		format_name=$(bash -c "ffprobe $ffprobeJsonOutput \"$videoFile\"" | jq -r .format.format_name | sed "s/null//")
 
 		test -z "$format_name" && echo "==> The is no format_name for this video, processing next file (if any) ..." >&2 && continue
-		extension="${videoFile/*./}"
-		echo "==> extension = <$extension>"
 
+		echo "==> format_name = <$format_name>"
 		case $format_name in
 			"mov,mp4,m4a,3gp,3g2,mj2") newExtension=mp4;;
 			mpegts) newExtension=m2ts;;
@@ -30,11 +29,12 @@ videoResetExtension ()
 		esac
 		echo "==> newExtension = <$newExtension>"
 
+		extension="${videoFile/*./}"
+		echo "==> extension = <$extension>"
+
 		if [ $newExtension != $extension ];then
-#			test -w "$videoFile" || chmod -v u+w "$videoFile"
-			echo "==> Updating the video format_name without the emojis in <$videoFile> ..." >&2
-			echo mv -v "$videoFile" "${videoFile/$extension/$newExtension}"
-#			chmod -v -w "$videoFile"
+			echo "==> Renamming the video according to its format_name which is <$format_name>." >&2
+			mv -v "$videoFile" "${videoFile/$extension/$newExtension}"
 			echo "==> DONE processing $videoFile." >&2
 		fi
 	done
