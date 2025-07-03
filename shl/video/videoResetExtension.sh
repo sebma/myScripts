@@ -8,6 +8,7 @@ videoResetExtension ()
 	}
 
 	local ffprobe="command ffprobe -hide_banner"
+    local ffprobeJsonOutput="-v error -show_format -show_streams -of json"
 
 	echo >&2
 	echo "=> Starting $FUNCNAME $@ ..." >&2
@@ -16,7 +17,7 @@ videoResetExtension ()
 	do
 		echo >&2
 		echo "==> Processing <$videoFile> ..." >&2
-		format_name=$(bash -c "ffprobe -v error -show_format_name -show_streams -of json \"$videoFile\"" | jq -r .format.format_name | sed "s/null//")
+		format_name=$(bash -c "ffprobe $ffprobeJsonOutput \"$videoFile\"" | jq -r .format.format_name | sed "s/null//")
 
 		test -z "$format_name" && echo "==> The is no format_name for this video, processing next file (if any) ..." >&2 && continue
 		extension="${videoFile/*./}"
