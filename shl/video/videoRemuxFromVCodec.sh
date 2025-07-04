@@ -1,6 +1,6 @@
 #!/usr/bin/env -S bash -u
 
-videoRemux2mp4 ()
+videoRemuxFromVCodec ()
 {
 	test $# = 0 && {
 		echo "=> Usage: $FUNCNAME mp4File1 mp4File2 mp4File3 ..." 1>&2
@@ -23,13 +23,12 @@ videoRemux2mp4 ()
 		extension="${videoFile/*./}"
 		echo "==> extension = <$extension>" >&2
 
-		format_name=$(bash -c "ffprobe $ffprobeJsonOutput \"$videoFile\"" | jq -r .format.format_name | sed "s/null//")
-		test -z "$format_name" && echo "==> The is no format_name for this video, processing next file (if any) ..." >&2 && continue
+		vcodec_name=$(bash -c "ffprobe $ffprobeJsonOutput \"$videoFile\"" | jq -r .streams[0].codec_name | sed "s/null//")
+		test -z "$vcodec_name" && echo "==> The is no vcodec_name for this video, processing next file (if any) ..." >&2 && continue
 
-		echo "==> format_name = <$format_name>" >&2
-		case $format_name in
-			"mov,mp4,m4a,3gp,3g2,mj2") newExtension=mp4;;
-			mpegts) newExtension=m2ts;;
+		echo "==> vcodec_name = <$vcodec_name>" >&2
+		case $vcodec_name in
+			h264) newExtension=mp4;;
 			*) echo "==> This format is not supported yet." >&2; continue;;
 		esac
 		echo "==> newExtension = <$newExtension>" >&2
@@ -38,7 +37,7 @@ videoRemux2mp4 ()
 
 		if [ $newExtension != $extension ];then
 			outputFile="${videoFile/$extension/$newExtension}"
-			echo "==> Remuxing the video according to its format_name which is <$format_name>." >&2
+			echo "==> Remuxing the video according to its vcodec_name which is <$vcodec_name>." >&2
 			time $ffmpeg -i "$videoFile" $remuxOptions "$outputFile"
 			sync
 			touch -r "$videoFile" "$outputFile"
@@ -49,4 +48,4 @@ videoRemux2mp4 ()
 	echo "=> Finished !" >&2
 }
 
-videoRemux2mp4 "$@"
+videoRemuxFromVCodec "$@"
