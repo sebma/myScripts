@@ -39,8 +39,10 @@ videoRemuxFromVCodec ()
 			outputFile="${videoFile/$extension/$newExtension}"
 			echo "==> Remuxing the video according to its vcodec_name which is <$vcodec_name>." >&2
 			time $ffmpeg -i "$videoFile" $remuxOptions "$outputFile"
+			retCode=$?
 			sync
 			touch -r "$videoFile" "$outputFile"
+			test $retCode = 0 && rm -vf "$videoFile"
 		 	echo "==> outputFile = <$outputFile>" >&2
 			echo "==> DONE processing $videoFile." >&2
 		fi
