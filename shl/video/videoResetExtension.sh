@@ -17,8 +17,10 @@ videoResetExtension ()
 	do
 		echo >&2
 		echo "==> Processing <$videoFile> ..." >&2
-		format_name=$(bash -c "ffprobe $ffprobeJsonOutput \"$videoFile\"" | jq -r .format.format_name | sed "s/null//")
+		extension="${videoFile/*./}"
+		echo "==> extension = <$extension>" >&2
 
+		format_name=$(bash -c "ffprobe $ffprobeJsonOutput \"$videoFile\"" | jq -r .format.format_name | sed "s/null//")
 		test -z "$format_name" && echo "==> The is no format_name for this video, processing next file (if any) ..." >&2 && continue
 
 		echo "==> format_name = <$format_name>" >&2
@@ -29,8 +31,6 @@ videoResetExtension ()
 		esac
 		echo "==> newExtension = <$newExtension>" >&2
 
-		extension="${videoFile/*./}"
-		echo "==> extension = <$extension>" >&2
 
 		if [ $newExtension != $extension ];then
 			echo "==> Renamming the video according to its format_name which is <$format_name>." >&2
