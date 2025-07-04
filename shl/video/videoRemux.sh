@@ -26,14 +26,14 @@ function videoRemux {
 		*) options="" ;;
 	esac
 
-	remuxOptions="-map 0 -c copy"
-	mp4Options="-movflags +frag_keyframe"
+	local remuxOptions="-map 0 -c copy"
+	local mp4Options="-movflags +frag_keyframe"
  	[ $extension = mp4 ] && remuxOptions="$remuxOptions $mp4Options"
-	ffmpeg="command  ffmpeg  -hide_banner"
+	local ffmpeg="command  ffmpeg  -hide_banner"
 	time $ffmpeg -i "$inputFile" $remuxOptions $options "${remainingArgs[@]}" "$outputFile"
 	sync
 	touch -r "$inputFile" "$outputFile"
- 	echo "=> outputFile = <$outputFile>"
+ 	echo "=> outputFile = <$outputFile>" >&2
 }
 
 videoRemux "$@"
