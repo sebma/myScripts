@@ -1,1 +1,1 @@
-video/videoRemux2mp4.sh
+video/videoRemuxFromVCodec.sh
