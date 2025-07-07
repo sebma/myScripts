@@ -359,7 +359,7 @@ if( $IsWindows ) {
 	function cdst {pushd "$HOME/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup"}
 	function cfind { choco find @args }
  	function cinfo { choco info @args }
-	function chome { (choco info @args | sls "Site:").Line.Split()[-1] }
+	function chome { Start-Process $(choco info @args | sls "Site:").Line.Split()[-1] }
 	function dirname($path) { Split-Path -Path $path }
 	function getInterFaceInfos($name) { Get-NetIPAddress -InterfaceAlias $name }
 #	function grepps($pattern) { Out-String -Stream | sls "$pattern" }
