@@ -346,7 +346,6 @@ if( $IsWindows ) {
 	function csearch { choco search @args | sort }
 	function clistlocal { choco list -l @args | sort }
 	function coutdated { choco outdated }
-	function cinfo { choco info @args | more }
 
 	if(alias man 2>$null | sls man) {
 		del alias:man
