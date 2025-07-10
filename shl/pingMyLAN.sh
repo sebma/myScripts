@@ -13,7 +13,7 @@ pingMyLAN ()
 		elif type -P nmap > /dev/null 2>&1; then
 			time \nmap -T5 -sP $myLAN/$prefix | sed -n '/Nmap scan report for /s/Nmap scan report for //p'
    		else
-     			time for i in $(seq $(($nbHost-1)); do ping $lanPrefix.$i -c1 -W1 & done | grep from
+     			time for i in $(seq $(($nbHost-1)); do ping $lanPrefix.$i -c1 -W1 & done | grep from | sort -t . -k 4n
 		fi
 	elif [ $# = 1 ]; then
 		port=$1
