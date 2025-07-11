@@ -1,1 +1,1 @@
-Get-NetTCPConnection -State listen | select local* , remote* , state , OwningProcess , @{ Name="Name" ; Expression={ (Get-WmiObject win32_service | ? ProcessId -eq $_.OwningProcess).Name } } | sort-object LocalPort
+Get-NetTCPConnection -State listen | select local* , remote* , state , OwningProcess , @{ Name="ServiceName" ; Expression={ (Get-WmiObject win32_service | ? ProcessId -eq $_.OwningProcess).ServiceName } } | sort-object LocalPort
