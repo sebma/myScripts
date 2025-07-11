@@ -1,0 +1,1 @@
+Get-NetTCPConnection -RemoteAddress 0.0.0.0 -State listen | select local* , remote* , state , OwningProcess , @{ Name="ServiceName" ; Expression={ (Get-WmiObject win32_service | ? ProcessId -eq $_.OwningProcess).Name } } | sort-object LocalPort
