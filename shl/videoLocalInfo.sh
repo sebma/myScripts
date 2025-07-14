@@ -8,8 +8,7 @@ function videoLocalInfo {
 		local ffprobeOptions="-probesize 400M -analyzeduration 400M"
 		for urlOrFile;do
 			echo "=> urlOrFile = $urlOrFile"
-			if echo "$urlOrFile" | egrep -q "(https?|s?ftps?|ssh|rtmp|rtsp|mms)://"
-			then
+			if echo "$urlOrFile" | egrep -q "(https?|s?ftps?|ssh|rtmp|rtsp|mms)://";then
 				#remote stream
 				echo "=> Cannot handle remote stream, next ..."
 				continue
