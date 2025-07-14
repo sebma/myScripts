@@ -1,4 +1,4 @@
-#!/usr/bin/env -S bash -u
+#!/usr/bin/env bash
 
 [ $BASH_VERSINFO -lt 4 ] && echo "=> [WARNING] BASH_VERSINFO = $BASH_VERSINFO then continuing in bash4 ..." && exec bash4 $0 "$@"
 
@@ -19,7 +19,6 @@ function set_colors() {
 		export escapeChar=$'\033'
 	fi
 }
-
 function usage() {
 	cat <<-EOF >&2
 Usage: $scriptBaseName [STRING]...
@@ -40,7 +39,6 @@ Usage: $scriptBaseName [STRING]...
 	--ytdl-k		keep downloaded intermediate files
 	--ytdl-x		extract audio
 	--ytdl-v		set downloader in verbose mode
-
 EOF
 	exit 1
 }
@@ -52,6 +50,105 @@ function checkRequirements() {
 			exit 2
 		fi
 	done
+}
+function parseArgs() {
+	local osType=$(uname -s)
+	local ffmpegErrorLogLevel=repeat+error
+	local ffmpegInfoLogLevel=repeat+info
+
+	if [ $osType = Linux ];then
+		if getopt -V | grep getopt.*util-linux -q;then
+			export getopt=getopt
+		else
+			echo "=> ERROR : You must use getopt from util-linux." >&2
+			exit 2
+		fi
+	elif [ $osType = Darwin ];then
+		export getopt=/usr/local/opt/gnu-getopt/bin/getopt
+	fi
+
+	TEMP=$($getopt -o 'df:hp:t:vxy' --long 'debug,downloader:,ffmpeg-e,ffmpeg-i,ffmpeg-w,formats:,help,playlist:,overwrite,timeout:,verbose,xtrace,yt-dl,ytdl-k,ytdl-x,ytdl-v' -- "$@")
+
+	if [ $? -ne 0 ]; then
+		echo 'Terminating...' >&2
+		exit 1
+	fi
+
+	# Note the quotes around "$TEMP": they are essential!
+	eval set -- "$TEMP"
+	unset TEMP
+
+	declare -g debug=""
+	declare -g downloader=yt-dlp
+	declare -g ffmpegLogLevel=$ffmpegErrorLogLevel
+	declare -g initialSiteVideoFormat=null
+	declare -g playlistFileName=""
+	declare -g timeout=180m
+	declare -g undebug="set +x" 
+	declare -g verboseLevel=0
+	declare -g ytdlInitialOptions=()
+	declare -g lastArgs
+	while true; do
+		case "$1" in
+			-d|--debug) shift
+				debug="set -x"
+				undebug=""
+				ytdlInitialOptions+=( -v )
+				;;
+			--downloader) shift
+				downloader=$1
+				shift
+				;;
+			--ffmpeg-e) shift
+				ffmpegLogLevel=$ffmpegErrorLogLevel
+				;;
+			--ffmpeg-i) shift
+				ffmpegLogLevel=$ffmpegInfoLogLevel
+				;;
+			--ffmpeg-w) shift
+				ffmpegLogLevel=$ffmpegWarningLogLevel
+				;;
+			-f|--formats) shift
+				initialSiteVideoFormat="$1"
+				shift
+				;;
+			-h|--help) shift
+				usage
+				;;
+			-p|--playlist) shift
+				playlistFileName=$1
+				shift
+				;;
+			-t|--timeout) shift
+				timeout=$1
+				shift
+				;;
+			-v|--verbose) shift
+				let verboseLevel++
+				;;
+			--yt-dl) shift
+				downloader=youtube-dl
+				;;
+			--ytdl-k) shift
+				ytdlInitialOptions+=( -k )
+				;;
+			--ytdl-x) shift
+				ytdlInitialOptions+=( -x )
+				;;
+			--ytdl-v) shift
+				ytdlInitialOptions+=( -v )
+				;;
+			-x|--xtrace) shift
+				debug="set -x"
+				;;
+			-y|--overwrite) shift
+				overwrite=true
+				;;
+			-- ) shift; break ;;
+			* ) break ;;
+		esac
+	done
+	lastArgs="$@"
 }
 
 unset -f getRestrictedFilenamesFORMAT
@@ -66,16 +163,11 @@ function getRestrictedFilenamesFORMAT() {
 	local audioOnly=false
 	local channel_id=null
 	local channel_url=null
-	local debug=""
 	local domainStringForFilename=null
 	local downloadOK=-1
-	local downloader=yt-dlp
 	local embedThumbnail="--write-thumbnail"
 	local errorLogFile=null
 	local extension
-	local ffmpegErrorLogLevel=repeat+error
-	local ffmpegInfoLogLevel=repeat+info
-	local ffmpegLogLevel=$ffmpegErrorLogLevel
 	local ffmpegWarningLogLevel=repeat+warning
 	local fileSizeOnFS=0
 	local formats=null
@@ -84,13 +176,11 @@ function getRestrictedFilenamesFORMAT() {
 	local fqdn
 	local fqdn=null domain=null sld=null
 	local i=0
-	local initialSiteVideoFormat=null
 	local isLIVE=false
 	local j=0
 	local jsonResults=null
 	local metadataURLFieldName=description
 	local numberOfURLsToDownload=null
-	local playlistFileName=""
 	local protocolForDownload=null
 	local remoteFileSize=0
 	local scriptOptions=null
@@ -99,16 +189,12 @@ function getRestrictedFilenamesFORMAT() {
 	local thumbnailExtension=null
 	local thumbnailerName=$(basename $(type -P AtomicParsley 2>/dev/null || type -P ffmpeg 2>/dev/null))
 	local thumbnailerExecutable="command $thumbnailerName 2>/dev/null"
-	local timeout=180m
 	local timestampFileRef=null
 	local tool=null
 	local translate=cat
-	local undebug="set +x"
 	local userAgent=null
-	local verboseLevel=0
 	local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__%(extractor)s.%(ext)s"
 	local ytdlExtraOptions=()
-	local ytdlInitialOptions=()
 
 	echo "=> Started <$scriptBaseName> on $@ at : $startTime ..."
 	echo
@@ -134,93 +220,6 @@ function getRestrictedFilenamesFORMAT() {
 
 	grepColor=$grep
 	grep --help 2>&1 | grep -q -- --color && grepColor+=" --color"
-
-	function parseArgs() {
-		osType=$(uname -s)
-		if [ $osType = Linux ];then
-			if getopt -V | grep getopt.*util-linux -q;then
-				export getopt=getopt
-			else
-				echo "=> ERROR : You must use getopt from util-linux." >&2
-				exit 2
-			fi
-		elif [ $osType = Darwin ];then
-			export getopt=/usr/local/opt/gnu-getopt/bin/getopt
-		fi
-
-		TEMP=$($getopt -o 'df:hp:t:vxy' --long 'debug,downloader:,ffmpeg-e,ffmpeg-i,ffmpeg-w,formats:,help,playlist:,overwrite,timeout:,verbose,xtrace,yt-dl,ytdl-k,ytdl-x,ytdl-v' -- "$@")
-
-		if [ $? -ne 0 ]; then
-			echo 'Terminating...' >&2
-			exit 1
-		fi
-
-		# Note the quotes around "$TEMP": they are essential!
-		eval set -- "$TEMP"
-		unset TEMP
-
-		while true; do
-			case "$1" in
-				-d|--debug) shift
-					debug="set -x"
-					undebug=""
-					ytdlInitialOptions+=( -v )
-					;;
-				--downloader) shift
-					downloader=$1
-					shift
-					;;
-				--ffmpeg-e) shift
-					ffmpegLogLevel=$ffmpegErrorLogLevel
-					;;
-				--ffmpeg-i) shift
-					ffmpegLogLevel=$ffmpegInfoLogLevel
-					;;
-				--ffmpeg-w) shift
-					ffmpegLogLevel=$ffmpegWarningLogLevel
-					;;
-				-f|--formats) shift
-					initialSiteVideoFormat="$1"
-					shift
-					;;
-				-h|--help) shift
-					usage
-					;;
-				-p|--playlist) shift
-					playlistFileName=$1
-					shift
-					;;
-				-t|--timeout) shift
-					timeout=$1
-					shift
-					;;
-				-v|--verbose) shift
-					let verboseLevel++
-					;;
-				--yt-dl) shift
-					downloader=youtube-dl
-					;;
-				--ytdl-k) shift
-					ytdlInitialOptions+=( -k )
-					;;
-				--ytdl-x) shift
-					ytdlInitialOptions+=( -x )
-					;;
-				--ytdl-v) shift
-					ytdlInitialOptions+=( -v )
-					;;
-				-x|--xtrace) shift
-					debug="set -x"
-					;;
-				-y|--overwrite) shift
-					overwrite=true
-					;;
-				-- ) shift; break ;;
-				* ) break ;;
-			esac
-		done
-		lastArgs="$@"
-	}
 
 	parseArgs "$@"
 	eval set -- "$lastArgs"
@@ -743,7 +742,6 @@ function getRestrictedFilenamesVLD() {
 	local possibleFormats="bestvideo[vcodec^=avc1][height<=?$height]+bestaudio[ext=m4a]/$other_Formats/best[ext=mp4][height<=?$height]"
 	getRestrictedFilenamesFORMAT -f "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
-
 function videoLocalInfo {
 	local size=0
 	type -P ffprobe >/dev/null && {
