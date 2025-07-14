@@ -6,6 +6,7 @@ function videoInfo {
 	type -P ffprobe >/dev/null && {
 		local youtube_dl='command youtube-dl'
 		local ffprobe='command ffprobe -hide_banner'
+		local ffprobeOptions="-probesize 400M -analyzeduration 400M"
 		local userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3513.1 Safari/537.36"
 		for urlOrFile;do
 			echo "=> urlOrFile = $urlOrFile"
