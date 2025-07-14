@@ -1,5 +1,6 @@
-#!/usr/bin/env -S bash -u
+#!/usr/bin/env bash
 
+set -u
 function videoInfo {
 	local size=0
 	type -P ffprobe >/dev/null && {
