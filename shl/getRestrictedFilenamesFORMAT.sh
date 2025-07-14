@@ -223,12 +223,12 @@ function getRestrictedFilenamesFORMAT() {
 	eval set -- "$lastArgs"
 
 	errorLogFile="${downloader}_errors_$$.log"
-	downloadCMD="env LANG=C.UTF-8 $downloader" # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
+	downloadCMD=( env LANG=C.UTF-8 $downloader ) # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
 
 	[ $verboseLevel = 1 ] && echo "=> TERM = <$TERM>"
 	[ $verboseLevel = 1 ] && echo "=> tty is <$(tty)>"
 
-	time $downloadCMD --ignore-config --rm-cache
+	time "${downloadCMD[@]}" --ignore-config --rm-cache
 	for url
 	do
 		let i++
@@ -265,7 +265,7 @@ function getRestrictedFilenamesFORMAT() {
 		printf "=> Fetching the formatsIDs list for \"$url\" for $siteVideoFormat format with ${effects[bold]}${colors[blue]}$downloader$normal at %s ...\n" "$(LC_MESSAGES=en date)"
 #		$undebug
 
-		jsonResults=$(time $downloadCMD --ignore-config --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
+		jsonResults=$(time "${downloadCMD[@]}" --ignore-config --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
 		formatsIDs=( $(echo "$jsonResults" | $jq -r .format_id | awk '!seen[$0]++') ) # Remove duplicate lines i.e: https://stackoverflow.com/a/1444448/5649639
 		formatsNumber=${#formatsIDs[@]}
 		echo
@@ -439,12 +439,12 @@ function getRestrictedFilenamesFORMAT() {
 			trap - INT
 			if [ $isLIVE == false ];then
 #				$debug
-				time $downloadCMD -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+				time "${downloadCMD[@]}" -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 				downloadOK=$?
 				$undebug
 			else
 #				$debug
-				time timeout -s SIGINT $timeout $downloadCMD -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+				time timeout -s SIGINT $timeout "${downloadCMD[@]}" -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 				downloadOK=$?
 				$undebug
 			fi
@@ -465,7 +465,7 @@ function getRestrictedFilenamesFORMAT() {
 				addThumbnail2media "$fileName" "$artworkFileName"
 			else
 				set +x
-				time $downloadCMD -o $fileName -f "$chosenFormatID" "$url" 2>$errorLogFile
+				time "${downloadCMD[@]}" -o $fileName -f "$chosenFormatID" "$url" 2>$errorLogFile
 				downloadOK=$?
 				echo
 
