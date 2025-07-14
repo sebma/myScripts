@@ -50,20 +50,37 @@ function checkRequirements() {
 			exit 2
 		fi
 	done
+	ffmpeg+=" -hide_banner"
+	ffprobe+=" -hide_banner"
+}
+function setOtherRequirements() {
+	local osFamily=$(uname -s)
+	if [ $osFamily = Linux ];then
+		for tool;do
+			declare -g $tool="$(type -P $tool)"
+		done
+	elif [ $osFamily = Darwin ];then
+		for tool;do
+			declare -g $tool="$(type -P g$tool)"
+		done
+	fi
+
+	grepColor=$grep
+	grep --help 2>&1 | grep -q -- --color && grepColor+=" --color"
 }
 function parseArgs() {
-	local osType=$(uname -s)
+	local osFamily=$(uname -s)
 	local ffmpegErrorLogLevel=repeat+error
 	local ffmpegInfoLogLevel=repeat+info
 
-	if [ $osType = Linux ];then
+	if [ $osFamily = Linux ];then
 		if getopt -V | grep getopt.*util-linux -q;then
 			export getopt=getopt
 		else
 			echo "=> ERROR : You must use getopt from util-linux." >&2
 			exit 2
 		fi
-	elif [ $osType = Darwin ];then
+	elif [ $osFamily = Darwin ];then
 		export getopt=/usr/local/opt/gnu-getopt/bin/getopt
 	fi
 
@@ -203,23 +220,7 @@ function getRestrictedFilenamesFORMAT() {
 #	local youtube_dl="env LANG=C.UTF-8 command youtube-dl"
 
 	checkRequirements ffmpeg ffprobe jq
-
-	ffmpeg+=" -hide_banner"
-	ffprobe+=" -hide_banner"
-
-	osFamily=$(uname -s)
-	if [ $osFamily = Linux ];then
-		date=$(type -P date)
-		grep=$(type -P grep)
-		stat=$(type -P stat)
-	elif [ $osFamily = Darwin ];then
-		date=$(type -P gdate)
-		grep=$(type -P ggrep)
-		stat=$(type -P gstat)
-	fi
-
-	grepColor=$grep
-	grep --help 2>&1 | grep -q -- --color && grepColor+=" --color"
+	setOtherRequirements date grep stat
 
 	parseArgs "$@"
 	eval set -- "$lastArgs"
