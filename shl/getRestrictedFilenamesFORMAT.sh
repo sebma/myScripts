@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -u
+
 [ $BASH_VERSINFO -lt 4 ] && echo "=> [WARNING] BASH_VERSINFO = $BASH_VERSINFO then continuing in bash4 ..." && exec bash4 $0 "$@"
 
 LANG=C.UTF-8
