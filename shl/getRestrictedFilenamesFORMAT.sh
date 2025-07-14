@@ -74,16 +74,17 @@ function parseArgs() {
 	local osFamily=$(uname -s)
 	local ffmpegErrorLogLevel=repeat+error
 	local ffmpegInfoLogLevel=repeat+info
+	local getopt=""
 
 	if [ $osFamily = Linux ];then
 		if getopt -V | grep getopt.*util-linux -q;then
-			export getopt=getopt
+			getopt=getopt
 		else
 			echo "=> ERROR : You must use getopt from util-linux." >&2
 			exit 2
 		fi
 	elif [ $osFamily = Darwin ];then
-		export getopt=/usr/local/opt/gnu-getopt/bin/getopt
+		getopt=/usr/local/opt/gnu-getopt/bin/getopt
 	fi
 
 	TEMP=$($getopt -o 'df:hp:t:vxy' --long 'debug,downloader:,ffmpeg-e,ffmpeg-i,ffmpeg-w,formats:,help,playlist:,overwrite,timeout:,verbose,xtrace,yt-dl,ytdl-k,ytdl-x,ytdl-v' -- "$@")
@@ -222,7 +223,7 @@ function getRestrictedFilenamesFORMAT() {
 	setOtherRequirements date grep stat
 
 	parseArgs "$@"
-	eval set -- "$lastArgs"
+	set -- "$lastArgs"
 
 	errorLogFile="${downloader}_errors_$$.log"
 	downloadCMD=( env LANG=C.UTF-8 $downloader ) # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
