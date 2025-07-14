@@ -216,9 +216,6 @@ function getRestrictedFilenamesFORMAT() {
 	echo "=> Started <$scriptBaseName> on $@ at : $startTime ..."
 	echo
 
-#	local youtube_dl="eval LANG=C.UTF-8 command youtube-dl" # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
-#	local youtube_dl="env LANG=C.UTF-8 command youtube-dl"
-
 	checkRequirements ffmpeg ffprobe jq
 	setOtherRequirements date grep stat
 
@@ -226,7 +223,7 @@ function getRestrictedFilenamesFORMAT() {
 	eval set -- "$lastArgs"
 
 	errorLogFile="${downloader}_errors_$$.log"
-	downloadCMD="env LANG=C.UTF-8 $downloader"
+	downloadCMD="env LANG=C.UTF-8 $downloader" # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
 
 	[ $verboseLevel = 1 ] && echo "=> TERM = <$TERM>"
 	[ $verboseLevel = 1 ] && echo "=> tty is <$(tty)>"
