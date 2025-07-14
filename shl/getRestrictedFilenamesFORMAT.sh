@@ -526,11 +526,11 @@ function getAudioExtension() {
 	else
 		case $acodec in
 			libspeex|speex) audioExtension=spx;;
-			opus|mp2|mp3|ac3) audioExtension=$acodec;;
 			vorbis) audioExtension=ogg;;
 			aac|mp4a) audioExtension=m4a;;
 			wmav2) audioExtension=wma;;
 			pcm_dvd|pcm_s16le) audioExtension=wav;;
+			opus|mp2|mp3|ac3) audioExtension=$acodec;;
 			*) audioExtension=unknown;;
 		esac
 	fi
