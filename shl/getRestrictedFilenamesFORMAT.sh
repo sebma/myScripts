@@ -44,6 +44,15 @@ Usage: $scriptBaseName [STRING]...
 EOF
 	exit 1
 }
+function checkRequirements() {
+	for tool;do
+		declare -g $tool="$(type -P $tool)"
+		if [ -z "${!tool}" ];then
+			echo "=> [$FUNCNAME] ERROR: $tool is required, you need to install it." >&2
+			exit 2
+		fi
+	done
+}
 
 unset -f getRestrictedFilenamesFORMAT
 function getRestrictedFilenamesFORMAT() {
@@ -105,17 +114,9 @@ function getRestrictedFilenamesFORMAT() {
 	echo
 
 #	local youtube_dl="eval LANG=C.UTF-8 command youtube-dl" # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
-	function videoDownloader() {
-		LANG=C.UTF-8 $downloader "$@"
-	}
+#	local youtube_dl="env LANG=C.UTF-8 command youtube-dl"
 
-	for tool in ffmpeg ffprobe jq;do
-		local $tool="$(type -P $tool)"
-		if [ -z "${!tool}" ];then
-			echo "=> [$FUNCNAME] ERROR: $tool is required, you need to install it." >&2
-			return 2
-		fi
-	done
+	checkRequirements ffmpeg ffprobe jq
 
 	ffmpeg+=" -hide_banner"
 	ffprobe+=" -hide_banner"
@@ -224,10 +225,13 @@ function getRestrictedFilenamesFORMAT() {
 	parseArgs "$@"
 	eval set -- "$lastArgs"
 
+	errorLogFile="${downloader}_errors_$$.log"
+	downloadCMD="env LANG=C.UTF-8 $downloader"
+
 	[ $verboseLevel = 1 ] && echo "=> TERM = <$TERM>"
 	[ $verboseLevel = 1 ] && echo "=> tty is <$(tty)>"
 
-	time videoDownloader --ignore-config --rm-cache
+	time $downloadCMD --ignore-config --rm-cache
 	for url
 	do
 		let i++
@@ -254,17 +258,17 @@ function getRestrictedFilenamesFORMAT() {
 			*) siteVideoFormat=$initialSiteVideoFormat ;;
 		esac
 
-		errorLogFile="${downloader}_errors_$$.log"
 		youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__$domainStringForFilename.%(ext)s"
 		jsonResults=null
 		ytdlExtraOptions=( "${ytdlInitialOptions[@]}" )
-		[ $downloader = yt-dlp ] && ytdlExtraOptions+=( --embed-metadata --format-sort +proto )
+		[[ $downloader =~ yt-dlp ]] && ytdlExtraOptions+=( --embed-metadata --format-sort +proto )
 		# ytdlExtraOptions+= ( --exec 'basename %(filepath)s .%(ext)s' --write-info-json )
 
 #		$debug
 		printf "=> Fetching the formatsIDs list for \"$url\" for $siteVideoFormat format with ${effects[bold]}${colors[blue]}$downloader$normal at %s ...\n" "$(LC_MESSAGES=en date)"
 #		$undebug
-		jsonResults=$(time videoDownloader --ignore-config --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
+
+		jsonResults=$(time $downloadCMD --ignore-config --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
 		formatsIDs=( $(echo "$jsonResults" | $jq -r .format_id | awk '!seen[$0]++') ) # Remove duplicate lines i.e: https://stackoverflow.com/a/1444448/5649639
 		formatsNumber=${#formatsIDs[@]}
 		echo
@@ -435,19 +439,19 @@ function getRestrictedFilenamesFORMAT() {
 			echo
 			printf "=> Starting $downloader at %s ...\n" "$(LC_MESSAGES=en date)"
 			echo
-			errorLogFile="${downloader}_errors_$$.log"
 			trap - INT
 			if [ $isLIVE == false ];then
 #				$debug
-				time videoDownloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+				time $downloadCMD -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+				downloadOK=$?
 				$undebug
 			else
 #				$debug
-				env LANG=C.UTF-8 time timeout -s SIGINT $timeout $downloader -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+				time timeout -s SIGINT $timeout $downloadCMD -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+				downloadOK=$?
 				$undebug
 			fi
 
-			downloadOK=$?
 			sync
 			echo
 
@@ -464,7 +468,7 @@ function getRestrictedFilenamesFORMAT() {
 				addThumbnail2media "$fileName" "$artworkFileName"
 			else
 				set +x
-				time videoDownloader -o $fileName -f "$chosenFormatID" "$url" 2>$errorLogFile
+				time $downloadCMD -o $fileName -f "$chosenFormatID" "$url" 2>$errorLogFile
 				downloadOK=$?
 				echo
 
