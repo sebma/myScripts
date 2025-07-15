@@ -568,7 +568,7 @@ function showNTPServers {
 	}
 }
 
-function macAddr($iface) {
+function mac@($iface) {
 	$argc = $PSBoundParameters.Count
 	if( $argc -eq 0 ) { (Get-NetAdapter) | select InterfaceAlias, MacAddress }
 	else { (Get-NetAdapter -Name $iface) | select InterfaceAlias, MacAddress }
