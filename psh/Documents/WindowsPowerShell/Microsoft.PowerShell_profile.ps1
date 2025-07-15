@@ -133,25 +133,30 @@ if( $IsWindows ) {
 
 	if ( $(alias ip *>$null;$?) ) { del alias:ip }
 	set-alias ipa ipv4
+ 	set-alias ipl iplink
+	set-alias mac@ iplink
  	set-alias ipr iproute
- 	function IPv4($iface) {
-		$argc = $PSBoundParameters.Count
-		if( $argc -eq 0 ) {
+	function IPv4($iface) {
+		if( $iface ) {
+			Get-NetIPAddress -AddressFamily IPv4 | ? InterfaceAlias -Match "$iface" | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" } | select InterfaceAlias , IPv4Address , PrefixLength
+		} else {
 			Get-NetIPAddress -AddressFamily IPv4  | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" } | select InterfaceAlias , IPv4Address , PrefixLength
 		}
-		else {
-			Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias $iface | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" } | select InterfaceAlias , IPv4Address , PrefixLength
+	}
+	function IPv6($iface) {
+		if( $iface ) {
+			Get-NetIPAddress -AddressFamily IPv6 | ? InterfaceAlias -Match "$iface" | ? { $_.InterfaceAlias -NotMatch "Local Area Connection*" } | select InterfaceAlias , IPv6Address , PrefixLength
+		} else {
+			Get-NetIPAddress -AddressFamily IPv6 | ? InterfaceAlias -NotMatch "Local Area Connection*" | select InterfaceAlias , IPv6Address , PrefixLength
 		}
 	}
-
-	function IPv6 {
-		Get-NetIPAddress -AddressFamily IPv6 | ? { $_.InterfaceAlias -NotMatch "Local Area Connection*" } | select InterfaceAlias , IPv6Address , PrefixLength
+	function iproute($dest) {
+		if( $dest ) {
+			Find-NetRoute -RemoteIPAddress $dest | Select-Object DestinationPrefix , NextHop , InterfaceAlias , ifIndex , InterfaceMetric , RouteMetric -Last 1 | Format-Table
+		} else {
+			Get-NetRoute -AddressFamily IPv4 | select DestinationPrefix,NextHop,InterfaceAlias,ifIndex,InterfaceMetric,RouteMetric | ? { $_.DestinationPrefix -ne "224.0.0.0/4" -and $_.DestinationPrefix -notmatch "[0-9.]*/32" } | Format-Table
+		}
 	}
-
-	function iproute {
- 		Get-NetRoute -AddressFamily IPv4 | select DestinationPrefix,NextHop,InterfaceAlias,ifIndex,InterfaceMetric,RouteMetric | ? { $_.DestinationPrefix -ne "224.0.0.0/4" -and $_.DestinationPrefix -notmatch "[0-9.]*/32" } | Format-Table
- 	}
-
 	function sdiff {
 		$argc=$args.Count
 		if ( $argc -eq 2 ) {
