@@ -1,7 +1,7 @@
 # $HOME/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1
 #
 
-$profileDIR=$(Split-Path "$PROFILE")
+$profileDIR=$(Split-Path "$PROFILE" -parent)
 # Create Profile directory if not exists
 if( ! ( Test-Path -Path (Split-Path "$PROFILE") ) ) { mkdir (Split-Path "$PROFILE");exit }
 
