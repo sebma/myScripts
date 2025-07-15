@@ -136,6 +136,13 @@ if( $IsWindows ) {
  	set-alias ipl iplink
 	set-alias mac@ iplink
  	set-alias ipr iproute
+	function iplink($iface) {
+		if( $iface ) {
+			Get-NetAdapter | ? InterfaceAlias -Match "$iface" | select InterfaceAlias , Status , MacAddress , MtuSize , LinkSpeed | Format-Table
+		} else {
+			Get-NetAdapter | select InterfaceAlias , Status , MacAddress , MtuSize , LinkSpeed | Format-Table
+		}
+	}
 	function IPv4($iface) {
 		if( $iface ) {
 			Get-NetIPAddress -AddressFamily IPv4 | ? InterfaceAlias -Match "$iface" | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" } | select InterfaceAlias , IPv4Address , PrefixLength
