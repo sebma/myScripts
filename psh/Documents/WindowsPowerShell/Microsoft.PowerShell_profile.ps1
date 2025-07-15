@@ -1,7 +1,7 @@
 # $HOME/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1
 #
 
-$profileDIR=$(Split-Path -Path "$PROFILE" -Parent)
+$profileDIR=$(Split-Path -Parent -Path "$PROFILE")
 
 # Create Profile directory if not exists
 if( ! ( Test-Path -Path (Split-Path "$PROFILE") ) ) { mkdir (Split-Path "$PROFILE");exit }
@@ -374,7 +374,7 @@ if( $IsWindows ) {
 	function cfind { choco find @args }
 	function chome { Start-Process $(choco info @args | sls "Site:").Line.Split()[-1] }
  	function cinfo { choco info @args }
-	function dirname($path) { Split-Path -Path $path -Parent }
+	function dirname($path) { Split-Path -Parent -Path $path }
 	function getInterFaceInfos($name) { Get-NetIPAddress -InterfaceAlias $name }
 #	function grepps($pattern) { Out-String -Stream | sls "$pattern" }
 	function host1($name, $server) { (nslookup $name $server 2>$null | sls Nom,Name,Address)[-2..-1] | Out-String -stream | foreach { $_.split(' ')[-1] } }
