@@ -1,6 +1,7 @@
 # $HOME/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1
 #
 
+$profileDIR=$(Split-Path "$PROFILE")
 # Create Profile directory if not exists
 if( ! ( Test-Path -Path (Split-Path "$PROFILE") ) ) { mkdir (Split-Path "$PROFILE");exit }
 
@@ -53,6 +54,7 @@ function osFamily {
 if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily } else { $osFamily = osFamily }
 
 if( $IsWindows ) {
+	$
 	$SuppressDriveInit = $true # cf. https://stackoverflow.com/a/1662159/5649639
 	$username = $env:USERNAME
 	$domain = $env:USERDOMAIN
