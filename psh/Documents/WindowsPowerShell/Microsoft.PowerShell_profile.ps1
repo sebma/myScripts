@@ -129,9 +129,16 @@ if( $IsWindows ) {
 	}
 
 	if ( $(alias ip *>$null;$?) ) { del alias:ip }
-	set-alias ip ipv4
- 	function IPv4 {
-		Get-NetIPAddress -AddressFamily IPv4  | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" } | select InterfaceAlias , IPv4Address , PrefixLength
+	set-alias ipa ipv4
+ 	set-alias ipr iproute
+ 	function IPv4($iface) {
+		$argc = $PSBoundParameters.Count
+		if( $argc -eq 0 ) {
+			Get-NetIPAddress -AddressFamily IPv4  | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" } | select InterfaceAlias , IPv4Address , PrefixLength
+		}
+		else {
+			Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias $iface | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" } | select InterfaceAlias , IPv4Address , PrefixLength
+		}
 	}
 
 	function IPv6 {
