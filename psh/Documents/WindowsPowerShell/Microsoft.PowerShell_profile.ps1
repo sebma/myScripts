@@ -138,6 +138,10 @@ if( $IsWindows ) {
 		Get-NetIPAddress -AddressFamily IPv6 | ? { $_.InterfaceAlias -NotMatch "Local Area Connection*" } | select InterfaceAlias , IPv6Address , PrefixLength
 	}
 
+	function iproute {
+ 		Get-NetRoute -AddressFamily IPv4 | select DestinationPrefix,NextHop,InterfaceAlias,ifIndex,InterfaceMetric,RouteMetric | ? { $_.DestinationPrefix -ne "224.0.0.0/4" -and $_.DestinationPrefix -notmatch "[0-9.]*/32" } | Format-Table
+ 	}
+
 	function sdiff {
 		$argc=$args.Count
 		if ( $argc -eq 2 ) {
