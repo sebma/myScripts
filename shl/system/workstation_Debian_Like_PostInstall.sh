@@ -37,7 +37,7 @@ if $isDebianLike;then
 	$sudo ufw reload
 #	$sudo ufw allow OpenSSH || $sudo ufw allow ssh
 #	$sudo ufw allow cups
-	localNetwork=$(ip -4 route | awk "/^[0-9].*dev $(ip -4 route | awk '/default/{print$5}')/"'{print$1}')
+	localNetwork=$(ip -4 route show dev $(ip -4 route show default | awk '{printf$5;exit}') | awk '!/default/&&!/169.254.0.0\/16/{printf$1;exit}')
 	$sudo ufw allow from $localNetwork to any app OpenSSH
 	$sudo ufw allow from $bastion to any app OpenSSH
 	$sudo ufw allow 1022/tcp comment "do-release-upgrade alternate SSH port"
