@@ -25,7 +25,7 @@ if $isDebianLike;then
 #	$sudo ufw app list
 	$sudo sed -i "s/IPV6.*/IPV6=no/" /etc/default/ufw
 
-	localNetwork=$(ip -4 route show dev $(ip -4 route show default | awk '{print$5}') | awk '!/default/{print$1}')
+	localNetwork=$(ip -4 route show dev $(ip -4 route show default | awk '{printf$5;exit}') | awk '!/default/&&!/169.254.0.0\/16/{printf$1;exit}')
 	for ip in $localNetwork $bastionIP;do
 		$sudo ufw allow from $ip to any app OpenSSH
 		$sudo ufw allow from $ip to any port 1022 proto tcp comment "do-release-upgrade alternate SSH port"
