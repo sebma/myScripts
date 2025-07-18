@@ -36,6 +36,7 @@ if $isDebianLike;then
 	$sudo sed -i "s/IPV6.*/IPV6=no/" /etc/default/ufw
 	$sudo ufw reload
 #	$sudo ufw allow OpenSSH || $sudo ufw allow ssh
+#	$sudo ufw allow cups
 	localNetwork=$(ip -4 route | awk "/^[0-9].*dev $(ip -4 route | awk '/default/{print$5}')/"'{print$1}')
 	$sudo ufw allow from $localNetwork to any app OpenSSH
 	$sudo ufw allow from $bastion to any app OpenSSH
