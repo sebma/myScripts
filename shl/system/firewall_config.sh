@@ -23,7 +23,8 @@ test $(id -u) == 0 && sudo=""
 
 if $isDebianLike;then
 	dpkg -s ufw &>/dev/null || $sudo apt install -V ufw
-	$sudo ufw allow ssh
+	$sudo ufw allow OpenSSH
+ 	$sudo ufw allow cups
 	$sudo ufw allow 1022/tcp comment "do-release-upgrade alternate SSH port"
 	$sudo ufw allow 2002/tcp comment "LogMeIn Host"
 	$sudo ufw allow 62354/tcp comment "GLPI-Agent"
