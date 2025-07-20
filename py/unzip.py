@@ -498,9 +498,12 @@ def listZipFileContents(zipFileName) :
 		print >> stderr, str(why); exit( -3 )
 
 def testZipFile(zipFileName) :
-	with ZipFile(zipFileName) as zipFile :
-		firstBadFile = zipFile.testzip()
-		return firstBadFile
+	try :
+		with ZipFile(zipFileName) as zipFile :
+			firstBadFile = zipFile.testzip()
+			return firstBadFile
+	except (IOError,BadZipfile) as why:
+		print >> stderr, str(why); exit( -3 )
 
 def main() :
 	initScript()
