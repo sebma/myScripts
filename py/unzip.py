@@ -503,7 +503,7 @@ def testZipFile(zipFileName) :
 			firstBadFile = zipFile.testzip()
 			return firstBadFile
 	except (IOError,BadZipfile) as why:
-		print >> stderr, str(why); exit( -3 )
+		print >> stderr, str(why); exit( 1 )
 
 def main() :
 	initScript()
@@ -520,7 +520,7 @@ def main() :
 		firstBadFile = testZipFile( args.zipfile )
 		if firstBadFile :
 			print >> stderr, "=> The file < " + firstBadFile + " > has a bad CRC."
-			exit(1)
+			exit(2)
 	else :
 		zipFile = abspath( args.zipfile ) #Le fichier zip doit etre accessible quel que soit le repertoire ou on est
 		chdir( args.dir ) #On travaille en relatif
