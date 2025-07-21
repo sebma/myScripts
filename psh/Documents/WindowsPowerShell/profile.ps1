@@ -1,4 +1,4 @@
-# $HOME/Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1
+# $HOME/Documents/WindowsPowerShell/profile.ps1
 #
 
 $profileDIR=$(Split-Path -Parent -Path "$PROFILE")
