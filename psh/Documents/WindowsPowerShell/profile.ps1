@@ -131,6 +131,18 @@ if( $IsWindows ) {
 		Get-Content (Get-PSReadlineOption).HistorySavePath | ? { $_ -match "$regExp" }
 	}
 
+ 	function lastBoot {
+		Get-CimInstance -ClassName Win32_OperatingSystem | Select CSName , LastBootUpTime
+	}
+	function lastBoots($nbBoots) {
+		if ( $nbBoots ) {
+			Get-WinEvent -LogName System | ? Id -eq 6005 | select -f $nbBoots
+		} else {
+			Get-WinEvent -LogName System | ? Id -eq 6005
+		}
+	}
+
+
 	if ( $(alias ip *>$null;$?) ) { del alias:ip }
 	set-alias ipa ipv4
  	set-alias ipl iplink
