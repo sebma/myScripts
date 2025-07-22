@@ -10,7 +10,8 @@ if( $IsWindows ) {
 		}
 
 		if( ! (sudo scoop bucket list | sls extras) ) { sudo scoop bucket add extras }
-		sudo scoop install freetube kitty gow pshazz openssh psutils wget gsudo -g
+		sudo scoop install freetube kitty gow pshazz openssh openssl-lts-light psutils wget gsudo -g
+  		sudo scoop reset openssl-lts-light
 		sudo scoop shim rm putty plink pscp psftp peagent
 		sudo -k
 	}
