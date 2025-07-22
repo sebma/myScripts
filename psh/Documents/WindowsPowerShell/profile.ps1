@@ -58,6 +58,14 @@ if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFa
 
 . $profileDIR/aliases.$osFamily.ps1
 
+if( isInstalled("openssl") ) {
+	"=> Sourcing openssl functions ..."
+	source $profileDIR/$scriptPrefix.openssl.ps1
+	#. $profileDIR/$scriptPrefix.openssl.ps1
+	setOpenSSLVariables
+	#"=> openssl = $openssl"
+}
+
 if( $IsWindows ) {
 	$SuppressDriveInit = $true # cf. https://stackoverflow.com/a/1662159/5649639
 	$username = $env:USERNAME
