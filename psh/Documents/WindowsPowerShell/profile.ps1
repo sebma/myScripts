@@ -53,6 +53,7 @@ function osFamily {
 }
 
 if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily } else { $osFamily = osFamily }
+#$IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily # A tester avec PowerShell v7
 
 . $profileDIR/profile.$osFamily.ps1
 
