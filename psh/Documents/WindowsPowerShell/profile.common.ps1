@@ -19,16 +19,18 @@ function osFamily {
 		} else {
 			$osFamily = "NOT_SUPPORTED"
 		}
+		return $IsWindows, $IsLinux, $IsMacOS, $osFamily
 	} else {
 		#Using PSv>5.1 where these variables are already defined
 		if( $IsWindows )   { $osFamily = "Windows" }
 		elseif( $IsLinux ) { $osFamily = "Linux" }
 		elseif( $IsMacOS ) { $osFamily = "Darwin" }
 		else { $osFamily = "NOT_SUPPORTED" }
+		return $osFamily
 	}
-
-	return $IsWindows, $IsLinux, $IsMacOS, $osFamily
 }
+
+if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily } else { $osFamily = osFamily }
 
 function pow2($a,$n) {
 	return [math]::pow($a,$n)
