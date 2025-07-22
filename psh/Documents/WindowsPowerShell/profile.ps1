@@ -1,9 +1,8 @@
-# $HOME/Documents/WindowsPowerShell/profile.ps1
-#
-
 $profileDIR=$(Split-Path -Parent -Path "$PROFILE")
+$scriptName = $MyInvocation.MyCommand.Name
+$scriptPrefix = $scriptName.Split(".")[0]
 
-. $profileDIR/profile.common.ps1
+. $profileDIR/$scriptPrefix.common.ps1
 
 # Create Profile directory if not exists
 if( ! ( Test-Path -Path (Split-Path "$PROFILE") ) ) { mkdir (Split-Path "$PROFILE");exit }
@@ -55,7 +54,7 @@ function osFamily {
 if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily } else { $osFamily = osFamily }
 #$IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily # A tester avec PowerShell v7
 
-. $profileDIR/profile.$osFamily.ps1
+. $profileDIR/$scriptPrefix.$osFamily.ps1
 
 . $profileDIR/aliases.$osFamily.ps1
 
