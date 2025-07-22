@@ -34,8 +34,19 @@ if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFa
 
 function isInstalled($cmd) { return gcm "$cmd" 2>$null }
 
+if ( $(alias history *>$null;$?) ) { del alias:history }
+function history($regExp) {
+	if( $regExp.Length -eq 0 ) { $regExp="." }
+	Get-Content (Get-PSReadlineOption).HistorySavePath | ? { $_ -match "$regExp" }
+}
+
 function pow2($a,$n) {
 	return [math]::pow($a,$n)
+}
+
+#function nocomment($file) { egrep -v "^(#|;|$)" "$file" }
+function nocomment {
+	sls -n "^\s*(#|$|;|//)" @args | % Line
 }
 
 function time {

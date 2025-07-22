@@ -61,6 +61,7 @@ function msinfo { msinfo32.exe -nfo "$ENV:COMPUTERNAME-$(get-date -f "yyyyMMdd")
 function main {
 	$FUNCNAME = $MyInvocation.MyCommand.Name
 	"=> Running $FUNCNAME ..."
+#	if( ! (Test-Path $HOME/Desktop/$env:COMPUTERNAME.nfo) ) { msinfo32 -nfo $HOME/Desktop/$env:COMPUTERNAME.nfo }
 	$DC = (Get-ADDomainController -Discover).Name
 	$LogonDC = $ENV:LOGONSERVER.Substring(2)
 	if( ! $DC.Contains( $LogonDC -replace "\d" ) ) {

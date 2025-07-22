@@ -19,8 +19,12 @@ function source($script) { . $script }
 
 . $profileDIR/aliases.$osFamily.ps1
 
+if( isInstalled("Get-ADUser") ) {
+	. $profileDIR/$scriptPrefix.AD.ps1
+}
+
 if( isInstalled("openssl") ) {
-	"=> Sourcing openssl functions ..."
+#	"=> Sourcing openssl functions ..."
 	source $profileDIR/$scriptPrefix.openssl.ps1
 	#. $profileDIR/$scriptPrefix.openssl.ps1
 	setOpenSSLVariables
@@ -85,30 +89,6 @@ function setVariables {
 setVariables
 
 if( $IsWindows ) {
-	Set-PSReadlineKeyHandler -Key ctrl+d -Function DeleteCharOrExit
-	if ( $(alias history *>$null;$?) ) { del alias:history }
-	function history($regExp) {
-		if( $regExp.Length -eq 0 ) { $regExp="." }
-		Get-Content (Get-PSReadlineOption).HistorySavePath | ? { $_ -match "$regExp" }
-	}
-
- 	function lastBoot {
-		Get-CimInstance -ClassName Win32_OperatingSystem | Select CSName , LastBootUpTime
-	}
-	function lastBoots($nbBoots) {
-		if ( $nbBoots ) {
-			Get-WinEvent -LogName System | ? Id -eq 6005 | select -f $nbBoots
-		} else {
-			Get-WinEvent -LogName System | ? Id -eq 6005
-		}
-	}
-
-
-	if ( $(alias ip *>$null;$?) ) { del alias:ip }
-	set-alias ipa ipv4
- 	set-alias ipl iplink
-	set-alias mac@ iplink
- 	set-alias ipr iproute
 	function iplink($iface) {
 		if( $iface ) {
 			Get-NetAdapter | ? InterfaceAlias -Match "$iface" | select InterfaceAlias , Status , MacAddress , MtuSize , LinkSpeed | Format-Table
@@ -164,111 +144,9 @@ if( $IsWindows ) {
 		"=> The default DC is now " + (Get-ADDomainController).Name
 	}
 
-	function nocomment {
-		sls -n "^\s*(#|$|;|//)" @args | % Line
-	}
- 
 	function netstat {
 		Get-NetTCPConnection | select local*,remote*,state,OwningProcess,@{Name="Process";Expression={(Get-Process -Id $_.OwningProcess).ProcessName}} | sort-object -property LocalPort | format-table | Out-String -Stream
 	}
-
-	function time {
-		# See https://github.com/lukesampson/psutils/blob/master/time.ps1
-		Set-StrictMode -Off;
-
-		# see http://stackoverflow.com/a/3513669/87453
-		$cmd, $args = $args
-		$args = @($args)
-		$sw = [diagnostics.stopwatch]::startnew()
-		& $cmd @args
-		$sw.stop()
-
-		"$($sw.elapsed)"
-	}
-
-	function viewPubKey($pubKey) {
-		& $openssl pkey -text -noout -in $pubKey
-	}
-
-	function openCsr {
-		& $openssl req -noout -in @args
-	}
-
-	function viewCsr {
-		openCsr @args -text
-	}
-
-	function viewCsrSummary {
-		openCsr @args -subject -nameopt multiline
-	}
-
-	function openCert {
-		& $openssl x509 -notext -noout -in @args
-	}
-
-	function viewCert {
-		openCert @args -text
-	}
-
-	function viewCertSummary {
-		openCert @args -subject -issuer -dates -ocsp_uri -nameopt multiline
-	}
-
-	function viewFullCert($cert) {
-		& $openssl crl2pkcs7 -nocrl -certfile $cert | openssl pkcs7 -noout -text -print_certs
-	}
-
-	function viewFullCertSummary($cert) {
-		viewFullCert($cert) | sls "CN|Not"
-	}
-
-	function openP12 {
-		& $openssl pkcs12 -noenc -in @args
-	}
-
-	function der2PEM($derFile, $pemFile) {
-		& $openssl x509 -in $derFile -outform PEM -out $pemFile
-	}
-
-	function pem2DER($pemFile , $derFile ) {
-		& $openssl x509 -in $pemFile -outform DER -out $derFile
-	}
-
-	function pem2P12($pemFile, $CAfile, $pemKey , $p12File ) {
-		& $openssl pkcs12 -in $pemFile -CAfile $CAfile -inkey $pemKey -export -out $p12File
-	}
-
-	function p12ToPEM($p12File, $pemFile) {
-#		$ext = ls $p12File | % Extension
-#		$pemFile = $p12File.replace( $ext , ".pem" )
-		& $openssl pkcs12 -noenc -in $p12File -out $pemFile
-	}
-
-	function pfx2PEM($pfxFile, $pemFile) {
-#		$ext = ls $pfxFile | % Extension
-#		$pemFile = $pfxFile.replace( $ext , ".pem" )
-		& $openssl pkcs12 -noenc -in $pfxFile -out $pemFile
-	}
-
-	function pfx2PKEY($pfxFile, $pkeyFile) {
-	#	$ext = ls $pfxFile | % Extension
-	#	$pemFile = $pfxFile.replace( $ext , ".pem" )
-		& $openssl pkcs12 -nocerts -nodes -in $pfxFile -out "$pkeyFile.new"
-		& $openssl pkey   -in "$pkeyFile.new" -out $pkeyFile
-		remove-item "$pkeyFile.new"
-	}
-
-	function viewP12 {
-		openP12 @args | openssl x509 -noout -text
-	}
-
-	function viewP12Summary {
-		openP12 @args | openssl x509 -noout -subject -issuer -dates -nameopt multiline
-	}
-
-	function msinfo { msinfo32.exe -nfo "$env:COMPUTERNAME-$(get-date -f "yyyyMMdd").nfo" }
-
-	if( ! (Test-Path $HOME/Desktop/$env:COMPUTERNAME.nfo) ) { msinfo32 -nfo $HOME/Desktop/$env:COMPUTERNAME.nfo }
 
 	if( ! (isInstalled("grep.exe")) ) {
 		function grep($pattern , $file) {
@@ -317,28 +195,6 @@ if( $IsWindows ) {
 		$Shortcut.Save()
 	}
 
-	function SetWindowsAliases {
-		set-alias -Scope Global np notepad
-		set-alias -Scope Global id whoisUSER
-		set-alias -Scope Global np notepad
-		set-alias -Scope Global np++ notepad++
-		set-alias -Scope Global nppp notepad++
-		set-alias -Scope Global np1 notepad1
-		set-alias -Scope Global np2 notepad2
-		set-alias -Scope Global np3 notepad3
-		set-alias -Scope Global reboot restart-computer
-		if( ! (alias wget 2>$null | sls wget) ) { set-alias -Scope Global wget Invoke-WebRequest }
-		set-alias -Scope Global more less  		
-	}
-
-	SetWindowsAliases
-
-
-	if(alias man 2>$null | sls man) {
-		del alias:man
-		function man { help @args | less }
-	}
-
 	function basename($path) { $path.split($dirSep)[-1] }
 	function cdh {pushd $HOME}
 	function cdr {pushd $HOME/AppData/Roaming/Microsoft/Windows/Recent}
@@ -351,23 +207,11 @@ if( $IsWindows ) {
 	function lock { rundll32.exe user32.dll,LockWorkStation }
 	function logoff { shutdown -l }
 #	function loopCommandThroughArgs($command) { $argc=$args.Count;for($i=0;$i -lt $argc;$i++) { $command $($args[$i]) } }
-	function nocomment($file) { egrep -v "^(#|;|$)" "$file" }
 	function pingps($remote) { Test-NetConnection $remote }
 	function renamePC($newName) { Rename-Computer -NewName $newName }
 	function runThroughArgs { $argc=$args.Count;for($i=0;$i -lt $argc;$i++) { echo "=> args[$i] = $($args[$i])"} }
 	function sysinfo { Get-ComputerInfo CsManufacturer , CsModel | % { $_.CsManufacturer , $_.CsModel } }
 
-	function groups {
-		$argc=$args.Count
-		if ( $argc -eq 0) {
-			( (Get-ADUser -Identity $env:username -Properties MemberOf).memberof | Get-ADGroup ).name | sort
-		} else {
-			for($i=0;$i -lt $argc;$i++) {
-				echo "=> Memberships of $($args[$i]) :"
-				( ( Get-ADUser -Identity $($args[$i]) -Properties MemberOf ).memberof | Get-ADGroup ).name | sort
-			}
-		}
-	}
 	function host($name, $server, $type) {
 		$FUNCNAME = $MyInvocation.MyCommand.Name
 		$argc = $PSBoundParameters.Count
@@ -404,39 +248,6 @@ if( $IsWindows ) {
 				} else {
 					Write-Warning "=> Not supported for the moment."
 				}
-			}
-		}
-	}
-	function lsgroup {
-		$argc=$args.Count
-		if ( $argc -gt 0) {
-			for($i=0;$i -lt $argc;$i++) {
-				echo "=> Members of group $($args[$i]) :"
-				(Get-ADGroupMember $args[$i]).SamAccountName | sort
-			}
-		}
-	}
-	function showSID { (whoisUSER @args).sid.value }
-	function whoisSID { (whoisUSER @args).SamAccountName }
-	function whoisUSER {
-		$argc=$args.Count
-		if ( $argc -eq 0) {
-			Get-ADUser -Identity $env:username -Properties AccountLockoutTime , BadLogonCount , Created , LastBadPasswordAttempt , PasswordLastSet
-		} else {
-			for($i=0;$i -lt $argc;$i++) {
-				echo "=> $($args[$i]) :"
-				Get-ADUser -Identity $($args[$i]) -Properties AccountLockoutTime , BadLogonCount , Created , LastBadPasswordAttempt, PasswordLastSet
-			}
-		}
-	}
-	function showOUOfComputer {
-		$argc=$args.Count
-		if ( $argc -eq 0) {
-			Get-ADComputer -Identity $env:COMPUTERNAME -Properties DistinguishedName,LastKnownParent,MemberOf | Out-String -Stream | sls DistinguishedName,LastKnownParent,MemberOf
-		} else {
-			for($i=0;$i -lt $argc;$i++) {
-				echo "=> $($args[$i]) :"
-				Get-ADComputer -Identity $($args[$i]) -Properties DistinguishedName,LastKnownParent,MemberOf | Out-String -Stream | sls DistinguishedName,LastKnownParent,MemberOf
 			}
 		}
 	}
