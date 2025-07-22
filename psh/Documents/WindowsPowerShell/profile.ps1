@@ -54,6 +54,10 @@ function osFamily {
 
 if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily } else { $osFamily = osFamily }
 
+. $profileDIR/profile.$osFamily.ps1
+
+. $profileDIR/aliases.$osFamily.ps1
+
 if( $IsWindows ) {
 	$SuppressDriveInit = $true # cf. https://stackoverflow.com/a/1662159/5649639
 	$username = $env:USERNAME
