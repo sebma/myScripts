@@ -1,6 +1,13 @@
-if ( $(alias openssl *>$null;$?) ) { del alias:openssl }
-Set-Variable -Scope global openssl "${ENV:ProgramData}\scoop\apps\openssl-lts-light\current\bin\openssl.exe"
-Set-Alias -Scope Global openssl "${ENV:ProgramData}\scoop\apps\openssl-lts-light\current\bin\openssl.exe"
+function setOpenSSLVariables {
+	if ( $(alias openssl *>$null;$?) ) { del alias:openssl }
+	if( $IsWindows ) {
+		Set-Variable -Scope global openssl "${ENV:ProgramData}\scoop\apps\openssl-lts-light\current\bin\openssl.exe"
+		Set-Alias -Scope Global openssl "${ENV:ProgramData}\scoop\apps\openssl-lts-light\current\bin\openssl.exe"
+	}
+}
+
+#setOpenSSLVariables
+#"=> openssl = $openssl"
 
 function viewPubKey($pubKey) {
 	& $openssl pkey -text -noout -in $pubKey
