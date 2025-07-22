@@ -22,7 +22,7 @@ function osFamily {
 	if( !(Test-Path variable:IsWindows) ) {
 		# $IsWindows is not defined, let's define it
 		$platform = [System.Environment]::OSVersion.Platform
-  		$IsWindows = $platform -eq "Win32NT"
+		$IsWindows = $platform -eq "Win32NT"
 		if( $isWindows ) {
 			$osFamily = "Windows"
 			$IsLinux = $IsMacOS = $false
