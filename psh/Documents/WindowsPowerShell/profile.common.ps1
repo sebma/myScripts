@@ -32,6 +32,8 @@ function osFamily {
 
 if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily } else { $osFamily = osFamily }
 
+function isInstalled($cmd) { return gcm "$cmd" 2>$null }
+
 function pow2($a,$n) {
 	return [math]::pow($a,$n)
 }

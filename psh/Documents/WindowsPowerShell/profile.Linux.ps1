@@ -1,0 +1,2 @@
+$USER= $env:USER
+$HOSTNAME = $env:HOSTNAME

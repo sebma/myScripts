@@ -11,12 +11,6 @@ $dirSep = [io.path]::DirectorySeparatorChar
 
 function source($script) { . $script }
 
-function pow2($a,$n) {
-	return [math]::pow($a,$n)
-}
-
-function isInstalled($cmd) { return gcm "$cmd" 2>$null }
-
 # sudo Update-Help
 
 #if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily } else { $osFamily = osFamily }
@@ -31,17 +25,6 @@ if( isInstalled("openssl") ) {
 	#. $profileDIR/$scriptPrefix.openssl.ps1
 	setOpenSSLVariables
 	#"=> openssl = $openssl"
-}
-
-if( $IsWindows ) {
-	$SuppressDriveInit = $true # cf. https://stackoverflow.com/a/1662159/5649639
-	$username = $env:USERNAME
-	$domain = $env:USERDOMAIN
-	$hostname = $env:COMPUTERNAME
-	$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
-} elseif( $IsLinux -or $IsMacOS ) {
-	$username = $env:USER
-	$hostname = $env:HOSTNAME
 }
 
 function osVersion {
@@ -337,7 +320,6 @@ if( $IsWindows ) {
 	function SetWindowsAliases {
 		set-alias -Scope Global np notepad
 		set-alias -Scope Global id whoisUSER
-#		set-alias -Scope Global source . # does not work
 		set-alias -Scope Global np notepad
 		set-alias -Scope Global np++ notepad++
 		set-alias -Scope Global nppp notepad++
@@ -346,22 +328,11 @@ if( $IsWindows ) {
 		set-alias -Scope Global np3 notepad3
 		set-alias -Scope Global reboot restart-computer
 		if( ! (alias wget 2>$null | sls wget) ) { set-alias -Scope Global wget Invoke-WebRequest }
-		set-alias -Scope Global  ex
 		set-alias -Scope Global more less  		
 	}
 
 	SetWindowsAliases
 
-	function ll { ls.exe -l @args }
-	function lla { ls.exe -al @args }
-	function lld { ls.exe -dl @args }
-	function llh { ls.exe -lh @args }
-	function llah { ls.exe -alh @args }
-	function ex{exit}
-
-	function csearch { choco search @args | sort }
-	function clistlocal { choco list -l @args | sort }
-	function coutdated { choco outdated @args }
 
 	if(alias man 2>$null | sls man) {
 		del alias:man
@@ -373,9 +344,6 @@ if( $IsWindows ) {
 	function cdr {pushd $HOME/AppData/Roaming/Microsoft/Windows/Recent}
 	function cdsd {pushd $HOME/AppData/Roaming/Microsoft/Windows/SendTo}
 	function cdst {pushd "$HOME/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup"}
-	function cfind { choco find @args }
-	function chome { Start-Process $(choco info @args | sls "Site:").Line.Split()[-1] }
- 	function cinfo { choco info @args }
 	function dirname($path) { Split-Path -Parent -Path $path }
 	function getInterFaceInfos($name) { Get-NetIPAddress -InterfaceAlias $name }
 #	function grepps($pattern) { Out-String -Stream | sls "$pattern" }
