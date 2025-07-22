@@ -5,7 +5,9 @@ if ( $(alias curl *>$null;$?) ) { del alias:curl }
 if ( $(alias ip *>$null;$?) ) { del alias:ip }
 if ( $(alias rm *>$null;$?) ) { del alias:rm }
 set-alias -Scope Global id whoisUSER
-set-alias -Scope Global l ls.exe
+if( isInstalled("ls.exe") ) {
+	set-alias -Scope Global l $ls
+}
 set-alias -Scope Global np notepad
 set-alias -Scope Global np++ notepad++
 set-alias -Scope Global np1 notepad1

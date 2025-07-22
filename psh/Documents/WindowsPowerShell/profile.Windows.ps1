@@ -9,15 +9,21 @@ $HOSTNAME = $ENV:COMPUTERNAME
 $SuppressDriveInit = $true # cf. https://stackoverflow.com/a/1662159/5649639
 $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
 
-#function ls { ls.exe -F @args }
-function l1 { ls.exe -1F @args }
-function la { ls.exe -aF @args }
-function ll { ls.exe -lF @args }
-function lla { ls.exe -laF @args }
-function llah { ls.exe -lahF @args }
-function lld { ls.exe -dlF @args }
-function llh { ls.exe -lhF @args }
-function rm { rm.exe -vi @args }
+if( isInstalled("ls.exe") ) {
+	$global:ls = "ls.exe"
+	#function ls { ls.exe -F @args }
+	function l1 { & $ls -1F @args }
+	function la { & $ls -aF @args }
+	function ll { & $ls -lF @args }
+	function lla { & $ls -laF @args }
+	function llah { & $ls -lahF @args }
+	function lld { & $ls -dlF @args }
+	function llh { & $ls -lhF @args }
+}
+
+if( isInstalled("rm.exe") ) {
+	function rm { rm.exe -vi @args }
+}
 
 function source($script ) {
 	if ($script) {
