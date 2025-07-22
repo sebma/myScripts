@@ -19,40 +19,7 @@ function isInstalled($cmd) { return gcm "$cmd" 2>$null }
 
 # sudo Update-Help
 
-function osFamily {
-	if( !(Test-Path variable:IsWindows) ) {
-		# $IsWindows is not defined, let's define it
-		$platform = [System.Environment]::OSVersion.Platform
-  		$IsWindows = $IsLinux = $IsMacOS = $false
-    		$osFamily = "not defined yet"
-		$IsWindows = $platform -eq "Win32NT"
-		if( $isWindows ) {
-			$osFamily = "Windows"
-		} elseif( $platform -eq "Unix" ) {
-			$osFamily = (uname -s)
-   			if( $osFamily -eq "Linux") {
-				$IsLinux = $true
-			} elseif( $osFamily -eq "Darwin" ) {
-				$IsMacOS = $true
-			} else {
-				$osFamily = "NOT_SUPPORTED"
-			}
-		} else {
-			$osFamily = "NOT_SUPPORTED"
-		}
-		return $IsWindows, $IsLinux, $IsMacOS, $osFamily
-	} else {
-		#Using PSv>5.1 where these variables are already defined
-		if( $IsWindows )   { $osFamily = "Windows" }
-		elseif( $IsLinux ) { $osFamily = "Linux" }
-		elseif( $IsMacOS ) { $osFamily = "Darwin" }
-		else { $osFamily = "NOT_SUPPORTED" }
-		return $osFamily
-	}
-}
-
-if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily } else { $osFamily = osFamily }
-#$IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily # A tester avec PowerShell v7
+#if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily } else { $osFamily = osFamily }
 
 . $profileDIR/$scriptPrefix.$osFamily.ps1
 
