@@ -3,6 +3,8 @@
 
 $profileDIR=$(Split-Path -Parent -Path "$PROFILE")
 
+. $profileDIR/profile.common.ps1
+
 # Create Profile directory if not exists
 if( ! ( Test-Path -Path (Split-Path "$PROFILE") ) ) { mkdir (Split-Path "$PROFILE");exit }
 
