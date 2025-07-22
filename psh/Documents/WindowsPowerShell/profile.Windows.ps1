@@ -56,7 +56,19 @@ function wgrep($regExp) {
 	Out-String -Stream | sls "$regExp"
 }
 
+if( ! (isInstalled("grep.exe")) ) {
+	function grep($pattern , $file) {
+		(cat $file) -match "$pattern"
+	}
+}
+
 function msinfo { msinfo32.exe -nfo "$ENV:COMPUTERNAME-$(get-date -f "yyyyMMdd").nfo" }
+
+function changeLanguage2English {
+	[Threading.Thread]::CurrentThread.CurrentUICulture = 'en-UK'
+	if( (Get-WinSystemLocale).Name -ne "en-UK" ) { Set-WinSystemLocale en-UK }
+#	if( (Get-WinUserLanguageList).LanguageTag -ne "en-GB" ) { Set-WinUserLanguageList en-GB -Force }
+}
 
 function main {
 	$FUNCNAME = $MyInvocation.MyCommand.Name
@@ -77,11 +89,19 @@ function main {
 
 		"=> Switching the default DC to " + $LogonDC + " ..."
 		$PSDefaultParameterValues = @{ "*-AD*:Server" = $LogonDC } # cf. https://serverfault.com/a/528834/312306
-		"=> Default DC is now " + (Get-ADDomainController).Name
+		"=> The default DC is now " + (Get-ADDomainController).Name
 	}
 
 	#"=> List of DCs via `"nltest /dclist:$ENV:USERDOMAIN`""
 	#nltest /dclist:$ENV:USERDOMAIN
+	"=> Current DC from `"nltest /dsgetdc:`""
+	nltest /dsgetdc: | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
+	"=> Current Site Name from `"nltest /dsgetdc:`""
+	nltest /dsgetdc: | sls Site.Name: | % { ( $_ -split('\s+|:') )[5] }
+	"=> List of DCs via `"nltest /dclist:`""
+	nltest /dclist:
+
+	changeLanguage2English
 }
 
 #time main

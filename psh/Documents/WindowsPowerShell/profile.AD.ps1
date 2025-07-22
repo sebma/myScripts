@@ -1,3 +1,9 @@
+"=> Current DC from Get-ADDomainController is : "
+$DC = (Get-ADDomainController -Discover).Name
+echo $DC
+"=> Current Site from (Get-ADDomainController -Discover).Site is :"
+(Get-ADDomainController -Discover).Site
+
 function groups {
 	$argc=$args.Count
 	if ( $argc -eq 0) {

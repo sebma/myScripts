@@ -29,6 +29,12 @@ function osFamily {
 		return $osFamily
 	}
 }
+function sdiff {
+	$argc=$args.Count
+	if ( $argc -eq 2 ) {
+		diff $(cat $args[0]) $(cat $args[1])
+	}
+}
 
 if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily } else { $osFamily = osFamily }
 

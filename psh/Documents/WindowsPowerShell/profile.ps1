@@ -117,50 +117,10 @@ if( $IsWindows ) {
 			Get-NetRoute -AddressFamily IPv4 | select DestinationPrefix,NextHop,InterfaceAlias,ifIndex,InterfaceMetric,RouteMetric | ? { $_.DestinationPrefix -ne "224.0.0.0/4" -and $_.DestinationPrefix -notmatch "[0-9.]*/32" } | Format-Table
 		}
 	}
-	function sdiff {
-		$argc=$args.Count
-		if ( $argc -eq 2 ) {
-			diff $(cat $args[0]) $(cat $args[1])
-		}
-	}
-
-	"=> Current DC from Get-ADDomainController is : "
-	$DC = (Get-ADDomainController -Discover).Name
- 	echo $DC
- 	"=> Current Site from (Get-ADDomainController -Discover).Site is :"
-	(Get-ADDomainController -Discover).Site
-
-	"=> Current DC from `"nltest /dsgetdc:`""
-	nltest /dsgetdc: | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
-	"=> Current Site Name from `"nltest /dsgetdc:`""
-	nltest /dsgetdc: | sls Site.Name: | % { ( $_ -split('\s+|:') )[5] }
-	"=> List of DCs via `"nltest /dclist:`""
-	nltest /dclist:
-
-	$LogonDC = $ENV:LOGONSERVER.Substring(2)
-	if( ! $DC.Contains( $LogonDC -replace "\d" ) ) {
-		"=> Switching the default DC to " + $LogonDC + " ..."
-		$PSDefaultParameterValues = @{ "*-AD*:Server" = $LogonDC } # cf. https://serverfault.com/a/528834/312306
-		"=> The default DC is now " + (Get-ADDomainController).Name
-	}
 
 	function netstat {
 		Get-NetTCPConnection | select local*,remote*,state,OwningProcess,@{Name="Process";Expression={(Get-Process -Id $_.OwningProcess).ProcessName}} | sort-object -property LocalPort | format-table | Out-String -Stream
 	}
-
-	if( ! (isInstalled("grep.exe")) ) {
-		function grep($pattern , $file) {
-			(cat $file) -match "$pattern"
-		}
-	}
-
-	function changeLanguage2English {
-		[Threading.Thread]::CurrentThread.CurrentUICulture = 'en-UK'
-		if( (Get-WinSystemLocale).Name -ne "en-UK" ) { Set-WinSystemLocale en-UK }
-#		if( (Get-WinUserLanguageList).LanguageTag -ne "en-GB" ) { Set-WinUserLanguageList en-GB -Force }
-	}
-
-	changeLanguage2English
 
 	function RegInitUser {
 		if( Get-ItemProperty -path HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -name LaunchTo 2>$null) {
