@@ -49,6 +49,7 @@ function osFamily {
 		return $osFamily
 	}
 }
+
 if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily } else { $osFamily = osFamily }
 
 if( $IsWindows ) {
