@@ -38,6 +38,14 @@ function sdiff {
 
 if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily } else { $osFamily = osFamily }
 
+if( $isWindows ) {
+$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
+} elseif( $IsLinux ) {
+	$isAdmin = "TO BE DEFINED"
+} elseif( $IsMacOS ) {
+	$isAdmin = "TO BE DEFINED"
+}
+
 function isInstalled($cmd) { return gcm "$cmd" 2>$null }
 
 if ( $(alias history *>$null;$?) ) { del alias:history }
