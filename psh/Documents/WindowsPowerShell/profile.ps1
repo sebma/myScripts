@@ -9,11 +9,7 @@ if( ! ( Test-Path -Path (Split-Path "$PROFILE") ) ) { mkdir (Split-Path "$PROFIL
 
 $dirSep = [io.path]::DirectorySeparatorChar
 
-function source($script) { . $script }
-
 # sudo Update-Help
-
-#if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily } else { $osFamily = osFamily }
 
 . $profileDIR/$scriptPrefix.$osFamily.ps1
 
