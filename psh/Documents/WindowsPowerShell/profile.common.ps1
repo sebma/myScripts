@@ -1,3 +1,5 @@
+using namespace System.Management.Automation.Language
+
 function osFamily {
 	if( !(Test-Path variable:IsWindows) ) {
 		# $IsWindows is not defined, let's define it
@@ -29,6 +31,40 @@ function osFamily {
 		return $osFamily
 	}
 }
+
+function source {
+	param([Parameter(Mandatory)] $script)
+
+	$errors = $null
+	$script = Convert-Path $script
+	$ast = [Parser]::ParseFile($script, [ref] $null, [ref] $errors)
+
+	if ($errors) {
+		Write-Error "Errors parsing script: $($errors -join ', ')"
+		return
+	}
+
+	$functions = $ast.FindAll({ $args[0] -is [FunctionDefinitionAst] }, $true)
+	foreach ($func in $functions) {
+		$funcName = $func.Name
+		$globalFuncBody = $func.Body.GetScriptBlock()
+		Set-Item -Path "Function:\global:$funcName" -Value $globalFuncBody
+	}
+
+	$assignments = $ast.FindAll({ $args[0] -is [AssignmentStatementAst] }, $false)
+	foreach ($assignment in $assignments) {
+		# bring the assignment to this scope
+		. ([scriptblock]::Create($assignment.ToString()))
+		foreach ($target in $assignment.GetAssignmentTargets()) {
+			# then get the value
+			$varName = $target.VariablePath.ToString()
+			$varValue = & ([scriptblock]::Create($target.ToString()))
+			# and assign it to the caller's scope
+			Set-Variable -Name $varName -Value $varValue -Scope Script
+		}
+	}
+}
+
 function sdiff {
 	$argc=$args.Count
 	if ( $argc -eq 2 ) {
