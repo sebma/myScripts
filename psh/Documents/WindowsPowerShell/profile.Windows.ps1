@@ -1,6 +1,4 @@
 Set-PSReadlineKeyHandler -Key ctrl+d -Function DeleteCharOrExit
-#	set-alias -Scope Global  ex
-#	function ex{exit}
 
 $USER = $ENV:USERNAME
 $DOMAIN = $ENV:USERDOMAIN
