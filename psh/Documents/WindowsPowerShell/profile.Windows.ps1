@@ -76,6 +76,11 @@ function changeLanguage2English {
 #	if( (Get-WinUserLanguageList).LanguageTag -ne "en-GB" ) { Set-WinUserLanguageList en-GB -Force }
 }
 
+function getSerialNumber {
+	# gin | % BiosSeralNumber
+	(gwmi -class win32_bios).SerialNumber
+}
+
 function main {
 	$FUNCNAME = $MyInvocation.MyCommand.Name
 #	"=> Running $FUNCNAME ..."
