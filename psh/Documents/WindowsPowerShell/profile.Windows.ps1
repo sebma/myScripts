@@ -68,7 +68,10 @@ if( ! (isInstalled("grep.exe")) ) {
 	}
 }
 
-function msinfo { msinfo32.exe -nfo "$ENV:COMPUTERNAME-$(get-date -f "yyyyMMdd").nfo" }
+function msinfo { 
+	$filename = "$ENV:COMPUTERNAME-$(get-date -f 'yyyyMMdd').nfo"
+	time Start-Process -wait  -FilePath "msinfo32.exe" -ArgumentList "-nfo", $filename
+}
 
 function changeLanguage2English {
 	[Threading.Thread]::CurrentThread.CurrentUICulture = 'en-UK'
