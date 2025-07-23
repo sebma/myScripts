@@ -98,14 +98,14 @@ function main {
 		"=> The default DC is now " + (Get-ADDomainController).Name
 	}
 
-	#"=> List of DCs via `"nltest /dclist:$ENV:USERDOMAIN`""
-	#nltest /dclist:$ENV:USERDOMAIN
-	"=> Current DC from `"nltest /dsgetdc:`""
-	nltest /dsgetdc: | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
-	"=> Current Site Name from `"nltest /dsgetdc:`""
-	nltest /dsgetdc: | sls Site.Name: | % { ( $_ -split('\s+|:') )[5] }
-	"=> List of DCs via `"nltest /dclist:`""
-	nltest /dclist:
+#	"=> List of DCs via `"nltest /dclist:$ENV:USERDOMAIN`""
+#	nltest /dclist:$ENV:USERDOMAIN
+#	"=> Current DC from `"nltest /dsgetdc:`""
+#	nltest /dsgetdc: | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
+#	"=> Current Site Name from `"nltest /dsgetdc:`""
+#	nltest /dsgetdc: | sls Site.Name: | % { ( $_ -split('\s+|:') )[5] }
+#	"=> List of DCs via `"nltest /dclist:`""
+#	nltest /dclist:
 
 	changeLanguage2English
 }
