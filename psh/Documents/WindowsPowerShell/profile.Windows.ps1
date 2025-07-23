@@ -23,23 +23,36 @@ if( isInstalled("rm.exe") ) {
 	function rm { rm.exe -vi @args }
 }
 
-function source($script ) {
-	if ($script) {
-		$tokens = $null
-		$errors = $null
-		$ast = [System.Management.Automation.Language.Parser]::ParseFile($script, [ref]$tokens, [ref]$errors)
-		if ($errors) {
-			Write-Error "Errors parsing script: $($errors -join ', ')"
-			return
-		}
-		$functions = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
-		foreach ($func in $functions) {
-			$funcName = $func.Name
-			$globalFuncBody = $func.Body.GetScriptBlock()
-			Set-Item -Path "Function:\global:$funcName" -Value $globalFuncBody
-		}
-	}
-}
+#function source($script) {
+#	if ($script) {
+#		$tokens = $null
+#		$errors = $null
+#		$ast = [System.Management.Automation.Language.Parser]::ParseFile($script, [ref]$tokens, [ref]$errors)
+#		if ($errors) {
+#			Write-Error "Errors parsing script: $($errors -join ', ')"
+#			return
+#		}
+#		$functions = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
+#		foreach ($func in $functions) {
+#			$funcName = $func.Name
+#			$globalFuncBody = $func.Body.GetScriptBlock()
+#			Set-Item -Path "Function:\global:$funcName" -Value $globalFuncBody
+#		}
+#	}
+#
+#	$assignments = $ast.FindAll({ $args[0] -is [AssignmentStatementAst] }, $false)
+#	foreach ($assignment in $assignments) {
+#		# bring the assignment to this scope
+#		. ([scriptblock]::Create($assignment.ToString()))
+#		foreach ($target in $assignment.GetAssignmentTargets()) {
+#			# then get the value
+#			$varName = $target.VariablePath.ToString()
+#			$varValue = & ([scriptblock]::Create($target.ToString()))
+#			# and assign it to the caller's scope
+#			Set-Variable -Name $varName -Value $varValue -Scope Script
+#		}
+#	}
+#}
 
 function host1($name, $server) {
 	(nslookup $name $server 2>$null | sls -n Addresses: | sls Nom,Name,Address)[-2..-1] | Out-String -stream | % { $_.split(' ')[-1] }
