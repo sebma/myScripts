@@ -78,7 +78,7 @@ function changeLanguage2English {
 
 function main {
 	$FUNCNAME = $MyInvocation.MyCommand.Name
-	"=> Running $FUNCNAME ..."
+#	"=> Running $FUNCNAME ..."
 #	if( ! (Test-Path $HOME/Desktop/$env:COMPUTERNAME.nfo) ) { msinfo32 -nfo $HOME/Desktop/$env:COMPUTERNAME.nfo }
 	$DC = (Get-ADDomainController -Discover).Name
 	$LogonDC = $ENV:LOGONSERVER.Substring(2)
@@ -114,6 +114,6 @@ function main {
 main
 
 if( isInstalled("choco") ) {
-	"=> Sourcing Chocolatey functions ..."
+#	"=> Sourcing Chocolatey functions ..."
 	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
