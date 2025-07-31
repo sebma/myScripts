@@ -96,6 +96,7 @@ function pfxSPLIT() {
 
 #	& $openssl x509 -in "$pemFile.new"  -out $pemFile #To remove the bag attributes
 	Remove-Item env:pwd
+	Remove-Variable pwd
 }
 
 #function viewP12 { openP12 @args | openssl x509 -noout -text; }
