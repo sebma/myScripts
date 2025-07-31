@@ -81,6 +81,23 @@ function pfx2PKEY($pfxFile, $pkeyFile) {
 	remove-item "$pkeyFile.new"
 }
 
+function pfxSPLIT() {
+	param ($pfxFile)
+
+	$ext = ls $pfxFile | % Extension
+
+	$pwd = Read-Host "Enter Import Password" -AsSecureString
+	$env:pwd = [pscredential]::new('dummyusername', $pwd).GetNetworkCredential().Password
+
+	& $openssl pkcs12 -passin env:pwd -nodes -in $pfxFile -out $pfxFile.replace( $ext , "-FULL.pem" )
+	& $openssl pkcs12 -passin env:pwd -nocerts -nodes -in $pfxFile -out $pfxFile.replace( $ext , "-PKEY.pem" )
+	& $openssl pkcs12 -passin env:pwd -nokeys -clcerts -nodes -in $pfxFile -out $pfxFile.replace( $ext , "-CRT.pem" )
+	& $openssl pkcs12 -passin env:pwd -nokeys -cacerts -nodes -in $pfxFile -out $pfxFile.replace( $ext , "-CHAIN.pem" )
+
+#	& $openssl x509 -in "$pemFile.new"  -out $pemFile #To remove the bag attributes
+	Remove-Item env:pwd
+}
+
 #function viewP12 { openP12 @args | openssl x509 -noout -text; }
 
 #function viewP12Summary { viewP12 @args | sls "CN|Not"; }
