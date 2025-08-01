@@ -27,6 +27,10 @@ if( isInstalled("openssl") ) {
 	#"=> openssl = $openssl"
 }
 
+if( isInstalled("Connect-VIServer") ) {
+	. $profileDIR/$scriptPrefix.powercli.ps1 # VCF.PowerCLI
+}
+
 function osVersion {
 	if( $IsWindows ) {
 		$windowsType = (Get-WmiObject -Class Win32_OperatingSystem).ProductType
