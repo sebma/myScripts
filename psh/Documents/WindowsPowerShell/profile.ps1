@@ -21,7 +21,7 @@ if( isInstalled("Get-ADUser") ) {
 
 if( isInstalled("openssl") ) {
 #	"=> Sourcing openssl functions ..."
-	source $profileDIR/$scriptPrefix.openssl.ps1
+	. $profileDIR/$scriptPrefix.openssl.ps1
 	#. $profileDIR/$scriptPrefix.openssl.ps1
 	setOpenSSLVariables
 	#"=> openssl = $openssl"
