@@ -15,6 +15,10 @@ function enableVMXNET3($vm) {
 }
 function vmInfo($vm) {
 	$vm | select Name , PowerState , GuestId , CreateDate , NumCpu , MemoryGB , HardwareVersion , VMHost , Notes
+	if( $vm.PowerState -eq "PoweredOn" ) {
+		$vm.guest.Nics | select Device , NetworkName , Connected , IPAddress , MacAddress | Format-Table
+		$vm.guest.Disks | Format-Table
+	}
 }
 
 #$vm = Get-VM "Virtual Machine Name"
