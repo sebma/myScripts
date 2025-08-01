@@ -13,6 +13,9 @@ function enableVMXNET3($vm) {
 		$nic
 	}
 }
+function vmInfo($vm) {
+	$vm | select Name , PowerState , GuestId , CreateDate , NumCpu , MemoryGB , HardwareVersion , VMHost , Notes
+}
 
 #$vm = Get-VM "Virtual Machine Name"
 #Connect-VIServer -Menu
