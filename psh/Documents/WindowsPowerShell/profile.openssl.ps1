@@ -81,9 +81,7 @@ function pfx2PKEY($pfxFile, $pkeyFile) {
 	remove-item "$pkeyFile.new"
 }
 
-function pfxSPLIT() {
-	param ($pfxFile)
-
+function pfxSPLIT($pfxFile) {
 	$ext = ls $pfxFile | % Extension
 
 	$pwd = Read-Host "Enter Import Password" -AsSecureString
