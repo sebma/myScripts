@@ -87,10 +87,10 @@ function pfxSPLIT($pfxFile) {
 	$pwd = Read-Host "Enter Import Password" -AsSecureString
 	$env:pwd = [pscredential]::new('dummyusername', $pwd).GetNetworkCredential().Password
 
-	& $openssl pkcs12 -passin env:pwd -nodes -in $pfxFile -out $pfxFile.replace( $ext , "-FULL.pem" )
-	& $openssl pkcs12 -passin env:pwd -nocerts -nodes -in $pfxFile -out $pfxFile.replace( $ext , "-PKEY.pem" )
-	& $openssl pkcs12 -passin env:pwd -nokeys -clcerts -nodes -in $pfxFile -out $pfxFile.replace( $ext , "-CRT.pem" )
-	& $openssl pkcs12 -passin env:pwd -nokeys -cacerts -nodes -in $pfxFile -out $pfxFile.replace( $ext , "-CHAIN.pem" )
+	& $openssl pkcs12 -passin env:pwd -in $pfxFile -nodes -out $pfxFile.replace( $ext , "-FULL.pem" )
+	& $openssl pkcs12 -passin env:pwd -nocerts -in $pfxFile -nodes -out $pfxFile.replace( $ext , "-PKEY.pem" )
+	& $openssl pkcs12 -passin env:pwd -nokeys -clcerts -in $pfxFile -nodes -out $pfxFile.replace( $ext , "-CRT.pem" )
+	& $openssl pkcs12 -passin env:pwd -nokeys -cacerts -in $pfxFile -nodes -out $pfxFile.replace( $ext , "-CHAIN.pem" )
 
 #	& $openssl x509 -in "$pemFile.new"  -out $pemFile #To remove the bag attributes
 	Remove-Item env:pwd
