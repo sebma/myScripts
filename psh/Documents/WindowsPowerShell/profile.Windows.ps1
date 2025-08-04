@@ -4,7 +4,7 @@ $USER = $ENV:USERNAME
 $DOMAIN = $ENV:USERDOMAIN
 $HOSTNAME = $ENV:COMPUTERNAME
 
-$SuppressDriveInit = $true # cf. https://stackoverflow.com/a/1662159/5649639
+$SuppressDriveInit = $true # cf. https://stackoverflow.com/a/1662159
 
 $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8' # cf. https://stackoverflow.com/a/40098904
 
@@ -139,6 +139,7 @@ if( isInstalled("choco") ) {
 #	"=> Sourcing Chocolatey functions ..."
 	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
+
 
 
 
