@@ -1,8 +1,14 @@
 function diskEnableUUID($vm) {
 	if( $vm ) {
+		echo "=> Taking Snapshot before setting `"disk.EnableUUID = TRUE`" ..."
+		New-Snapshot -VM $vm -Name PoweredOnVM -Memory $true -Description "Before setting `"disk.EnableUUID = TRUE`"."
+		echo "=> Done"
+		echo "=> Before :"
 		Get-AdvancedSetting -Entity $vm -Name "disk.EnableUUID"
 		New-AdvancedSetting -Entity $vm -Name "disk.EnableUUID" -Value "TRUE" -Confirm:$false
+		echo "=> After :"
 		Get-AdvancedSetting -Entity $vm -Name "disk.EnableUUID"
+		echo "=> FINISHED."
 	}
 }
 function enableVMXNET3($vm) {
