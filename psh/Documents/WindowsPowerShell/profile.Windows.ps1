@@ -99,13 +99,13 @@ function main {
 	$FUNCNAME = $MyInvocation.MyCommand.Name
 #	"=> Running $FUNCNAME ..."
 #	if( ! (Test-Path $HOME/Desktop/$env:COMPUTERNAME.nfo) ) { msinfo32 -nfo $HOME/Desktop/$env:COMPUTERNAME.nfo }
-	$DC = (Get-ADDomainController -Discover).Name
+	$DC = $(Get-ADDomainController -Discover)
 	$LogonDC = $ENV:LOGONSERVER.Substring(2)
-	if( ! $DC.Contains( $LogonDC -replace "\d" ) ) {
+	if( ! $DC.Name.Contains( $LogonDC -replace "\d" ) ) {
 		"=> Current DC from `"(Get-ADDomainController -Discover).Name`" is :"
-		echo $DC
-		#"=> Current Site from (Get-ADDomainController -Discover).Site is :"
-		#(Get-ADDomainController -Discover).Site
+		echo $DC.Name
+		"=> Current Site from (Get-ADDomainController -Discover).Site is :"
+		$DC.Site
 
 		#"=> Current DC from nltest /dsgetdc:" + $ENV:USERDNSDOMAIN
 		#nltest /dsgetdc:$ENV:USERDNSDOMAIN | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
@@ -136,4 +136,5 @@ if( isInstalled("choco") ) {
 #	"=> Sourcing Chocolatey functions ..."
 	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
+
 
