@@ -114,7 +114,7 @@ function main {
 
 		"=> Switching the default DC to " + $LogonDC + " ..."
 		$global:PSDefaultParameterValues = @{ "*-AD*:Server" = $LogonDC } # cf. https://serverfault.com/a/528834/312306
-		"=> The default DC is now " + (Get-ADDomainController).Name
+		"=> The default DC is now " + $(Get-ADDomainController).Name
 	}
 
 #	"=> List of DCs via `"nltest /dclist:$ENV:USERDOMAIN`""
@@ -136,5 +136,6 @@ if( isInstalled("choco") ) {
 #	"=> Sourcing Chocolatey functions ..."
 	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
+
 
 
