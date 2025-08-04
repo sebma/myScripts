@@ -113,7 +113,7 @@ function main {
 		nltest /dsgetdc: | sls Site.Name: | % { ( $_ -split('\s+|:') )[5] }
 
 		"=> Switching the default DC to " + $LogonDC + " ..."
-		$PSDefaultParameterValues = @{ "*-AD*:Server" = $LogonDC } # cf. https://serverfault.com/a/528834/312306
+		$global:PSDefaultParameterValues = @{ "*-AD*:Server" = $LogonDC } # cf. https://serverfault.com/a/528834/312306
 		"=> The default DC is now " + (Get-ADDomainController).Name
 	}
 
@@ -136,3 +136,4 @@ if( isInstalled("choco") ) {
 #	"=> Sourcing Chocolatey functions ..."
 	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
+
