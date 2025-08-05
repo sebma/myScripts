@@ -239,7 +239,10 @@ EOF
 		egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name -q || $sudo hwclock --systohc
 
 		# CONFIG SYSLOG
-		grep $syslogSERVER /etc/rsyslog.conf /etc/rsyslog.d/* -q || echo "*.* @$syslogSERVER" | sudo tee -a /etc/rsyslog.d/$company-rsyslog.conf
+		if ! grep $syslogSERVER /etc/rsyslog.conf /etc/rsyslog.d/* -q;then
+			#echo "*.* @$syslogSERVER" | sudo tee -a /etc/rsyslog.d/$company-rsyslog.conf
+			echo -e "$(printf "*.%s\n" info notice warning error crit alert emerg | paste -sd ';' -)\t@$syslogSERVER" | sudo tee -a /etc/rsyslog.d/$company-rsyslog.conf
+		fi
 		$sudo systemctl restart rsyslog
 
 		mkdir -p $HOME/.vim
