@@ -41,13 +41,17 @@ if $isDebianLike;then
 	grep 'net.ipv6.conf.all.disable_ipv6=1' /etc/sysctl.conf /etc/sysctl.d/*.conf -q || echo net.ipv6.conf.all.disable_ipv6=1 | $sudo tee -a /etc/sysctl.d/99-$company.conf
  	$sudo sysctl -p /etc/sysctl.d/99-$company.conf
   
+	# swappiness
+	grep 'vm.swappiness' /etc/sysctl.conf /etc/sysctl.d/*.conf -q || echo vm.swappiness = 10 | $sudo tee -a /etc/sysctl.d/99-$company.conf
+	$sudo sysctl -p /etc/sysctl.d/99-$company.conf
+
 	# ACTIVATION DE dmesg
 	sysctl kernel.dmesg_restrict || grep "kernel.dmesg_restrict\s*=\s*0" -q || $sudo sysctl -w kernel.dmesg_restrict = 0 # Allows users to run "dmesg"
-	grep "kernel.dmesg_restrict\s*=\s*0" /etc/sysctl.conf /etc/sysctl.d/*.conf -q || {
+	if ! grep "kernel.dmesg_restrict\s*=\s*0" /etc/sysctl.conf /etc/sysctl.d/*.conf -q;then
 		echo kernel.dmesg_restrict = 0 | sudo tee -a /etc/sysctl.d/99-$company.conf
   		$sudo sysctl -p /etc/sysctl.d/99-$company.conf
 		$sudo systemctl restart systemd-sysctl.service
-	}
+	fi
 
 	grep "preserve_hostname: true" /etc/cloud/cloud.cfg -q && sudo sed -i "s/preserve_hostname: true/preserve_hostname: false/" /etc/cloud/cloud.cfg
 	sudo touch /etc/cloud/cloud-init.disabled # To Disable Cloud-Init
