@@ -94,8 +94,11 @@ function changeLanguage2English {
 }
 
 function getSerialNumber {
-	# gin | % BiosSeralNumber
-	(gwmi -class win32_bios).SerialNumber
+	(gwmi win32_bios).SerialNumber
+}
+
+function getModelName {
+	(gwmi Win32_ComputerSystem).Model
 }
 
 function main {
@@ -140,6 +143,7 @@ if( isInstalled("choco") ) {
 #	"=> Sourcing Chocolatey functions ..."
 	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
+
 
 
 
