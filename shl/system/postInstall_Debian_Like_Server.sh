@@ -199,7 +199,7 @@ EOF
 			$sudo grep includeAllDisks /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.d/*snmpd.conf -q  2>/dev/null || echo includeAllDisks 20% | sudo tee -a /etc/snmp/snmpd.conf.d/*snmpd.conf
 			egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q && sudo sed -i.BACKUP "/^sysLocation.*/s/^sysLocation.*/sysLocation    Hosted on our VMware ESX Cluster/" /etc/snmp/snmpd.conf
 		fi
-		$sudo systemctl start snmpd
+		$sudo systemctl restart snmpd
 		ss -4nul | grep :161
 
 		# CONFIG NTP
