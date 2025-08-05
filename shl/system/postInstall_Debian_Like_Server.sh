@@ -199,6 +199,14 @@ EOF
 			$sudo grep includeAllDisks /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.d/*snmpd.conf -q  2>/dev/null || echo includeAllDisks 20% | sudo tee -a /etc/snmp/snmpd.conf.d/*snmpd.conf
 			egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q && sudo sed -i.BACKUP "/^sysLocation.*/s/^sysLocation.*/sysLocation    Hosted on our VMware ESX Cluster/" /etc/snmp/snmpd.conf
 		fi
+		if systemctl cat snmpd | grep "ExecStart=.*snmpd -Lsd" -q;then
+			cat <<-EOF | sudo tee /etc/systemd/system/snmpd.service.d/override.conf
+				[Service]
+				ExecStart=
+				ExecStart=/usr/sbin/snmpd -LS0-5d -Lf /dev/null -u Debian-snmp -g Debian-snmp -I -smux,mteTrigger,mteTriggerConf -f
+EOF
+			$sudo systemctl daemon-reload
+		fi
 		$sudo systemctl restart snmpd
 		ss -4nul | grep :161
 
