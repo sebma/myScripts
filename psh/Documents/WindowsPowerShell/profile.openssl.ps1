@@ -32,6 +32,7 @@ function pfxSPLIT($pfxFile) {
 
 	$pwd = Read-Host "Enter Import Password" -AsSecureString
 	$env:pwd = [pscredential]::new('dummyusername', $pwd).GetNetworkCredential().Password # i.e https://stackoverflow.com/a/79721412/5649639
+	Remove-Variable pwd
 
 	& $openssl pkcs12 -passin env:pwd -in $pfxFile -nodes -out $pfxFile.replace( $ext , "-FULL.pem" )
 	& $openssl pkcs12 -passin env:pwd -nocerts -in $pfxFile -nodes -out $pfxFile.replace( $ext , "-PKEY.pem" )
@@ -40,7 +41,6 @@ function pfxSPLIT($pfxFile) {
 
 #	& $openssl x509 -in "$pemFile.new"  -out $pemFile #To remove the bag attributes
 	Remove-Item env:pwd
-	Remove-Variable pwd
 }
 function setOpenSSLVariables {
 	if ( $(alias openssl *>$null;$?) ) { del alias:openssl }
