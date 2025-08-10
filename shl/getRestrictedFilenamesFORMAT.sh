@@ -321,7 +321,7 @@ function getRestrictedFilenamesFORMAT() {
 #			$isLIVE && echo && echo -e "=> title = <$title>" && echo && printf "$title" | cut -c 1-20 | hexdump -C
 #			$undebug
 
-			ytdlExtraOptions+=( --replace-in-metadata "title" " ?[\U00002B07-\U00002E7F]+" "" --replace-in-metadata "title" " ?[\U00002FF0-\U00002FFF]+" "" --replace-in-metadata "title" " ?[\U00002B00-\U0000DFFF]+" "" --replace-in-metadata "title" " ?[\U0000E000-\U0000F8FF]+" "" --replace-in-metadata "title" " ?[\U0000FE00-\U0000FE2F]+" "" --replace-in-metadata "title" " ?[\U0000FF00-\U0000FFFF]+" "" --replace-in-metadata "title" " ?[\U00010B40-\U0010FFFF]+" "" ) # cf. https://github.com/yt-dlp/yt-dlp/issues/3047#issuecomment-2587024675
+			ytdlExtraOptions+=( --replace-in-metadata "title" " ?[\U00002B07-\U00002E7F]+ ?" "" --replace-in-metadata "title" " ?[\U00002FF0-\U00002FFF]+ ?" "" --replace-in-metadata "title" " ?[\U00002B00-\U0000DFFF]+ ?" "" --replace-in-metadata "title" " ?[\U0000E000-\U0000F8FF]+ ?" "" --replace-in-metadata "title" " ?[\U0000FE00-\U0000FE2F]+ ?" "" --replace-in-metadata "title" " ?[\U0000FF00-\U0000FFFF]+ ?" "" --replace-in-metadata "title" " ?[\U00010B40-\U0010FFFF]+ ?" "" ) # cf. https://github.com/yt-dlp/yt-dlp/issues/3047#issuecomment-2587024675
 
 			webpage_url=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .webpage_url)')
 			duration=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .duration)' | sed "s/null/0/")
