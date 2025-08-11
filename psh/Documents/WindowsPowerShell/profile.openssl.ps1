@@ -53,7 +53,7 @@ function viewCert {
 	openCert @args -text
 }
 function viewCertSummary {
-	openCert @args -subject -issuer -dates -ocsp_uri -nameopt multiline
+	openCert @args -subject -issuer -dates -ocsp_uri -nameopt multiline -ext "subjectAltName,keyUsage,extendedKeyUsage,crlDistributionPoints,authorityInfoAccess"
 }
 function viewCsr {
 	openCsr @args -text
