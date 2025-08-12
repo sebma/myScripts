@@ -1,13 +1,15 @@
 function diskEnableUUID($vm) {
+	$today = $(Get-Date -f 'yyyyMMdd')
 	if( $vm ) {
-		echo "=> Taking Snapshot before setting `"disk.EnableUUID = TRUE`" ..."
-		New-Snapshot -VM $vm -Name Before.disk.EnableUUID -Memory $true -Description "Before setting `"disk.EnableUUID = TRUE`"."
+		$parameter = "disk.EnableUUID"
+		echo "=> Taking Snapshot before setting `"$parameter = TRUE`" ..."
+		New-Snapshot -VM $vm -Name Before.disk.EnableUUID-$today -Memory $true -Description "Before setting `"$parameter = TRUE`"."
 		echo "=> Done"
 		echo "=> Before :"
-		Get-AdvancedSetting -Entity $vm -Name "disk.EnableUUID"
-		New-AdvancedSetting -Entity $vm -Name "disk.EnableUUID" -Value "TRUE" -Confirm:$false
+		Get-AdvancedSetting -Entity $vm -Name $parameter | select Name , Value
+		New-AdvancedSetting -Entity $vm -Name $parameter -Value "TRUE" -Confirm:$false
 		echo "=> After :"
-		Get-AdvancedSetting -Entity $vm -Name "disk.EnableUUID"
+		Get-AdvancedSetting -Entity $vm -Name $parameter | select Name , Value
 		echo "=> FINISHED."
 	}
 }
@@ -15,15 +17,17 @@ function enableCopyPaste($vm) {
 	$today = $(Get-Date -f 'yyyyMMdd')
 	if( $vm ) {
 		echo "=> Taking Snapshot before enabling copy/paste ..."
-		New-Snapshot -VM $vm -Name Before.disk.EnableUUID-$today -Memory $true -Description "Before enabling copy/paste."
+		New-Snapshot -VM $vm -Name Before-Enable-Copy-Paste-$today -Description "Before enabling copy/paste." -Memory:$true
 		echo "=> Done"
-		foreach( $parameter in "isolation.tools.copy.enable" , "isolation.tools.paste.enable" , "isolation.tools.setGUIOptions.enable" ) {
-			echo "=> Before :"
-			Get-AdvancedSetting -Entity $vm -Name "$parameter"
-			New-AdvancedSetting -Entity $vm -Name "$parameter" -Value "TRUE" -Confirm:$false
-			echo "=> After :"
-			Get-AdvancedSetting -Entity $vm -Name "$parameter"
-		}
+		$parameter = "isolation.tools.copy.disable"
+		New-AdvancedSetting -Entity $vm -Name $parameter -Value "FALSE" -Confirm:$false
+		Get-AdvancedSetting -Entity $vm -Name $parameter | select Name , Value
+		$parameter = "isolation.tools.paste.disable"
+		New-AdvancedSetting -Entity $vm -Name $parameter -Value "FALSE" -Confirm:$false
+		Get-AdvancedSetting -Entity $vm -Name $parameter | select Name , Value
+		$parameter = "isolation.tools.setGUIOptions.enable"
+		New-AdvancedSetting -Entity $vm -Name $parameter -Value "TRUE" -Confirm:$false
+		Get-AdvancedSetting -Entity $vm -Name $parameter | select Name , Value
 		echo "=> FINISHED."
 	}
 }
