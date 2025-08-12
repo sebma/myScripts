@@ -87,7 +87,7 @@ function isInstalled($cmd) { return gcm "$cmd" 2>$null }
 if ( $(alias history *>$null;$?) ) { del alias:history }
 function history($regExp) {
 	if( $regExp.Length -eq 0 ) { $regExp="." }
-	Get-Content (Get-PSReadlineOption).HistorySavePath | ? { $_ -match "$regExp" }
+ 	sls "$regExp" $histFile = (Get-PSReadlineOption).HistorySavePath
 }
 
 function pow2($a,$n) {
