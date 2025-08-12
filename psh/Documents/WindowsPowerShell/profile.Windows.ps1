@@ -109,6 +109,7 @@ function getInstallDate {
 
 function main {
 	$FUNCNAME = $MyInvocation.MyCommand.Name
+ 	$global:HISTFILE = $(Get-PSReadlineOption).HistorySavePath
  	$today = $(Get-Date -f 'yyyyMMdd')
 #	"=> Running $FUNCNAME ..."
 #	if( ! (Test-Path $HOME/Desktop/$env:COMPUTERNAME.nfo) ) { msinfo32 -nfo $HOME/Desktop/$env:COMPUTERNAME.nfo }
@@ -149,6 +150,7 @@ if( isInstalled("choco") ) {
 #	"=> Sourcing Chocolatey functions ..."
 	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
+
 
 
 
