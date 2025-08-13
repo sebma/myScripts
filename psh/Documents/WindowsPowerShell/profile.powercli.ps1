@@ -6,10 +6,10 @@ function diskEnableUUID($vm) {
 		New-Snapshot -VM $vm -Name Before.disk.EnableUUID-$today -Memory $true -Description "Before setting `"$parameter = TRUE`"."
 		echo "=> Done"
 		echo "=> Before :"
-		Get-AdvancedSetting -Entity $vm -Name $parameter | select Name , Value
+		Get-AdvancedSetting -Entity $vm -Name $parameter | select Name , Value | ft
 		New-AdvancedSetting -Entity $vm -Name $parameter -Value "TRUE" -Confirm:$false
 		echo "=> After :"
-		Get-AdvancedSetting -Entity $vm -Name $parameter | select Name , Value
+		Get-AdvancedSetting -Entity $vm -Name $parameter | select Name , Value | ft
 		echo "=> FINISHED."
 	}
 }
@@ -20,14 +20,23 @@ function enableCopyPaste($vm) {
 		New-Snapshot -VM $vm -Name Before-Enable-Copy-Paste-$today -Description "Before enabling copy/paste." -Memory:$true
 		echo "=> Done"
 		$parameter = "isolation.tools.copy.disable"
+		echo "=> Before :"
+		Get-AdvancedSetting -Entity $vm -Name $parameter | select Name , Value | ft
 		New-AdvancedSetting -Entity $vm -Name $parameter -Value "FALSE" -Confirm:$false
-		Get-AdvancedSetting -Entity $vm -Name $parameter | select Name , Value
+		echo "=> After :"
+		Get-AdvancedSetting -Entity $vm -Name $parameter | select Name , Value | ft
 		$parameter = "isolation.tools.paste.disable"
+		echo "=> Before :"
+		Get-AdvancedSetting -Entity $vm -Name $parameter | select Name , Value | ft
 		New-AdvancedSetting -Entity $vm -Name $parameter -Value "FALSE" -Confirm:$false
-		Get-AdvancedSetting -Entity $vm -Name $parameter | select Name , Value
+		echo "=> After :"
+		Get-AdvancedSetting -Entity $vm -Name $parameter | select Name , Value | ft
 		$parameter = "isolation.tools.setGUIOptions.enable"
+		echo "=> Before :"
+		Get-AdvancedSetting -Entity $vm -Name $parameter | select Name , Value | ft
 		New-AdvancedSetting -Entity $vm -Name $parameter -Value "TRUE" -Confirm:$false
-		Get-AdvancedSetting -Entity $vm -Name $parameter | select Name , Value
+		echo "=> After :"
+		Get-AdvancedSetting -Entity $vm -Name $parameter | select Name , Value | ft
 		echo "=> FINISHED."
 	}
 }
