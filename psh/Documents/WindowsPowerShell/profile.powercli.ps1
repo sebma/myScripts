@@ -3,7 +3,7 @@ function diskEnableUUID($vm) {
 	if( $vm ) {
 		$parameter = "disk.EnableUUID"
 		echo "=> Taking Snapshot before setting `"$parameter = TRUE`" ..."
-		New-Snapshot -VM $vm -Name Before.disk.EnableUUID-$today -Memory:$true -Description "Before setting `"$parameter = TRUE`"."
+		New-Snapshot -VM $vm -Name Before.disk.EnableUUID-$today -Description "Before setting `"$parameter = TRUE`"." -Memory:$true
 		echo "=> Done"
 		echo "=> Before :"
 		Get-AdvancedSetting -Entity $vm -Name $parameter | select Name , Value | ft
