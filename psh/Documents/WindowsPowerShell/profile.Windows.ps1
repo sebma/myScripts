@@ -161,3 +161,5 @@ main
 if( isInstalled("choco") ) {
 	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
+
+
