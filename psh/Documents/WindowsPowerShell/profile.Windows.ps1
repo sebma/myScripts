@@ -133,11 +133,6 @@ function main {
 	echo $DC.Site
 #	return
 	if( ! $DC.Name.Contains( $LogonDC -replace "\d" ) ) {
-		"=> Current DC from `"(Get-ADDomainController -Discover).Name`" is :"
-		echo $DC.Name
-		"=> Current Site from (Get-ADDomainController -Discover).Site is :"
-		$DC.Site
-
 		#"=> Current DC from nltest /dsgetdc:" + $ENV:USERDNSDOMAIN
 		#nltest /dsgetdc:$ENV:USERDNSDOMAIN | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
 		"=> Current Site Name from `"nltest /dsgetdc:`""
@@ -160,12 +155,13 @@ function main {
 #	changeLanguage2English
 }
 
-#time main
+#times main
 main
 
 if( isInstalled("choco") ) {
 	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
+
 
 
 
