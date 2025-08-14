@@ -10,6 +10,16 @@ $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8' # cf. https://stackoverf
 
 $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
 
+function setVariables {
+	$global:openssl = "${ENV:ProgramFiles(x86)}\LogMeIn\x64\openssl.exe" # Le "openssl" package dans LogMeIn ne sais pas decrypter
+}
+
+setVariables
+
+function sysinfo {
+	Get-ComputerInfo CsManufacturer , CsModel
+}
+
 if( isInstalled("ls.exe") ) {
 	$global:ls = "ls.exe"
 	#function ls { ls.exe -F @args }
@@ -140,16 +150,16 @@ function main {
 #	"=> List of DCs via `"nltest /dclist:`""
 #	nltest /dclist:
 
-	changeLanguage2English
+#	changeLanguage2English
 }
 
 #time main
 main
 
 if( isInstalled("choco") ) {
-#	"=> Sourcing Chocolatey functions ..."
 	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
+
 
 
 
