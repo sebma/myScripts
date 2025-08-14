@@ -1,17 +1,19 @@
+$SuppressDriveInit = $true # cf. https://stackoverflow.com/a/1662159/5649639
+
 $profileDIR=$(Split-Path -Parent -Path "$PROFILE")
 $scriptName = $MyInvocation.MyCommand.Name
 $scriptPrefix = $scriptName.Split(".")[0]
 
-. $profileDIR/$scriptPrefix.common.ps1
+Set-PSReadlineKeyHandler -Key ctrl+d -Function DeleteCharOrExit
 
-# Create Profile directory if not exists
-if( ! ( Test-Path -Path (Split-Path "$PROFILE") ) ) { mkdir (Split-Path "$PROFILE");exit }
+. $profileDIR/$scriptPrefix.common.ps1
 
 $dirSep = [io.path]::DirectorySeparatorChar
 
 # sudo Update-Help
 
 . $profileDIR/$scriptPrefix.$osFamily.ps1
+. $profileDIR/$scriptPrefix.$osFamily.network.ps1
 
 . $profileDIR/aliases.$osFamily.ps1
 
@@ -20,11 +22,8 @@ if( isInstalled("Get-ADUser") ) {
 }
 
 if( isInstalled("openssl") ) {
-#	"=> Sourcing openssl functions ..."
 	. $profileDIR/$scriptPrefix.openssl.ps1
-	#. $profileDIR/$scriptPrefix.openssl.ps1
 	setOpenSSLVariables
-	#"=> openssl = $openssl"
 }
 
 if( isInstalled("Connect-VIServer") ) {
