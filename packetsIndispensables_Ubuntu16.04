@@ -10,6 +10,7 @@ abcde
 android-tools-adb
 apcalc
 apt-file
+apt-listchanges
 apt-rdepends
 apt-src
 apt-transport-https
