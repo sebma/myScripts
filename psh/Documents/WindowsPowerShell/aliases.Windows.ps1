@@ -1,3 +1,10 @@
+if( $(alias cd *>$null;$?) ) {
+	del alias:cd
+}
+
+set-alias historyLocal Get-History
+if ( $(alias history *>$null;$?) ) { del alias:history }
+
 #if ( $(alias ls *>$null;$?) ) { del alias:ls }
 #set-alias -Scope Global more less.exe
 #set-alias -Scope Global openssl "${ENV:ProgramFiles(x86)}\LogMeIn\x64\openssl.exe"
@@ -6,6 +13,7 @@ if ( $(alias ip *>$null;$?) ) { del alias:ip }
 if ( $(alias rm *>$null;$?) ) { del alias:rm }
 set-alias -Scope Global id whoisUSER
 if( isInstalled("ls.exe") ) {
+	$global:ls = "ls.exe"
 	set-alias -Scope Global l $ls
 }
 set-alias -Scope Global np notepad
@@ -26,4 +34,5 @@ set-alias -Scope Global more less
 #	del alias:man
 #	function man { help @args | less }
 #}
+
 
