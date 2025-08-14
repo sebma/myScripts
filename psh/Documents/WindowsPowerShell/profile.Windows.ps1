@@ -119,12 +119,19 @@ function getInstallDate {
 
 function main {
 	$FUNCNAME = $MyInvocation.MyCommand.Name
+ 	"=> Running $FUNCNAME ..."
  	$global:HISTFILE = $(Get-PSReadlineOption).HistorySavePath
  	$today = $(Get-Date -f 'yyyyMMdd')
-#	"=> Running $FUNCNAME ..."
-#	if( ! (Test-Path $HOME/Desktop/$env:COMPUTERNAME.nfo) ) { msinfo32 -nfo $HOME/Desktop/$env:COMPUTERNAME.nfo }
-	$DC = $(Get-ADDomainController -Discover)
-	$LogonDC = $ENV:LOGONSERVER.Substring(2)
+	$global:DC = $(Get-ADDomainController -Discover)
+	$global:LogonDC = $ENV:LOGONSERVER.Substring(2)
+
+	"=> Current DC from `"(Get-ADDomainController -Discover).Name`" is :"
+	echo $DC.Name
+	"=> Current LogonDC from `"`$ENV:LOGONSERVER.Substring(2)`" is :"
+	echo $LogonDC
+	"=> Current Site from (Get-ADDomainController -Discover).Site is :"
+	echo $DC.Site
+#	return
 	if( ! $DC.Name.Contains( $LogonDC -replace "\d" ) ) {
 		"=> Current DC from `"(Get-ADDomainController -Discover).Name`" is :"
 		echo $DC.Name
@@ -159,6 +166,7 @@ main
 if( isInstalled("choco") ) {
 	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
+
 
 
 
