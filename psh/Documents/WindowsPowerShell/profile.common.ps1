@@ -75,7 +75,12 @@ function sdiff {
 if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily } else { $osFamily = osFamily }
 
 if( $isWindows ) {
-$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
+	$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
+	function cd($dir) {
+		if($dir -eq "-"){popd}
+		elseif( ! $dir.Length ) {pushd ~}
+		else {pushd $dir}
+	}
 } elseif( $IsLinux ) {
 	$isAdmin = "TO BE DEFINED"
 } elseif( $IsMacOS ) {
@@ -84,10 +89,13 @@ $isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIde
 
 function isInstalled($cmd) { return gcm "$cmd" 2>$null }
 
-if ( $(alias history *>$null;$?) ) { del alias:history }
-function history($regExp) {
+function history() {
+	cat  $(Get-PSReadlineOption).HistorySavePath
+}
+
+function histgrep($regExp) {
 	if( $regExp.Length -eq 0 ) { $regExp="." }
- 	sls "$regExp" $histFile = (Get-PSReadlineOption).HistorySavePath
+	sls "$regExp" $(Get-PSReadlineOption).HistorySavePath | % Line
 }
 
 function pow2($a,$n) {
@@ -99,7 +107,7 @@ function nocomment {
 	sls -n "^\s*(#|$|;|//)" @args | % Line
 }
 
-function time {
+function times {
 	# See https://github.com/lukesampson/psutils/blob/master/time.ps1
 	Set-StrictMode -Off;
 
