@@ -227,7 +227,8 @@ function getRestrictedFilenamesFORMAT() {
 	setOtherRequirements date grep stat
 
 	parseArgs "$@"
-	set -- "$lastArgs"
+	set -- $lastArgs
+	$debug
 
 	errorLogFile="${downloader}_errors_$$.log"
 	downloadCMD=( env LANG=C.UTF-8 $downloader ) # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
