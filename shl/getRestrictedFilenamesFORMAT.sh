@@ -15,6 +15,7 @@ function set_colors() {
 	if [ $BASH_VERSINFO -ge 4 ];then
 		export escapeChar=$'\e'
 		export blinkOff=${escapeChar}'[25m'
+set +x
 		declare -Ag effects=( [bold]=$(tput bold) [dim]=$(tput dim) [italics]=$(tput sitm) [underlined]=$(tput smul) [blink]=$(tput blink) [reverse]=$(tput rev) [hidden]=$(tput invis) [blinkOff]=$blinkOff )
 		declare -Ag colors=( [red]=$(tput setaf 1) [green]=$(tput setaf 2) [blue]=$(tput setaf 4) [cyan]=$(tput setaf 6) [yellow]=$(tput setaf 11) [yellowOnRed]=$(tput setaf 11)$(tput setab 1) [greenOnBlue]=$(tput setaf 2)$(tput setab 4) [yellowOnBlue]=$(tput setaf 11)$(tput setab 4) [cyanOnBlue]=$(tput setaf 6)$(tput setab 4) [whiteOnBlue]=$(tput setaf 7)$(tput setab 4) [redOnGrey]=$(tput setaf 1)$(tput setab 7) [blueOnGrey]=$(tput setaf 4)$(tput setab 7) )
 	else
@@ -88,7 +89,7 @@ function parseArgs() {
 		getopt=/usr/local/opt/gnu-getopt/bin/getopt
 	fi
 
-	TEMP=$($getopt -o 'df:hp:t:vxy' --long 'debug,downloader:,ffmpeg-e,ffmpeg-i,ffmpeg-w,formats:,help,playlist:,overwrite,timeout:,verbose,xtrace,yt-dl,ytdl-k,ytdl-x,ytdl-v' -- "$@")
+	TEMP=$($getopt -o 'df:hip:t:vxy' --long 'debug,downloader:,ignore-errors,ffmpeg-e,ffmpeg-i,ffmpeg-w,formats:,help,playlist:,overwrite,timeout:,verbose,xtrace,yt-dl,ytdl-k,ytdl-x,ytdl-v' -- "$@")
 
 	if [ $? -ne 0 ]; then
 		echo 'Terminating...' >&2
