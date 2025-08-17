@@ -28,6 +28,7 @@ Usage: $scriptBaseName [STRING]...
 
 	-d|--debug		be even more verbose
 	-h|--help		display this help and exit
+	-i|--ignore-errors	ignore download and postprocessing errors.
 	-f|--formats		format(s) of video(s) to download
 	-p|--playlist		create M3U playlist
 	-t|--timeout		timeout the recording by speficied value (180m by default)
@@ -133,6 +134,9 @@ function parseArgs() {
 				;;
 			-h|--help) shift
 				usage
+				;;
+			-i|--ignore-errors) shift
+				ytdlInitialOptions+=( --ignore-errors )
 				;;
 			-p|--playlist) shift
 				playlistFileName=$1
