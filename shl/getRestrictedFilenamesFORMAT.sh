@@ -112,7 +112,6 @@ function parseArgs() {
 		case "$1" in
 			-d|--debug) shift
 				debug="set -x"
-				undebug=""
 				ytdlInitialOptions+=( -v )
 				;;
 			--downloader) shift
@@ -441,13 +440,13 @@ function getRestrictedFilenamesFORMAT() {
 			echo
 			trap - INT
 			if [ $isLIVE == false ];then
-#				$debug
-				time "${downloadCMD[@]}" -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+				$debug
+				time "${downloadCMD[@]}" --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 				downloadOK=$?
 				$undebug
 			else
-#				$debug
-				time timeout -s SIGINT $timeout "${downloadCMD[@]}" -v --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+				$debug
+				time timeout -s SIGINT $timeout "${downloadCMD[@]}" --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 				downloadOK=$?
 				$undebug
 			fi
