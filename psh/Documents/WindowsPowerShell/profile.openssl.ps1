@@ -40,7 +40,7 @@ function pfxSPLIT($pfxFile) {
 
 	& $openssl pkey -in $pfxFile.replace( $ext , "-PKEY-Bags.pem" ) -out $pfxFile.replace( $ext , "-PKEY.pem" ) #To remove the bag attributes
 	& $openssl x509 -in $pfxFile.replace( $ext , "-CRT-Bags.pem" ) -out $pfxFile.replace( $ext , "-CRT.pem" ) #To remove the bag attributes
-	& $openssl crl2pkcs7 -nocrl -certfile $pfxFile.replace( $ext , "-CHAIN-Bags.pem" ) | & $openssl pkcs7 -print_certs | sls -n " CN =|^$" | out-file -e utf8 $pfxFile.replace( $ext , "-CHAIN.pem" ) #To remove the bag attributes
+	[string[]](& $openssl crl2pkcs7 -nocrl -certfile $pfxFile.replace( $ext , "-CHAIN-Bags.pem" ) | & $openssl pkcs7 -print_certs | sls -n " CN =|^$") | out-file -e utf8 $pfxFile.replace( $ext , "-CHAIN.pem" ) #To remove the bag attributes
 
 	Remove-Item *-Bags.pem
 }
