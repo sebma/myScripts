@@ -29,16 +29,20 @@ function pfxSPLIT($pfxFile) {
 	$ext = ls $pfxFile | % Extension
 
 	$pwd = Read-Host "Enter Import Password" -AsSecureString
-	$env:pwd = [pscredential]::new('dummyusername', $pwd).GetNetworkCredential().Password # i.e https://stackoverflow.com/a/79721412/5649639
+	$env:pwd = [pscredential]::new('dummyusername', $pwd).GetNetworkCredential().Password
 	Remove-Variable pwd
 
-	& $openssl pkcs12 -passin env:pwd -in $pfxFile -nodes -out $pfxFile.replace( $ext , "-FULL.pem" )
-	& $openssl pkcs12 -passin env:pwd -nocerts -in $pfxFile -nodes -out $pfxFile.replace( $ext , "-PKEY.pem" )
-	& $openssl pkcs12 -passin env:pwd -nokeys -clcerts -in $pfxFile -nodes -out $pfxFile.replace( $ext , "-CRT.pem" )
-	& $openssl pkcs12 -passin env:pwd -nokeys -cacerts -in $pfxFile -nodes -out $pfxFile.replace( $ext , "-CHAIN.pem" )
+	& $openssl pkcs12 -passin env:pwd -nocerts -in $pfxFile -nodes -out $pfxFile.replace( $ext , "-PKEY-Bags.pem" )
+	& $openssl pkcs12 -passin env:pwd -nokeys -clcerts -in $pfxFile -nodes -out $pfxFile.replace( $ext , "-CRT-Bags.pem" )
+	& $openssl pkcs12 -passin env:pwd -nokeys -cacerts -in $pfxFile -nodes -out $pfxFile.replace( $ext , "-CHAIN-Bags.pem" )
 
-#	& $openssl x509 -in "$pemFile.new"  -out $pemFile #To remove the bag attributes
 	Remove-Item env:pwd
+
+	& $openssl pkey -in $pfxFile.replace( $ext , "-PKEY-Bags.pem" ) -out $pfxFile.replace( $ext , "-PKEY.pem" ) #To remove the bag attributes
+	& $openssl x509 -in $pfxFile.replace( $ext , "-CRT-Bags.pem" ) -out $pfxFile.replace( $ext , "-CRT.pem" ) #To remove the bag attributes
+	#& $openssl x509 -in $pfxFile.replace( $ext , "-CHAIN-Bags.pem" ) -out $pfxFile.replace( $ext , "-CHAIN.pem" ) #To remove the bag attributes
+
+	Remove-Item *-Bags.pem
 }
 function setOpenSSLVariables {
 	if ( $(alias openssl *>$null;$?) ) { del alias:openssl }
