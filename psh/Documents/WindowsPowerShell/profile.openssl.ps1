@@ -26,24 +26,30 @@ function pfx2PKEY($pfxFile, $pkeyFile) {
 	remove-item "$pkeyFile.new"
 }
 function pfxSPLIT($pfxFile) {
-	$ext = ls $pfxFile | % Extension
+	$pfxFileBaseName = ls $pfxFile | % BaseName
+	$pfxFileDirName = $(Split-Path -Parent -Path $pfxFile)
+	$pfxFilePrefix = $pfxFileDirName + $dirSep + $pfxFileBaseName
+
+#echo "=> CMD -in $pfxFile -nodes -out $pfxFilePrefix-PKEY-Bags.pem"
 
 	$pwd = Read-Host "Enter Import Password" -AsSecureString
 	$env:pwd = [pscredential]::new('dummyusername', $pwd).GetNetworkCredential().Password
 	Remove-Variable pwd
 
-	& $openssl pkcs12 -passin env:pwd -nocerts -in $pfxFile -nodes -out $pfxFile.replace( $ext , "-PKEY-Bags.pem" )
-	& $openssl pkcs12 -passin env:pwd -nokeys -clcerts -in $pfxFile -nodes -out $pfxFile.replace( $ext , "-CRT-Bags.pem" )
-	& $openssl pkcs12 -passin env:pwd -nokeys -cacerts -in $pfxFile -nodes -out $pfxFile.replace( $ext , "-CHAIN-Bags.pem" )
+	& $openssl pkcs12 -passin env:pwd -nocerts -in $pfxFile -nodes -out "$pfxFilePrefix-PKEY-Bags.pem"
+	& $openssl pkcs12 -passin env:pwd -nokeys -clcerts -in $pfxFile -nodes -out "$pfxFilePrefix-CRT-Bags.pem"
+	& $openssl pkcs12 -passin env:pwd -nokeys -cacerts -in $pfxFile -nodes -out "$pfxFilePrefix-CHAIN-Bags.pem"
 
 	Remove-Item env:pwd
 
-	& $openssl pkey -in $pfxFile.replace( $ext , "-PKEY-Bags.pem" ) -out $pfxFile.replace( $ext , "-PKEY.pem" ) #To remove the bag attributes
-	& $openssl x509 -in $pfxFile.replace( $ext , "-CRT-Bags.pem" ) -out $pfxFile.replace( $ext , "-CRT.pem" ) #To remove the bag attributes
-#	[string[]](& $openssl crl2pkcs7 -nocrl -certfile $pfxFile.replace( $ext , "-CHAIN-Bags.pem" ) | & $openssl pkcs7 -print_certs | sls -n " CN =|^$") | out-file -e utf8 $pfxFile.replace( $ext , "-CHAIN.pem" ) #To remove the bag attributes
-	[string[]](& $openssl crl2pkcs7 -nocrl -certfile $pfxFile.replace( $ext , "-CHAIN-Bags.pem" ) | & $openssl pkcs7 -print_certs | sls -n "^$") | out-file -e utf8 $pfxFile.replace( $ext , "-CHAIN.pem" ) #To remove the bag attributes
+	& $openssl pkey -in "$pfxFilePrefix-PKEY-Bags.pem" -out "$pfxFilePrefix-PKEY.pem" #To remove the bag attributes
+	& $openssl x509 -in "$pfxFilePrefix-CRT-Bags.pem"  -out "$pfxFilePrefix-CRT.pem"  #To remove the bag attributes
+	[string[]](& $openssl crl2pkcs7 -nocrl -certfile "$pfxFilePrefix-CHAIN-Bags.pem" | & $openssl pkcs7 -print_certs | sls -n " CN =|^$") | out-file -e utf8 "$pfxFilePrefix-CHAIN.pem" #To remove the bag attributes
 
-	Remove-Item *-Bags.pem
+	Remove-Item "$pfxFilePrefix-PKEY-Bags.pem"
+	Remove-Item "$pfxFilePrefix-CRT-Bags.pem"
+
+	& $openssl x509 -in "$pfxFilePrefix-CRT.pem" -noout -subject -issuer -dates -ocsp_uri -nameopt multiline -ext "subjectAltName,keyUsage,extendedKeyUsage,crlDistributionPoints,authorityInfoAccess"
 }
 function setOpenSSLVariables {
 	if ( $(alias openssl *>$null;$?) ) { del alias:openssl }
