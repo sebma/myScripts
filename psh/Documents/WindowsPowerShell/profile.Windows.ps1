@@ -116,11 +116,9 @@ function getInstallDate {
 	(gwmi Win32_OperatingSystem).InstallDate | % { [Management.ManagementDateTimeConverter]::ToDateTime( $_ ) }
 }
 
-function main {
+function setLogonDC {
 	$FUNCNAME = $MyInvocation.MyCommand.Name
- 	"=> Running $FUNCNAME ..."
- 	$global:HISTFILE = $(Get-PSReadlineOption).HistorySavePath
- 	$today = $(Get-Date -f 'yyyyMMdd')
+	"=> Running $FUNCNAME ..."
 	$global:DC = $(Get-ADDomainController -Discover)
 	$global:LogonDC = $ENV:LOGONSERVER.Substring(2)
 
@@ -132,34 +130,36 @@ function main {
 	echo $DC.Site
 #	return
 	if( ! $DC.Name.Contains( $LogonDC -replace "\d" ) ) {
-		#"=> Current DC from nltest /dsgetdc:" + $ENV:USERDNSDOMAIN
-		#nltest /dsgetdc:$ENV:USERDNSDOMAIN | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
-		"=> Current Site Name from `"nltest /dsgetdc:`""
-		nltest /dsgetdc: | sls Site.Name: | % { ( $_ -split('\s+|:') )[5] }
+#		"=> Current DC from nltest /dsgetdc:" + $ENV:USERDNSDOMAIN
+#		nltest /dsgetdc:$ENV:USERDNSDOMAIN | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
+#		"=> Current Site Name from `"nltest /dsgetdc:`""
+#		nltest /dsgetdc: | sls Site.Name: | % { ( $_ -split('\s+|:') )[5] }
 
 		"=> Switching the default DC to " + $LogonDC + " ..."
 		$global:PSDefaultParameterValues = @{ "*-AD*:Server" = $LogonDC } # cf. https://serverfault.com/a/528834/312306
 		"=> The default DC is now " + $(Get-ADDomainController).Name
 	}
 
-#	"=> List of DCs via `"nltest /dclist:$ENV:USERDOMAIN`""
-#	nltest /dclist:$ENV:USERDOMAIN
-#	"=> Current DC from `"nltest /dsgetdc:`""
-#	nltest /dsgetdc: | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
-#	"=> Current Site Name from `"nltest /dsgetdc:`""
-#	nltest /dsgetdc: | sls Site.Name: | % { ( $_ -split('\s+|:') )[5] }
 #	"=> List of DCs via `"nltest /dclist:`""
 #	nltest /dclist:
+}
 
+function main {
+	$FUNCNAME = $MyInvocation.MyCommand.Name
+ 	"=> Running $FUNCNAME ..."
+ 	$global:HISTFILE = $(Get-PSReadlineOption).HistorySavePath
+ 	$today = $(Get-Date -f 'yyyyMMdd')
+
+#	setLogonDC
 #	changeLanguage2English
 }
 
-#times main
 main
 
 if( isInstalled("choco") ) {
 	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
+
 
 
 
