@@ -1,6 +1,6 @@
 $SuppressDriveInit = $true # cf. https://stackoverflow.com/a/1662159/5649639
 
-$profileDIR=$(Split-Path -Parent -Path "$PROFILE")
+$profileDIR=$(Split-Path -Parent -Path $MyInvocation.MyCommand.Path)
 $scriptName = $MyInvocation.MyCommand.Name
 $scriptPrefix = $scriptName.Split(".")[0]
 
