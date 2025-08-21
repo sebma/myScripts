@@ -1,17 +1,16 @@
 Set-PSReadlineKeyHandler -Key ctrl+d -Function DeleteCharOrExit
 
-$USER = $ENV:USERNAME
-$DOMAIN = $ENV:USERDOMAIN
-$HOSTNAME = $ENV:COMPUTERNAME
-
 $SuppressDriveInit = $true # cf. https://stackoverflow.com/a/1662159
 
 $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8' # cf. https://stackoverflow.com/a/40098904
 
-$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
-
 function setVariables {
 	$global:openssl = "${ENV:ProgramFiles(x86)}\LogMeIn\x64\openssl.exe" # Le "openssl" package dans LogMeIn ne sais pas decrypter
+	$global:USER = $ENV:USERNAME
+	$global:DOMAIN = $ENV:USERDOMAIN
+	$global:HOSTNAME = $ENV:COMPUTERNAME
+	$global:isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
+	$global:KiTTY_LogDIR= "${ENV:ProgramData}/scoop/apps/kitty/current/log"
 }
 
 setVariables
@@ -161,5 +160,6 @@ main
 if( isInstalled("choco") ) {
 	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
+
 
 
