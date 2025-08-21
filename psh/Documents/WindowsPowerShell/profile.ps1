@@ -2,7 +2,8 @@ $SuppressDriveInit = $true # cf. https://stackoverflow.com/a/1662159/5649639
 
 $dirSep = [io.path]::DirectorySeparatorChar
 
-$profileDIR=$(Split-Path -Parent -Path $MyInvocation.MyCommand.Path)
+$beforeLastItemIndex = $MyInvocation.MyCommand.Path.Split($dirSep).Length - 2
+$profileDIR = $MyInvocation.MyCommand.Path.Split($dirSep)[0..$beforeLastItemIndex] -join $dirSep
 $scriptName = $MyInvocation.MyCommand.Name
 $scriptPrefix = $scriptName.Split(".")[0]
 
