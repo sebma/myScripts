@@ -335,8 +335,8 @@ function Prompt {
 	Write-Host "@ $ENV:USERDOMAIN " -NoNewline -ForegroundColor Red
 	#Write-Host "/ $osFamily $OSVersion " -NoNewline -ForegroundColor Green
 	Write-Host "] " -NoNewline
-	#Write-Host "PSv$PSHVersion " -NoNewline
-	Write-Host "PS $myCWD" -ForegroundColor Green
+	Write-Host "(PSv$PSHVersion) " -NoNewline
+	Write-Host "$myCWD" -ForegroundColor Green
 	if( $isAdmin ) { return "# " } else { return "$ " }
 }
 
