@@ -1,5 +1,7 @@
 $SuppressDriveInit = $true # cf. https://stackoverflow.com/a/1662159/5649639
 
+$dirSep = [io.path]::DirectorySeparatorChar
+
 $profileDIR=$(Split-Path -Parent -Path $MyInvocation.MyCommand.Path)
 $scriptName = $MyInvocation.MyCommand.Name
 $scriptPrefix = $scriptName.Split(".")[0]
@@ -7,8 +9,6 @@ $scriptPrefix = $scriptName.Split(".")[0]
 Set-PSReadlineKeyHandler -Key ctrl+d -Function DeleteCharOrExit
 
 . $profileDIR/$scriptPrefix.common.ps1
-
-$dirSep = [io.path]::DirectorySeparatorChar
 
 # sudo Update-Help
 
