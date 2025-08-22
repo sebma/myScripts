@@ -44,10 +44,12 @@ function pfxSPLIT($pfxFile) {
 	& $openssl x509 -in "$pfxFilePrefix-CRT-Bags.pem"  -out "$pfxFilePrefix-CRT.pem"  #To remove the bag attributes
 	[string[]](& $openssl crl2pkcs7 -nocrl -certfile "$pfxFilePrefix-CHAIN-Bags.pem" | & $openssl pkcs7 -print_certs | sls -n " CN =|^$") | out-file -e utf8 "$pfxFilePrefix-CHAIN.pem" #To remove the bag attributes
 
-	Remove-Item "$pfxFilePrefix-PKEY-Bags.pem"
-	Remove-Item "$pfxFilePrefix-CRT-Bags.pem"
-
+	"=> Certificate summary of $pfxFilePrefix-CRT.pem :"
 	& $openssl x509 -in "$pfxFilePrefix-CRT.pem" -noout -subject -issuer -dates -ocsp_uri -nameopt multiline -ext "subjectAltName,keyUsage,extendedKeyUsage,crlDistributionPoints,authorityInfoAccess"
+
+	"=> Certificates Subjects in <$pfxFilePrefix-CHAIN-Bags.pem> :"
+	$(sls subject $pfxFilePrefix-CHAIN-Bags.pem).Line
+	Remove-Item *-Bags.pem
 }
 function setOpenSSLVariables {
 	if ( $(alias openssl *>$null;$?) ) { del alias:openssl }
