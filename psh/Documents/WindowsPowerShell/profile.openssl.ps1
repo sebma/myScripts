@@ -72,7 +72,7 @@ function viewFullCert($cert) {
 	& $openssl crl2pkcs7 -nocrl -certfile $cert | openssl pkcs7 -noout -text -print_certs
 }
 function viewFullCertSummary($cert) {
-	viewFullCert($cert) | sls "CN|Not"
+	viewFullCert($cert) | sls "(Issuer|Before|Subject|Key Algorithm|Key Usage|Subject Alternative Name):" -Co 0,1
 }
 function der2PEM($derFile, $pemFile) {
 	& $openssl x509 -in $derFile -outform PEM -out $pemFile
