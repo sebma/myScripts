@@ -48,7 +48,9 @@ function pfxSPLIT($pfxFile) {
 	& $openssl x509 -in "$pfxFilePrefix-CRT.pem" -noout -subject -issuer -dates -ocsp_uri -nameopt multiline -ext "subjectAltName,keyUsage,extendedKeyUsage,crlDistributionPoints,authorityInfoAccess"
 
 	"=> Certificates Subjects in <$pfxFilePrefix-CHAIN-Bags.pem> :"
-	$(sls subject $pfxFilePrefix-CHAIN-Bags.pem).Line
+#	$(sls subject $pfxFilePrefix-CHAIN-Bags.pem).Line
+	& $openssl crl2pkcs7 -nocrl -certfile $pfxFilePrefix-CHAIN.pem | & $openssl pkcs7 -noout -text -print_certs | sls "(Subject|Issuer|Before|Key Algorithm|Key Usage|Subject Alternative Name):" -Co 0,1
+ 
 	Remove-Item *-Bags.pem
 }
 function setOpenSSLVariables {
