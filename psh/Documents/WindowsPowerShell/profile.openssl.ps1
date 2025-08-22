@@ -30,8 +30,6 @@ function pfxSPLIT($pfxFile) {
 	$pfxFileDirName = $(Split-Path -Parent -Path $pfxFile)
 	$pfxFilePrefix = $pfxFileDirName + $dirSep + $pfxFileBaseName
 
-#echo "=> CMD -in $pfxFile -nodes -out $pfxFilePrefix-PKEY-Bags.pem"
-
 	$pwd = Read-Host "Enter Import Password" -AsSecureString
 	$env:pwd = [pscredential]::new('dummyusername', $pwd).GetNetworkCredential().Password
 	Remove-Variable pwd
