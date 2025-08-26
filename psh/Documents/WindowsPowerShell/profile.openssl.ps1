@@ -28,7 +28,6 @@ function pfx2PKEY($pfxFile, $pkeyFile) {
 function pfxSPLIT($pfxFile) {
 	$pfxFileBaseName = ls $pfxFile | % BaseName
 	$pfxFileDirName = $(Split-Path -Parent -Path $pfxFile)
-	$pfxFilePrefix = $pfxFileDirName + $dirSep + $pfxFileBaseName
 
 	if( $pfxFileDirName ) { 
 		$pfxFilePrefix = $pfxFileDirName + $dirSep + $pfxFileBaseName
