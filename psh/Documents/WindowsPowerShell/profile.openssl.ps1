@@ -30,6 +30,12 @@ function pfxSPLIT($pfxFile) {
 	$pfxFileDirName = $(Split-Path -Parent -Path $pfxFile)
 	$pfxFilePrefix = $pfxFileDirName + $dirSep + $pfxFileBaseName
 
+	if( $pfxFileDirName ) { 
+		$pfxFilePrefix = $pfxFileDirName + $dirSep + $pfxFileBaseName
+	} else {
+		$pfxFilePrefix = $pfxFileBaseName
+	}
+
 	$pwd = Read-Host "Enter Import Password" -AsSecureString
 	$env:pwd = [pscredential]::new('dummyusername', $pwd).GetNetworkCredential().Password
 	Remove-Variable pwd
