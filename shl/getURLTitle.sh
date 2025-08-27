@@ -5,7 +5,7 @@ function getURLTitle() {
 		for URL
 		do
 			printf "$URL # "
-			\curl -qLs "$URL" | xidel -s --css 'head title'
+			xidel -s --css 'head title' "$URL"
 		done
 	elif type -P pup > /dev/null; then
 		for URL
