@@ -66,6 +66,22 @@ if( isInstalled("rm.exe") ) {
 #	}
 #}
 
+function findfiles {
+	$argc=$args.Count
+	if ( $argc -eq 1 ) {
+		$dirName = "."
+		$regexp = $args[0]
+	} elseif ( $argc -eq 2 ) {
+		$dirName = $args[0]
+		$regexp = $args[1]
+	} else {
+		write-warning "Usage : [dirName] regexp"
+		return 1
+	}
+
+	dir -r -fo $dirName 2>$null | ? Name -match "$regexp" | % FullName
+}
+
 function host1($name, $server) {
 	(nslookup $name $server 2>$null | sls -n Addresses: | sls Nom,Name,Address)[-2..-1] | Out-String -stream | % { $_.split(' ')[-1] }
 }
@@ -159,6 +175,7 @@ main
 if( isInstalled("choco") ) {
 	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
+
 
 
 
