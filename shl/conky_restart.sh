@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 restart_conky() {
-	while ! \pgrep plasma-desktop >/dev/null
+	while ! \pgrep plasmashell >/dev/null
 	do
 		sleep 1
 	done
