@@ -278,7 +278,7 @@ function getRestrictedFilenamesFORMAT() {
 		formatsNumber=${#formatsIDs[@]}
 		echo
 
-		[ $formatsNumber = 0 ] && echo "=> ERROR : No format IDs found for $siteVideoFormat" >&2 && exit 1
+		[ $formatsNumber = 0 ] && echo "=> ERROR : No format IDs found for $siteVideoFormat" >&2 && continue
 
 		[ $verboseLevel = 1 ] && echo "=> \$formatsNumber = $formatsNumber"
 		[ $verboseLevel = 1 ] && echo "=> \${formatsIDs[@]} = ${formatsIDs[@]}"
