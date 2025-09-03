@@ -4,7 +4,12 @@ set -u
 
 [ $BASH_VERSINFO -lt 4 ] && echo "=> [WARNING] BASH_VERSINFO = $BASH_VERSINFO then continuing in bash4 ..." && exec bash4 $0 "$@"
 
-LANG=C.UTF-8
+if locale | grep -i C.UTF-8 -q;then
+	LANG=C.UTF-8
+else
+	LANG=C
+fi
+
 scriptBaseName=${0/*\//}
 scriptExtension=${0/*./}
 funcName=${scriptBaseName/.$scriptExtension/}
@@ -228,7 +233,7 @@ function getRestrictedFilenamesFORMAT() {
 
 	parseArgs "$@"
 	set -- $lastArgs
-	$debug
+	#$debug
 
 	errorLogFile="${downloader}_errors_$$.log"
 	downloadCMD=( env LANG=C.UTF-8 $downloader ) # i.e https://unix.stackexchange.com/questions/505733/add-locale-in-variable-for-command
@@ -269,7 +274,6 @@ function getRestrictedFilenamesFORMAT() {
 		[[ $downloader =~ yt-dlp ]] && ytdlExtraOptions+=( --embed-metadata --format-sort +proto )
 		# ytdlExtraOptions+= ( --exec 'basename %(filepath)s .%(ext)s' --write-info-json )
 
-#		$debug
 		printf "=> Fetching the formatsIDs list for \"$url\" for $siteVideoFormat format with ${effects[bold]}${colors[blue]}$downloader$normal at %s ...\n" "$(LC_MESSAGES=en date)"
 #		$undebug
 
@@ -306,7 +310,6 @@ function getRestrictedFilenamesFORMAT() {
 			acodec=$(echo $acodec | cut -d. -f1)
 			protocolForDownload=$(echo "$jsonResults" | $jq -n -r "first(inputs | select(.format_id==\"$videoFormatID\")).protocol")
 
-#			$debug
 			remoteFileSize=$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).filesize" | sed "s/null/-1/")
 			$undebug
 			if [ $remoteFileSize != -1 ]; then
@@ -319,12 +322,12 @@ function getRestrictedFilenamesFORMAT() {
 			# Les resultats ci-dessous ne dependent pas du format selectionne
 			isLIVE=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .is_live)'| sed "s/null/false/")
 
-#			$debug
 			title=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .title)' )
 #			$isLIVE && echo && echo -e "=> title = <$title>" && echo && printf "$title" | cut -c 1-20 | hexdump -C
-			title=$(echo "$jsonHeaders" | $jq -n -r 'first(inputs | .title)' | perl -C -pe 's/[\x{1f300}-\x{1f5ff}\x{1f900}-\x{1f9ff}\x{1f600}-\x{1f64f}\x{1f680}-\x{1f6ff}\x{2600}-\x{26ff}\x{2700}-\x{27bf}\x{1f1e6}-\x{1f1ff}\x{1f191}-\x{1f251}\x{1f004}\x{1f0cf}\x{1f170}-\x{1f171}\x{1f17e}-\x{1f17f}\x{1f18e}\x{3030}\x{2b50}\x{2b55}\x{2934}-\x{2935}\x{2b05}-\x{2b07}\x{2b1b}-\x{2b1c}\x{3297}\x{3299}\x{303d}\x{00a9}\x{00ae}\x{2122}\x{23f3}\x{24c2}\x{23e9}-\x{23ef}\x{25b6}\x{23f8}-\x{23fa}\x{1f7e2}]\s*//g') # cf. https://stackoverflow.com/a/58422821/5649639
+#			$debug
+			title=$(echo "$title" | perl -C -pe 's/[\x{1f300}-\x{1f5ff}\x{1f900}-\x{1f9ff}\x{1f600}-\x{1f64f}\x{1f680}-\x{1f6ff}\x{2600}-\x{26ff}\x{2700}-\x{27bf}\x{1f1e6}-\x{1f1ff}\x{1f191}-\x{1f251}\x{1f004}\x{1f0cf}\x{1f170}-\x{1f171}\x{1f17e}-\x{1f17f}\x{1f18e}\x{3030}\x{2b50}\x{2b55}\x{2934}-\x{2935}\x{2b05}-\x{2b07}\x{2b1b}-\x{2b1c}\x{3297}\x{3299}\x{303d}\x{00a9}\x{00ae}\x{2122}\x{23f3}\x{24c2}\x{23e9}-\x{23ef}\x{25b6}\x{23f8}-\x{23fa}\x{1f7e2}]\s*//g') # cf. https://stackoverflow.com/a/58422821/5649639
 #			$isLIVE && echo && echo -e "=> title = <$title>" && echo && printf "$title" | cut -c 1-20 | hexdump -C
-#			$undebug
+			$undebug
 
 			ytdlExtraOptions+=( --replace-in-metadata "title" " ?[\U00002B07-\U00002E7F]+ ?" "" --replace-in-metadata "title" " ?[\U00002FF0-\U00002FFF]+ ?" "" --replace-in-metadata "title" " ?[\U00002B00-\U0000DFFF]+ ?" "" --replace-in-metadata "title" " ?[\U0000E000-\U0000F8FF]+ ?" "" --replace-in-metadata "title" " ?[\U0000FE00-\U0000FE2F]+ ?" "" --replace-in-metadata "title" " ?[\U0000FF00-\U0000FFFF]+ ?" "" --replace-in-metadata "title" " ?[\U00010B40-\U0010FFFF]+ ?" "" ) # cf. https://github.com/yt-dlp/yt-dlp/issues/3047#issuecomment-2587024675
 
@@ -344,6 +347,7 @@ function getRestrictedFilenamesFORMAT() {
 			if [ -z "$acodec" ] || [ $acodec = null ];then
 				# Preparing the User Agent for ffprobe
 				userAgent="$(yt-dlp --dump-user-agent)"
+				$undebug
 				echo "=> Fetching some information from remote stream with ffprobe ..."
 				if echo $chosenFormatID | \grep "[+]" -q;then
 					audioFormatID=$(echo $formatID | sed "s/.*+//")
