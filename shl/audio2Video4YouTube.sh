@@ -27,11 +27,11 @@ audio2Video4YouTube ()
 	local video4YouTubeFile=""
 	case $audioCodec in
 		aac|mp3)
-			video4YouTubeFile="${audioFile%.*}__4YouTube.mp4"
+			video4YouTubeFile="${audioFile%.*}.mp4"
 			time $ffmpeg -i "$audioFile" -loop 1 -framerate 4 -i "$pictureFile" -shortest -speed max -map 0:a -c:a copy -map 1:v -preset medium -tune stillimage -crf 18 -pix_fmt yuv420p -movflags +frag_keyframe "$video4YouTubeFile"
 		;;
 		opus|vorbis)
-			video4YouTubeFile="${audioFile%.*}__4YouTube.webm"
+			video4YouTubeFile="${audioFile%.*}.webm"
 			time $ffmpeg -i "$audioFile" -loop 1 -framerate 1 -i "$pictureFile" -shortest -speed max -map 0:a -c:a copy -map 1:v "$video4YouTubeFile"
 		;;
 		*)
