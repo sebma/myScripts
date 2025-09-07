@@ -40,7 +40,7 @@ audio2Video4YouTube ()
 		;;
 	esac
 	sync
-	videoInfo "$video4YouTubeFile"
+	videoInfo.sh "$video4YouTubeFile"
 }
 
 audio2Video4YouTube "$@"
