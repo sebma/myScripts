@@ -274,7 +274,7 @@ function getRestrictedFilenamesFORMAT() {
 		[[ $downloader =~ yt-dlp ]] && ytdlExtraOptions+=( --embed-metadata --format-sort +proto )
 		# ytdlExtraOptions+= ( --exec 'basename %(filepath)s .%(ext)s' --write-info-json )
 
-		printf "=> Fetching the formatsIDs list for \"$url\" with ${effects[bold]}${colors[blue]}$downloader$normal at %s ...\n" "$(LC_MESSAGES=en date)"
+		printf "=> Fetching the formatsIDs list for \"${url//\%/%%}\" with ${effects[bold]}${colors[blue]}$downloader$normal at %s ...\n" "$(LC_MESSAGES=en date)"
 #		$undebug
 
 		jsonResults=$(time "${downloadCMD[@]}" --ignore-config --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
