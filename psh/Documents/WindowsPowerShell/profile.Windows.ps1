@@ -11,6 +11,9 @@ function setVariables {
 	$global:HOSTNAME = $ENV:COMPUTERNAME
 	$global:isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
 	$global:KiTTY_LogDIR= "${ENV:ProgramData}/scoop/apps/kitty/current/log"
+	$global:RecentDIR = "$ENV:APPDATA/Microsoft/Windows/Recent"
+	$global:SendToDIR = "$ENV:APPDATA/Microsoft/Windows/SendTo"
+	$global:StartupDIR = "$ENV:APPDATA/Microsoft/Windows/Start Menu/Programs/Startup"
 }
 
 setVariables
@@ -175,6 +178,7 @@ main
 if( isInstalled("choco") ) {
 	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
+
 
 
 
