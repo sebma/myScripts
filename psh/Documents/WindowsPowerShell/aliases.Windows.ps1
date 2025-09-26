@@ -18,6 +18,7 @@ if( isInstalled("ls.exe") ) {
 	$global:ls = "ls.exe"
 	set-alias -Scope Global l $ls
 }
+set-alias -Scope Global lscom lsserial
 set-alias -Scope Global np notepad
 set-alias -Scope Global np++ notepad++
 set-alias -Scope Global np1 notepad1
@@ -36,6 +37,7 @@ set-alias -Scope Global more less
 #	del alias:man
 #	function man { help @args | less }
 #}
+
 
 
 
