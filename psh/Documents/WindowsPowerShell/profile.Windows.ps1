@@ -99,6 +99,15 @@ function lastBoots($nbBoots) {
 		Get-WinEvent -LogName System | ? Id -eq 6005
 	}
 }
+function lsserial {
+#	Get-CimInstance Win32_SerialPort | Select Name, Description, DeviceID
+#	""
+#	Get-WmiObject Win32_SerialPort | Select Name, Description, DeviceID
+#	""
+	$lptAndCom = '{4d36e978-e325-11ce-bfc1-08002be10318}'
+	gwmi Win32_PNPEntity | ? ClassGuid -eq $lptAndCom | select Name, Description
+	echo ""
+}
 function wgrep($regExp) {
 	if( $regExp.Length -eq 0 ) { $regExp="." }
 	Out-String -Stream | sls "$regExp"
@@ -178,6 +187,7 @@ main
 if( isInstalled("choco") ) {
 	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
+
 
 
 
