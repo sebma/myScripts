@@ -13,13 +13,20 @@ ytdlpUpdate ()
 			local ytdlpPyPI_URL=https://pypi.org/pypi/yt-dlp
 		fi
 	fi
+
 	local sudo=""
 	test -z "$isAdmin" && isAdmin=$(groups 2>/dev/null | \egrep -wq "sudo|adm|admin|root|wheel" && echo true || echo false)
 	if $isAdmin; then
 		sudo="command sudo -H"
 	fi
+
 	local package=yt-dlp
-	local yt_dlp="$(type -P $package)"
+	local yt_dlp="$(readlink -f $(type -P yt-dlp))"
+	if echo $yt_dlp | grep /opt/pipx/venvs/ -q;then
+		$sudo pipx upgrade --global yt-dlp
+		exit 1
+	fi
+
 	if [ -n "$yt_dlp" ]; then
 		local ytdlpCurrentRelease=$($package --version)
 		echo "=> The current version of $package is <$ytdlpCurrentRelease>."
@@ -31,7 +38,7 @@ ytdlpUpdate ()
 			local ytdlpLatestRelease=$(\git ls-remote --tags --refs $ytdlpGitURL | awk -F/ '{print$NF}' | sort -rV | head -1)
 			set +o pipefail
 		else
-			if echo $ytdlpLatestRelease | cut -d. -f4 | \grep . -q; then
+			if echo $ytdlpLatestRelease | cut -d. -f4 | grep . -q; then
 				ytdlpLatestRelease=$(printf "%04d.%02d.%02d.%d" $(echo $ytdlpLatestRelease | cut -d. -f1-4 | tr . " "))
 			else
 				ytdlpLatestRelease=$(printf "%04d.%02d.%02d" $(echo $ytdlpLatestRelease | cut -d. -f1-3 | tr . " "))
