@@ -24,7 +24,7 @@ ytdlpUpdate ()
 	local yt_dlp="$(readlink -f $(type -P yt-dlp))"
 	if echo $yt_dlp | grep /opt/pipx/venvs/ -q;then
 		$sudo pipx upgrade --global yt-dlp
-		exit 1
+		exit
 	fi
 
 	if [ -n "$yt_dlp" ]; then
