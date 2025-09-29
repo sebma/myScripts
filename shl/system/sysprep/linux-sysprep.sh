@@ -28,6 +28,10 @@ if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
 				echo "=> Removing the IP of $iface network interface ..."
 				netplan set "ethernets.$iface.addresses=null"
 			done
+			netplan get bonds | awk -F: '/^[^ ]*:$/{print$1}' | while read iface;do
+				echo "=> Removing the IP of $iface network interface ..."
+				netplan set "bonds.$iface.addresses=null"
+			done
 			netplan apply
 		fi
 	elif $isRedHatLike;then
