@@ -31,11 +31,7 @@ if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q;then
 			cp -piv /etc/netplan/00-installer-config.yaml /etc/netplan/BACKUP/00-installer-config-ORIG.yaml <<< n
 			netplan get ethernets | awk -F: '/^[^ ]*:$/{print$1}' | while read iface;do
 				echo "=> Removing the IP of $iface network interface ..."
-				if echo $iface | grep bond -q;then
-					netplan set "bonds.$iface.addresses=null"
-				else
-					netplan set "ethernets.$iface.addresses=null"
-				fi
+				netplan set "ethernets.$iface.addresses=null"
 			done
 			netplan apply
 		fi
