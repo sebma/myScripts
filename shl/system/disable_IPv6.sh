@@ -23,6 +23,9 @@ if $isDebianLike;then
 		netplan get ethernets | awk -F: '/^[^ ]*:$/{print$1}' | while read iface;do
 			$sudo netplan set "ethernets.$iface.link-local=[]"
 		done
+		netplan get bonds | awk -F: '/^[^ ]*:$/{print$1}' | while read iface;do
+			$sudo netplan set "bonds.$iface.link-local=[]"
+		done
 	fi
 	if nmcli connection show >/dev/null;then 
 		nmcli connection show | sed -n '2,$ p' | awk '{print$1}' | while read connection;do
