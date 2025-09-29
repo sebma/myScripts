@@ -4,6 +4,7 @@ declare {isDebian,isRedHat}Like=false
 
 distribID=$(source /etc/os-release;echo $ID)
 majorNumber=$(source /etc/os-release;echo $VERSION_ID | cut -d. -f1)
+test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
 if   echo $distribID | egrep "centos|rhel|fedora" -q;then
 	isRedHatLike=true
