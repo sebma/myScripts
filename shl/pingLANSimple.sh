@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 
 function pingLANSimple {
+	if [ $# != 1 ];then
+		echo "=> ERROR: pingLANSimple lanCIDR" >&2
+		return 1
+	fi
+
 	local lanCIDR=$1
 	local prefix=${lanCIDR#*/}
 	local lanPrefix=$(echo $lanCIDR | cut -d. -f1-3)
