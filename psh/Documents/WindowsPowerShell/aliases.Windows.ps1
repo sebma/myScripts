@@ -3,7 +3,6 @@ if( $(alias cd *>$null;$?) ) {
 }
 
 set-alias historyLocal Get-History
-if ( $(alias history *>$null;$?) ) { del alias:history }
 
 #if ( $(alias ls *>$null;$?) ) { del alias:ls }
 #set-alias -Scope Global more less.exe
@@ -37,6 +36,7 @@ set-alias -Scope Global more less
 #	del alias:man
 #	function man { help @args | less }
 #}
+
 
 
 
