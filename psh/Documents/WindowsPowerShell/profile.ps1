@@ -330,10 +330,11 @@ function Prompt {
 	$myCWD = $myCWD.Replace( $HOME, '~' )
 	$PSHVersion = ""+$PSVersionTable.PSVersion.Major + "." + $PSVersionTable.PSVersion.Minor
 	$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
-	if( $isAdmin) { Write-Host "$ENV:USERNAME : [ " -NoNewline -ForegroundColor Red } else { Write-Host "$ENV:USERNAME : [ " -NoNewline }
+	if( $isAdmin) { Write-Host "$ENV:USERNAME : " -NoNewline -ForegroundColor Red } else { Write-Host "$ENV:USERNAME : " -NoNewline }
+	Write-Host "[ " -NoNewline
 	Write-Host "$ENV:COMPUTERNAME " -NoNewline -ForegroundColor Yellow
 	Write-Host "@ $ENV:USERDOMAIN " -NoNewline -ForegroundColor Red
-	#Write-Host "/ $osFamily $OSVersion " -NoNewline -ForegroundColor Green
+#	Write-Host "/ $osFamily $OSVersion " -NoNewline -ForegroundColor Green
 	Write-Host "] " -NoNewline
 	Write-Host "(PSv$PSHVersion) " -NoNewline
 	Write-Host "$myCWD" -ForegroundColor Green
