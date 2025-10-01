@@ -11,3 +11,5 @@ function pingMyLANSimple {
         ping $lanPrefix.$i -c1 -W1 &
     done | grep from | sort -t . -k 4n
 }
+
+pingMyLANSimple
