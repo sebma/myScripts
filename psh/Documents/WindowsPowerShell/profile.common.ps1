@@ -89,8 +89,8 @@ if( $isWindows ) {
 
 function isInstalled($cmd) { return gcm "$cmd" 2>$null }
 
+if ( $(alias history *>$null;$?) ) { del alias:history }
 function history() {
-	if ( $(alias history *>$null;$?) ) { del alias:history }
 	cat  $(Get-PSReadlineOption).HistorySavePath
 }
 
