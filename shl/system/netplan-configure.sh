@@ -28,12 +28,12 @@ if $isDebianLike;then
 		if echo $iface | grep bond -q;then
 			$sudo netplan set bonds.$iface.addresses=[$ipaddressCIDR]
 			$sudo netplan set bonds.$iface.nameservers.addresses=[$DNS_SERVER1 , $FallBack_DNS_SERVER]
-			$sudo netplan set bonds.$iface.nameservers.search=$searchDomains
+			$sudo netplan set bonds.$iface.nameservers.search=[$searchDomains]
 			$sudo netplan set bonds.$iface.routes='[{"to":"default", "via": "'$gateway'"}]'
 		else
 			$sudo netplan set ethernets.$iface.addresses=[$ipaddressCIDR]
 			$sudo netplan set ethernets.$iface.nameservers.addresses=[$DNS_SERVER1 , $FallBack_DNS_SERVER]
-			$sudo netplan set ethernets.$iface.nameservers.search=$searchDomains
+			$sudo netplan set ethernets.$iface.nameservers.search=[$searchDomains]
 			$sudo netplan set ethernets.$iface.routes='[{"to":"default", "via": "'$gateway'"}]'
 		fi
 	fi
