@@ -10,8 +10,6 @@ abcde
 android-tools-adb
 apcalc
 apt-file
-lolcat
-toilet
 apt-listchanges
 apt-rdepends
 apt-src
@@ -23,6 +21,7 @@ archivemount
 aria2
 arp-scan
 ascii
+asciinema
 atomicparsley
 atop
 audacious
@@ -173,6 +172,7 @@ libvirt-bin
 links2
 lm-sensors
 lnav
+lolcat
 lsdvd
 lshw-gtk
 lsscsi
@@ -301,6 +301,7 @@ thunderbird-globalmenu
 tlp
 tmpreaper
 tmux
+toilet
 traceroute
 transfig
 translate-shell
