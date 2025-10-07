@@ -12,14 +12,23 @@ elif echo $distribID | egrep "debian|ubuntu" -q;then
 	isDebianLike=true
 fi
 
-if [ $# != 2 ];then
-	echo "=> Usage $scriptBaseName variablesDefinitionFile ipaddress/cidr" >&2
+scriptBaseName=${0##*/}
+if [ $# -lt 2 ];then
+	echo "=> Usage $scriptBaseName variablesDefinitionFile ipaddress/cidr [iface1] [iface2] [iface3] [iface4] ..." >&2
 	exit 1
 fi
 
 variablesDefinitionFile="$1"
 source "$variablesDefinitionFile" || exit
 ipaddressCIDR=$2
+interfaceList=""
+if [ $# -gt 2 ];then
+	shift 2
+	interfaceList="$@"
+	interfaceList="${interfaceList// /,}"
+fi
+
+#echo "=> interfaceList = $interfaceList"
 
 if $isDebianLike;then
 	if $isUbuntuLike && [ $majorNumber -ge 20 ];then
@@ -32,11 +41,13 @@ if $isDebianLike;then
 			$sudo netplan set bonds.$iface.nameservers.search=[$searchDomains]
 			$sudo netplan set bonds.$iface.routes='[{"to":"default", "via": "'$gateway'"}]'
 			# CONFIG LACP cf. https://askubuntu.com/a/1287665/426176
-#			$sudo netplan set bonds.$iface.interfaces=[ens3f0,ens3f1]
-#			$sudo netplan set bonds.$iface.parameters.mode=802.3ad
-#			$sudo netplan set bonds.$iface.parameters.lacp-rate=fast
-#			$sudo netplan set bonds.$iface.parameters.mii-monitor-interval=100
-#			$sudo netplan set bonds.$iface.parameters.transmit-hash-policy=layer2+3
+			if [ $interfaceList ];then
+				$sudo netplan set bonds.$iface.interfaces=[$interfaceList]
+				$sudo netplan set bonds.$iface.parameters.mode=802.3ad
+				$sudo netplan set bonds.$iface.parameters.lacp-rate=fast
+				$sudo netplan set bonds.$iface.parameters.mii-monitor-interval=100
+				$sudo netplan set bonds.$iface.parameters.transmit-hash-policy=layer2+3
+			fi
 		else
 			$sudo netplan set ethernets.$iface.addresses=[$ipaddressCIDR]
 			$sudo netplan set ethernets.$iface.link-local=[]
