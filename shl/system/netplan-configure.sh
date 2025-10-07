@@ -31,6 +31,12 @@ if $isDebianLike;then
 			$sudo netplan set bonds.$iface.nameservers.addresses=[$DNS_SERVER1,$FallBack_DNS_SERVER]
 			$sudo netplan set bonds.$iface.nameservers.search=[$searchDomains]
 			$sudo netplan set bonds.$iface.routes='[{"to":"default", "via": "'$gateway'"}]'
+			# CONFIG LACP
+#			$sudo netplan set bonds.$iface.interfaces=[ens3f0,ens3f1]
+#			$sudo netplan set bonds.$iface.parameters.mode=802.3ad
+#			$sudo netplan set bonds.$iface.parameters.lacp-rate=fast
+#			$sudo netplan set bonds.$iface.parameters.mii-monitor-interval=100
+#			$sudo netplan set bonds.$iface.parameters.transmit-hash-policy=layer2+3
 		else
 			$sudo netplan set ethernets.$iface.addresses=[$ipaddressCIDR]
 			$sudo netplan set ethernets.$iface.link-local=[]
