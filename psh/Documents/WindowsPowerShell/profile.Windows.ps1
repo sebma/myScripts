@@ -22,6 +22,10 @@ function sysinfo {
 	Get-ComputerInfo CsManufacturer , CsModel
 }
 
+if( isInstalled("rg.exe") ) {
+	function rgrep { rg -uu -g !.git/ @args }
+}
+
 if( isInstalled("ls.exe") ) {
 	$global:ls = "ls.exe"
 	#function ls { ls.exe -F @args }
