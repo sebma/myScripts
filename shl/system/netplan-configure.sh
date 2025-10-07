@@ -31,7 +31,7 @@ if $isDebianLike;then
 			$sudo netplan set bonds.$iface.nameservers.addresses=[$DNS_SERVER1,$FallBack_DNS_SERVER]
 			$sudo netplan set bonds.$iface.nameservers.search=[$searchDomains]
 			$sudo netplan set bonds.$iface.routes='[{"to":"default", "via": "'$gateway'"}]'
-			# CONFIG LACP
+			# CONFIG LACP cf. https://askubuntu.com/a/1287665/426176
 #			$sudo netplan set bonds.$iface.interfaces=[ens3f0,ens3f1]
 #			$sudo netplan set bonds.$iface.parameters.mode=802.3ad
 #			$sudo netplan set bonds.$iface.parameters.lacp-rate=fast
