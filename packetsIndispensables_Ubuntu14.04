@@ -165,6 +165,7 @@ libvirt-bin
 links2
 lm-sensors
 lnav
+lolcat
 lsdvd
 lshw-gtk
 lsscsi
@@ -287,6 +288,7 @@ thunderbird-globalmenu
 tlp
 tmpreaper
 tmux
+toilet
 tpconfig
 traceroute
 transfig
