@@ -45,8 +45,10 @@ if $isDebianLike;then
 				$sudo netplan set bonds.$iface.interfaces=[$interfaceList]
 				$sudo netplan set bonds.$iface.parameters.mode=802.3ad
 				$sudo netplan set bonds.$iface.parameters.lacp-rate=fast
-				$sudo netplan set bonds.$iface.parameters.mii-monitor-interval=100
-				$sudo netplan set bonds.$iface.parameters.transmit-hash-policy=layer2+3
+#				$sudo netplan set bonds.$iface.parameters.mii-monitor-interval=100
+#				$sudo netplan set bonds.$iface.parameters.transmit-hash-policy=layer2+3
+				$sudo modprobe -r bonding
+				$sudo netplan apply
 			fi
 		else
 			$sudo netplan set ethernets.$iface.addresses=[$ipaddressCIDR]
