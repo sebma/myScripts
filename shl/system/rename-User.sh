@@ -2,6 +2,7 @@
 set -u
 declare {isDebian,isRedHat}Like=false
 
+scriptBaseName=${0##*/}
 if [ $# != 2 ];then
 	echo "=> Usage: $scripBaseName : $oldUSER $newUSER" >&2
 	exit 1
@@ -19,9 +20,15 @@ fi
 oldUSER=$1
 if $isDebianLike;then
 	if id -u $oldUSER >/dev/null;then
-		newUSER=$2
 		$sudo loginctl terminate-session $(loginctl list-sessions | awk "/$oldUSER/"'{print$1;exit}')
+
+		newUSER=$2
+		oldMount=$(grep $oldUSER /etc/passwd | grep -v /home/$oldUSER | cut -d: -f6)
+		[ $oldMount ] && newMount=${oldUSER/$newUSER/} && grep "^[^#]/$oldUSER" /etc/fstab -q && $sudo umount -v $oldMount
 #		$sudo sed -i "s/$oldUSER\>/$newUSER/g" /etc/passwd /etc/group /etc/shadow /etc/gshadow /etc/subuid /etc/subgid; $sudo mv /home/$oldUSER /home/$newUSER
-		$sudo usermod -l $newUSER -m -d /home/$newUSER $oldUSER && $sudo groupmod -n $newUSER $oldUSER # https://serverfault.com/a/653514/312306
+		# https://serverfault.com/a/653514/312306
+		$sudo groupmod -n $newUSER $oldUSER && $sudo usermod -l $newUSER -m -d /home/$newUSER $oldUSER
+		$sudo sed -i "s/$oldUSER\>/$newUSER/g" /etc/subuid /etc/subgid
+		[ $newMount ] && $sudo mount -v $newMount
 	fi
 fi
