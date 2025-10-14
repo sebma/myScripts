@@ -28,7 +28,7 @@ if $isDebianLike;then
 #		$sudo sed -i "s/$oldUSER\>/$newUSER/g" /etc/passwd /etc/group /etc/shadow /etc/gshadow /etc/subuid /etc/subgid; $sudo mv /home/$oldUSER /home/$newUSER
 		# https://serverfault.com/a/653514/312306
 		$sudo groupmod -n $newUSER $oldUSER && $sudo usermod -l $newUSER -m -d /home/$newUSER $oldUSER
-		$sudo sed -i "s/$oldUSER\>/$newUSER/g" /etc/subuid /etc/subgid
+		$sudo sed -i "s/$oldUSER\>/$newUSER/g" /etc/subuid /etc/subgid /etc/ssh/sshd_config
 		[ $oldMount ] && newMount=${oldUSER/$newUSER/} && $sudo mount -v $newMount
 	fi
 fi
