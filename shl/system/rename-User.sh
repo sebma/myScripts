@@ -4,7 +4,7 @@ declare {isDebian,isRedHat}Like=false
 
 scriptBaseName=${0##*/}
 if [ $# != 2 ];then
-	echo "=> Usage: $scripBaseName : oldUSER newUSER" >&2
+	echo "=> Usage: $scriptBaseName : oldUSER newUSER" >&2
 	exit 1
 fi
 
