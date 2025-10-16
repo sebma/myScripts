@@ -9,7 +9,7 @@ if [ $# != 1 ];then
 fi
 
 depth=$1
-find -maxdepth $depth -type d | while read dir;do
+find -maxdepth $depth -type d | grep -wv .git | while read dir;do
 	if [ ! -d $dir/.git ];then
 		cd $dir
 		git init
