@@ -6,4 +6,4 @@ function cinfo { choco info @args }
 function clistlocal { choco list -l @args | sort }
 function coutdated { choco outdated @args }
 function csearch { choco search @args | sort }
-
+function cversion { choco info @args | sls "^$($args[0])" }
