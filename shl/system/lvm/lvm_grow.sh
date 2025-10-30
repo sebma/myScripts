@@ -50,7 +50,7 @@ if [ $diskSizeAfter != $diskSizeBefore ];then
 	$sudo pvresize $partitionDevicePath
 fi
 
-vgFree=$($sudo vgs --noheadings -o vg_free $vgName | awk '{print toupper($1)}')
+vgFree=$($sudo vgs --noheadings -o vg_free $vgName | awk '{sub("<","",$1);print toupper($1)}')
 newSizeInBytes=$(echo $newSizeUpperCase | numfmt --from=iec --to=none --format=%f)
 freeSpaceInBytes=$(echo $vgFree | numfmt --from=iec --to=none --format=%f)
 if [ $vgFree == 0 ] || [ $newSizeInBytes -gt $freeSpaceInBytes ];then
