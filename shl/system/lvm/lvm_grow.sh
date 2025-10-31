@@ -44,7 +44,7 @@ for partitionDevicePath in $partitionDevicePathList;do
 	diskSizeAfter=$(cat /sys/block/$disk/size)
 	if [ $diskSizeAfter != $diskSizeBefore ];then
 		echo "=> Taking the new $diskDevicePath disk size into account."
-		echo Fix | $sudo parted ---pretend-input-tty $diskDevicePath print free
+		echo Fix | $sudo parted ---pretend-input-tty $diskDevicePath print free | egrep "Model|/dev"
 	fi
 
 	freeSpaceAfterLastPartition=$($sudo parted $diskDevicePath unit KB print free | awk '/Free Space/{sub("[A-Za-z]+","",$3);free=$3}END{print free}')
