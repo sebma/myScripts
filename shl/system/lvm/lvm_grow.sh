@@ -56,7 +56,7 @@ for partitionDevicePath in $partitionDevicePathList;do
 
 	sizeOfLVMPartitionInGiB=$($sudo parted $diskDevicePath unit GB print  | awk '/lvm$/{sub("[A-Za-z]+","",$4);size=$4}END{print int(size/1.024^3)}')
 	sizeOfLVMStructure=$(sudo pvs $diskDevicePath --no-headings -o pv_size | awk '{gsub("[A-Za-z<]*","",$1)}END{print int($1)}')
-	if [ $sizeOfLVMPartitionInGiB -gt $sizeOfLVMStructure ]
+	if [ $sizeOfLVMPartitionInGiB -gt $sizeOfLVMStructure ];then
 		echo "=> Upsizing the $partitionDevicePath PV LVM structure."
 		$sudo pvresize $partitionDevicePath
 	fi
