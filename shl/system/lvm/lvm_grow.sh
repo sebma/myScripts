@@ -11,7 +11,7 @@ fi
 filesystemPath="$1"
 [ $# == 2 ] && desiredSize=$2 || desiredSize=-1
 desiredSizeUpperCase=${desiredSize^^}
-desiredSizeInBytes=$(numfmt --from=iec --to=none --format=%f $desiredSizeUpperCase)
+desiredSizeInBytes=$(numfmt --from=iec --to=none --format=%f $desiredSizeUpperCase || desiredSizeInBytes=-1)
 
 vgName=$(findmnt -no source "$filesystemPath" | awk -F '[/-]' '{print$4}')
 if [ -z "$vgName" ];then
@@ -63,7 +63,7 @@ for partitionDevicePath in $partitionDevicePathList;do
 
 	vgFree=$($sudo vgs --noheadings -o vg_free $vgName | awk '{sub("<","",$1);print toupper($1)}')
 	freeSpaceInBytes=$(numfmt --from=iec --to=none --format=%f $vgFree)
-	if [ $vgFree == 0 ] || [ $desiredSizeInBytes -gt $freeSpaceInBytes ];then
+	if [ $freeSpaceInBytes == 0 ] || [ $desiredSizeInBytes -gt $freeSpaceInBytes ];then
 		echo "=> ERROR: There is not enough free space on the $disk." >&2
 		$sudo vgs $vgName
 		exit 4
