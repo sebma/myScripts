@@ -14,6 +14,8 @@ function setVariables {
 	$global:RecentDIR = "$ENV:APPDATA/Microsoft/Windows/Recent"
 	$global:SendToDIR = "$ENV:APPDATA/Microsoft/Windows/SendTo"
 	$global:StartupDIR = "$ENV:APPDATA/Microsoft/Windows/Start Menu/Programs/Startup"
+	$global:QuickLaunchDIR = "$ENV:APPDATA/Microsoft/Internet Explorer/Quick Launch"
+	$global:TaskBarDIR = "$ENV:APPDATA/Microsoft/Internet Explorer/Quick Launch/User Pinned/TaskBar"
 }
 
 setVariables
@@ -191,6 +193,7 @@ main
 if( isInstalled("choco") ) {
 	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
+
 
 
 
