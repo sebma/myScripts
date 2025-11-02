@@ -34,14 +34,12 @@ for partitionDevicePath in $partitionDevicePathList;do
 	diskDevicePath=${partitionDevicePath/[0-9]*/}
 	disk=$(echo $diskDevicePath | cut -d/ -f3)
 
-	diskSizeBefore=$(cat /sys/block/$disk/size)
+	diskSizeBefore=$(cat /sys/class/block/$disk/size)
 	echo "=> Re-scanning existing disks for changes (such as size for virtual disks), just in case ..."
-	echo 1 | $sudo tee /sys/class/block/sd?/device/rescan >/dev/null
-	echo "=> Re-scanning SCSI hosts for new disks, just in case ..."
-	echo "- - -" | $sudo tee /sys/class/scsi_host/host*/scan >/dev/null
+	echo 1 | $sudo tee /sys/class/block/$disk/device/rescan >/dev/null
 
 	trap 'echo "=> SIGINT Received, cannot interrupt $scriptBaseName starting from this point, continuing ...";' SIGINT
-	diskSizeAfter=$(cat /sys/block/$disk/size)
+	diskSizeAfter=$(cat /sys/class/block/$disk/size)
 	if [ $diskSizeAfter != $diskSizeBefore ];then
 		echo "=> Taking the new $diskDevicePath disk size into account."
 		echo Fix | $sudo parted ---pretend-input-tty $diskDevicePath print free | egrep "Model|/dev"
