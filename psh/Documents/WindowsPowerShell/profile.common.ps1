@@ -120,7 +120,6 @@ function times {
 	$sw.stop()
 
 #	Write-Warning "$($sw.elapsed)"
-#	$host.ui.WriteErrorLine( "$($sw.elapsed)" )
 	[Console]::Error.WriteLine( "$($sw.elapsed)" )
 }
 
