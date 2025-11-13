@@ -36,9 +36,9 @@ function sha256sum {
 			$checkSum = ($_ -split '\s+')[0]
 			$file = ($_ -split '\s+')[1]
 			$trueCheckSum = $(Get-FileHash -a $algorithm $file).hash.Tolower()
-			if( $trueCheckSum -eq $checkSum ) { echo "$file: OK" } else { $failed = $true;++$i; echo "$file: FAILED" }
+			if( $trueCheckSum -eq $checkSum ) { echo "${file}: OK" } else { $failed = $true;++$i; echo "${file}: FAILED" }
 		}
-	if( $failed ) { [Console]::Error.WriteLine( "$scriptName: WARNING: $i of $nbLines computed checksums did NOT match" ) }
+	if( $failed ) { [Console]::Error.WriteLine( "${scriptName}: WARNING: $i of $nbLines computed checksums did NOT match" ) }
 }
 
 sha256sum @args
