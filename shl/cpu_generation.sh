@@ -18,11 +18,7 @@ echo "CPU Model: $model"
 if [[ $model =~ i[0-9]+-([0-9]+) ]]; then
 	modelNumber=${BASH_REMATCH[1]}
 	exponent=${#modelNumber}
-	if [ $exponent -gt 4 ];then
-		generation=${modelNumber:0:2}
-	else
-		generation=${modelNumber:0:1}
-	fi
+	generation=${modelNumber:0:$(($exponent-3))}
 	echo "Intel Generation: $generation"
 elif [[ $model =~ Ryzen\ ([0-9]+) ]]; then
 	generation=${BASH_REMATCH[1]}
