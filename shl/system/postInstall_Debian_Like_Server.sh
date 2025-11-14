@@ -227,7 +227,6 @@ EOF
 		echo [Time] | sudo tee -a /etc/systemd/timesyncd.conf.d/$company-timesyncd.conf
 		grep "^NTP=$NTP" /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.d/* -q || echo "NTP=$NTP" | sudo tee -a /etc/systemd/timesyncd.conf.d/$company-timesyncd.conf
 		grep "^FallbackNTP=$FallbackNTP" /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.d/* -q || echo "FallbackNTP=$FallbackNTP" | sudo tee -a /etc/systemd/timesyncd.conf.d/$company-timesyncd.conf
-		RootDistanceMaxSec=20
 		grep "^RootDistanceMaxSec=$RootDistanceMaxSec" /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.d/* -q || echo "RootDistanceMaxSec=$RootDistanceMaxSec" | sudo tee -a /etc/systemd/timesyncd.conf.d/$company-timesyncd.conf
 
 		$sudo systemctl restart systemd-timesyncd
