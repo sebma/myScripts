@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -u
+
 model=""
 scriptBaseName=${0/*\//}
 if [ $# == 0 ];then
