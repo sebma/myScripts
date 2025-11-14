@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
 model=""
+scriptBaseName=${0/*\//}
 if [ $# == 0 ];then
 	model=$(awk '/model.name/{for(i=4;i<=NF;i++) printf $i " "; print "";exit}' /proc/cpuinfo)
 elif [ $# == 1 ];then
 	model=$1
 else
-	echo "=> Usage : $scriptName [cpu model]"
+    echo "=> Usage : $scriptBaseName [cpu model]" >&2
 	exit 1
 fi
 
