@@ -6,6 +6,7 @@ import ipdb
 
 # https://www.intel.com/content/www/us/en/support/articles/000032203/processors/intel-core-processors.html
 
+progName = sys.argv[0]
 argc = len(sys.argv)
 if argc == 1:
 	modelLine = subprocess.check_output("grep -m1 'model name' /proc/cpuinfo", shell=True).decode()
@@ -16,6 +17,9 @@ elif argc == 2:
 		model_name = re.search(': (.*)', modelLine).group(1).strip()
 	except AttributeError :
 		model_name = modelLine
+else :
+	sys.stderr.write("=> Usage : %s [cpuModel]\n" % progName)
+	exit(1)
 
 print("CPU Model: %s " % model_name)
 
