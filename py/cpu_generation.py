@@ -2,7 +2,7 @@
 import subprocess
 import re
 import sys
-import ipdb
+import pdb
 
 # https://www.intel.com/content/www/us/en/support/articles/000032203/processors/intel-core-processors.html
 
@@ -26,7 +26,7 @@ print("CPU Model: %s " % model_name)
 # Infer generation
 if re.search(r'i[0-9]+-[0-9]+', model_name):
 	modelNumber = re.search(r'i[0-9]+-([0-9]+)', model_name).group(1)  # Capture modelNumber
-#	ipdb.set_trace()
+	#pdb.set_trace()
 	if len(modelNumber) >= 4:
 		generation = modelNumber[0:2]
 	else:
