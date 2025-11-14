@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# https://www.intel.com/content/www/us/en/support/articles/000032203/processors/intel-core-processors.html
+
 set -u
 
 model=""
