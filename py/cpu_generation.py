@@ -27,7 +27,7 @@ print("CPU Model: %s " % model_name)
 if re.search(r'i[0-9]+-[0-9]+', model_name):
 	modelNumber = re.search(r'i[0-9]+-([0-9]+)', model_name).group(1)  # Capture modelNumber
 	#pdb.set_trace()
-	if len(modelNumber) >= 4:
+	if len(modelNumber) > 4:
 		generation = modelNumber[0:2]
 	else:
 		generation = modelNumber[0]
