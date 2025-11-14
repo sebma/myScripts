@@ -2,7 +2,7 @@
 
 model=""
 if [ $# == 0 ];then
-	model=$(lscpu | awk '/Model name/{for(i=3;i<=NF;i++) printf $i " "; print ""}')
+	model=$(awk '/model.name/{for(i=4;i<=NF;i++) printf $i " "; print "";exit}' /proc/cpuinfo)
 elif [ $# == 1 ];then
 	model=$1
 else
