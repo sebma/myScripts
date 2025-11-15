@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+#coding: latin1
+
 import subprocess
 import re
 import sys
