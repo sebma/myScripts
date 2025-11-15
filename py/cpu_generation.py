@@ -12,20 +12,20 @@ progName = sys.argv[0]
 argc = len(sys.argv)
 if argc == 1:
 	#modelLine = subprocess.check_output("grep -m1 'model name' /proc/cpuinfo", shell=True).decode()
-	#model_name = re.search(': (.*)', modelLine).group(1).strip()
 	pattern1 = re.compile( 'model name', re.I )
+	pattern2 = re.compile( ': (.*)' )
 	cpuinfoFile = open("/proc/cpuinfo")
 	for line in cpuinfoFile :
 		if pattern1.search( line ) :
-			#pdb.set_trace()
-			pattern2 = re.compile( ': (.*)' )
 			model_name = re.search( pattern2, line).group(1).strip()
+			#pdb.set_trace()
 			break
 	cpuinfoFile.close()
 elif argc == 2:
 	modelLine = sys.argv[1]
+	pattern2 = re.compile( ': (.*)' )
 	try :
-		model_name = re.search(': (.*)', modelLine).group(1).strip()
+		model_name = re.search( pattern2, modelLine).group(1).strip()
 	except AttributeError :
 		model_name = modelLine
 else :
