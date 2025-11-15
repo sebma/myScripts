@@ -4,7 +4,7 @@
 import subprocess
 import re
 import sys
-import ipdb
+import pdb
 
 # https://www.intel.com/content/www/us/en/support/articles/000032203/processors/intel-core-processors.html
 
@@ -32,7 +32,7 @@ else :
 	exit(1)
 
 print("CPU Model: %s " % model_name)
-#ipdb.set_trace()
+#pdb.set_trace()
 
 # Infer generation
 pattern3 = re.compile( r'i[0-9]+-([0-9]+)' )
