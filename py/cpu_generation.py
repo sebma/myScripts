@@ -36,13 +36,16 @@ print("CPU Model: %s " % model_name)
 
 # Infer generation
 pattern3 = re.compile( r'i[0-9]+-([0-9]+)' )
-match = re.search(pattern3, model_name)
-if match :
-	modelNumber = match.group(1)  # Capture modelNumber
+intel_match = re.search(pattern3, model_name)
+if intel_match :
+	modelNumber = intel_match.group(1)  # Capture modelNumber
 	generation = modelNumber[0:len(modelNumber)-3]
 	print("Intel Generation: %s" % generation)
-elif re.search(r'Ryzen\ ([0-9]+)', model_name):
-	generation = re.search(r'Ryzen\ ([0-9]+)', model_name).group(1)  # Capture generation for AMD
-	print("AMD Ryzen Generation: %s (e.g., Ryzen 5 5600X is from the %sth generation)" %(generation[0],generation[0]))
-else:
-	print("Unknown CPU model format.")
+else :
+	pattern4 = re.compile( r'Ryzen\ ([0-9]+)' )
+	amd_match = re.search( pattern4, model_name)
+	if amd_match :
+		generation = amd_match.group(1)  # Capture generation for AMD
+		print("AMD Ryzen Generation: %s (e.g., Ryzen 5 5600X is from the %sth generation)" %(generation[0],generation[0]))
+	else:
+		print("Unknown CPU model format.")
