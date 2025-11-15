@@ -10,10 +10,10 @@ import pdb
 
 progName = sys.argv[0]
 argc = len(sys.argv)
+pattern2 = re.compile( ': (.*)' )
 if argc == 1:
 	#modelLine = subprocess.check_output("grep -m1 'model name' /proc/cpuinfo", shell=True).decode()
 	pattern1 = re.compile( 'model name', re.I )
-	pattern2 = re.compile( ': (.*)' )
 	cpuinfoFile = open("/proc/cpuinfo")
 	for line in cpuinfoFile :
 		if pattern1.search( line ) :
@@ -22,7 +22,6 @@ if argc == 1:
 	cpuinfoFile.close()
 elif argc == 2:
 	modelLine = sys.argv[1]
-	pattern2 = re.compile( ': (.*)' )
 	try :
 		model_name = re.search( pattern2, modelLine).group(1).strip()
 	except AttributeError :
