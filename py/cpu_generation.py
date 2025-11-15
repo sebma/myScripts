@@ -4,7 +4,7 @@
 import subprocess
 import re
 import sys
-import pdb
+import ipdb
 
 # https://www.intel.com/content/www/us/en/support/articles/000032203/processors/intel-core-processors.html
 
@@ -18,7 +18,6 @@ if argc == 1:
 	for line in cpuinfoFile :
 		if pattern1.search( line ) :
 			model_name = re.search( pattern2, line).group(1).strip()
-			#pdb.set_trace()
 			break
 	cpuinfoFile.close()
 elif argc == 2:
@@ -33,10 +32,13 @@ else :
 	exit(1)
 
 print("CPU Model: %s " % model_name)
+#ipdb.set_trace()
 
 # Infer generation
-if re.search(r'i[0-9]+-[0-9]+', model_name):
-	modelNumber = re.search(r'i[0-9]+-([0-9]+)', model_name).group(1)  # Capture modelNumber
+pattern3 = re.compile( r'i[0-9]+-([0-9]+)' )
+match = re.search(pattern3, model_name)
+if match :
+	modelNumber = match.group(1)  # Capture modelNumber
 	generation = modelNumber[0:len(modelNumber)-3]
 	print("Intel Generation: %s" % generation)
 elif re.search(r'Ryzen\ ([0-9]+)', model_name):
