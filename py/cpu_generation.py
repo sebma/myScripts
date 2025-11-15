@@ -11,8 +11,17 @@ import pdb
 progName = sys.argv[0]
 argc = len(sys.argv)
 if argc == 1:
-	modelLine = subprocess.check_output("grep -m1 'model name' /proc/cpuinfo", shell=True).decode()
-	model_name = re.search(': (.*)', modelLine).group(1).strip()
+	#modelLine = subprocess.check_output("grep -m1 'model name' /proc/cpuinfo", shell=True).decode()
+	#model_name = re.search(': (.*)', modelLine).group(1).strip()
+	pattern1 = re.compile( 'model name', re.I )
+	cpuinfoFile = open("/proc/cpuinfo")
+	for line in cpuinfoFile :
+		if pattern1.search( line ) :
+			#pdb.set_trace()
+			pattern2 = re.compile( ': (.*)' )
+			model_name = re.search( pattern2, line).group(1).strip()
+			break
+	cpuinfoFile.close()
 elif argc == 2:
 	modelLine = sys.argv[1]
 	try :
@@ -28,7 +37,6 @@ print("CPU Model: %s " % model_name)
 # Infer generation
 if re.search(r'i[0-9]+-[0-9]+', model_name):
 	modelNumber = re.search(r'i[0-9]+-([0-9]+)', model_name).group(1)  # Capture modelNumber
-	#pdb.set_trace()
 	generation = modelNumber[0:len(modelNumber)-3]
 	print("Intel Generation: %s" % generation)
 elif re.search(r'Ryzen\ ([0-9]+)', model_name):
