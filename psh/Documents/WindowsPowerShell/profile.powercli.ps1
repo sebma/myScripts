@@ -64,6 +64,7 @@ function vmInfo($vm) {
 	}
 }
 
-#$vm = Get-VM "Virtual Machine Name"
+#Set-PowerCLIConfiguration -InvalidCertificateAction Prompt
 #Connect-VIServer -Menu
+#$vm = Get-VM "Virtual Machine Name"
 #Disconnect-VIServer -Confirm:$false
