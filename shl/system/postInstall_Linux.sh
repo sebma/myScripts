@@ -205,8 +205,8 @@ EOF
 		done
 		if which update-grub >/dev/null;then
   			$sudo update-grub
-     		else
-       			if [ -d /sys/firmware/efi ];then
+		else
+			if [ -d /sys/firmware/efi ];then
 	  			$sudo grub2-mkconfig -o /boot/efi/EFI/$distribID/grub.cfg
 	  		else
 				$sudo grub2-mkconfig -o /boot/grub2/grub.cfg
