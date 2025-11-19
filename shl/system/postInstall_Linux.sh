@@ -206,7 +206,7 @@ EOF
 		if which update-grub >/dev/null;then
   			$sudo update-grub
 		else
-			$sudo grub2-mkconfig "$(readlink -f /etc/grub2.cfg)" || $sudo grub2-mkconfig "$(readlink -f /etc/grub2.conf)"
+			$sudo grub2-mkconfig -o "$(readlink -f /etc/grub2.cfg)" || $sudo grub2-mkconfig -o "$(readlink -f /etc/grub2.conf)"
 		fi
 
 		# CONFIG SNMP
