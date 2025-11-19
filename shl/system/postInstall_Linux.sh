@@ -209,9 +209,9 @@ EOF
        			if [ -d /sys/firmware/efi ];then
 	  			$sudo grub2-mkconfig -o /boot/efi/EFI/$distribID/grub.cfg
 	  		else
-       				$sudo grub2-mkconfig -o /boot/grub2/grub.cfg
-	   		fi
-     		fi
+				$sudo grub2-mkconfig -o /boot/grub2/grub.cfg
+			fi
+		fi
 
 		# CONFIG SNMP
 		$sudo $apt install snmp snmpd -y $aptSimul # Pour la supervision SNMP
