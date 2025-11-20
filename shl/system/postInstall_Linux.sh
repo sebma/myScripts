@@ -42,7 +42,7 @@ if   $isRedHatLike;then
 	target_console_loglevel=4
 	if [ $console_loglevel -ge 5 ];then
 		echo kernel.printk=$kernel_printk | sed "s/$console_loglevel/$target_console_loglevel/" | $sudo tee -a /etc/sysctl.d/99-$company.conf
-		$sudo sysctl -p /etc/sysctl.d/99-$company.conf
+		$sudo dmesg --console-level $target_console_loglevel
 	fi
 
 	hostnamectl status
