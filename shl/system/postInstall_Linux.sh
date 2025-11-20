@@ -13,6 +13,14 @@ fi
 
 test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
+if [ $# != 1 ];then
+	echo "=> Usage $scriptBaseName variablesDefinitionFile" >&2
+	exit 1
+fi
+
+variablesDefinitionFile="$1"
+source "$variablesDefinitionFile" || exit
+
 if   $isRedHatLike;then
 	timedatectl status | grep Time.zone:.Europe/Paris -q || timedatectl set-timezone Europe/Paris
  
