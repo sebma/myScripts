@@ -30,6 +30,21 @@ if   $isRedHatLike;then
 	$sudo localectl set-x11-keymap fr pc105
  	$sudo localectl set-locale LANG=en_US.UTF-8
  
+	# DESACTIVER l'IPv6 ("link-local: []") AVEC yq : WIP
+	# AJOUT L'OPTION "optional: true" AVEC yq : WIP
+	# iface=docker0
+	# $sudo sysctl -w net.ipv6.conf.$iface.disable_ipv6=1
+	grep 'net.ipv6.conf.all.disable_ipv6=1' /etc/sysctl.conf /etc/sysctl.d/*.conf -q || echo net.ipv6.conf.all.disable_ipv6=1 | $sudo tee -a /etc/sysctl.d/99-$company.conf
+	$sudo sysctl -p /etc/sysctl.d/99-$company.conf
+
+	kernel_printk=$(sysctl -n kernel.printk)
+	console_loglevel=$(echo "$kernel_printk" | cut -f1)
+	target_console_loglevel=4
+	if [ $console_loglevel -ge 5 ];then
+		echo kernel.printk=$kernel_printk | sed "s/$console_loglevel/$target_console_loglevel/" | $sudo tee -a /etc/sysctl.d/99-$company.conf
+		$sudo sysctl -p /etc/sysctl.d/99-$company.conf
+	fi
+
 	hostnamectl status
  
 	grep ^proxy\s*= /etc/yum.conf -q || echo proxy = $http_proxy | tee -a /etc/yum.conf
