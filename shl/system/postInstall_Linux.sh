@@ -13,13 +13,6 @@ fi
 
 test $(id -u) == 0 && sudo=""
 
-mtu=9000
-proxyIP=X.Y.Z.T4
-NTP1=X.Y.Z.T1
-NTP2=X.Y.Z.T2
-http_proxy_port=80
-http_proxy=http://$proxyIP:$http_proxy_port
-https_proxy=$http_proxy/HTTPS///
 if   $isRedHatLike;then
 	timedatectl status | grep Time.zone:.Europe/Paris -q || timedatectl set-timezone Europe/Paris
  
