@@ -11,7 +11,7 @@ elif echo $distribID | egrep "debian|ubuntu" -q;then
 	isDebianLike=true
 fi
 
-test $(id -u) == 0 && sudo=""
+test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
 if   $isRedHatLike;then
 	timedatectl status | grep Time.zone:.Europe/Paris -q || timedatectl set-timezone Europe/Paris
