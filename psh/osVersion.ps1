@@ -33,8 +33,8 @@ function osVersion {
 				{ ( $_ -ge 22000 ) -and ( $_ -lt 26200 ) } {$OSRelease += "11"; Break}
 				default { $OSRelease = "Not Known"; Break}
 			}
-			if ( $osBuildNumber -gt 7600 ) {
-				$DisplayVersion = (gp "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").DisplayVersion
+			if ( $osBuildNumber -gt 10240 ) {
+				$DisplayVersion = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").DisplayVersion
 				$OSRelease += " $DisplayVersion"
 			}
 		}
