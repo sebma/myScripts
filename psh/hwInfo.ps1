@@ -1,0 +1,24 @@
+$today = $( get-date -f "yyyyMMdd" )
+& {
+echo "=> PC Summary info :"
+gin WindowsProductName , BiosFirmwareType , CsManufacturer , CsModel , CsChassisSKUNumber , CsProcessors , CsTotalPhysicalMemory , OsName , OsVersion, OsLanguage, OsMuiLanguages , CsNetworkAdapters , CsName , CsUserName , OsPagingFiles , TimeZone
+echo "UserProfile`t      : $ENV:USERPROFILE"
+echo ""
+echo "=> Network Drives Usage :"
+Get-PSDrive -PSProvider FileSystem | Format-Table
+#Get-PSDrive -PSProvider FileSystem | Format-Table Name , @{ N="Used";E={ "{0:n3} GiB" -f ($_.Used/1GB) };A="right" } , @{ N="Free";E={ "{0:n3} GiB" -f ($_.Free/1GB) };A="right" } , @{ N="Total";E={ "{0:n3} GiB" -f (($_.Used+$_.Free)/1GB) };A="right" }
+echo "=> Bootable disk info :"
+Get-Disk | Where { $_.IsBoot -eq $TRUE } | Select Number , FriendlyName , SerialNumber , HealthStatus , OperationalStatus, Size , PartitionStyle , IsBoot | ft
+echo "=> Bootable disk PartitionStyle :"
+(Get-Disk | Where { $_.IsBoot -eq $TRUE }).PartitionStyle
+echo "=> Volumes Usage :"
+Get-Volume
+#Get-NetIPAddress -AddressFamily IPv4  | Select InterfaceAlias , IPAddress | Sort InterfaceAlias | Format-Table
+echo ""
+echo "=> IP information :"
+Get-NetIPInterface -ConnectionState Connected -AddressFamily IPv4 | % { Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias $_.InterfaceAlias } | Select InterfaceAlias , IPAddress , PrefixLength , @{ Name='IPv4DefaultGateway'; Expression={ ( $_ | Get-NetIPConfiguration ).IPv4DefaultGateway.Nexthop } } | Format-Table
+echo "=> Routing table :"
+Get-NetRoute -AddressFamily IPv4 | Select DestinationPrefix,NextHop,InterfaceAlias,ifIndex,InterfaceMetric,RouteMetric | Format-Table | Out-String -stream | sls -n "224.0.0.0/4|/32"
+echo "=> Running Services :"
+Get-Service | ? Status -eq "Running" | select Status , Name , DisplayName | Format-Table
+} | Tee "$env:COMPUTERNAME-$today.txt"
