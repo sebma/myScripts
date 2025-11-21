@@ -27,7 +27,8 @@ function osVersion {
 				7601 {$OSRelease = "7SP1"; Break}
 				9200 {$OSRelease = "8"; Break}
 				9600 {$OSRelease = "8.1"; Break}
-				{$_ -ge 10240} {$OSRelease = $PSVersionTable.BuildVersion.Major; Break}
+				{ ( $_ -ge 10240 ) -and ( $_ -lt 22000 ) } {$OSRelease = "10"; Break}
+				{ ( $_ -ge 22000 ) -and ( $_ -lt 26200 ) } {$OSRelease = "11"; Break}
 				default { $OSRelease = "Not Known"; Break}
 			}
 		}
