@@ -18,13 +18,18 @@ diskDevice=$(pvs | awk "/$osVGName/"'{print substr($1,1,8)}')
 mount | grep -q $rootFSLogicalVolume || $sudo mount /dev/mapper/$rootFSLogicalVolume /mnt          # montage de celle-ci en remplacant le X par le bon numero de partition
 for special in dev dev/pts proc sys ; do $sudo mkdir -pv /mnt/$special;$sudo mount -v --bind /$special /mnt/$special ; done
 
-$sudo chroot /mnt $SHELL <<-EOF # mise a la racine du disque monte
-	findmnt >/dev/null && mount -av || exit                      # montage des partitions dans le chroot
+$sudo chroot /mnt bash <<-EOF # mise a la racine du disque monte
+	findmnt >/dev/null && mount -av || exit # montage des partitions dans le chroot
 	update-grub                   # creation d'un nouveau fichier de configuration : grub.cfg
-	if $efiMode
-	then
-		mkdir -p /boot/efi
-		grub-install --target=x86_64-efi --efi-directory=/boot/efi --removable || grub-install --force --target=x86_64-efi --efi-directory=/boot/efi --removable # installation de grub
+	if $efiMode;then
+		efiBootDir=/boot/efi
+		mkdir -p $efiBootDir
+
+		case $HOSTTYPE in
+			x86_64) target=x86_64-efi;;
+		esac
+
+		grub-install --target=$target --efi-directory=$efiBootDir --removable || grub-install --force --target=$target --efi-directory=$efiBootDir --removable # installation de grub
 	else
 		grub-install $diskDevice || grub-install --force $diskDevice # installation de grub sur le MBR
 	fi
