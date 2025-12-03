@@ -14,9 +14,9 @@ function netstat {
 
 function iplink($iface) {
 	if( $iface ) {
-		Get-NetAdapter | ? InterfaceAlias -Match "$iface" | select InterfaceAlias , Status , MacAddress , MtuSize , LinkSpeed | Format-Table
+		Get-NetAdapter | ? InterfaceAlias -Match "$iface" | select InterfaceAlias , Status , MacAddress , MtuSize , Virtual , ifDesc , LinkSpeed | Format-Table
 	} else {
-		Get-NetAdapter | select InterfaceAlias , Status , MacAddress , MtuSize , LinkSpeed | Format-Table
+		Get-NetAdapter | select InterfaceAlias , Status , MacAddress , MtuSize , Virtual , ifDesc , LinkSpeed | Format-Table
 	}
 }
 function ip($iface) {
@@ -87,4 +87,5 @@ function host($url, $server, $type) {
 		}
 	}
 }
+
 
