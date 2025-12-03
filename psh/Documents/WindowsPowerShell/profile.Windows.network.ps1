@@ -26,6 +26,7 @@ function ip($iface) {
 		Get-NetIPAddress | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" } | select InterfaceAlias , IPAddress , PrefixLength
 	}
 }
+
 function IPv4($iface) {
 	if( $iface ) {
 		Get-NetIPAddress -AddressFamily IPv4 | ? InterfaceAlias -Match "$iface" | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" } | select InterfaceAlias , IPv4Address , PrefixLength
@@ -87,5 +88,6 @@ function host($url, $server, $type) {
 		}
 	}
 }
+
 
 
