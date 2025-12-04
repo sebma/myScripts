@@ -20,7 +20,7 @@ variablesDefinitionFile="$1"
 source "$variablesDefinitionFile" || exit
 
 if $isDebianLike;then
-	test $(id -u) == 0 && sudo="" || sudo=sudo
+	test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
 #	$sudo ufw app list
 	$sudo sed -i "s/IPV6.*/IPV6=no/" /etc/default/ufw
