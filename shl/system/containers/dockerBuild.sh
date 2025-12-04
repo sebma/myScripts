@@ -2,7 +2,7 @@
 
 set -u
 scriptBaseName=${0/*\//}
-test $(id -u) == 0 && sudo="" || sudo=sudo
+test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
 dockerBuild () {
 	local imageName=""
