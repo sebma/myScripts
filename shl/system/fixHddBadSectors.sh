@@ -11,7 +11,7 @@ fi
 
 if type sudo >/dev/null 2>&1 
 then
-	sudo=$(which sudo)
+	sudo=$(type -P sudo)
 else
 	sudo=""
 fi
