@@ -8,7 +8,7 @@ elif echo $distribID | egrep "debian|ubuntu" -q;then
 	isDebianLike=true
 fi
 
-test $(id -u) == 0 && sudo="" || sudo=sudo
+test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 if $isDebianLike;then
 	$sudo apt install -V ufw -y
 	$sudo ufw enable
