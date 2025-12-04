@@ -28,7 +28,7 @@ source "$variablesDefinitionFile" || exit
 apt="$(which apt) -V"
 aptOptions="-V"
 if $isDebianLike;then
-	test $(id -u) == 0 && sudo="" || sudo=sudo
+	test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
 	$sudo sysctl -w kernel.dmesg_restrict = 0 # Allows users to run "dmesg"
 	echo kernel.dmesg_restrict = 0 | sudo tee -a /etc/sysctl.d/99-$company.conf
