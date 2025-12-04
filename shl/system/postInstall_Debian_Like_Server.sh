@@ -27,7 +27,7 @@ apt="$(which apt) -V"
 aptOptions="-V"
 aptSimul="-s"
 if $isDebianLike;then
-	test $(id -u) == 0 && sudo="" || sudo=sudo
+	test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
 	# CONFIG KEYBOARD LAYOUT
 	localectl set-x11-keymap fr pc105 latin9
