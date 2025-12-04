@@ -4,7 +4,7 @@ scriptBaseName=${0##*/}
 #set -o errexit
 set -o nounset
 
-type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo=$(which sudo) || sudo=""
+type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo=$(type -P sudo) || sudo=""
 if [ $# != 1 ]
 then
         echo "=> Usage : $scriptBaseName disk" >&2
