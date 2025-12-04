@@ -2,7 +2,7 @@
 set -u
 declare {isDebian,isRedHat}Like=false
 
-test $(id -u) == 0 && sudo="" || sudo=sudo
+test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
 echo $OSTYPE | grep -q android && osFamily=Android || osFamily=$(uname -s)
 
