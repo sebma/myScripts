@@ -17,7 +17,7 @@ function main {
 
 		if $isAdmin
 		then
-			sudo=sudo
+			sudo=$(type -P sudo)
 			distrib="$(\lsb_release -si)"
 			distribCodeName="$(\lsb_release -sc)"
 			case $distrib in
