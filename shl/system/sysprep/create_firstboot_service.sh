@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-test $(id -u) == 0 && sudo="" || sudo=$(which sudo)
+test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 initName=$(ps -p 1 -o comm=)
 if egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor -q && [ $initName == systemd ];then
 #	Taken from https://askubuntu.com/a/1327781
