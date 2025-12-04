@@ -7,7 +7,7 @@ if [ $# != 1 ];then
 fi
 
 countryKeyCode=$1
-test $(id -u) == 0 && sudo="" || sudo=sudo
+test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 $sudo mkdir -v /boot/grub/layouts
 
 if $sudo grub-kbdcomp -o /boot/grub/layouts/$countryKeyCode.gkb $countryKeyCode;then
