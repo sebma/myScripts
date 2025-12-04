@@ -2,7 +2,7 @@
 
 set -u
 
-test $(id -u) == 0 && sudo="" || sudo=sudo
+test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
 biosAddress=$($sudo dmidecode -t bios | awk '/BIOS Information/{section_found=1}/Address:/&&section_found{printf$2;exit}')
 case $biosAddress in
