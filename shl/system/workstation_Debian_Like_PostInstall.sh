@@ -11,7 +11,7 @@ if   echo $distribID | egrep "centos|rhel|fedora" -q;then
 elif echo $distribID | egrep "debian|ubuntu" -q;then
 	isDebianLike=true
 fi
-test $(id -u) == 0 && sudo="" || sudo=sudo
+test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
 #aptSimul="-s"
 proxyIP=X.Y.Z.T4
