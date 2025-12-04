@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo=$(which sudo)
+type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo=$(type -P sudo)
 simpleUserGroups=""
 for userName
 do
