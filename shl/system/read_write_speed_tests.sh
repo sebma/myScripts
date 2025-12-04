@@ -3,7 +3,7 @@
 myPID=$$
 scriptName=$(basename $0)
 sudo=""
-type sudo >/dev/null 2>&1 && sudo=$(which sudo)
+type sudo >/dev/null 2>&1 && sudo=$(type -P sudo)
 #set -o nounset
 #set -o errexit
 
