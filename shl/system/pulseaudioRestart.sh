@@ -5,7 +5,7 @@ initPath=$(type -P $initName)
 set -o pipefail
 systemType=$(strings $initPath | egrep -o "upstart|sysvinit|systemd|launchd" | head -1 || echo unknown)
 set +o pipefail
-[ $(id -u) != 0 ] && sudo=sudo || sudo=""
+[ $(id -u) != 0 ] && sudo=$(type -P sudo) || sudo=""
 
 echo "=> Restarting the pulseaudio server ..."
 pulseaudio --kill;sleep 1;pidof pulseaudio >/dev/null || pulseaudio --start --log-target=syslog # Restart pulseaudio
