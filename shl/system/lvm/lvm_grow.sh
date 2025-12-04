@@ -22,7 +22,7 @@ echo "=> vgName = $vgName"
 echo "=> BEFORE: "
 df -h "$filesystemPath"
 
-test $(id -u) == 0 && sudo="" || sudo=sudo
+test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 partitionDevicePathList=$($sudo vgs --noheadings -o pv_name $vgName)
 for partitionDevicePath in $partitionDevicePathList;do
 	if echo $partitionDevicePath | grep /dev/md -q;then
