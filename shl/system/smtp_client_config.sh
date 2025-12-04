@@ -20,7 +20,7 @@ variablesDefinitionFile="$1"
 source "$variablesDefinitionFile" || exit
 
 if $isDebianLike;then
-	test $(id -u) == 0 && sudo="" || sudo=sudo
+	test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
 		# CONFIG EXIM4
 		cat <<-EOF | sudo tee /etc/exim4/update-exim4.conf.conf >/dev/null
