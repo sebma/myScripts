@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-test $(id -u) == 0 && sudo="" || sudo=sudo
+test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 scriptBaseName=${0/*\//}
 if [ $# != 1 ];then
 	echo "=> Usage $scriptBaseName globalProtectVersion" >&2
