@@ -36,7 +36,7 @@ function fixCVEs {
 
 	test $(id -u) == 0 && local sudo="" || local sudo=$(type -P sudo)
 	if [ $distribName == debian ];then
-		$sudo apt install -V $(debsecan --suite $(cut -d/ -f2 /etc/debian_version) --only-fixed | egrep "$cveListRegExp" | cut -d" " -f2 | sort -u)
+		$sudo apt install -V $(debsecan --suite $(cut -d/ -f2 /etc/debian_version) --only-fixed | awk "/$cveListRegExp/"'{print$2}' | sort -u)
 	fi
 }
 
