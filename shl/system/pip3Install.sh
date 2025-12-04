@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 function pip3Install {
-	test $(id -u) == 0 && sudo="" || sudo=sudo
+	test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 	if ! type -P pip3 > /dev/null; then
 		if [ $(source /etc/os-release;echo $ID_LIKE) = debian ]; then
 			for pkg in python3-distutils
