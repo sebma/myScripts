@@ -1,23 +1,26 @@
 #!/usr/bin/env bash
 
+set -o nounset
+set -o errexit
+
 scriptName=$(basename $0)
 declare -i virtualDiskNumber=-1
 declare -i last=-1
 declare listReadyPhysicalDisks=false
 
-if [ $# = 0 ];then
+if [ $# == 0 ];then
 	lastest=true # Choose the latest VirtualDisk by default.
-elif [ $# = 1 ];then
-	if [ $1 = -h ];then
+elif [ $# == 1 ];then
+	if [ $1 == -h ];then
 		echo "=> Usage : $scriptName virtualDiskNumber|[latest]" >&2
 		echo "=> Usage : $scriptName -l : List physical disks that are Ready." >&2
 		exit 1
-	elif [ $1 = -l ];then
+	elif [ $1 == -l ];then
 		listReadyPhysicalDisks=true
 	else
 		lastest=false
 		virtualDiskNumber=$1
-		if [ $virtualDiskNumber = 0 ];then
+		if [ $virtualDiskNumber == 0 ];then
 			echo "=> ERROR [$scriptName] : virtualDiskNumber must be an integer." >&2
 			exit 2
 		fi
@@ -34,7 +37,7 @@ if which omreport >/dev/null;then
 	if $listReadyPhysicalDisks;then
 		omreport storage pdisk controller=$controllerID | egrep '^(ID|Status|State|Power|Media|Failure Predicted|Capacity|Sector Size|Bus|Vendor|Product|Serial|Part.Number|^$)' | awk -v myPATTERN=Ready -v RS='' -v ORS='\n\n' '$0 ~ myPATTERN'
 		pdisk=$(omreport storage pdisk controller=$controllerID -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/Ready;/{value=$1;print value;exit}')
-		[ -z "$pdisk" ] && echo "=> There is no more physical disk in <Ready> state." >&2
+		[ -z "$pdisk" ] && echo "=> ERROR [$scriptName] : There is no more physical disk in <Ready> state." >&2
 		exit 3
 	fi
 
@@ -47,7 +50,7 @@ if which omreport >/dev/null;then
 
 	pdisk=$(omreport storage pdisk controller=$controllerID -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/Ready;/{value=$1;print value;exit}')
 	if [ -z "$pdisk" ];then
-		echo "=> There is no more physical disk in <Ready> state for this operation." >&2
+		echo "=> ERROR [$scriptName] : There is no more physical disk in <Ready> state for this operation." >&2
 		exit 5
 	fi
 
@@ -55,7 +58,11 @@ if which omreport >/dev/null;then
 	omreport storage pdisk controller=$controllerID pdisk=$pdisk| egrep '^(ID|Status|Capacity|Sector Size|Bus|Power|Media|State|Vendor|Product|Serial|Part.Number|^$)'
 
 	# Fetching the RAID and Policy values from the latest Virtual Disk
-	latestVirtualDiskID=$(omreport storage vdisk controller=$controllerID -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/virtual\s*disk\s*[0-9]+/{value=$1}END{printf value}')
+	latestVirtualDiskID=$(omreport storage vdisk controller=$controllerID -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}$3 ~ /(virtual)?\s*disk\s*[0-9]+/{value=$1}END{printf value}')
+	if [ -z "$latestVirtualDiskID" ];then
+		echo "=> ERROR [$scriptName] : Could not fetch the latest Virtual Disk ID." >&2
+		exit 6
+	fi
 
 	raid=$(omreport storage vdisk controller=$controllerID vdisk=$latestVirtualDiskID | awk '/Layout/{value=$NF;printf tolower(gensub("RAID-","r",1,value))}')
 	readpolicy=$(omreport storage vdisk controller=$controllerID vdisk=$latestVirtualDiskID | awk '/Read Policy/{value=$(NF-1)" "$NF;printf tolower(value)}')
@@ -69,7 +76,7 @@ if which omreport >/dev/null;then
 		"no read ahead") readpolicy=nra;;
 		"read cache") readpolicy=rc;;
 		"no read cache") readpolicy=nrc;;
-		*) echo "=> Unsupported read policy: <$readpolicy>." >&2;exit 6;;
+		*) echo "=> ERROR [$scriptName] : Unsupported read policy: <$readpolicy>." >&2;exit 6;;
 	esac
 
 	case $writepolicy in
@@ -78,11 +85,11 @@ if which omreport >/dev/null;then
 		"write cache") writepolicy=wc;;
 		"force write back") writepolicy=fwb;;
 		"no write cache") writepolicy=nwc;;
-		*) echo "=> Unsupported write policy = <$writepolicy>." >&2;exit 7;;
+		*) echo "=> ERROR [$scriptName] : Unsupported write policy = <$writepolicy>." >&2;exit 7;;
 	esac
 
 	if $lastest;then
-		last=$(omreport storage vdisk controller=$controllerID -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1;last=1}/virtual\s*disk\s*[0-9]+;/{last+=1}END{printf last}')
+		last=$(omreport storage vdisk controller=$controllerID -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1;last=1}$3 ~ /(virtual)?\s*disk\s*[0-9]+;/{last+=1}END{printf last}')
 		last+=1
 		virtualDiskNumber=$last
 	fi
@@ -93,7 +100,7 @@ if which omreport >/dev/null;then
 		echo "=> ERROR : There is Preserved Cache on the controller $controllerID." >&2
 		echo "=> You need to flush the Preserved Cache of the controller $controllerID." >&2
 		echo "=> You can flush the Preserved Cache of the controller $controllerID with this command :" >&2
-		echo "=> omconfig storage controller action=discardpreservedcache controller=$controllerID force=disabled"
+		echo "=> omconfig storage controller action=discardpreservedcache controller=$controllerID"
 		exit 8
 	fi
 	echo
@@ -103,16 +110,16 @@ if which omreport >/dev/null;then
 	echo
 	time omconfig storage controller action=createvdisk controller=$controllerID raid=$raid size=max pdisk=$pdisk stripesize=$stripesize diskcachepolicy=$diskcachepolicy readpolicy=$readpolicy writepolicy=$writepolicy name=$name
 	retCode=$?
-	echo "=> retCode = $retCode"
 
-	if [ $retCode = 0 ];then
+	if [ $retCode == 0 ];then
 		echo "=> The new created Virtual Disk is :"
 		vdiskID=$(omreport storage vdisk controller=$controllerID -fmt ssv | awk -F ';' "/VirtualDisk$virtualDiskNumber/"'{print$1;exit}')
 		omreport storage vdisk controller=$controllerID vdisk=$vdiskID
+	else
+		echo "=> ERROR [$scriptName] : The new Virtual Disk creation failed, omconfig returned $retCode." >&2
+		exit $retCode
 	fi
 else
 	echo "=> ERROR [$scriptName] : DELL OpenManage omreport is not installed." >&2
 	exit 2
 fi
-
-exit $retCode
