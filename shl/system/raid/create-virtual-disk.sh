@@ -9,7 +9,7 @@ declare -i last=-1
 declare listReadyPhysicalDisks=false
 
 if [ $# == 0 ];then
-	lastest=true # Choose the latest VirtualDisk by default.
+	latest=true # Choose the latest VirtualDisk by default.
 elif [ $# == 1 ];then
 	if [ $1 == -h ];then
 		echo "=> Usage : $scriptName virtualDiskNumber|[latest]" >&2
@@ -18,7 +18,7 @@ elif [ $# == 1 ];then
 	elif [ $1 == -l ];then
 		listReadyPhysicalDisks=true
 	else
-		lastest=false
+		latest=false
 		virtualDiskNumber=$1
 		if [ $virtualDiskNumber == 0 ];then
 			echo "=> ERROR [$scriptName] : virtualDiskNumber must be an integer." >&2
@@ -88,7 +88,7 @@ if which omreport >/dev/null;then
 		*) echo "=> ERROR [$scriptName] : Unsupported write policy = <$writepolicy>." >&2;exit 7;;
 	esac
 
-	if $lastest;then
+	if $latest;then
 		last=$(omreport storage vdisk controller=$controllerID -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1;last=1}$3 ~ /(virtual)?\s*disk\s*[0-9]+;/{last+=1}END{printf last}')
 		last+=1
 		virtualDiskNumber=$last
