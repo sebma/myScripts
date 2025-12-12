@@ -1,7 +1,7 @@
 $today = $( get-date -f "yyyyMMdd" )
 & {
 echo "=> PC Summary info :"
-gin WindowsProductName , BiosFirmwareType , CsManufacturer , CsModel , CsChassisSKUNumber , CsProcessors , CsTotalPhysicalMemory , OsName , OsVersion, OsLanguage, OsMuiLanguages , CsNetworkAdapters , CsName , CsUserName , OsPagingFiles , TimeZone
+gin WindowsProductName , BiosFirmwareType , BiosSeralNumber , CsManufacturer , CsModel , CsChassisSKUNumber , CsProcessors , CsTotalPhysicalMemory , OsName , OsVersion, OsLanguage, OsMuiLanguages , CsNetworkAdapters , CsName , CsUserName , OsPagingFiles , TimeZone
 echo "UserProfile`t      : $ENV:USERPROFILE"
 echo ""
 echo "=> Network Drives Usage :"
