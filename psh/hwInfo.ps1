@@ -19,6 +19,4 @@ echo "=> IP information :"
 Get-NetIPInterface -ConnectionState Connected -AddressFamily IPv4 | % { Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias $_.InterfaceAlias } | Select InterfaceAlias , IPAddress , PrefixLength , @{ Name='IPv4DefaultGateway'; Expression={ ( $_ | Get-NetIPConfiguration ).IPv4DefaultGateway.Nexthop } } | Format-Table
 echo "=> Routing table :"
 Get-NetRoute -AddressFamily IPv4 | Select DestinationPrefix,NextHop,InterfaceAlias,ifIndex,InterfaceMetric,RouteMetric | Format-Table | Out-String -stream | sls -n "224.0.0.0/4|/32"
-echo "=> Running Services :"
-Get-Service | ? Status -eq "Running" | select Status , Name , DisplayName | Format-Table
 } | Tee "$env:COMPUTERNAME-$today.txt"
