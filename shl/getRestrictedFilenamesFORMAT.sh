@@ -346,7 +346,7 @@ function getRestrictedFilenamesFORMAT() {
 
 			if [ -z "$acodec" ] || [ $acodec = null ];then
 				# Preparing the User Agent for ffprobe
-				userAgent="$(yt-dlp --dump-user-agent)"
+				userAgent=$(yt-dlp https://api.github.com/orgs/yt-dlp/repos --print "%(http_headers)#j" | jq '."User-Agent"' -r)
 				$undebug
 				echo "=> Fetching some information from remote stream with ffprobe ..."
 				if echo $chosenFormatID | \grep "[+]" -q;then
