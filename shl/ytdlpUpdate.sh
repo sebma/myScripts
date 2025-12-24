@@ -48,6 +48,7 @@ ytdlpUpdate ()
 					;;
 				/usr/local/Cellar/*)
 					brew upgrade yt-dlp
+					exit
 					;;
 			esac
 
