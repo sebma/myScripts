@@ -5,7 +5,7 @@ function videoURL {
 	for video in "$@"
 	do
 		printf "$video : "
-		$ffprobe "$video" 2>&1 | awk '/PURL|description/{print$3;exit;}'
+		$ffprobe -v error -show_format -of json "$video" | jq '.format.tags | .description , .comment' -r | grep ^http -m1
 	done
 }
 
