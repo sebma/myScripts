@@ -2,5 +2,6 @@ scoop bucket add extras
 scoop bucket add nirsoft
 scoop bucket add versions
 archiver aria2 busybox curl dos2unix fastfetch git gow mediainfo-cli mpv openssl-lts-light psutils python38@3.8.9 rsync unzip wget yt-dlp
+#rustdesk
 # busybox contains time.exe and time.ps1
 # psutils contains time.ps1
