@@ -8,4 +8,5 @@ echo $PATH | grep $scriptDir -q || export PATH+=:$scriptDir
 url=https://www.youtube.com/user/NewCreationChurch/live
 #cd /multimedia
 cd $HOME
+mkdir -vp /tmp/Videos/ENGLISH/CHRIST/Joseph_Prince/Live_sermons/Live_NCC/;cd /tmp/
 cd ./Videos/ENGLISH/CHRIST/Joseph_Prince/Live_sermons/Live_NCC/ && getRestrictedFilenamesFORMAT.sh --timeout $estimatedDuration -f 94/231+233 "$url"
