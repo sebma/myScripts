@@ -19,6 +19,8 @@ function getURLTitle() {
 			printf "$URL # "
 			\curl -qLs "$URL" | hxnormalize -x | hxselect -s '\n' 'head title' -c
 		done
+	else
+		\curl -qLs "$URL" | grep -oP '<title>\K[^<]*'
 	fi
 }
 
