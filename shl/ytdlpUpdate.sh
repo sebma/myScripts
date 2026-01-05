@@ -69,7 +69,7 @@ ytdlpUpdate ()
 		fi
 	else
 		echo "=> [$FUNCNAME] INFO : $package is not installed, installing $package ..." 1>&2
-		$sudo pip3 install $package
+		$sudo pipx install --global $package[default,curl-cffi]
 	fi
 }
 
