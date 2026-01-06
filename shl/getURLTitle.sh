@@ -23,12 +23,22 @@ function getURLTitle() {
 		if \grep -P '.*' <<< 'Test' >/dev/null;then
 			for URL
 			do
-				\curl -qLs "$URL" | \grep -oP '<title>\K[^<]*'
+				\curl -qLs "$URL" | \grep -oP '<title>\K[^<]*' || \curl -qLs "$URL" | \grep -iPo '(?<=<title>)(.*)(?=</title>)'
+			done
+		elif type -P perl > /dev/null; then
+			for URL
+			do
+				\curl -qLs "$URL" | \perl -le '$/=undef; $s=<>; $s =~ m{<title>(.*)</title>}si; print $1 if $1'
+			done
+		elif type -P gawk > /dev/null; then
+			for URL
+			do
+				\curl -qLs "$URL" | \gawk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}'
 			done
 		else
 			for URL
 			do
-				\curl -qLs "$URL" | \perl -le '$/=undef; $s=<>; $s =~ m{<title>(.*)</title>}si; print $1 if $1'
+				\curl -qLs "$URL" |	grep -o "<title>[^<]*" | cut -d'>' -f2-
 			done
 		fi
 	fi
