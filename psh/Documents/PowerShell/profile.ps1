@@ -6,6 +6,7 @@ $dirSep = [io.path]::DirectorySeparatorChar
 $beforeLastItemIndex = $MyInvocation.MyCommand.Path.Split($dirSep).Length - 2
 $profileDIR = $MyInvocation.MyCommand.Path.Split($dirSep)[0..$beforeLastItemIndex] -join $dirSep
 $scriptPrefix = $MyInvocation.MyCommand.Name.Split(".")[0]
+$ENV:IsWindows = $IsWindows
 
 function isInstalled($cmd) { return gcm "$cmd" | % Name 2>$null }
 function dirname($path) { Split-Path -Parent -Path "$path" }
