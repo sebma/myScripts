@@ -10,8 +10,8 @@ url=https://www.youtube.com/user/NewCreationChurch/live
 lvmVolume=/tmp
 cd $lvmVolume
 live_NCC_Dir="Videos/ENGLISH/CHRIST/Joseph_Prince/Live_sermons/Live_NCC/"
-mkdir -vp $live_NCC_Dir && cd $live_NCC_Dir && getRestrictedFilenamesFORMAT.sh --timeout $estimatedDuration -f 94/231+233 "$url"
+#mkdir -vp $live_NCC_Dir && cd $live_NCC_Dir && getRestrictedFilenamesFORMAT.sh --timeout $estimatedDuration -f 94/231+233 "$url"
 initName=$(ps -p 1 -o comm= | cut -d" " -f1)
 initPath=$(type -P $initName)
 systemType=$(strings $initPath | grep -o -E "upstart|sysvinit|systemd|launchd" | head -1 || echo unknown)
-test $systemType = systemd && systemctl suspend
+test "$systemType" = systemd && systemctl suspend
