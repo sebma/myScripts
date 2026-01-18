@@ -9,5 +9,5 @@ url=https://www.youtube.com/user/NewCreationChurch/live
 #lvmVolume=/multimedia
 lvmVolume=/tmp
 cd $lvmVolume
-live_NCC_Dir="Videos/ENGLISH/CHRIST/Joseph_Prince/Live_sermons/Live_NCC/"
+live_NCC_Dir="Videos/ENGLISH/CHRIST/Joseph_Prince/Live_sermons/Live_NCC"
 mkdir -vp $live_NCC_Dir && cd $live_NCC_Dir && getRestrictedFilenamesFORMAT.sh --timeout $estimatedDuration -f 94/231+233 "$url"
