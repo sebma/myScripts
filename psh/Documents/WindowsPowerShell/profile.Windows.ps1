@@ -153,6 +153,10 @@ function getModelName {
 	(gwmi Win32_ComputerSystem).Model
 }
 
+function osName {
+	echo $(gwmi Win32_OperatingSystem).Caption
+}
+
 function getInstallDate {
 	(Get-CimInstance Win32_OperatingSystem).InstallDate
 	(gwmi Win32_OperatingSystem).InstallDate
@@ -202,6 +206,7 @@ main
 if( isInstalled("choco") ) {
 	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
+
 
 
 
