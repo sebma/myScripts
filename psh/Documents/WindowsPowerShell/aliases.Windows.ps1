@@ -1,4 +1,3 @@
-if( $(alias cd *>$null;echo $?) ) { del alias:cd }
 if( $(alias curl *>$null;echo $?) ) { del alias:curl }
 if( $(alias ip *>$null;echo $?) ) { del alias:ip }
 if( $(alias rm *>$null;echo $?) ) { del alias:rm }
@@ -33,3 +32,4 @@ set-alias ipr iproute
 set-alias mac@ iplink
 set-alias mac iplink
 set-alias -Scope Global more less
+
