@@ -77,6 +77,7 @@ if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFa
 if( $isWindows ) {
 	$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
 	function cd($dir) {
+		if( $(alias cd *>$null;echo $?) ) { del alias:cd }
 		if($dir -eq "-"){popd}
 		elseif( ! $dir.Length ) {pushd ~}
 		else {pushd $dir}
