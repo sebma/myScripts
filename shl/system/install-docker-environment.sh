@@ -4,7 +4,7 @@ declare {isDebian,isRedHat}Like=false
 
 test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
-echo $OSTYPE | grep -q android && osFamily=Android || osFamily=$(uname -s)
+echo $OSTYPE | grep -q android && osFamily=Android || osFamily=$(uname -s | cut -d' ' -f1)
 
 if [ $osFamily == Linux ];then
 	distribID=$(source /etc/os-release;echo $ID)
