@@ -8,7 +8,7 @@ osCodeName() {
 	local osx_minor=-1
 	local OSX_MARKETING=()
 
-	echo $OSTYPE | grep -q android && osFamily=Android || osFamily=$(uname -s)
+	echo $OSTYPE | grep -q android && osFamily=Android || osFamily=$(uname -s | cut -d' ' -f1)
 	case $osFamily in
 		Darwin)
 			osx_major=$(sw_vers -productVersion | cut -d. -f1)
@@ -52,7 +52,7 @@ os() {
 	local OSTYPE=$(bash -c 'echo $OSTYPE')
 	local osFamily=unknown
 
-	echo $OSTYPE | grep -q android && osFamily=Android || osFamily=$(uname -s)
+	echo $OSTYPE | grep -q android && osFamily=Android || osFamily=$(uname -s | cut -d' ' -f1)
 	case $osFamily in
 		Darwin)
 			if which sw_vers >/dev/null 2>&1;then
