@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-osFamily=$(uname -s)
+osFamily=$(uname -s | cut -d' ' -f1)
 if [ $osFamily = Linux ]
 then
 	[ $# = 0 ] && {
