@@ -21,7 +21,7 @@ EOF
 
 function installMinicondaFromScript {
 	[ $debug = 1 ] && set -x
-	local osFamily=$(uname -s)
+	local osFamily=$(uname -s | cut -d' ' -f1)
 	local archi=$(uname -m | \sed "s/^i6/x/")
 	local wgetOptions="-c --progress=bar"
 	local wget="$(type -P wget2 2>/dev/null || type -P wget) $wgetOptions"
@@ -120,7 +120,7 @@ function installMiniconda {
 	[ $debug = 1 ] && set -x
 	local Version=$1
 	local condaInstallerURL=""
-	local osFamily=$(uname -s)
+	local osFamily=$(uname -s | cut -d' ' -f1)
 	local archi=$(uname -m | \sed "s/^i6/x/")
 
 	if type -P -a conda | grep -q miniconda$Version/bin/conda && [ $reInstall = 0 ]
@@ -166,7 +166,7 @@ function installCondaPythonPackages {
 	local conda="command conda$minicondaVersion"
 	local requiredPythonPackageList="$2"
 	local envName="$3"
-	local osFamily=$(uname -s)
+	local osFamily=$(uname -s | cut -d' ' -f1)
 
 	if test -n $envName
 	then
