@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-getprop 2>/dev/null | grep -q ro.build.version.release && export osFamily=Android || export osFamily=$(uname -s)
+getprop 2>/dev/null | grep -q ro.build.version.release && export osFamily=Android || export osFamily=$(uname -s | cut -d' ' -f1)
 wifiCapabilities ()
 {
 	export LANG=C
