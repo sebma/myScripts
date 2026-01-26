@@ -2,7 +2,7 @@
 
 distribName () {
 	local osName=unknown
-	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
+	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s | cut -d' ' -f1)
 
 	if [ $osFamily = Linux ]; then
 		if type -P lsb_release >/dev/null 2>&1; then
@@ -22,7 +22,7 @@ distribName () {
 	echo $osName | awk '{print tolower($0)}'
 }
 hw_probeInstallFromSource () {
-	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
+	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s | cut -d' ' -f1)
 	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo="command sudo" || local sudo=""
 	local distribName=$(distribName)
 
