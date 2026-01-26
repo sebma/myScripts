@@ -7,7 +7,7 @@ brewInstall () {
 	brew=undefined
 	brewPrefix=undefined
 	osFamily=undefined
-	$(which bash) -c 'echo $OSTYPE' | grep -q android && osFamily=Android || osFamily=$(uname -s)
+	$(which bash) -c 'echo $OSTYPE' | grep -q android && osFamily=Android || osFamily=$(uname -s | cut -d' ' -f1)
 	if ! type -P brew > /dev/null 2>&1; then
 		if [ $osFamily = Linux ]; then
 			if groups | \egrep -wq "adm|admin|sudo|root|wheel"; then
