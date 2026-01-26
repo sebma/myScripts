@@ -63,7 +63,7 @@ function checkRequirements() {
 	ffprobe+=" -hide_banner"
 }
 function setOtherRequirements() {
-	local osFamily=$(uname -s)
+	local osFamily=$(uname -s | cut -d' ' -f1)
 	if [ $osFamily = Linux ];then
 		for tool;do
 			declare -g $tool="$(type -P $tool)"
@@ -78,7 +78,7 @@ function setOtherRequirements() {
 	grep --help 2>&1 | grep -q -- --color && grepColor+=" --color"
 }
 function parseArgs() {
-	local osFamily=$(uname -s)
+	local osFamily=$(uname -s | cut -d' ' -f1)
 	local ffmpegErrorLogLevel=repeat+error
 	local ffmpegInfoLogLevel=repeat+info
 	local getopt=""
