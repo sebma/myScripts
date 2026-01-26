@@ -2,7 +2,7 @@
 
 #Creation du .cache dans /tmp/$USER et pointage de ce dernier via le lien symbolique ~/.cache
 function moveCacheTo_tmp {
-	local osFamily=$(uname -s)
+	local osFamily=$(uname -s | cut -d' ' -f1)
 	local cacheLinkName=.cache
 	local myCacheRootDir=/tmp/$USER
 	cd $HOME
