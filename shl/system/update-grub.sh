@@ -2,7 +2,7 @@
 
 function distribName {
 	local osName=unknown
-	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
+	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s | cut -d' ' -f1)
 
 	if [ $osFamily = Linux ]; then
 		if grep -w ID /etc/os-release -q 2>/dev/null; then
@@ -30,7 +30,7 @@ function distribName {
 function distribType {
 	local distribName=unknown
 	local distribType=unknown
-	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
+	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s | cut -d' ' -f1)
 
 	if [ $osFamily = Linux ]; then
 		if grep ID_LIKE /etc/os-release -q 2>/dev/null; then
