@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 distribName () {
-	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
+	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s | cut -d' ' -f1)
 
 	local osName=unknown
 	if [ $osFamily = Linux ]; then
@@ -53,7 +53,7 @@ toolsCheck () {
 	echo
 }
 hw_probeInstall () {
-	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
+	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s | cut -d' ' -f1)
 	type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && local sudo="command sudo" || local sudo=""
 	local distribName=$(distribName)
 	local retCode=0
