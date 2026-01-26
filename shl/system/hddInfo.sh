@@ -44,7 +44,7 @@ diskFamily="$(echo "$smartctlDiskInfo" |  awk '/Family:/{gsub("/","_");for(i=3;i
 test -z $diskFamily && diskFamily="$(echo "$smartctlDiskInfo" |  awk '/Model:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
 diskFamily="$(echo $diskFamily | sed -E "s/[.]+$|\"//g")"
 
-osFamily=$(uname -s)
+osFamily=$(uname -s | cut -d' ' -f1)
 if [ $osFamily == Linux ];then
 	vendor=$(sed 's/ $//;s/ /_/g' < /sys/block/$(readlink /sys/block/$diskName)/../../vendor)
 	model=$(sed 's/ $//;s/ /_/g' < /sys/block/$(readlink /sys/block/$diskName)/../../model)
