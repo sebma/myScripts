@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-echo $OSTYPE | grep -q android && export osFamily=Android || export osFamily=$(uname -s)
+echo $OSTYPE | grep -q android && export osFamily=Android || export osFamily=$(uname -s | cut -d' ' -f1)
 scriptBaseName=${0##*/}
 if [ $# != 1 ];then
 	echo "=> Usage: $scriptBaseName wifiName" >&2
