@@ -3,7 +3,7 @@
 type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|admin|root|wheel" && sudo="command sudo" || sudo=""
 distribName () {
 	local osName=unknown
-	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
+	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s | cut -d' ' -f1)
 
 	if [ $osFamily = Linux ]; then
 		if type -P lsb_release >/dev/null 2>&1; then
