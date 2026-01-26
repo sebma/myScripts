@@ -8,7 +8,7 @@ osCodeName() {
 	local osx_minor=-1
 	local OSX_MARKETING=()
 
-	echo $OSTYPE | grep -q android && osFamily=Android || osFamily=$(uname -s)
+	echo $OSTYPE | grep -q android && osFamily=Android || osFamily=$(uname -s | cut -d' ' -f1)
 	case $osFamily in
 		Darwin)
 			osx_major=$(sw_vers -productVersion | cut -d. -f1)
