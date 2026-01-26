@@ -10,7 +10,7 @@ gitUpdateAllMyLocalRepos ()
 		return 1
 	fi
 
-	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s) # The bash interpreter is needed for it sets the OSTYPE variable
+	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s | cut -d' ' -f1) # The bash interpreter is needed for it sets the OSTYPE variable
 	[ $osFamily = Darwin ] && find=gfind
 	local dir=""
 	$find ~ -maxdepth 2 -type d -name .git 2>/dev/null | \egrep -v "/.linuxbrew/" | sort | while read dir; do
