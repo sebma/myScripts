@@ -18,7 +18,7 @@ mpvFORMAT() {
 	fi
 
 	local mpv="$(type -P mpv)"
-	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s)
+	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s | cut -d' ' -f1)
 	[ $osFamily = Linux ] && [ -c /dev/fb0 ] && tty | egrep -q "/dev/tty[0-9]+" && local mpvDefaultOptions="--vo=drm" && local mplayerDefaultOptions="--vo=fbdev2"
 	mpv="$mpv $mpvDefaultOptions"
 	local mpvConfigFile="$HOME/.config/mpv/mpv.conf"
