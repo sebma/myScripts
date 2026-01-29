@@ -44,11 +44,11 @@ ytdlpUpdate ()
 			case $yt_dlp in
 				/opt/pipx/*) 
 					$sudo pipx upgrade --global yt-dlp
-					exit
+					return
 					;;
 				/usr/local/Cellar/*)
 					brew upgrade yt-dlp
-					exit
+					return
 					;;
 			esac
 
