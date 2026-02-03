@@ -58,9 +58,9 @@ function host($url, $server, $type) {
 		if( $url -Match $ipv4RegExp ) {
 			$ip = $url -Replace('https?://|s?ftps?://','') -Replace('(/|:\d+).*$','')
 			if ( $argc -eq 1 ) {
-				(Resolve-DnsName $ip -server $DC).NameHost | sort
+				(Resolve-DnsName -DnsOnly $ip -server $DC).NameHost | sort
 			} elseif ( $argc -eq 2 ) {
-				(Resolve-DnsName -name $ip -server $server).NameHost | sort
+				(Resolve-DnsName -DnsOnly -name $ip -server $server).NameHost | sort
 			} else {
 				Write-Warning "=> Not supported for the moment."
 			}
@@ -88,6 +88,7 @@ function host($url, $server, $type) {
 		}
 	}
 }
+
 
 
 
