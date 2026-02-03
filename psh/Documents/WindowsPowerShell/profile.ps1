@@ -183,9 +183,9 @@ if( $IsWindows ) {
 				$ip = $name -Replace('https?://|s?ftps?://','') -Replace('(/|:\d+).*$','')
 				#echo "=> $ip :"
 				if ( $argc -eq 1 ) {
-					(Resolve-DnsName $ip).NameHost
+					(Resolve-DnsName -DnsOnly $ip).NameHost
 				} elseif ( $argc -eq 2 ) {
-					(Resolve-DnsName -name $ip -server $server).NameHost
+					(Resolve-DnsName -DnsOnly -name $ip -server $server).NameHost
 				} else {
 					Write-Warning "=> Not supported for the moment."
 				}
