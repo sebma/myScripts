@@ -54,7 +54,7 @@ if which omreport >/dev/null;then
 	echo "=> The first physical disk in <Ready> state selected is <$pdisk> :"
 	omreport storage pdisk controller=$id pdisk=$pdisk| egrep '^(ID|Status|Capacity|Sector Size|Bus|Power|Media|State|Vendor|Product|Serial|Part.Number|^$)'
 
-	raid=$(omreport storage vdisk controller=$id -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/virtual\s*disk\s*[0-9]+;/{value=$7}END{printf tolower(gensub("RAID-","r",1,value))}')
+	raid=$(omreport storage vdisk controller=$id -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/virtual\s*disk\s*[0-9]+;/{value=$7;sub("RAID-","r",value)}END{printf tolower(value)}')
 	readpolicy=$(omreport storage vdisk controller=$id -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/virtual\s*disk\s*[0-9]+;/{value=$(NF-4)}END{printf tolower(value)}')
 	writepolicy=$(omreport storage vdisk controller=$id -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/virtual\s*disk\s*[0-9]+;/{value=$(NF-3)}END{printf tolower(value)}')
 	stripesize=$(omreport storage vdisk controller=$id -fmt ssv | awk -F';' 'BEGIN{IGNORECASE=1}/virtual\s*disk\s*[0-9]+;/{value=$(NF-1)}END{printf gensub(" ","",1,value)}')
