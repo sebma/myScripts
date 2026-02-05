@@ -64,7 +64,7 @@ if which omreport >/dev/null;then
 		exit 6
 	fi
 
-	raid=$(omreport storage vdisk controller=$controllerID vdisk=$latestVirtualDiskID | awk '/Layout/{value=$NF;printf tolower(gensub("RAID-","r",1,value))}')
+	raid=$(omreport storage vdisk controller=$controllerID vdisk=$latestVirtualDiskID | awk '/Layout/{value=$NF;sub("RAID-","r",value);printf tolower(value)}')
 	readpolicy=$(omreport storage vdisk controller=$controllerID vdisk=$latestVirtualDiskID | awk '/Read Policy/{value=$(NF-1)" "$NF;printf tolower(value)}')
 	writepolicy=$(omreport storage vdisk controller=$controllerID vdisk=$latestVirtualDiskID | awk '/Write Policy/{value=$(NF-1)" "$NF;printf tolower(value)}')
 	stripesize=$(omreport storage vdisk controller=$controllerID vdisk=$latestVirtualDiskID | awk '/Stripe Element Size/{value=$(NF-1)$NF;printf tolower(value)}')
