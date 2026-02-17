@@ -88,7 +88,7 @@ if( $isWindows ) {
 	$isAdmin = "TO BE DEFINED"
 }
 
-function isInstalled($cmd) { return gcm "$cmd" 2>$null }
+function isInstalled($cmd) { return gcm "$cmd" 2>$null | % Name }
 
 if ( $(alias history *>$null;$?) ) { del alias:history }
 function history() {
