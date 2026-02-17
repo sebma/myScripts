@@ -8,7 +8,7 @@ $profileDIR = $MyInvocation.MyCommand.Path.Split($dirSep)[0..$beforeLastItemInde
 $scriptPrefix = $MyInvocation.MyCommand.Name.Split(".")[0]
 $ENV:IsWindows = $IsWindows
 
-function isInstalled($cmd) { return gcm "$cmd" | % Name 2>$null }
+function isInstalled($cmd) { return gcm "$cmd" 2>$null | % Name }
 function dirname($path) { Split-Path -Parent -Path "$path" }
 
 #. $profileDIR/$scriptPrefix.common.ps1
