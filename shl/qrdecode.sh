@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-\zbarimg -q --raw
+\zbarimg -q --raw "$@"
