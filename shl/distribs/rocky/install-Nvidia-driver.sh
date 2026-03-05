@@ -21,6 +21,10 @@ if $isRedHatLike;then
 		$sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelVersion/$(uname -i)/cuda-rhel$rhelVersion.repo
 	fi
 
+	$sudo update-pciids
+	echo "=> Showing graphic(s) controller(s) :"
+	\lspci -nnd ::0300
+
 	if dnf module list nvidia-driver | grep $nvidiaDriverVersion -q;then
 		nvidiaDriverVersionNumber=(tr -d '[a-zA-Z-_]' <<< $nvidiaDriverVersion)
 		$sudo dnf module enable $nvidiaDriverVersion -y
