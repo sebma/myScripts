@@ -11,7 +11,7 @@ test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
 declare {isDebian,isRedHat,isAlpine}Like=false
 distribID=$(source /etc/os-release;echo $ID)
-if   echo $distribID | egrep "centos|rhel|fedora" -q;then
+if   echo $distribID | egrep "centos|rhel|fedora|rocky" -q;then
 	isRedHatLike=true
 fi
 
