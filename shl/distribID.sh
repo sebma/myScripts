@@ -16,7 +16,7 @@ ID_LIKE=""
 ID_LIKE=$(source /etc/os-release;echo $ID_LIKE)
 if [ -n "$ID_LIKE" ];then
 	case $ID_LIKE in
-		rhel|centos|fedora) isRedHatLike=true;;
+		rhel|centos|fedora|rocky) isRedHatLike=true;;
 		debian) isDebianLike=true;;
 	esac
 	distribID=$ID_LIKE
