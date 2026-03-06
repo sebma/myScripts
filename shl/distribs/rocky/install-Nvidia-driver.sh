@@ -22,7 +22,7 @@ if $isRedHatLike;then
 	fi
 
 	$sudo sed -i '/^exclude=/s/^/#/' /etc/yum.conf
-	$sudo update-pciids
+	$sudo update-pciids -q
 	echo "=> Showing graphic(s) controller(s) :"
 	\lspci -nnd ::0300
 
