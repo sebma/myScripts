@@ -21,13 +21,14 @@ if $isRedHatLike;then
 		$sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelVersion/$(uname -i)/cuda-rhel$rhelVersion.repo
 	fi
 
+	$sudo sed -i '/^exclude=/s/^/#/' /etc/yum.conf
 	$sudo update-pciids
 	echo "=> Showing graphic(s) controller(s) :"
 	\lspci -nnd ::0300
 
 	if dnf module list nvidia-driver | grep $nvidiaDriverVersion -q;then
 		nvidiaDriverVersionNumber=(tr -d '[a-zA-Z-_]' <<< $nvidiaDriverVersion)
-		$sudo dnf module enable $nvidiaDriverVersion -y
+		$sudo dnf module enable nvidia-driver:$nvidiaDriverVersion -y || $sudo dnf module switch-to nvidia-driver:$nvidiaDriverVersion -y
 		# dnf nvidia-plugin || $sudo dnf install dnf-plugin-nvidia -y
 		# dnf4 versionlock || $sudo dnf install python3-dnf-plugin-versionlock -y # See https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/version-locking.html
 		if [ $nvidiaDriverVersionNumber -gt 515 ];then
