@@ -17,8 +17,8 @@ fi
 
 if $isRedHatLike;then
 	if ! dnf repolist | grep cuda -q;then
-		rhelVersion=8
-		$sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelVersion/$(uname -i)/cuda-rhel$rhelVersion.repo
+		rhelMajorVersion=8
+		$sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -i)/cuda-rhel$rhelMajorVersion.repo
 	fi
 
 	$sudo sed -i '/^exclude=/s/^/#/' /etc/yum.conf
