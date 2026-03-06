@@ -29,6 +29,7 @@ if $isRedHatLike;then
 	$sudo update-pciids -q
 	echo "=> Showing graphic(s) controller(s) :"
 	\lspci -nnd ::0300
+	$sudo systemctl stop puppet.service
 
 	if dnf module list nvidia-driver | grep $nvidiaDriverVersion -q;then
 		nvidiaDriverVersionNumber=(tr -d '[a-zA-Z-_]' <<< $nvidiaDriverVersion)
