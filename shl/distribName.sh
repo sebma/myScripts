@@ -1,0 +1,1 @@
+distribs/distribName.sh
