@@ -22,6 +22,9 @@ if $isRedHatLike;then
 	fi
 
 	$sudo sed -i '/^exclude=/s/^/#/' /etc/yum.conf
+	echo "=> Showing graphic(s) controller(s) :"
+	\lspci -nnd ::0300
+	echo "=> Updating PCI ids ..."
 	$sudo update-pciids -q
 	echo "=> Showing graphic(s) controller(s) :"
 	\lspci -nnd ::0300
