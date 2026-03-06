@@ -17,7 +17,8 @@ fi
 
 if $isRedHatLike;then
 	if ! dnf repolist | grep cuda -q;then
-		rhelMajorVersion=8
+		versionID=$(source /etc/os-release;echo $VERSION_ID)
+		rhelMajorVersion=${versionID/.*}
 		$sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -i)/cuda-rhel$rhelMajorVersion.repo
 	fi
 
