@@ -10,7 +10,7 @@ $robocopyARGS = "$srcDIR", "$dstDIR", "$bigFILE" , "/IM" , "/NP"
 
 "=> Copying $srcDIR/$bigFILE $dstDIR  ..."
 $cmd = "$robocopyCOMMAND $srcDIR $dstDIR $bigFILE $robocopyOPTIONS"
-$duration = Measure-Command { iex $cmd | tee -var result | Out-Default }
+$duration = Measure-Command { Invoke-Expression $cmd | tee -var result | Out-Default }
 
 "=> The command launched was : "
 $cmd
