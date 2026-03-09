@@ -12,9 +12,9 @@ if( $IsWindows ) {
 
 			[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
 			if( (Get-ExecutionPolicy) -ne "Unrestricted" -and (Get-ExecutionPolicy) -ne "RemoteSigned" -and (Get-ExecutionPolicy) -ne "Bypass" ) {
-				sudo Set-ExecutionPolicy Bypass -Scope Process -Force
+				$sudo Set-ExecutionPolicy Bypass -Scope Process -Force
 			}
-			sudo iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+			$sudo Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 		}
 	}
 	InstallChocolatey
