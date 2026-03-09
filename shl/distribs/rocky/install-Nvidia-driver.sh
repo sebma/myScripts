@@ -46,7 +46,7 @@ if $isRedHatLike;then
 			nvidia-smi >/dev/null || $sudo dnf install kmod-nvidia-$nvidiaEffectiveDriverVersion-$(uname -r | cut -d. -f1-5)-$nvidiaEffectiveDriverVersion-$release.$(uname -r | cut -d. -f6-7) -y
 		fi
 #		$sudo grubby --args="nouveau.modeset=0 rd.driver.blacklist=nouveau" --update-kernel=ALL
-		mokutil --sb-state | grep SecureBoot -q && $sudo mokutil --import /var/lib/dkms/mok.pub
+		mokutil --sb-state | grep SecureBoot.enabled -q && $sudo mokutil --import /var/lib/dkms/mok.pub
 	else
 		echo "=> There is no $nvidiaDriverVersion available." >&2
 		echo "=> Try running this 2 commands :" >&2
