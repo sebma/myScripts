@@ -40,7 +40,7 @@ if $isRedHatLike;then
 			$sudo dnf install nvidia-open -y
 			nvidia-smi >/dev/null || $sudo dnf reinstall kmod-nvidia-open-dkms -y
 		else
-			nvidiaEffectiveDriverVersion=$(dnf info nvidia-driver | awk -F ':| ' '/Version/{print$NF}')
+			nvidiaEffectiveDriverVersion=$(dnf info nvidia-driver | awk -F '[: ]' '/Version/{print$NF}')
 			$sudo dnf install nvidia-driver nvidia-driver-cuda -y
 			release=3
 			nvidia-smi >/dev/null || $sudo dnf install kmod-nvidia-$nvidiaEffectiveDriverVersion-$(uname -r | cut -d. -f1-5)-$nvidiaEffectiveDriverVersion-$release.$(uname -r | cut -d. -f6-7) -y
