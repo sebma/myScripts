@@ -7,7 +7,7 @@ if( $IsWindows ) {
 			if( (Get-ExecutionPolicy) -ne "Unrestricted" -and (Get-ExecutionPolicy) -ne "RemoteSigned" -and (Get-ExecutionPolicy) -ne "Bypass" ) {
 				$sudo Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 			}
-			$sudo iex "& {$(irm get.scoop.sh)} -RunAsAdmin -ScoopDir $env:ProgramData\scoop"
+			$sudo Invoke-Expression "& {$(irm get.scoop.sh)} -RunAsAdmin -ScoopDir $env:ProgramData\scoop"
 		}
 		$sudo -k
 	}
