@@ -32,7 +32,7 @@ if $isRedHatLike;then
 	$sudo systemctl stop puppet.service
 
 	if dnf module list nvidia-driver | grep $nvidiaDriverVersion -q;then
-		nvidiaDriverVersionNumber=(tr -d '[a-zA-Z-_]' <<< $nvidiaDriverVersion)
+		nvidiaDriverVersionNumber=$(tr -d '[a-zA-Z-_]' <<< $nvidiaDriverVersion)
 		$sudo dnf module enable nvidia-driver:$nvidiaDriverVersion -y || $sudo dnf module switch-to nvidia-driver:$nvidiaDriverVersion -y
 		# dnf nvidia-plugin || $sudo dnf install dnf-plugin-nvidia -y
 		# dnf versionlock || $sudo dnf install python3-dnf-plugin-versionlock -y # See https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/version-locking.html
