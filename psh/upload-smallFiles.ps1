@@ -10,7 +10,7 @@ $robocopyCOMMAND = "robocopy.exe"
 
 "=> Copying $srcDIR $dstDIR  ..."
 $cmd = "$robocopyCOMMAND $srcDIR $dstDIR $robocopyOPTIONS"
-$duration = Measure-Command { iex $cmd | tee -var result | Out-Default }
+$duration = Measure-Command { Invoke-Expression $cmd | tee -var result | Out-Default }
 
 "=> The command launched was : "
 $cmd
