@@ -7,7 +7,7 @@ if( $IsWindows ) {
 				Set-ExecutionPolicy RemoteSigned -Scope Process -Force
 			}
 			[Net.ServicePointManager]::SecurityProtocol = 'Tls12'
-			iwr -useb https://raw.githubusercontent.com/gerardog/gsudo/master/installgsudo.ps1 | iex
+			iwr -useb https://raw.githubusercontent.com/gerardog/gsudo/master/installgsudo.ps1 | Invoke-Expression
 		}
 	}
 	InstallSudo
