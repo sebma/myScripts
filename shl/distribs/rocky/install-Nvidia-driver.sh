@@ -22,7 +22,7 @@ if $isRedHatLike;then
 		$sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -i)/cuda-rhel$rhelMajorVersion.repo
 	fi
 
-	$sudo sed -i '/^exclude=/s/^/#/' /etc/yum.conf
+	$sudo sed -i '/^exclude=/s/^/#/' /etc/dnf/dnf.conf
 	echo "=> Showing graphic(s) controller(s) :"
 	\lspci -nnd ::0300
 	echo "=> Updating PCI ids ..."
