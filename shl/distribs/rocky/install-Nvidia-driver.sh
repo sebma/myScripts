@@ -16,8 +16,16 @@ if   echo $distribID | egrep "centos|rhel|fedora|rocky" -q;then
 fi
 
 if $isRedHatLike;then
+	echo "=> Showing graphic(s) controller(s) :"
+	\lspci -nnd ::0300
+	echo "=> Updating PCI ids ..."
+	$sudo update-pciids -q
+	echo "=> Showing graphic(s) controller(s) :"
+	\lspci -nnd ::0300
+
 	$sudo systemctl stop puppet.service
 	$sudo rm /etc/yum.repos.d/cuda.repo -f
+	$sudo sed -i '/^exclude=/s/^/#/' /etc/dnf/dnf.conf
 
 	if ! dnf repolist | grep cuda -q;then
 		versionID=$(source /etc/os-release;echo $VERSION_ID)
@@ -25,14 +33,6 @@ if $isRedHatLike;then
 		# See https://docs.rockylinux.org/8/desktop/display/installing_nvidia_gpu_drivers/
 		$sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -i)/cuda-rhel$rhelMajorVersion.repo
 	fi
-
-	$sudo sed -i '/^exclude=/s/^/#/' /etc/dnf/dnf.conf
-	echo "=> Showing graphic(s) controller(s) :"
-	\lspci -nnd ::0300
-	echo "=> Updating PCI ids ..."
-	$sudo update-pciids -q
-	echo "=> Showing graphic(s) controller(s) :"
-	\lspci -nnd ::0300
 
 	if dnf module list nvidia-driver | grep $nvidiaDriverVersion -q;then
 		$sudo dnf module enable nvidia-driver:$nvidiaDriverVersion -y || $sudo dnf module switch-to nvidia-driver:$nvidiaDriverVersion -y
