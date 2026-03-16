@@ -26,6 +26,7 @@ if $isRedHatLike;then
 	$sudo systemctl stop puppet.service
 	$sudo rm /etc/yum.repos.d/cuda.repo -f
 	$sudo sed -i '/^exclude=/s/^/#/' /etc/dnf/dnf.conf
+	dnf config-manager --dump | grep ^exclude
 
 	if ! dnf repolist | grep cuda -q;then
 		rhelMajorVersion=$(source /etc/os-release;echo ${VERSION_ID/.*})
