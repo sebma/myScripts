@@ -16,6 +16,7 @@ if   echo $distribID | egrep "centos|rhel|fedora|rocky" -q;then
 fi
 
 if $isRedHatLike;then
+	$sudo systemctl stop puppet.service
 	if ! dnf repolist | grep cuda -q;then
 		versionID=$(source /etc/os-release;echo $VERSION_ID)
 		rhelMajorVersion=${versionID/.*}
@@ -30,7 +31,6 @@ if $isRedHatLike;then
 	$sudo update-pciids -q
 	echo "=> Showing graphic(s) controller(s) :"
 	\lspci -nnd ::0300
-	$sudo systemctl stop puppet.service
 
 	if dnf module list nvidia-driver | grep $nvidiaDriverVersion -q;then
 		$sudo dnf module enable nvidia-driver:$nvidiaDriverVersion -y || $sudo dnf module switch-to nvidia-driver:$nvidiaDriverVersion -y
