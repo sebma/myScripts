@@ -28,7 +28,7 @@ if $isRedHatLike;then
 	$sudo sed -i '/^exclude=/s/^/#/' /etc/dnf/dnf.conf
 
 	if ! dnf repolist | grep cuda -q;then
-		rhelMajorVersion=$(source /etc/os-release;echo ${VERSION_ID.*})
+		rhelMajorVersion=$(source /etc/os-release;echo ${VERSION_ID/.*})
 		# See https://docs.rockylinux.org/8/desktop/display/installing_nvidia_gpu_drivers/
 		$sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -i)/cuda-rhel$rhelMajorVersion.repo
 	fi
