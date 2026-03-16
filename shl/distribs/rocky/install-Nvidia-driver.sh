@@ -49,9 +49,10 @@ if $isRedHatLike;then
 		mokutil --sb-state | grep SecureBoot.enabled -q && $sudo mokutil --import /var/lib/dkms/mok.pub
 	else
 		echo "=> There is no $nvidiaDriverVersion available." >&2
-		echo "=> Try running this 2 commands :" >&2
-		echo $sudo dnf clean metadata >&2
-		echo $sudo dnf makecache >&2
+		echo "=> Try running these commands :" >&2
+		echo $sudo dnf module reset nvidia-driver -y
+		echo $sudo dnf clean metadata
+		echo $sudo dnf makecache
 		exit 2
 	fi
 fi
