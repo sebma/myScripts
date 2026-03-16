@@ -56,8 +56,9 @@ if $isRedHatLike;then
 		$sudo dnf install -y nvidia-container-toolkit-${NVIDIA_CONTAINER_TOOLKIT_VERSION} nvidia-container-toolkit-base-${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
       libnvidia-container-tools-${NVIDIA_CONTAINER_TOOLKIT_VERSION} libnvidia-container1-${NVIDIA_CONTAINER_TOOLKIT_VERSION}
 	else
-		echo "=> There is no $nvidiaDriverVersion available." >&2
-		echo "=> Try running these commands :" >&2
+		# See https://superuser.com/a/1935617/528454
+		echo "=> There is no $nvidiaDriverVersion available in the nvidia-driver DNF modules list." >&2
+		echo "=> Try running these commands :" >&2 
 		echo $sudo dnf module reset nvidia-driver -y
 		echo $sudo dnf clean metadata
 		echo $sudo dnf makecache
