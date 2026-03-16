@@ -17,6 +17,8 @@ fi
 
 if $isRedHatLike;then
 	$sudo systemctl stop puppet.service
+	$sudo rm /etc/yum.repos.d/cuda.repo -f
+
 	if ! dnf repolist | grep cuda -q;then
 		versionID=$(source /etc/os-release;echo $VERSION_ID)
 		rhelMajorVersion=${versionID/.*}
