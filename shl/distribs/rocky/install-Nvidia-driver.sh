@@ -25,7 +25,7 @@ if $isRedHatLike;then
 
 	$sudo systemctl stop puppet.service
 	$sudo rm /etc/yum.repos.d/cuda.repo -f
-	$sudo sed -i '/^exclude=/s/^/#/' /etc/dnf/dnf.conf
+	$sudo sed -i '/^exclude=/s/^/#/' $(readlink -e /etc/yum.conf)
 	dnf config-manager --dump | grep ^exclude
 	dnf repolist | grep powertools -wq || $sudo dnf config-manager --set-enabled powertools
 
