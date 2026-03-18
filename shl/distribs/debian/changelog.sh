@@ -13,6 +13,7 @@ do
 		URL=https://launchpad.net/~$ppa_user_name/+archive/ubuntu/$ppa_name/+files/${package_name}_${package_version}_source.changes
 		#echo "=> URL = $URL"
 		grep -q launchpad.net <<< "$URL" || { echo "=> ERROR: The package is not installed from <launchpad.net>" >&2 ; exit 1; }
-		\wget -q -O - $URL | awk '/Changes:/{f=1;next}/Checksums/{f=0}f'
+		set -x
+		\curl -qLs $URL | awk '/Changes:/{f=1;next}/Checksums/{f=0}f'
 	fi
 done
