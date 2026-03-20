@@ -3,13 +3,14 @@
 function podman {
 	local args=("$@")
 	local firstArg=$1
+	local podman=$(which -a podman | grep -v /usr/local/ -m1)
 
 	case $firstArg in
 		pull)
 			shift
-			echo http_proxy=http://10.10.30.90:80 https_proxy=http://10.10.30.90:80 podman pull "${args[@]}"
+			echo env http_proxy=http://10.10.30.90:80 https_proxy=http://10.10.30.90:80 $podman pull "${args[@]}"
 		;;
-		*) command podman "${args[@]}"
+		*) $podman "${args[@]}"
 		;;
 	esac
 }
