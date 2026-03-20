@@ -8,7 +8,7 @@ function podman {
 	case $firstArg in
 		pull)
 			shift
-			echo env http_proxy=$http_proxy https_proxy=$https_proxy $podman pull "${args[@]}"
+			env http_proxy=$http_proxy https_proxy=$https_proxy $podman pull "${args[@]}"
 		;;
 		*) $podman "${args[@]}"
 		;;
