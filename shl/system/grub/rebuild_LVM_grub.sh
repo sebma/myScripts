@@ -4,6 +4,8 @@ type sudo >/dev/null 2>&1 && [ $(id -u) != 0 ] && groups | egrep -wq "sudo|adm|a
 #set -o nounset
 set -o errexit
 
+[ -d /sys/firmware/efi ] && efiMode=true || efiMode=false
+
 $sudo lvs | grep -q root || {
 	$sudo pvscan
 	$sudo vgscan
