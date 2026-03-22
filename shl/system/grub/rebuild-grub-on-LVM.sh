@@ -10,15 +10,16 @@ $sudo lvs | grep root -q || {
 	$sudo lvscan
 }
 
-currentRootFS_VG=$($sudo lvs --noheadings $(findmnt / -o source -n) -o vg_name)
-rootFSLogicalVolume=$($sudo lvs | awk  "/$currentRootFS_VG/{next}"'/root/{if($2 ~ /-/){print$2"--"$1}else{print$2"-"$1}}')
+currentRootFS_VGName=$($sudo lvs --noheadings $(findmnt / -o source -n) -o vg_name)
+rootFS_VGName=$($sudo lvs | awk  "/$currentRootFS_VGName/{next}"'/root/{print$2;exit}')
+rootFS_LVName=$($sudo lvs $rootFS_VGName | awk '/root/{print$1;exit}')
 
 set -x
-mount | grep -q $rootFSLogicalVolume || $sudo mount -v /dev/mapper/$rootFSLogicalVolume /mnt
+mount | grep ${rootFS_VGName}-*$rootFS_LVName -q || $sudo mount -v /dev/$rootFS_VGName/$rootFS_LVName /mnt
 for special in dev dev/pts proc sys ; do $sudo mkdir -pv /mnt/$special;$sudo mount -v --bind /$special /mnt/$special ; done
 
 set +o errexit
-osVGName=$($sudo lvs | awk "/$currentRootFS_VG/{next}"'/root/{print$2}')
+osVGName=$($sudo lvs | awk "/$currentRootFS_VGName/{next}"'/root/{print$2}')
 export diskDevice=$(pvs | awk "/$osVGName/"'{print substr($1,1,8)}')
 $sudo chroot /mnt bash <<-EOF # mise a la racine du disque monte
 	findmnt >/dev/null && mount -av || exit # montage des partitions dans le chroot
