@@ -48,7 +48,7 @@ if ! $sudo gdisk -l $disk | grep -qw 8E00;then
 else
 	echo "=> INFO : This LVM partition already exits." >&2
 	echo >&2
-#	exit 3
+	exit 4
 fi
 
 $sudo parted $disk print
