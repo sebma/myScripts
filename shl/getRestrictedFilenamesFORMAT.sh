@@ -242,7 +242,7 @@ function getRestrictedFilenamesFORMAT() {
 	[ $verboseLevel = 1 ] && echo "=> tty is <$(tty)>"
 
 	time "${downloadCMD[@]}" --ignore-config --rm-cache
-	printf "=> CWD = ";pwd
+	printf "=> CWD = ";pwd;echo
 	for url
 	do
 		let i++
