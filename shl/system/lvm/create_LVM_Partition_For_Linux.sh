@@ -32,8 +32,6 @@ echo
 
 lvmPartition=$disk$lvmPartitionNumber
 lvmFS=/mnt/$(basename $lvmPartition)
-diskModelName=$(sudo smartctl -i $disk | awk '/Device Model:/{$1=$2="";gsub("  ","");gsub(" ","_");print}')
-diskSerialNumber=$(sudo smartctl -i $disk | awk '/Serial Number:/{$1=$2="";gsub("  ","");gsub(" ","_");print}')
 
 if ! $sudo gdisk -l $disk | grep -qw 8E00;then
 	$sudo sgdisk -n $lvmPartitionNumber:0:0 -t $lvmPartitionNumber:8E00 -c $lvmPartitionNumber:$diskModelName-$diskSerialNumber $disk
