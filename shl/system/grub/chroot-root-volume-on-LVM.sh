@@ -21,7 +21,7 @@ if $sudo dumpe2fs /dev/$rootFS_VGName/$rootFS_LVName 2>&1 | grep "Couldn't find 
 	$sudo vgchange -a y $rootFS_VGName
 fi
 fstype=$($sudo blkid /dev/$rootFS_VGName/$rootFS_LVName -o value -s TYPE)
-$sudo fsck.$fstype -v /dev/$rootFS_VGName/$rootFS_LVName
+time $sudo fsck.$fstype -v /dev/$rootFS_VGName/$rootFS_LVName
 
 mount | grep ${rootFS_VGName}-*$rootFS_LVName -q || $sudo mount -v /dev/$rootFS_VGName/$rootFS_LVName /mnt
 for special in dev dev/pts proc sys ; do $sudo mkdir -pv /mnt/$special;$sudo mount -v --bind /$special /mnt/$special ; done
