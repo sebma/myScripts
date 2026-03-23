@@ -4,12 +4,12 @@ echo $DC
 "=> Current Site from (Get-ADDomainController -Discover).Site is :"
 (Get-ADDomainController -Discover).Site
 
-function findGroup ($myPattern) {
+function findGroup {
 	$myPattern = '*'+$args[0]+'*'
 	$DC = $env:LOGONSERVER.Substring(2)
 	Get-ADGroup -Server $DC -Properties CN , CanonicalName , Created, Modified , Description -Filter { name -like $myPattern }
 }
-function findUser ($myPattern) {
+function findUser {
 	$myPattern = '*'+$args[0]+'*'
 	$DC = $env:LOGONSERVER.Substring(2)
 	# ` is used for Newline escape
