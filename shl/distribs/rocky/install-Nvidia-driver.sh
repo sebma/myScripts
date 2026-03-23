@@ -32,7 +32,7 @@ if $isRedHatLike;then
 		rhelMajorVersion=$(source /etc/os-release;echo ${VERSION_ID/.*})
 		# See https://docs.rockylinux.org/8/desktop/display/installing_nvidia_gpu_drivers/
 		#$sudo rm /etc/yum.repos.d/cuda.repo -f
-		$sudo dnf config-manager --disable cuda
+		dnf repolist | grep "cuda$" -q && $sudo dnf config-manager --disable cuda
 		$sudo dnf remove *nvidia* cuda-drivers -y
 		$sudo sed -i 's/pkgs.dyn.su/pkgs.sysadmins.ws/' /etc/yum.repos.d/raven.repo # cf. https://git.sysadmins.ws/pkgs/raven/commit/3a0b578c3e#diff-25c0edd698ac12b47c5e2548b587db23904aac24
 		dnf repolist | grep cuda-rhel$rhelMajorVersion-$(uname -i) -q || $sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -i)/cuda-rhel$rhelMajorVersion.repo
