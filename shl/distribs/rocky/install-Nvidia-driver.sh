@@ -64,7 +64,7 @@ if $isRedHatLike;then
 		echo "=> There is no $nvidiaDriverVersion available in the nvidia-driver DNF modules list." >&2
 		echo "=> Try running these commands :" >&2 
 		echo $sudo dnf module reset nvidia-driver -y
-		echo $sudo dnf clean expire-cache
+		echo $sudo dnf clean all
 		echo $sudo dnf makecache
 		exit 2
 	fi
