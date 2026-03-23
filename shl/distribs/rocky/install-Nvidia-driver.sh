@@ -33,7 +33,7 @@ if $isRedHatLike;then
 		# See https://docs.rockylinux.org/8/desktop/display/installing_nvidia_gpu_drivers/
 		$sudo rm /etc/yum.repos.d/cuda.repo -f
 		$sudo dnf remove *nvidia* cuda-drivers -y
-		dnf repolist | grep cuda-rhel8-$(uname -i) -q || $sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -i)/cuda-rhel$rhelMajorVersion.repo
+		dnf repolist | grep cuda-rhel$rhelMajorVersion-$(uname -i) -q || $sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -i)/cuda-rhel$rhelMajorVersion.repo
 	fi
 
 	if dnf module list nvidia-driver | grep $nvidiaDriverVersion -q;then
