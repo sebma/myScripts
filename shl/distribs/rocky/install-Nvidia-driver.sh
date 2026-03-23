@@ -24,7 +24,6 @@ if $isRedHatLike;then
 	\lspci -nnd ::0300
 
 	$sudo systemctl stop puppet.service
-	$sudo rm /etc/yum.repos.d/cuda.repo -f
 	$sudo sed -i '/^exclude=/s/^/#/' $(readlink -e /etc/yum.conf)
 	dnf config-manager --dump | grep ^exclude
 	dnf repolist | grep powertools -wq || $sudo dnf config-manager --set-enabled powertools
@@ -32,6 +31,7 @@ if $isRedHatLike;then
 	if ! dnf repolist | grep cuda -q;then
 		rhelMajorVersion=$(source /etc/os-release;echo ${VERSION_ID/.*})
 		# See https://docs.rockylinux.org/8/desktop/display/installing_nvidia_gpu_drivers/
+		$sudo rm /etc/yum.repos.d/cuda.repo -f
 		$sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -i)/cuda-rhel$rhelMajorVersion.repo
 	fi
 
