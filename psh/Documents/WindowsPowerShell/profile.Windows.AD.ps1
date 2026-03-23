@@ -4,6 +4,18 @@ echo $DC
 "=> Current Site from (Get-ADDomainController -Discover).Site is :"
 (Get-ADDomainController -Discover).Site
 
+function findGroup ($myPattern) {
+	$myPattern = '*'+$args[0]+'*'
+	$DC = $env:LOGONSERVER.Substring(2)
+	Get-ADGroup -Server $DC -Properties CN , CanonicalName , Created, Modified , Description -Filter { name -like $myPattern }
+}
+function findUser ($myPattern) {
+	$myPattern = '*'+$args[0]+'*'
+	$DC = $env:LOGONSERVER.Substring(2)
+	# ` is used for Newline escape
+	Get-ADUser -Server $DC -Properties CN , CanonicalName , Created , Description , EmailAddress , Enabled , LastLogonDate, LockedOut, msDS-UserPasswordExpiryTimeComputed , PasswordExpired , PasswordLastSet , PasswordNeverExpires , proxyAddresses , SamAccountName , UserPrincipalName -Filter { Name -like $myPattern -or (SamAccountName -like $myPattern) } `
+| select CN , CanonicalName , Created , Description , DistinguishedName , EmailAddress , Enabled , LastLogonDate, LockedOut, @{name="PasswordExpiryDate";expression={ [datetime]::fromfiletime($_."msDS-UserPasswordExpiryTimeComputed") } } , PasswordExpired , PasswordLastSet , PasswordNeverExpires , proxyAddresses , SamAccountName , UserPrincipalName
+}
 function groups {
 	$argc=$args.Count
 	if ( $argc -eq 0) {
