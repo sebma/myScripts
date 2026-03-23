@@ -16,10 +16,11 @@ gitUpdateAllMyLocalRepos ()
 	$find ~ -maxdepth 2 -type d -name .git 2>/dev/null | \egrep -v "/.linuxbrew/" | sort | while read dir; do
 		cd $dir/..
 		remoteRepoUrl=$(git config --local remote.origin.url)
-		test -n "$remoteRepoUrl" && echo "=> Updating <$dir> repo. from <$remoteRepoUrl> repo. ..." 1>&2 && git pull && sync
+		test -n "$remoteRepoUrl" && echo "=> Updating <$dir> repo. from <$remoteRepoUrl> repo. ..." 1>&2 && git pull
 		cd - > /dev/null
 		echo
 	done
+	sync
 }
 
 gitUpdateAllMyLocalRepos
