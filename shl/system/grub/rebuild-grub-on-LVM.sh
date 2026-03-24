@@ -19,6 +19,8 @@ if $sudo dumpe2fs /dev/$rootFS_VGName/$rootFS_LVName 2>&1 | grep "Couldn.t find 
 	$sudo vgchange -a n $rootFS_VGName
 	sleep 1s
 	$sudo vgchange -a y $rootFS_VGName
+else
+	$sudo dumpe2fs /dev/$rootFS_VGName/$rootFS_LVName 2>&1
 fi
 fstype=$($sudo blkid /dev/$rootFS_VGName/$rootFS_LVName -o value -s TYPE)
 time $sudo fsck.$fstype -v /dev/$rootFS_VGName/$rootFS_LVName
