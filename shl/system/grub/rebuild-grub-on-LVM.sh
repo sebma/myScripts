@@ -15,7 +15,7 @@ rootFS_VGName=$($sudo lvs | awk  "/$currentRootFS_VGName/{next}"'/root/{print$2;
 rootFS_LVName=$($sudo lvs $rootFS_VGName | awk '/root/{print$1;exit}')
 
 set -x
-if $sudo dumpe2fs /dev/$rootFS_VGName/$rootFS_LVName 2>&1 | grep "Couldn.t find valid filesystem superblock." -q;then
+if $sudo dumpe2fs /dev/$rootFS_VGName/$rootFS_LVName 2>&1 | grep "Couldn.t find valid filesystem superblock.";then
 	$sudo vgchange -a n $rootFS_VGName
 	sleep 1s
 	$sudo vgchange -a y $rootFS_VGName
