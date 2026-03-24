@@ -9,6 +9,7 @@ test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
 declare {isDebian,isRedHat,isAlpine}Like=false
 distribID=$(source /etc/os-release;echo $ID)
+distribID=$(awk -F'"|=' '/^ID=/{print$NF;exit}' /etc/os-release)
 if   echo $distribID | egrep "centos|rhel|fedora" -q;then
 	isRedHatLike=true
 elif echo $distribID | egrep "debian|ubuntu" -q;then
