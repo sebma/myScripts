@@ -18,8 +18,10 @@ After=docker.service
 
 [Service]
 Type=simple
-WorkingDirectory=$workingDirectory # Need to point the folder where your docker-compose is located
-Environment=ENVIRONMENT=production # Put any environments you want to pass into docker
+# Need to point the folder where your docker-compose is located
+WorkingDirectory=$workingDirectory
+# Put any environments you want to pass into docker
+Environment=ENVIRONMENT=production
 ExecStart=/usr/bin/docker compose up
 ExecStop=/usr/bin/docker compose down
 Restart=always
