@@ -49,11 +49,19 @@ if $isRedHatLike;then
 			$sudo dnf install nvidia-open nvidia-driver-cuda -y
 			nvidia-smi >/dev/null || $sudo dnf reinstall kmod-nvidia-open-dkms -y
 		else
-			nvidiaEffectiveDriverVersion=$(dnf info nvidia-driver | awk -F '[: ]' '/Version/{print$NF}')
-			$sudo dnf install nvidia-driver nvidia-driver-cuda -y
-			release=3
-			nvidia-smi >/dev/null || $sudo dnf install kmod-nvidia-$nvidiaEffectiveDriverVersion-$(uname -r | cut -d. -f1-5)-$nvidiaEffectiveDriverVersion-$release.$(uname -r | cut -d. -f6-7) -y
+			if   echo $nvidiaDriverVersion | grep -- "-open$" -q;then
+				$sudo dnf install nvidia-open nvidia-driver-cuda kmod-nvidia-open-dkms nvidia-container-toolkit -y
+				nvidiaEffectiveDriverVersion=$(dnf info nvidia-driver | awk -F '[: ]' '/Version/{print$NF}')
+				release=3
+				nvidia-smi >/dev/null || $sudo dnf install kmod-nvidia-$nvidiaEffectiveDriverVersion-$(uname -r | cut -d. -f1-5)-$nvidiaEffectiveDriverVersion-$release.$(uname -r | cut -d. -f6-7) -y
+			elif echo $nvidiaDriverVersion | grep -- "-dkms$" -q;then
+				$sudo dnf install nvidia-driver nvidia-driver-cuda kmod-nvidia-latest-dkms nvidia-container-toolkit -y
+				nvidiaEffectiveDriverVersion=$(dnf info nvidia-driver | awk -F '[: ]' '/Version/{print$NF}')
+				release=3
+				nvidia-smi >/dev/null || $sudo dnf install kmod-nvidia-$nvidiaEffectiveDriverVersion-$(uname -r | cut -d. -f1-5)-$nvidiaEffectiveDriverVersion-$release.$(uname -r | cut -d. -f6-7) -y
+			fi
 		fi
+
 #		$sudo grubby --args="nouveau.modeset=0 rd.driver.blacklist=nouveau" --update-kernel=ALL
 		mokutil --sb-state | grep SecureBoot.enabled -q && $sudo mokutil --import /var/lib/dkms/mok.pub
 
