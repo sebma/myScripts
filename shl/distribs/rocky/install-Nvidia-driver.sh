@@ -45,9 +45,10 @@ if $isRedHatLike;then
 		# dnf nvidia-plugin || $sudo dnf install dnf-plugin-nvidia -y
 		# dnf versionlock || $sudo dnf install python3-dnf-plugin-versionlock -y # See https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/version-locking.html
 		nvidiaDriverVersionNumber=$(tr -d '[a-zA-Z-_]' <<< $nvidiaDriverVersion)
-		if [ $nvidiaDriverVersionNumber -gt 515 ];then
-			$sudo dnf install nvidia-open nvidia-driver-cuda -y
-			nvidia-smi >/dev/null || $sudo dnf reinstall kmod-nvidia-open-dkms -y
+		if [ $nvidiaDriverVersionNumber -lt 515 ];then
+			$sudo dnf install nvidia-driver nvidia-driver-cuda -y
+			#nvidia-smi >/dev/null || $sudo dnf reinstall kmod-nvidia-open-dkms -y
+			nvidia-smi >/dev/null || $sudo dnf reinstall kmod-nvidia-latest-dkms -y
 		else
 			if   echo $nvidiaDriverVersion | grep -- "-open$" -q;then
 				$sudo dnf install nvidia-open nvidia-driver-cuda kmod-nvidia-open-dkms nvidia-container-toolkit -y
