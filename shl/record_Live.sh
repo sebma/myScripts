@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 estimatedDuration=0m # last for ever when the "estimatedDuration" is unknown
-format=94/231+233
+format=93/230+233
 case $# in
 	1) url=$1;;
 	2) estimatedDuration=$1; url=$2;;
