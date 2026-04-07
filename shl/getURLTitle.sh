@@ -5,7 +5,8 @@ function getURLTitle() {
 		for URL
 		do
 			printf "$URL # "
-			\curl -qLs "$URL" | htmlq -t 'title' | \xargs
+			#\curl -qLs "$URL" | htmlq -t 'title' | \xargs -0
+			\curl -qLs "$URL" | htmlq -t 'title'
 		done
 	elif type -P pup > /dev/null; then
 		for URL
