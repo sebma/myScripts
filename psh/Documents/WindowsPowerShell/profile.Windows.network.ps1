@@ -56,7 +56,7 @@ function host($url, $server, $type) {
 	} else {
 		$ipv4RegExp = '^(https?://|s?ftps?://)?\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}'
 		if( $url -Match $ipv4RegExp ) {
-			$ip = $url -Replace('https?://|s?ftps?://','') -Replace('(/|:\d+).*$','')
+			$ip = $url -Replace('https?://|s?ftps?://','') -Replace('^\\+|(/|:\d+).*$','')
 			if ( $argc -eq 1 ) {
 				(Resolve-DnsName -DnsOnly $ip -server $DC).NameHost | sort
 			} elseif ( $argc -eq 2 ) {
@@ -66,7 +66,7 @@ function host($url, $server, $type) {
 			}
 		}
 		else {
-			$fqdn = $url -Replace('https?://|s?ftps?://','') -Replace('(/|:\d+).*$','')
+			$fqdn = $url -Replace('https?://|s?ftps?://','') -Replace('^\\+|(/|:\d+).*$','')
 			if ( $argc -eq 1 ) {
 				(Resolve-DnsName $fqdn -server $DC).IP4Address | sort
 			} elseif ( $argc -eq 2 ) {
