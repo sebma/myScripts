@@ -194,7 +194,11 @@ function setLogonDC {
 function np3 {
 	$argc=$args.Count
 	for($i=0;$i -lt $argc;$i++) {
-		notepad3 $($args[$i])
+		if ( Test-Path $($args[$i]) ) {
+			notepad3 $($args[$i])
+		} else {
+			Write-Warning "$($args[$i]) does not exist."
+		}
 	}
 }
 
