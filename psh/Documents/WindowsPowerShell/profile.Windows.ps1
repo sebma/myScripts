@@ -191,6 +191,13 @@ function setLogonDC {
 #	nltest /dclist:
 }
 
+function np3 {
+	$argc=$args.Count
+	for($i=0;$i -lt $argc;$i++) {
+		notepad3 $($args[$i])
+	}
+}
+
 function main {
 	$FUNCNAME = $MyInvocation.MyCommand.Name
  	"=> Running $FUNCNAME ..."
