@@ -106,6 +106,7 @@ EOF
 			$sudo resolvectl domain $iface $searchDOMAIN
 			resolvectl dns $iface
 			resolvectl status $iface
+			$sudo systemctl restart systemd-resolved.service
 		fi
 
 		# Install open-vm-tools
