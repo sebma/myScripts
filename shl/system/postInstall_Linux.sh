@@ -75,6 +75,7 @@ if   $isRedHatLike;then
 		$sudo resolvectl domain $iface $DOMAIN
 		resolvectl dns $iface
 		resolvectl status $iface
+		$sudo systemctl restart systemd-resolved.service
 	fi
 
 	# CONF NTP (hors systemd)
