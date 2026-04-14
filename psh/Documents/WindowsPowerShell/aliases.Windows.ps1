@@ -22,7 +22,7 @@ set-alias -Scope Global np notepad
 set-alias -Scope Global np++ notepad++
 set-alias -Scope Global np1 notepad1
 set-alias -Scope Global np2 notepad2
-set-alias -Scope Global np3 notepad3
+#set-alias -Scope Global np3 notepad3
 set-alias -Scope Global np4 notepad4
 set-alias -Scope Global nppp notepad++
 set-alias -Scope Global reboot restart-computer
