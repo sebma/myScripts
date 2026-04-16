@@ -17,6 +17,9 @@ function ip($cmd,$iface) {
 		ipaddr($iface)
 	} elseif( $cmd -eq 'l' ) {
 		iplink($iface)
+	} elseif( $cmd -eq 'r' ) {
+		$dest=$iface
+		iproute($dest)
 	}
 }
 
