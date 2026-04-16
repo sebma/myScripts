@@ -12,6 +12,14 @@ function netstat {
 	Get-NetTCPConnection | select local*,remote*,state,OwningProcess,@{Name="Process";Expression={(Get-Process -Id $_.OwningProcess).ProcessName}} | sort-object -property LocalPort | format-table | Out-String -Stream
 }
 
+function dns($iface) {
+	if( $iface ) {
+		Get-DnsClientServerAddress $face -AddressFamily IPv4 | select InterfaceAlias , AddressFamily , ServerAddresses
+	} else {
+		Get-DnsClientServerAddress -AddressFamily IPv4 | ? { $_.ServerAddresses.Count -ge 1 } | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" -and $_.InterfaceAlias -NotMatch "Loopback*" } | select InterfaceAlias , AddressFamily , ServerAddresses
+	}
+}
+
 function ip($cmd,$iface) {
 	if( $cmd -eq 'a' ) {
 		ipaddr($iface)
