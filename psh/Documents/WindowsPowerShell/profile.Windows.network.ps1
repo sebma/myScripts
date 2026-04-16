@@ -14,9 +14,9 @@ function netstat {
 
 function dns($iface) {
 	if( $iface ) {
-		Get-DnsClientServerAddress $iface -AddressFamily IPv4 | select InterfaceAlias , AddressFamily , ServerAddresses
+		Get-DnsClientServerAddress $iface -AddressFamily IPv4 | select InterfaceAlias , ServerAddresses
 	} else {
-		Get-DnsClientServerAddress -AddressFamily IPv4 | ? { $_.ServerAddresses.Count -ge 1 } | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" -and $_.InterfaceAlias -NotMatch "Loopback*" } | select InterfaceAlias , AddressFamily , ServerAddresses
+		Get-DnsClientServerAddress -AddressFamily IPv4 | ? { $_.ServerAddresses.Count -ge 1 } | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" -and $_.InterfaceAlias -NotMatch "Loopback*" } | select InterfaceAlias , ServerAddresses
 	}
 }
 
