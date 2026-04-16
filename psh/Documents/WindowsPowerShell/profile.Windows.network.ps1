@@ -12,6 +12,14 @@ function netstat {
 	Get-NetTCPConnection | select local*,remote*,state,OwningProcess,@{Name="Process";Expression={(Get-Process -Id $_.OwningProcess).ProcessName}} | sort-object -property LocalPort | format-table | Out-String -Stream
 }
 
+function ip($cmd,$iface) {
+	if( $cmd -eq 'a' ) {
+		ipaddr($iface)
+	} elseif( $cmd -eq 'l' ) {
+		iplink($iface)
+	}
+}
+
 function iplink($iface) {
 	if( $iface ) {
 		Get-NetAdapter | ? InterfaceAlias -Match "$iface" | select InterfaceAlias , Status , MacAddress , MtuSize , Virtual , ifDesc , LinkSpeed | Format-Table
