@@ -23,3 +23,8 @@ function dirname($path) { Split-Path -Parent -Path "$path" }
 #if( isInstalled("Connect-VIServer") ) {
 #	. $profileDIR/$scriptPrefix.powercli.ps1 # VCF.PowerCLI
 #}
+
+if ( $(alias history *>$null;$?) ) { del alias:history }
+function history() {
+	cat  $(Get-PSReadlineOption).HistorySavePath
+}
