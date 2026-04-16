@@ -19,7 +19,7 @@ function iplink($iface) {
 		Get-NetAdapter | select InterfaceAlias , Status , MacAddress , MtuSize , Virtual , ifDesc , LinkSpeed | Format-Table
 	}
 }
-function ip($iface) {
+function ipaddr($iface) {
 	if( $iface ) {
 		Get-NetIPAddress | ? InterfaceAlias -Match "$iface" | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" } | select InterfaceAlias , IPAddress , PrefixLength
 	} else {
