@@ -23,7 +23,7 @@ if $isRedHatLike;then
 	echo "=> Showing graphic(s) controller(s) :"
 	\lspci -nnd ::0300
 
-	$sudo systemctl stop puppet.service
+	$sudo systemctl disable --now puppet.service
 	# $sudo sed -i '/^exclude=/s/^/#/' $(readlink -e /etc/yum.conf)
 	$sudo sed -i.bak '/^proxy=/s/^/#/' $(readlink -e /etc/yum.conf)
 	dnf config-manager --dump | grep ^exclude
