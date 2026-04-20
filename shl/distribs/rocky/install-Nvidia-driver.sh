@@ -64,6 +64,10 @@ if $isRedHatLike;then
 			fi
 		fi
 		$sudo dnf install nvidia-driver-cuda nvidia-container-toolkit -y
+		dnf info cuda cuda-toolkit cuda-tools
+		dnf info cuda-compiler
+		$sudo dnf install cuda cuda-runtime cuda-toolkit cuda-tools cuda-compiler -y # i.e. https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Rocky&target_version=8&target_type=rpm_network and https://docs.nvidia.com/cuda/cuda-installation-guide-linux/#meta-packages
+		$sudo dnf install cuda-compiler -y
 		nvidia-smi | grep Version
 
 #		$sudo grubby --args="nouveau.modeset=0 rd.driver.blacklist=nouveau" --update-kernel=ALL
