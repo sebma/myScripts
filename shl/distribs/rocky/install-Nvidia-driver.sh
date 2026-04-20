@@ -74,6 +74,7 @@ if $isRedHatLike;then
 		$sudo dnf install cuda cuda-runtime cuda-toolkit cuda-tools cuda-compiler -y --allowerasing # i.e. https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Rocky&target_version=8&target_type=rpm_network and https://docs.nvidia.com/cuda/cuda-installation-guide-linux/#meta-packages
 		$sudo dnf install cuda-compiler -y --allowerasing
 		nvidia-smi | grep Version
+		# https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/post-installation-actions.html
 
 #		$sudo grubby --args="nouveau.modeset=0 rd.driver.blacklist=nouveau" --update-kernel=ALL
 		mokutil --sb-state | grep SecureBoot.enabled -q && $sudo mokutil --import /var/lib/dkms/mok.pub
