@@ -43,7 +43,8 @@ if $isRedHatLike;then
 	dnf clean expire-cache # See https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/rocky-linux.html
 	if dnf module list nvidia-driver | grep $nvidiaDriverVersion -q;then
 		$sudo dnf clean expire-cache
-		$sudo dnf module enable nvidia-driver:$nvidiaDriverVersion -y || $sudo dnf module switch-to nvidia-driver:$nvidiaDriverVersion -y
+		$sudo dnf module reset nvidia-driver -y
+		$sudo dnf module enable nvidia-driver:$nvidiaDriverVersion -y
 		# dnf nvidia-plugin || $sudo dnf install dnf-plugin-nvidia -y
 		# dnf versionlock || $sudo dnf install python3-dnf-plugin-versionlock -y # See https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/version-locking.html
 		nvidiaDriverVersionNumber=$(tr -d '[a-zA-Z-_]' <<< $nvidiaDriverVersion)
@@ -53,24 +54,25 @@ if $isRedHatLike;then
 			nvidia-smi >/dev/null || $sudo dnf reinstall kmod-nvidia-latest-dkms -y
 		else
 			if   echo $nvidiaDriverVersion | grep -- "-open$" -q;then
-				$sudo dnf install nvidia-open kmod-nvidia-open-dkms -y
+				$sudo dnf install nvidia-open kmod-nvidia-open-dkms -y --allowerasing
 
 				#nvidiaEffectiveDriverVersion=$(dnf info nvidia-driver | awk -F '[: ]' '/Version/{print$NF}')
 				#release=3
 				#nvidia-smi >/dev/null || $sudo dnf install kmod-nvidia-$nvidiaEffectiveDriverVersion-$(uname -r | cut -d. -f1-5)-$nvidiaEffectiveDriverVersion-$release.$(uname -r | cut -d. -f6-7) -y
 			elif echo $nvidiaDriverVersion | grep -- "-dkms$" -q;then
-				$sudo dnf install nvidia-driver kmod-nvidia-latest-dkms -y
+				$sudo dnf install nvidia-driver kmod-nvidia-latest-dkms -y --allowerasing
 
 				#nvidiaEffectiveDriverVersion=$(dnf info nvidia-driver | awk -F '[: ]' '/Version/{print$NF}')
 				#release=3
 				#nvidia-smi >/dev/null || $sudo dnf install kmod-nvidia-$nvidiaEffectiveDriverVersion-$(uname -r | cut -d. -f1-5)-$nvidiaEffectiveDriverVersion-$release.$(uname -r | cut -d. -f6-7) -y
 			fi
 		fi
-		$sudo dnf install nvidia-driver-cuda nvidia-container-toolkit -y
+
+		$sudo dnf install nvidia-driver-cuda nvidia-container-toolkit -y --allowerasing
 		dnf info cuda cuda-toolkit cuda-tools
 		dnf info cuda-compiler
-		$sudo dnf install cuda cuda-runtime cuda-toolkit cuda-tools cuda-compiler -y # i.e. https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Rocky&target_version=8&target_type=rpm_network and https://docs.nvidia.com/cuda/cuda-installation-guide-linux/#meta-packages
-		$sudo dnf install cuda-compiler -y
+		$sudo dnf install cuda cuda-runtime cuda-toolkit cuda-tools cuda-compiler -y --allowerasing # i.e. https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Rocky&target_version=8&target_type=rpm_network and https://docs.nvidia.com/cuda/cuda-installation-guide-linux/#meta-packages
+		$sudo dnf install cuda-compiler -y --allowerasing
 		nvidia-smi | grep Version
 
 #		$sudo grubby --args="nouveau.modeset=0 rd.driver.blacklist=nouveau" --update-kernel=ALL
