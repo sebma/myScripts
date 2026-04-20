@@ -28,6 +28,7 @@ if $isRedHatLike;then
 	$sudo sed -i.bak '/^proxy=/s/^/#/' $(readlink -e /etc/yum.conf)
 	dnf config-manager --dump | grep ^exclude
 	dnf repolist | grep powertools -wq || $sudo dnf config-manager --set-enabled powertools
+	dnf repolist | grep epel -wq || $sudo dnf install epel-release -y
 
 	if ! dnf repolist | grep cuda -q;then
 		rhelMajorVersion=$(source /etc/os-release;echo ${VERSION_ID/.*})
@@ -39,7 +40,7 @@ if $isRedHatLike;then
 		dnf repolist | grep cuda-rhel$rhelMajorVersion-$(uname -i) -q || $sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -i)/cuda-rhel$rhelMajorVersion.repo
 	fi
 
-	dnf clean expire-cache
+	dnf clean expire-cache # See https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/rocky-linux.html
 	if dnf module list nvidia-driver | grep $nvidiaDriverVersion -q;then
 		$sudo dnf clean expire-cache
 		$sudo dnf module enable nvidia-driver:$nvidiaDriverVersion -y || $sudo dnf module switch-to nvidia-driver:$nvidiaDriverVersion -y
@@ -53,11 +54,13 @@ if $isRedHatLike;then
 		else
 			if   echo $nvidiaDriverVersion | grep -- "-open$" -q;then
 				$sudo dnf install nvidia-open kmod-nvidia-open-dkms -y
+
 				#nvidiaEffectiveDriverVersion=$(dnf info nvidia-driver | awk -F '[: ]' '/Version/{print$NF}')
 				#release=3
 				#nvidia-smi >/dev/null || $sudo dnf install kmod-nvidia-$nvidiaEffectiveDriverVersion-$(uname -r | cut -d. -f1-5)-$nvidiaEffectiveDriverVersion-$release.$(uname -r | cut -d. -f6-7) -y
 			elif echo $nvidiaDriverVersion | grep -- "-dkms$" -q;then
 				$sudo dnf install nvidia-driver kmod-nvidia-latest-dkms -y
+
 				#nvidiaEffectiveDriverVersion=$(dnf info nvidia-driver | awk -F '[: ]' '/Version/{print$NF}')
 				#release=3
 				#nvidia-smi >/dev/null || $sudo dnf install kmod-nvidia-$nvidiaEffectiveDriverVersion-$(uname -r | cut -d. -f1-5)-$nvidiaEffectiveDriverVersion-$release.$(uname -r | cut -d. -f6-7) -y
