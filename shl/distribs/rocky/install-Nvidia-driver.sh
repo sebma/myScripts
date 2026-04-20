@@ -71,7 +71,10 @@ if $isRedHatLike;then
 		$sudo dnf install nvidia-driver-cuda nvidia-container-toolkit -y --allowerasing
 		dnf info cuda cuda-toolkit cuda-tools
 		dnf info cuda-compiler
-		$sudo dnf install cuda cuda-runtime cuda-toolkit cuda-tools cuda-compiler -y --allowerasing # i.e. https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Rocky&target_version=8&target_type=rpm_network and https://docs.nvidia.com/cuda/cuda-installation-guide-linux/#meta-packages
+		$sudo dnf install cuda cuda-runtime cuda-toolkit cuda-tools -y --allowerasing
+		# https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Rocky&target_version=8&target_type=rpm_network
+		# https://docs.nvidia.com/cuda/cuda-installation-guide-linux/#meta-packages
+		# https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/rocky-linux.html
 		$sudo dnf install cuda-compiler -y --allowerasing
 		nvidia-smi | grep Version
 		# https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/post-installation-actions.html
@@ -88,9 +91,8 @@ if $isRedHatLike;then
 		# See https://superuser.com/a/1935617/528454
 		echo "=> There is no $nvidiaDriverVersion available in the nvidia-driver DNF modules list." >&2
 		echo "=> Try running these commands :" >&2 
-		echo $sudo dnf module reset nvidia-driver -y
-		echo $sudo dnf clean all
-		echo $sudo dnf makecache
+		echo dnf clean expire-cache
+		echo $sudo dnf clean expire-cache
 		exit 2
 	fi
 fi
