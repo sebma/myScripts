@@ -69,7 +69,6 @@ if $isRedHatLike;then
 		fi
 
 		$sudo dnf install nvidia-driver-cuda nvidia-container-toolkit -y --allowerasing
-		dnf info cuda cuda-toolkit
 		$sudo dnf install cuda cuda-toolkit -y --allowerasing
 		# https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Rocky&target_version=8&target_type=rpm_network
 		# https://docs.nvidia.com/cuda/cuda-installation-guide-linux/#meta-packages
