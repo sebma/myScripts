@@ -69,13 +69,11 @@ if $isRedHatLike;then
 		fi
 
 		$sudo dnf install nvidia-driver-cuda nvidia-container-toolkit -y --allowerasing
-		dnf info cuda cuda-toolkit cuda-tools
-		dnf info cuda-compiler
-		$sudo dnf install cuda cuda-runtime cuda-toolkit cuda-tools -y --allowerasing
+		dnf info cuda cuda-toolkit
+		$sudo dnf install cuda cuda-toolkit -y --allowerasing
 		# https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Rocky&target_version=8&target_type=rpm_network
 		# https://docs.nvidia.com/cuda/cuda-installation-guide-linux/#meta-packages
 		# https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/rocky-linux.html
-		$sudo dnf install cuda-compiler -y --allowerasing
 		nvidia-smi | grep Version
 		# https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/post-installation-actions.html
 
