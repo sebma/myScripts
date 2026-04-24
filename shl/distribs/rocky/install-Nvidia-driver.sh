@@ -68,9 +68,9 @@ if $isRedHatLike;then
 
 		$sudo reboot
 		nvidia-smi >/dev/null || $sudo dnf reinstall kmod-nvidia-*-dkms -y
-		$sudo dnf install nvidia-container-toolkit -y --allowerasing
+		$sudo dnf install nvidia-container-toolkit -y
 		$sudo systemctl restart docker.service
-		$sudo dnf install cuda cuda-toolkit -y --allowerasing
+		$sudo dnf install cuda cuda-toolkit -y
 		# https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Rocky&target_version=8&target_type=rpm_network
 		# https://docs.nvidia.com/cuda/cuda-installation-guide-linux/#meta-packages
 		# https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/rocky-linux.html
