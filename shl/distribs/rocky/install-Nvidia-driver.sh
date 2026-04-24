@@ -90,6 +90,7 @@ if $isRedHatLike;then
 		# https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/post-installation-actions.html
 
 		nvidia-smi | grep Version
+		cat /proc/driver/nvidia/version
 		$(echo /usr/local/cuda-*/bin/nvcc | head -1) --version
 
 		# nouveau driver disable :
