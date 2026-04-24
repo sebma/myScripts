@@ -67,24 +67,36 @@ if $isRedHatLike;then
 		fi
 
 		$sudo reboot
-		which nvidia-smi >/dev/null && ! nvidia-smi >/dev/null && $sudo dnf reinstall kmod-nvidia-*-dkms -y
-		$sudo dnf install nvidia-container-toolkit -y
-		$sudo systemctl restart docker.service
-		$sudo dnf install cuda cuda-toolkit -y
-		# https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Rocky&target_version=8&target_type=rpm_network
-		# https://docs.nvidia.com/cuda/cuda-installation-guide-linux/#meta-packages
-		# https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/rocky-linux.html
-		nvidia-smi | grep Version
-		# https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/post-installation-actions.html
 
-#		$sudo grubby --args="nouveau.modeset=0 rd.driver.blacklist=nouveau" --update-kernel=ALL
-		mokutil --sb-state | grep SecureBoot.enabled -q && $sudo mokutil --import /var/lib/dkms/mok.pub
+		# Si on boot sur un nouveau kernel, il faut re-installer le packet kmod-nvidia-latest-dkms || kmod-nvidia-open-dkms
+		which nvidia-smi >/dev/null && ! nvidia-smi >/dev/null && $sudo dnf reinstall kmod-nvidia-*-dkms -y
 
 		# NVIDIA Container Toolkit cf. https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#with-dnf-rhel-centos-fedora-amazon-linux
 		# $sudo dnf config-manager --add-repo https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo
 		# export NVIDIA_CONTAINER_TOOLKIT_VERSION=1.18.2-1
 		# $sudo dnf install -y nvidia-container-toolkit-${NVIDIA_CONTAINER_TOOLKIT_VERSION} nvidia-container-toolkit-base-${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
         # libnvidia-container-tools-${NVIDIA_CONTAINER_TOOLKIT_VERSION} libnvidia-container1-${NVIDIA_CONTAINER_TOOLKIT_VERSION}
+
+		# PLUS SIMPLE :
+		$sudo dnf install nvidia-container-toolkit -y
+		$sudo systemctl restart docker.service
+
+		# NECESSAIRE ? :
+		$sudo dnf install cuda cuda-toolkit -y # See https://docs.nvidia.com/cuda/cuda-installation-guide-linux/#meta-packages
+
+		# https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Rocky&target_version=8&target_type=rpm_network
+		# https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/rocky-linux.html
+
+		# https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/post-installation-actions.html
+
+		nvidia-smi | grep Version
+		$(echo /usr/local/cuda-*/bin/nvcc | head -1) --version
+
+		# nouveau driver disable :
+		grep -w nouveau /etc/modprobe.conf /etc/modprobe.d/ -r -q 2>/dev/null || echo -e 'blacklist nouveau\noptions nouveau modeset=0\noptions nvidia_drm modeset=1' | $sudo tee -a /etc/modprobe.d/nvidia.conf >/dev/null
+		$sudo grubby --args="nouveau.modeset=0 rd.driver.blacklist=nouveau" --update-kernel=ALL
+		
+		mokutil --sb-state | grep SecureBoot.enabled -q && $sudo mokutil --import /var/lib/dkms/mok.pub
 	else
 		# See https://superuser.com/a/1935617/528454
 		echo "=> There is no $nvidiaDriverVersion available in the nvidia-driver DNF modules list." >&2
