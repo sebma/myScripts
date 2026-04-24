@@ -50,17 +50,15 @@ if $isRedHatLike;then
 		nvidiaDriverVersionNumber=$(tr -d '[a-zA-Z-_]' <<< $nvidiaDriverVersion)
 		if [ $nvidiaDriverVersionNumber -lt 515 ];then
 			$sudo dnf install nvidia-driver nvidia-driver-cuda -y
-			#nvidia-smi >/dev/null || $sudo dnf reinstall kmod-nvidia-open-dkms -y
-			nvidia-smi >/dev/null || $sudo dnf reinstall kmod-nvidia-latest-dkms -y
 		else
 			if   echo $nvidiaDriverVersion | grep -- "-open$" -q;then
-				$sudo dnf install nvidia-open kmod-nvidia-open-dkms -y --allowerasing
+				$sudo dnf install nvidia-open kmod-nvidia-open-dkms nvidia-driver-cuda -y --allowerasing
 
 				#nvidiaEffectiveDriverVersion=$(dnf info nvidia-driver | awk -F '[: ]' '/Version/{print$NF}')
 				#release=3
 				#nvidia-smi >/dev/null || $sudo dnf install kmod-nvidia-$nvidiaEffectiveDriverVersion-$(uname -r | cut -d. -f1-5)-$nvidiaEffectiveDriverVersion-$release.$(uname -r | cut -d. -f6-7) -y
 			elif echo $nvidiaDriverVersion | grep -- "-dkms$" -q;then
-				$sudo dnf install nvidia-driver kmod-nvidia-latest-dkms -y --allowerasing
+				$sudo dnf install nvidia-driver kmod-nvidia-latest-dkms nvidia-driver-cuda -y --allowerasing
 
 				#nvidiaEffectiveDriverVersion=$(dnf info nvidia-driver | awk -F '[: ]' '/Version/{print$NF}')
 				#release=3
@@ -68,7 +66,9 @@ if $isRedHatLike;then
 			fi
 		fi
 
-		$sudo dnf install nvidia-driver-cuda nvidia-container-toolkit -y --allowerasing
+		$sudo reboot
+		nvidia-smi >/dev/null || $sudo dnf reinstall kmod-nvidia-*-dkms -y
+		$sudo dnf install nvidia-container-toolkit -y --allowerasing
 		$sudo systemctl restart docker.service
 		$sudo dnf install cuda cuda-toolkit -y --allowerasing
 		# https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Rocky&target_version=8&target_type=rpm_network
