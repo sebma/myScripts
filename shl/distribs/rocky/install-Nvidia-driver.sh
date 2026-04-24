@@ -67,7 +67,7 @@ if $isRedHatLike;then
 		fi
 
 		$sudo reboot
-		nvidia-smi >/dev/null || $sudo dnf reinstall kmod-nvidia-*-dkms -y
+		which nvidia-smi >/dev/null && ! nvidia-smi >/dev/null && $sudo dnf reinstall kmod-nvidia-*-dkms -y
 		$sudo dnf install nvidia-container-toolkit -y
 		$sudo systemctl restart docker.service
 		$sudo dnf install cuda cuda-toolkit -y
