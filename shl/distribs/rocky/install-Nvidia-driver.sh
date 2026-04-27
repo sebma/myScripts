@@ -26,21 +26,21 @@ if $isRedHatLike;then
 	$sudo systemctl disable --now puppet.service
 	# $sudo sed -i '/^exclude=/s/^/#/' $(readlink -e /etc/yum.conf)
 	$sudo sed -i.bak '/^proxy=/s/^/#/' $(readlink -e /etc/yum.conf)
-	dnf config-manager --dump | grep ^exclude
+
 	dnf repolist | grep epel -wq || $sudo dnf install epel-release -y
 	if awk -F '[=."]' '/VERSION_ID/{print$3}' /etc/os-release | grep -wq 8;then
-		dnf repolist | grep powertools -wq || $sudo dnf config-manager --set-enabled powertools
+		dnf repolist | grep powertools -wq || $sudo dnf config-manager --enable powertools
 	fi
 	
 	if ! dnf repolist | grep cuda -q;then
 		rhelMajorVersion=$(source /etc/os-release;echo ${VERSION_ID/.*})
 		# See https://docs.rockylinux.org/8/desktop/display/installing_nvidia_gpu_drivers/
-		#$sudo rm /etc/yum.repos.d/cuda.repo -f
-		dnf repolist | grep 'cuda\s.*cuda$' -q && $sudo dnf config-manager --disable cuda
+		$sudo rm /etc/yum.repos.d/cuda.repo -f
 		$sudo dnf remove *nvidia* cuda-drivers -y
-		$sudo sed -i.bak 's/pkgs.dyn.su/pkgs.sysadmins.ws/' /etc/yum.repos.d/raven.repo # cf. https://git.sysadmins.ws/pkgs/raven/commit/3a0b578c3e#diff-25c0edd698ac12b47c5e2548b587db23904aac24
 		dnf repolist | grep cuda-rhel$rhelMajorVersion-$(uname -i) -q || $sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -i)/cuda-rhel$rhelMajorVersion.repo
 	fi
+
+	$sudo sed -i.bak 's/pkgs.dyn.su/pkgs.sysadmins.ws/' /etc/yum.repos.d/raven.repo # cf. https://git.sysadmins.ws/pkgs/raven/commit/3a0b578c3e#diff-25c0edd698ac12b47c5e2548b587db23904aac24
 
 	dnf clean expire-cache # See https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/rocky-linux.html
 	if dnf module list nvidia-driver | grep $nvidiaDriverVersion -q;then
