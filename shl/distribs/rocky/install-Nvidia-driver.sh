@@ -32,8 +32,9 @@ if $isRedHatLike;then
 	if [ $rhelMajorVersion -le 8 ];then
 		dnf repolist | grep powertools -w -q || $sudo dnf config-manager --enable powertools
 	else
-		:
+		dnf repolist | grep crb -w -q || $sudo dnf config-manager --set-enabled crb
 	fi
+	# cf. https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/rocky-linux.html#preparation
 	
 	if ! dnf repolist | grep cuda -q;then
 		# See https://docs.rockylinux.org/8/desktop/display/installing_nvidia_gpu_drivers/
