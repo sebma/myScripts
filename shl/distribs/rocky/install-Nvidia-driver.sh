@@ -28,7 +28,9 @@ if $isRedHatLike;then
 	$sudo sed -i.bak '/^proxy=/s/^/#/' $(readlink -e /etc/yum.conf)
 	dnf config-manager --dump | grep ^exclude
 	dnf repolist | grep powertools -wq || $sudo dnf config-manager --set-enabled powertools
+	dnf repolist | grep crb -wq || $sudo dnf config-manager --set-enabled crb
 	dnf repolist | grep epel -wq || $sudo dnf install epel-release -y
+	
 
 	if ! dnf repolist | grep cuda -q;then
 		rhelMajorVersion=$(source /etc/os-release;echo ${VERSION_ID/.*})
