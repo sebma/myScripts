@@ -75,12 +75,6 @@ if $isRedHatLike;then
 		# Si on boot sur un nouveau kernel, il faut re-installer le packet kmod-nvidia-latest-dkms || kmod-nvidia-open-dkms
 		which nvidia-smi >/dev/null && ! nvidia-smi >/dev/null && $sudo dnf reinstall kmod-nvidia-*-dkms -y
 
-		# NVIDIA Container Toolkit cf. https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#with-dnf-rhel-centos-fedora-amazon-linux
-		# $sudo dnf config-manager --add-repo https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo
-		# export NVIDIA_CONTAINER_TOOLKIT_VERSION=1.18.2-1
-		# $sudo dnf install -y nvidia-container-toolkit-${NVIDIA_CONTAINER_TOOLKIT_VERSION} nvidia-container-toolkit-base-${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
-        # libnvidia-container-tools-${NVIDIA_CONTAINER_TOOLKIT_VERSION} libnvidia-container1-${NVIDIA_CONTAINER_TOOLKIT_VERSION}
-
 		# PLUS SIMPLE :
 		$sudo dnf install nvidia-container-toolkit -y
 		$sudo systemctl restart docker.service
@@ -90,7 +84,6 @@ if $isRedHatLike;then
 
 		# https://developer.nvidia.com/cuda-downloads?target_os=Linux&target_arch=x86_64&Distribution=Rocky&target_version=8&target_type=rpm_network
 		# https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/rocky-linux.html
-
 		# https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/post-installation-actions.html
 
 		nvidia-smi | grep Version
