@@ -27,11 +27,11 @@ if $isRedHatLike;then
 	# $sudo sed -i '/^exclude=/s/^/#/' $(readlink -e /etc/yum.conf)
 	$sudo sed -i.bak '/^proxy=/s/^/#/' $(readlink -e /etc/yum.conf)
 	dnf config-manager --dump | grep ^exclude
-	dnf repolist | grep powertools -wq || $sudo dnf config-manager --set-enabled powertools
-	dnf repolist | grep crb -wq || $sudo dnf config-manager --set-enabled crb
 	dnf repolist | grep epel -wq || $sudo dnf install epel-release -y
+	if awk -F '[=."]' '/VERSION_ID/{print$3}' /etc/os-release | grep -wq 8;then
+		dnf repolist | grep powertools -wq || $sudo dnf config-manager --set-enabled powertools
+	fi
 	
-
 	if ! dnf repolist | grep cuda -q;then
 		rhelMajorVersion=$(source /etc/os-release;echo ${VERSION_ID/.*})
 		# See https://docs.rockylinux.org/8/desktop/display/installing_nvidia_gpu_drivers/
