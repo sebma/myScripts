@@ -14,8 +14,8 @@ function robocopyPS {
 	$logDIR = "C:\TEMP\Robocopy\Logs"
 
 	gci $sourceDIR | foreach {
-		Write-Host robocopy $_.FullName $destinationDIR $robocopyDryRUN $robocopyOption $robocopyMirror /log:"$logDIR\$($_.BaseName).log" "/r:0 /np /v"
-		robocopy $_.FullName $destinationDIR $robocopyDryRUN $robocopyOption $robocopyMirror /log:"$logDIR\$($_.BaseName).log" /r:0 /np /v
+		Write-Host robocopy $_.FullName $destinationDIR $robocopyDryRUN $robocopyOption $robocopyMirror /r:0 /np /v /log:"$logDIR\$($_.BaseName).log"
+		robocopy $_.FullName $destinationDIR $robocopyDryRUN $robocopyOption $robocopyMirror /r:0 /np /v /log:"$logDIR\$($_.BaseName).log"
 	}
 }
 
