@@ -1,7 +1,7 @@
 echo "==> Current DC from `"(Get-ADDomainController).Name`" is :"
 $(Get-ADDomainController).Name
 echo "==> Current DC from Get-ADDomainController is : "
-$global:DC = (Get-ADDomainController -Discover).Name
+$global:DC = (Get-ADDomainController -Discover)
 echo $DC.Name
 echo "==> Current LogonDC from `"`$ENV:LOGONSERVER.Substring(2)`" is :"
 $global:LogonDC = $ENV:LOGONSERVER.Substring(2)
