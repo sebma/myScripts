@@ -1,4 +1,7 @@
-Set-PSReadlineKeyHandler -Key ctrl+d -Function DeleteCharOrExit
+"=> Sourcing $scriptPrefix.$osFamily.ps1 functions ..."
+if( $(Get-PSReadlineKeyHandler | ? Key -eq Ctrl+d | % Function) -ne "DeleteCharOrExit" ) {
+	Set-PSReadlineKeyHandler -Key ctrl+d -Function DeleteCharOrExit
+}
 
 $SuppressDriveInit = $true # cf. https://stackoverflow.com/a/1662159
 
