@@ -72,21 +72,16 @@ function sdiff {
 	}
 }
 
-if( ! ( Test-Path variable:IsWindows ) ) { $IsWindows, $IsLinux, $IsMacOS, $osFamily = osFamily } else { $osFamily = osFamily }
-
-if( $isWindows ) {
-	$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
-	function cd($dir) {
-		if( $(alias cd *>$null;echo $?) ) { del alias:cd }
-		if($dir -eq "-"){popd}
-		elseif( ! $dir.Length ) {pushd ~}
-		else {pushd $dir}
+function main {
+	#% .
+	if ( $(alias history *>$null;$?) ) { del alias:history }
+	if( ! ( Test-Path variable:IsWindows ) ) { $global:IsWindows, $global:IsLinux, $global:IsMacOS, $global:osFamily = osFamily } else { $global:osFamily = osFamily }
+	if( $isWindows ) {
+		Set-PSReadlineKeyHandler -Key ctrl+d -Function DeleteCharOrExit
 	}
-} elseif( $IsLinux ) {
-	$isAdmin = "TO BE DEFINED"
-} elseif( $IsMacOS ) {
-	$isAdmin = "TO BE DEFINED"
 }
+
+main
 
 function isInstalled($cmd) { return gcm "$cmd" 2>$null | % Name }
 
