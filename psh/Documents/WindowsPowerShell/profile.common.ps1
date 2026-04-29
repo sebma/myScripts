@@ -1,5 +1,5 @@
 using namespace System.Management.Automation.Language
-
+"=> Sourcing $scriptPrefix.common.ps1 functions ..."
 function osFamily {
 	if( !(Test-Path variable:IsWindows) ) {
 		$platform = [System.Environment]::OSVersion.Platform
@@ -95,7 +95,7 @@ function times {
 	# See https://github.com/lukesampson/psutils/blob/master/time.ps1
 	Set-StrictMode -Off;
 
-	# see http://stackoverflow.com/a/3513669/87453
+	# See http://stackoverflow.com/a/3513669/87453
 	$cmd, $args = $args
 	$args = @($args)
 	$sw = [diagnostics.stopwatch]::startnew()
