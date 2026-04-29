@@ -7,24 +7,15 @@ $profileDIR = $MyInvocation.MyCommand.Path.Split($dirSep)[0..$beforeLastItemInde
 $scriptName = $MyInvocation.MyCommand.Name
 $scriptPrefix = $scriptName.Split(".")[0]
 
-Set-PSReadlineKeyHandler -Key ctrl+d -Function DeleteCharOrExit
+#function isInstalled($cmd) { return gcm "$cmd" | % Name 2>$null }
+#function dirname($path) { Split-Path -Parent -Path "$path" }
 
 . $profileDIR/$scriptPrefix.common.ps1
-
-# sudo Update-Help
-
 . $profileDIR/$scriptPrefix.$osFamily.ps1
-. $profileDIR/$scriptPrefix.$osFamily.network.ps1
-
 . $profileDIR/aliases.$osFamily.ps1
-
-if( isInstalled("Get-ADUser") ) {
-	. $profileDIR/$scriptPrefix.AD.ps1
-}
 
 if( isInstalled("openssl") ) {
 	. $profileDIR/$scriptPrefix.openssl.ps1
-	setOpenSSLVariables
 }
 
 if( isInstalled("Connect-VIServer") ) {
