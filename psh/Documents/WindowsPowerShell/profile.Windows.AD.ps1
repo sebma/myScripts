@@ -1,14 +1,3 @@
-echo "==> Current DC from `"(Get-ADDomainController).Name`" is :"
-$(Get-ADDomainController).Name
-echo "==> Current DC from Get-ADDomainController is : "
-$global:DC = (Get-ADDomainController -Discover)
-echo $DC.Name
-echo "==> Current LogonDC from `"`$ENV:LOGONSERVER.Substring(2)`" is :"
-$global:LogonDC = $ENV:LOGONSERVER.Substring(2)
-echo $LogonDC
-echo "==> Current Site from (Get-ADDomainController -Discover).Site is :"
-echo $DC.Site
-
 function findGroup {
 	$myPattern = '*'+$args[0]+'*'
 	$DC = $env:LOGONSERVER.Substring(2)
@@ -66,3 +55,41 @@ function showOUOfComputer {
 	}
 }
 
+function setLogonDC {
+	$FUNCNAME = $MyInvocation.MyCommand.Name
+	"=> Running $FUNCNAME ..."
+
+	echo "==> Current DC from `"(Get-ADDomainController).Name`" is :"
+	$(Get-ADDomainController).Name
+	echo "==> Current DC from Get-ADDomainController is : "
+	$global:DC = (Get-ADDomainController -Discover)
+	echo $DC.Name
+	echo "==> Current LogonDC from `"`$ENV:LOGONSERVER.Substring(2)`" is :"
+	$global:LogonDC = $ENV:LOGONSERVER.Substring(2)
+	echo $LogonDC
+	echo "==> Current Site from (Get-ADDomainController -Discover).Site is :"
+	echo $DC.Site
+
+#	return
+	if( ! $DC.Name.Contains( $LogonDC -replace "\d" ) ) {
+#		"=> Current DC from nltest /dsgetdc:" + $ENV:USERDNSDOMAIN
+#		nltest /dsgetdc:$ENV:USERDNSDOMAIN | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
+#		"=> Current Site Name from `"nltest /dsgetsite:`""
+#		nltest /dsgetsite
+
+		"=> Switching the default DC to " + $LogonDC + " ..."
+		$global:PSDefaultParameterValues = @{ "*-AD*:Server" = $LogonDC } # cf. https://serverfault.com/a/528834/312306
+		"=> The default DC is now " + $(Get-ADDomainController).Name
+	}
+
+#	"=> List of DCs via `"nltest /dclist:`""
+#	nltest /dclist:
+}
+
+function main {
+	$FUNCNAME = $MyInvocation.MyCommand.Name
+	"=> Running $FUNCNAME ..."
+	setLogonDC
+}
+
+main
