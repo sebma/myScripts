@@ -1,3 +1,4 @@
+"=> Sourcing $scriptPrefix.$osFamily.AD.ps1 functions ..."
 function findGroup {
 	$myPattern = '*'+$args[0]+'*'
 	$DC = $env:LOGONSERVER.Substring(2)
