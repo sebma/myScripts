@@ -1,12 +1,12 @@
-"==> Current DC from `"(Get-ADDomainController).Name`" is :"
+echo "==> Current DC from `"(Get-ADDomainController).Name`" is :"
 $(Get-ADDomainController).Name
-"==> Current DC from Get-ADDomainController is : "
+echo "==> Current DC from Get-ADDomainController is : "
 $global:DC = (Get-ADDomainController -Discover).Name
 echo $DC.Name
-"==> Current LogonDC from `"`$ENV:LOGONSERVER.Substring(2)`" is :"
+echo "==> Current LogonDC from `"`$ENV:LOGONSERVER.Substring(2)`" is :"
 $global:LogonDC = $ENV:LOGONSERVER.Substring(2)
 echo $LogonDC
-"==> Current Site from (Get-ADDomainController -Discover).Site is :"
+echo "==> Current Site from (Get-ADDomainController -Discover).Site is :"
 echo $DC.Site
 
 function findGroup {
