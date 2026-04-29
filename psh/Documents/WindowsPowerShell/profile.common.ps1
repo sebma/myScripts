@@ -72,17 +72,6 @@ function sdiff {
 	}
 }
 
-function main {
-	#% .
-	if ( $(alias history *>$null;$?) ) { del alias:history }
-	if( ! ( Test-Path variable:IsWindows ) ) { $global:IsWindows, $global:IsLinux, $global:IsMacOS, $global:osFamily = osFamily } else { $global:osFamily = osFamily }
-	if( $isWindows ) {
-		Set-PSReadlineKeyHandler -Key ctrl+d -Function DeleteCharOrExit
-	}
-}
-
-main
-
 function isInstalled($cmd) { return gcm "$cmd" 2>$null | % Name }
 
 if ( $(alias history *>$null;$?) ) { del alias:history }
@@ -134,3 +123,11 @@ function findfiles {
 
 	dir -r -fo $dirName 2>$null | ? FullName -Match "$regexp" | % FullName
 }
+
+function main {
+	#% .
+	if( ! ( Test-Path variable:IsWindows ) ) { $global:IsWindows, $global:IsLinux, $global:IsMacOS, $global:osFamily = osFamily } else { $global:osFamily = osFamily }
+	if( $isWindows ) { Set-PSReadlineKeyHandler -Key ctrl+d -Function DeleteCharOrExit }
+}
+
+main
