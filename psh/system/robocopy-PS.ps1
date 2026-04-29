@@ -8,14 +8,7 @@ function robocopyPS {
 
 	$sourceDIR = $args[0]
 	$destinationDIR = Join-Path $args[1] $sourceDIR.Split('\')[-1]
-	$robocopyOptions = @(
-    	"/COPY:DATSO"
-    	"/MIR"
-		"/r:0"
-		"/np"
-		"/v"
-	)
-
+	$robocopyOptions = "/COPY:DATSO /MIR /r:0 /np /v" -split '\s+'
 	#$robocopyDryRUN = "/L"
 	$logDIR = "C:\TEMP\Robocopy\Logs"
 
