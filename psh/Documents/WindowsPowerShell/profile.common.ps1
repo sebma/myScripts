@@ -2,7 +2,6 @@ using namespace System.Management.Automation.Language
 
 function osFamily {
 	if( !(Test-Path variable:IsWindows) ) {
-		# $IsWindows is not defined, let's define it
 		$platform = [System.Environment]::OSVersion.Platform
 		$IsWindows = $IsLinux = $IsMacOS = $false
 		$osFamily = "not defined yet"
@@ -88,7 +87,6 @@ function pow2($a,$n) {
 	return [math]::pow($a,$n)
 }
 
-#function nocomment($file) { egrep -v "^(#|;|$)" "$file" }
 function nocomment {
 	sls -n "^\s*(#|$|;|//)" @args | % Line
 }
@@ -104,7 +102,6 @@ function times {
 	& $cmd @args
 	$sw.stop()
 
-#	Write-Warning "$($sw.elapsed)"
 	[Console]::Error.WriteLine( "$($sw.elapsed)" )
 }
 
