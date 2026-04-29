@@ -58,7 +58,7 @@ function showOUOfComputer {
 
 function setLogonDC {
 	$FUNCNAME = $MyInvocation.MyCommand.Name
-	"=> Running $FUNCNAME ..."
+	"==> Running $FUNCNAME ..."
 
 	echo "==> Current DC from `"(Get-ADDomainController).Name`" is :"
 	$(Get-ADDomainController).Name
@@ -89,7 +89,7 @@ function setLogonDC {
 
 function main {
 	$FUNCNAME = $MyInvocation.MyCommand.Name
-	"=> Running $FUNCNAME ..."
+	"==> Running $FUNCNAME ..."
 	setLogonDC
 }
 
