@@ -2,7 +2,8 @@
 $DC = (Get-ADDomainController -Discover).Name
 echo $DC
 "=> Current Site from (Get-ADDomainController -Discover).Site is :"
-(Get-ADDomainController -Discover).Site
+$Site = (Get-ADDomainController -Discover).Site
+echo $Site
 
 function findGroup {
 	$myPattern = '*'+$args[0]+'*'
