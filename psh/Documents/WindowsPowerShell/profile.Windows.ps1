@@ -8,6 +8,7 @@ function setVariables {
 	$global:openssl = "${ENV:ProgramFiles(x86)}\LogMeIn\x64\openssl.exe" # Le "openssl" package dans LogMeIn ne sais pas decrypter
 	$global:USER = $ENV:USERNAME
 	$global:DOMAIN = $ENV:USERDOMAIN
+	$global:DNSDOMAIN = $ENV:USERDNSDOMAIN
 	$global:HOSTNAME = $ENV:COMPUTERNAME
 	$global:isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 	$global:KiTTY_LogDIR= "${ENV:ProgramData}/scoop/apps/kitty/current/log"
