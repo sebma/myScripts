@@ -3,9 +3,19 @@ if( $(Get-PSReadlineKeyHandler | ? Key -eq Ctrl+d | % Function) -ne "DeleteCharO
 	Set-PSReadlineKeyHandler -Key ctrl+d -Function DeleteCharOrExit
 }
 
+#	set-alias -Scope Global  ex
+#	function ex{exit}
+
 $SuppressDriveInit = $true # cf. https://stackoverflow.com/a/1662159
 
 $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8' # cf. https://stackoverflow.com/a/40098904
+
+function cd($dir) {
+	if( $(alias cd *>$null;echo $?) ) { del alias:cd }
+	if($dir -eq "-"){popd}
+	elseif( ! $dir.Length ) {pushd ~}
+	else {pushd $dir}
+}
 
 function setVariables {
 	$global:openssl = "${ENV:ProgramFiles(x86)}\LogMeIn\x64\openssl.exe" # Le "openssl" package dans LogMeIn ne sais pas decrypter
