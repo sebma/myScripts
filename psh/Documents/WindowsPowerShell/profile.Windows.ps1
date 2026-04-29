@@ -164,34 +164,6 @@ function getInstallDate {
 	(gwmi Win32_OperatingSystem).InstallDate | % { [Management.ManagementDateTimeConverter]::ToDateTime( $_ ) }
 }
 
-function setLogonDC {
-	$FUNCNAME = $MyInvocation.MyCommand.Name
-	"=> Running $FUNCNAME ..."
-	$global:DC = $(Get-ADDomainController -Discover)
-	$global:LogonDC = $ENV:LOGONSERVER.Substring(2)
-
-	"=> Current DC from `"(Get-ADDomainController -Discover).Name`" is :"
-	echo $DC.Name
-	"=> Current LogonDC from `"`$ENV:LOGONSERVER.Substring(2)`" is :"
-	echo $LogonDC
-	"=> Current Site from (Get-ADDomainController -Discover).Site is :"
-	echo $DC.Site
-#	return
-	if( ! $DC.Name.Contains( $LogonDC -replace "\d" ) ) {
-#		"=> Current DC from nltest /dsgetdc:"
-#		nltest /dsgetdc: | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
-#		"=> Current Site Name from `"nltest /dsgetsite:`""
-#		nltest /dsgetsite
-
-		"=> Switching the default DC to " + $LogonDC + " ..."
-		$global:PSDefaultParameterValues = @{ "*-AD*:Server" = $LogonDC } # cf. https://serverfault.com/a/528834/312306
-		"=> The default DC is now " + $(Get-ADDomainController).Name
-	}
-
-#	"=> List of DCs via `"nltest /dclist:`""
-#	nltest /dclist:
-}
-
 function np3 {
 	$argc=$args.Count
 	for($i=0;$i -lt $argc;$i++) {
@@ -205,11 +177,10 @@ function np3 {
 
 function main {
 	$FUNCNAME = $MyInvocation.MyCommand.Name
- 	"=> Running $FUNCNAME ..."
+# 	"=> Running $FUNCNAME ..."
  	$global:HISTFILE = $(Get-PSReadlineOption).HistorySavePath
  	$today = $(Get-Date -f 'yyyyMMdd')
 
-#	setLogonDC
 #	changeLanguage2English
 }
 
@@ -218,16 +189,3 @@ main
 if( isInstalled("choco") ) {
 	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
