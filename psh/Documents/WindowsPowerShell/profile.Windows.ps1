@@ -199,10 +199,12 @@ function main {
 
 main
 
-if( isInstalled("choco") ) {
-	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
-}
+. $profileDIR/$scriptPrefix.$osFamily.network.ps1
 
 if( isInstalled("Get-ADUser") ) {
 	. $profileDIR/profile.Windows.AD.ps1
+}
+
+if( isInstalled("choco") ) {
+	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
 }
