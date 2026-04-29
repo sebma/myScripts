@@ -1,9 +1,13 @@
-"=> Current DC from Get-ADDomainController is : "
-$DC = (Get-ADDomainController -Discover).Name
-echo $DC
-"=> Current Site from (Get-ADDomainController -Discover).Site is :"
-$Site = (Get-ADDomainController -Discover).Site
-echo $Site
+"==> Current DC from `"(Get-ADDomainController).Name`" is :"
+$(Get-ADDomainController).Name
+"==> Current DC from Get-ADDomainController is : "
+$global:DC = (Get-ADDomainController -Discover).Name
+echo $DC.Name
+"==> Current LogonDC from `"`$ENV:LOGONSERVER.Substring(2)`" is :"
+$global:LogonDC = $ENV:LOGONSERVER.Substring(2)
+echo $LogonDC
+"==> Current Site from (Get-ADDomainController -Discover).Site is :"
+echo $DC.Site
 
 function findGroup {
 	$myPattern = '*'+$args[0]+'*'
