@@ -179,8 +179,8 @@ function setLogonDC {
 	if( ! $DC.Name.Contains( $LogonDC -replace "\d" ) ) {
 #		"=> Current DC from nltest /dsgetdc:" + $ENV:USERDNSDOMAIN
 #		nltest /dsgetdc:$ENV:USERDNSDOMAIN | sls DC: | % { ( $_ -split('\s+|\.') )[2].substring(2) }
-#		"=> Current Site Name from `"nltest /dsgetdc:`""
-#		nltest /dsgetdc: | sls Site.Name: | % { ( $_ -split('\s+|:') )[5] }
+		"=> Current Site Name from `"nltest /dsgetsite:`""
+		nltest /dsgetsite
 
 		"=> Switching the default DC to " + $LogonDC + " ..."
 		$global:PSDefaultParameterValues = @{ "*-AD*:Server" = $LogonDC } # cf. https://serverfault.com/a/528834/312306
