@@ -52,6 +52,7 @@ $sudo systemctl enable --now haveged.service
 sysctl kernel.random.entropy_avail
 cat /proc/sys/kernel/random/entropy_avail
 
+$sudo dnf install dnf-plugins-core -y
 dnf repolist | grep crb -w -q || $sudo dnf config-manager --set-enabled crb
 dnf repolist | grep docker-ce -q || $sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 
