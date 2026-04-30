@@ -87,7 +87,7 @@ which nvidia-smi &>/dev/null && dnf module list nvidia-driver | grep -F '[e]'
 
 dnf repolist | grep puppet -q || $sudo dnf install https://yum.puppet.com/puppet-release-el-$rhelMajorVersion.noarch.rpm -y
 rpm -q puppet-agent || $sudo dnf install puppet-agent -y
-$sudo systemctl enable --now puppet.service
+#$sudo systemctl enable --now puppet.service
 puppet_agent=$(find /opt/puppetlabs/ -type l -name puppet -executable | grep bin/ -m1)
 ${puppet_agent} agent -h
 echo "=> ${puppet_agent} agent -t"
