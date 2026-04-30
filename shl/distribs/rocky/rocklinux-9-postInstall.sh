@@ -18,9 +18,9 @@ timedatectl status | grep Time.zone:.Europe/Paris -q || $sudo timedatectl set-ti
 #Creation du swap
 swapSize=32.6GiB # car / trop petit pour le moment
 dataDir=/data
+swapFilePath=$dataDir/swapfile
 if [ ! -e $swapFilePath ];then
 	$sudo mkdir -p $dataDir
-	swapFilePath=$dataDir/swapfile
 	$sudo fallocate -l $swapSize $swapFilePath
 	$sudo chmod 0600 $swapFilePath
 	$sudo mkswap $swapFilePath
@@ -89,4 +89,3 @@ rpm -q puppet-agent || $sudo dnf install puppet-agent -y
 puppet_agent=$(find /opt/puppetlabs/ -type l -name puppet -executable | grep bin/ -m1)
 ${puppet_agent} agent -h
 echo "=> ${puppet_agent} agent -t"
-
