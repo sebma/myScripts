@@ -71,8 +71,9 @@ if $isRedHatLike;then
 
 		# PLUS SIMPLE :
 		dnf repolist | grep docker-ce -q || $sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo # https://docs.docker.com/engine/install/centos/#install-using-the-repository
-		$sudo dnf install nvidia-container-toolkit -y
+		$sudo dnf install docker-ce docker-compose-plugin -y
 		$sudo systemctl enable --now docker.service
+		$sudo dnf install nvidia-container-toolkit -y
 		$sudo systemctl restart docker.service
 
 		# NECESSAIRE ? :
