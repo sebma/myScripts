@@ -83,3 +83,10 @@ $sudo sed -i.bak -r '/#\s*greeter-show-manual-login\s*=\s*\w+$/s/^.*$/greeter-sh
 $sudo systemctl restart lightdm.service
 
 which nvidia-smi &>/dev/null && dnf module list nvidia-driver | grep -F '[e]'
+
+dnf repolist | grep puppet -q || $sudo dnf install https://yum.puppet.com/puppet-release-el-$rhelMajorVersion.noarch.rpm -y
+rpm -q puppet-agent || $sudo dnf install puppet-agent -y
+puppet_agent=$(find /opt/puppetlabs/ -type l -name puppet -executable | grep bin/ -m1)
+${puppet_agent} agent -h
+echo "=> ${puppet_agent} agent -t"
+
