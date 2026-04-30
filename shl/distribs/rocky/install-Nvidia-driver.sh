@@ -70,6 +70,7 @@ if $isRedHatLike;then
 		which nvidia-smi >/dev/null && ! nvidia-smi >/dev/null && $sudo dnf reinstall kmod-nvidia-*-dkms -y
 
 		# PLUS SIMPLE :
+		dnf repolist | grep docker-ce -q || $sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo # https://docs.docker.com/engine/install/centos/#install-using-the-repository
 		$sudo dnf install nvidia-container-toolkit -y
 		$sudo systemctl restart docker.service
 
