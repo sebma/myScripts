@@ -420,12 +420,11 @@ function getRestrictedFilenamesFORMAT() {
 			echo "=> Downloading <$url> ..."
 			echo
 
-			ytdlExtraOptions+=( --add-metadata --restrict-filenames )
+			ytdlExtraOptions+=( --add-metadata --restrict-filenames --retries=25 )
 
 			if [ $audioOnly = false ] && [ $isLIVE = false ];then
 				ytdlExtraOptions+=( --embed-subs --write-auto-sub --sub-lang='en,fr,es,de,iw' )
 			fi
-
 
 #			$undebug
 			[ $verboseLevel = 1 ] && echo "=> ytdlExtraOptions = ${ytdlExtraOptions[@]}" && echo
