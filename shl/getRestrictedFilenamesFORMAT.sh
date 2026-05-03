@@ -563,11 +563,7 @@ function addURLs2mp4Metadata() {
 	local timestampFileRef=$(mktemp)
 	touch -r "$fileName" $timestampFileRef
 
-	if type -P mp4tags >/dev/null 2>&1;then
-		echo "[mp4tags] Adding '$url' to '$fileName' description metadata"
-		time mp4tags -m "$url" "$fileName"
-		retCode=$?
-	elif type -P ffmpeg >/dev/null 2>&1;then
+	if type -P ffmpeg >/dev/null 2>&1;then
 		local extension="${fileName/*./}"
 		local outputVideo="${fileName/.$extension/_NEW.$extension}"
 
@@ -580,11 +576,14 @@ function addURLs2mp4Metadata() {
 		local ffprobeJSON_File_Info=$($ffprobe -v error -show_format -show_streams -print_format json "$fileName")
 		local videoContainer=$(echo $ffprobeJSON_File_Info | $jq -r .format.format_name | cut -d, -f1)
 
-		if [ $videoContainer = mov ] || [ $videoContainer = mp3 ];then
-			metadataURLFieldName=description
-		elif [ $videoContainer = matroska ];then
-			metadataURLFieldName=PURL
-		fi
+		case $videoContainer in
+			mov|mp4|m4a|3gp|3g2|mj2|mp3)
+				metadataURLFieldName=description
+			;;
+			matroska)
+				metadataURLFieldName=PURL
+			;;
+		esac
 
 		echo "[ffmpeg] Adding '$url' to '$fileName' description metadata"
 		movflags="+frag_keyframe"
@@ -593,6 +592,10 @@ function addURLs2mp4Metadata() {
 		retCode=$?
 		$undebug
 		[ $retCode = 0 ] && sync && \mv -f "$outputVideo" "$fileName"
+	elif type -P mp4tags >/dev/null 2>&1;then
+		echo "[mp4tags] Adding '$url' to '$fileName' description metadata"
+		time mp4tags -m "$url" "$fileName"
+		retCode=$?
 	fi
 
 	[ $retCode = 0 ] && touch -r $timestampFileRef "$fileName"
