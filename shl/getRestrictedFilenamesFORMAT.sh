@@ -4,16 +4,6 @@ set -u
 
 [ $BASH_VERSINFO -lt 4 ] && echo "=> [WARNING] BASH_VERSINFO = $BASH_VERSINFO then continuing in bash4 ..." && exec bash4 $0 "$@"
 
-if locale | grep -i C.UTF-8 -q;then
-	LANG=C.UTF-8
-else
-	LANG=C
-fi
-
-scriptBaseName=${0/*\//}
-scriptExtension=${0/*./}
-funcName=${scriptBaseName/.$scriptExtension/}
-
 function set_colors() {
 	[ "$TERM" = dumb ] && export TERM=xterm-256color
 	export normal=$(tput sgr0)
@@ -27,6 +17,7 @@ set +x
 		export escapeChar=$'\033'
 	fi
 }
+
 function usage() {
 	cat <<-EOF >&2
 Usage: $scriptBaseName [STRING]...
@@ -51,6 +42,7 @@ Usage: $scriptBaseName [STRING]...
 EOF
 	exit 1
 }
+
 function checkRequirements() {
 	for tool;do
 		declare -g $tool="$(type -P $tool)"
@@ -62,6 +54,7 @@ function checkRequirements() {
 	ffmpeg+=" -hide_banner"
 	ffprobe+=" -hide_banner"
 }
+
 function setOtherRequirements() {
 	local osFamily=$(uname -s | cut -d' ' -f1)
 	if [ $osFamily = Linux ];then
@@ -77,6 +70,7 @@ function setOtherRequirements() {
 	grepColor=$grep
 	grep --help 2>&1 | grep -q -- --color && grepColor+=" --color"
 }
+
 function parseArgs() {
 	local osFamily=$(uname -s | cut -d' ' -f1)
 	local ffmpegErrorLogLevel=repeat+error
@@ -193,7 +187,7 @@ function getRestrictedFilenamesFORMAT() {
 	local channel_id=null
 	local channel_url=null
 	local domainStringForFilename=null
-	local downloadOK=-1
+	local downloadRetCode=-1
 	local embedThumbnail="--write-thumbnail"
 	local errorLogFile=null
 	local extension
@@ -453,40 +447,38 @@ function getRestrictedFilenamesFORMAT() {
 			if [ $isLIVE == false ];then
 				$debug
 				time "${downloadCMD[@]}" --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
-				downloadOK=$?
+				downloadRetCode=$?
 				$undebug
 			else
 				$debug
 				time timeout -s SIGINT $timeout "${downloadCMD[@]}" --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
-				downloadOK=$?
+				downloadRetCode=$?
 				$undebug
 			fi
 
 			sync
 			echo
 
-			$grepColor -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && echo >&2 && continue || \rm $errorLogFile
-
 			if echo "${ytdlExtraOptions[@]}" | $grep -qw -- "-x";then
 				extension=$(getAudioExtension $firstAudioStreamCodecName) || continue
 				fileName="${fileName/.*/.$extension}"
 			fi
 
-			fileSizeOnFS=$($stat -c %s "$fileName" || echo 0)
-			if [ $fileSizeOnFS -ge $remoteFileSize ] || [ $downloadOK = 0 ]; then
-				set +x
-				addThumbnail2media "$fileName" "$artworkFileName"
-			else
-				set +x
-				time "${downloadCMD[@]}" -o $fileName -f "$chosenFormatID" "$url" 2>$errorLogFile
-				downloadOK=$?
-				echo
+#			fileSizeOnFS=$($stat -c %s "$fileName" || echo 0)
+#			if [ $fileSizeOnFS -ge $remoteFileSize ] || [ $downloadRetCode = 0 ]; then
+#				set +x
+#				addThumbnail2media "$fileName" "$artworkFileName"
+#			else
+#				set +x
+#				time "${downloadCMD[@]}" -o $fileName -f "$chosenFormatID" "$url" 2>$errorLogFile
+#				downloadRetCode=$?
+#				echo
 
-				$grepColor -A1 'ERROR:.*' $errorLogFile >&2 && echo "=> \$? = $downloadOK" >&2 && echo >&2 && return $downloadOK || \rm $errorLogFile
-			fi
+#				$grepColor -A1 'ERROR:.*' $errorLogFile >&2 && echo "=> \$? = $downloadRetCode" >&2 && echo >&2 && return $downloadRetCode || \rm $errorLogFile
+#			fi
 #			$undebug
 
-			if [ $downloadOK = 0 ]; then
+			if [ $downloadRetCode = 0 ]; then
 				ffprobeJSON_File_Info=$($ffprobe -v error -show_format -show_streams -print_format json "$fileName")
 				videoContainer=$(echo $ffprobeJSON_File_Info | $jq -r .format.format_name | cut -d, -f1)
 				videoContainersList=$(echo $ffprobeJSON_File_Info | $jq -r .format.format_name)
@@ -507,16 +499,21 @@ Channel URL : $channelURL" "$fileName"
 				df -T . | awk '{print$2}' | egrep -q "fuseblk|vfat" || chmod -w "$fileName"
 				echo
 				videoLocalInfo "$fileName"
+				$grepColor -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadRetCode" >&2 && echo >&2 && continue || \rm $errorLogFile
 			else
-				echo "=> ERROR: $downloader returned $downloadOK." >&2
-				exit $downloadOK
+				echo "=> ERROR: $downloader returned $downloadRetCode." >&2
+				$grepColor -iA1 'ERROR' $errorLogFile >&2
+				echo "=> \$? = $downloadRetCode" >&2
+				echo >&2
+				exit $downloadRetCode
 			fi
 		done
 	done
 	sync
 	set +x
-	return $downloadOK
+	return $downloadRetCode
 }
+
 function webp2jpg() {
 	local image
 	for image
@@ -528,6 +525,7 @@ function webp2jpg() {
 		fi
 	done
 }
+
 function getAudioExtension() {
 	if [ $# != 1 ];then
 		echo "=> [$FUNCNAME] Usage: $FUNCNAME ffprobeAudioCodecName" 1>&2
@@ -553,6 +551,7 @@ function getAudioExtension() {
 	fi
 	echo $audioExtension
 }
+
 function addURLs2mp4Metadata() {
 	if [ $# != 2 ];then
 		echo "=> Usage: $FUNCNAME url mediaFile" 1>&2
@@ -604,6 +603,7 @@ function addURLs2mp4Metadata() {
 	\rm $timestampFileRef
 	return $retCode
 }
+
 function addSubtitles2media() {
 	local inputVideo=$1
 	test $# -le 1 && {
@@ -634,6 +634,7 @@ function addSubtitles2media() {
 	touch -r "$inputVideo" "$outputVideo"
 	[ $retCode = 0 ] && \mv -f "$outputVideo" "$inputVideo" && \rm "$@"
 }
+
 function addThumbnail2media() {
 	local scriptOptions=null
 	local debug=""
@@ -783,4 +784,19 @@ function videoLocalInfo {
 	}
 }
 
-time $funcName $@
+function main() {
+	if locale | grep -i C.UTF-8 -q;then
+		declare -gx LANG=C.UTF-8
+	else
+		declare -gx LANG=C
+	fi
+
+	declare -gx scriptBaseName=${0/*\//}
+	declare -gx scriptExtension=${0/*./}
+	declare -gx funcName=${scriptBaseName/.$scriptExtension/}
+
+	time $funcName $@
+	return $?
+}
+
+main $@
