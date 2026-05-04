@@ -507,6 +507,9 @@ Channel URL : $channelURL" "$fileName"
 				df -T . | awk '{print$2}' | egrep -q "fuseblk|vfat" || chmod -w "$fileName"
 				echo
 				videoLocalInfo "$fileName"
+			else
+				echo "=> ERROR: $downloader returned $downloadOK." >&2
+				exit $downloadOK
 			fi
 		done
 	done
