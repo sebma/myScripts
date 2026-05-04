@@ -68,6 +68,7 @@ if dnf module list nvidia-driver | grep $nvidiaDriverVersion -q;then
 	$sudo dnf install docker-ce docker-compose-plugin -y
 	$sudo systemctl enable --now docker.service
 	$sudo dnf install nvidia-container-toolkit -y
+	$sudo nvidia-ctk runtime configure --runtime=docker
 	$sudo systemctl restart docker.service
 else
 	echo "=> There is no $nvidiaDriverVersion available in the nvidia-driver DNF modules list." >&2
