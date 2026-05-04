@@ -4,6 +4,8 @@ nvidiaDriverVersion=580-open
 
 test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
+rhelMajorVersion=$(source /etc/os-release;echo ${VERSION_ID/.*})
+
 $sudo localectl set-x11-keymap fr pc105 latin9
 localectl set-locale LANG=en_US.UTF-8
 $sudo localectl set-locale LANG=en_US.UTF-8
@@ -56,7 +58,6 @@ $sudo dnf install dnf-plugins-core -y
 dnf repolist | grep crb -w -q || $sudo dnf config-manager --set-enabled crb
 dnf repolist | grep docker-ce -q || $sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 
-rhelMajorVersion=$(source /etc/os-release;echo ${VERSION_ID/.*})
 dnf repolist | grep cuda-rhel -q || $sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -i)/cuda-rhel$rhelMajorVersion.repo
 
 dnf clean expire-cache
