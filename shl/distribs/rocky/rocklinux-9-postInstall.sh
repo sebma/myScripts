@@ -19,8 +19,8 @@ timedatectl status | grep Time.zone:.Europe/Paris -q || $sudo timedatectl set-ti
 swapSize=32.6GiB # car / trop petit pour le moment
 dataDir=/data
 swapFilePath=$dataDir/swapfile
+$sudo mkdir -p $dataDir
 if [ ! -e $swapFilePath ];then
-	$sudo mkdir -p $dataDir
 	$sudo fallocate -l $swapSize $swapFilePath
 	$sudo chmod 0600 $swapFilePath
 	$sudo mkswap $swapFilePath
