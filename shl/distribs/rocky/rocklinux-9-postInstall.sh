@@ -87,7 +87,7 @@ $sudo systemctl restart lightdm.service
 
 which nvidia-smi &>/dev/null && dnf module list nvidia-driver | grep -F '[e]'
 
-dnf repolist | grep puppet -q || $sudo dnf install https://yum.puppet.com/puppet-release-el-$rhelMajorVersion.noarch.rpm -y
+dnf repolist | grep puppet -q || $sudo dnf install https://yum.puppet.com/puppet8-release-el-$rhelMajorVersion.noarch.rpm -y
 rpm -q puppet-agent || $sudo dnf install puppet-agent -y
 #$sudo systemctl enable --now puppet.service # car va contacter https://puppet:8140/puppet-ca/v1 par default
 puppet=$(find /opt/puppetlabs/ -type l -name puppet -executable | grep bin/ -m1)
