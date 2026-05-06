@@ -75,8 +75,9 @@ else
 	exit 2
 fi
 
-if ! grep -r vm.max_map_count /etc/sysctl.conf /etc/sysctl.d/ -q 2>/dev/null;then
-	echo "vm.max_map_count = $((2**18))" | $sudo tee -a /etc/sysctl.d/98-comfyui.conf >/dev/null
+vm_max_map_count=$((2**18))
+if [ $(< /proc/sys/vm/max_map_count) -lt ${vm_max_map_count} ] && ! grep -r vm.max_map_count /etc/sysctl.conf /etc/sysctl.d/ -q 2>/dev/null;then
+	echo "vm.max_map_count = ${vm_max_map_count}" | $sudo tee -a /etc/sysctl.d/98-comfyui.conf >/dev/null
 	$sudo systemctl restart systemd-sysctl.service
 	sysctl vm.max_map_count
 	cat /proc/sys/vm/max_map_count
