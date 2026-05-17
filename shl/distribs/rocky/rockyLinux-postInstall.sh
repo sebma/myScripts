@@ -87,6 +87,7 @@ if ! dnf repolist | grep elrepo -w -q;then
 fi
 
 dnf clean expire-cache
+dnf makecache
 if dnf module list nvidia-driver | grep $nvidiaDriverVersion -q;then
 	$sudo dnf clean expire-cache
 	$sudo dnf module enable nvidia-driver:$nvidiaDriverVersion -y
