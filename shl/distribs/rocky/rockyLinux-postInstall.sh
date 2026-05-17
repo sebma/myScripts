@@ -65,6 +65,7 @@ if ! dnf repolist | grep elrepo -w -q;then
 	$sudo dnf install elrepo-release -y
 	$sudo dnf install nvidia-detect -y
 	# $sudo dnf remove elrepo-release -y
+	# See https://github.com/elrepo/packages/tree/master/nvidia-detect#readme
 	nvidia-detect -v
 	nvidia-detect
 	nvidia-detect -x
