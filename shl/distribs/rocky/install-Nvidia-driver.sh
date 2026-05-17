@@ -35,8 +35,9 @@ if $isRedHatLike;then
 		$sudo dnf install nvidia-detect -y
 		# $sudo dnf remove elrepo-release -y
 		# See https://github.com/elrepo/packages/tree/master/nvidia-detect#readme
-		nvidia-detect -v
 		nvidia-detect
+		nvidia-detect -h
+		nvidia-detect -v
 		nvidia-detect -x
 		# $sudo dnf install $(nvidia-detect)
 	fi
