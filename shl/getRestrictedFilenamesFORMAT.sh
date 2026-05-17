@@ -495,11 +495,15 @@ Channel URL : $channelURL" "$fileName"
 					subTitleExtension=srt
 				fi
 
-				[ $extension = m4a ] && \ls "${fileName/.*/}".*.$subTitleExtension >/dev/null 2>&1  && addSubtitles2media "$fileName" "${fileName/.*/}".*.$subTitleExtension
+				[ $extension = m4a ] && \ls "${fileName/.*/}".*.$subTitleExtension >/dev/null 2>&1 && addSubtitles2media "$fileName" "${fileName/.*/}".*.$subTitleExtension
 				df -T . | awk '{print$2}' | egrep -q "fuseblk|vfat" || chmod -w "$fileName"
 				echo
 				videoLocalInfo "$fileName"
-				$grepColor -A1 ERROR: $errorLogFile >&2 && echo "=> \$? = $downloadRetCode" >&2 && echo >&2 && continue || \rm $errorLogFile
+				if $grep -i error $errorLogFile -q;then
+					echo "=> The were errors, you can see them in the <$errorLogFile>." >&2
+				else
+					\rm -v $errorLogFile
+				fi
 			else
 				echo "=> ERROR: $downloader returned $downloadRetCode." >&2
 				$grepColor -iA1 'ERROR' $errorLogFile >&2
