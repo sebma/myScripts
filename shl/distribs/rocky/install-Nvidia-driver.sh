@@ -61,6 +61,7 @@ if $isRedHatLike;then
 		# dnf nvidia-plugin || $sudo dnf install dnf-plugin-nvidia -y
 		# dnf versionlock || $sudo dnf install python3-dnf-plugin-versionlock -y # See https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/version-locking.html
 		nvidiaDriverVersionNumber=$(tr -d '[a-zA-Z-_]' <<< $nvidiaDriverVersion)
+		echo "=> See https://download.nvidia.com/XFree86/Linux-x86_64/$nvidiaDriverVersionNumber.142/README/supportedchips.html"
 		if [ $nvidiaDriverVersionNumber -lt 515 ];then
 			$sudo dnf install nvidia-driver nvidia-driver-cuda -y
 		else
