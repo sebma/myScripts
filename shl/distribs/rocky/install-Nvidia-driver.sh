@@ -30,11 +30,15 @@ if $isRedHatLike;then
 	dnf repolist | grep epel -w -q || $sudo dnf install epel-release -y
 
 	# See https://elrepo.org/wiki/doku.php?id=nvidia-detect
-	dnf repolist | grep elrepo -w -q || $sudo dnf install elrepo-release -y
-	$sudo dnf install nvidia-detect -y
-	$sudo dnf remove elrepo-release -y
-	nvidia-detect -v
-	# $sudo dnf install $(nvidia-detect)
+	if ! dnf repolist | grep elrepo -w -q;then
+		$sudo dnf install elrepo-release -y
+		$sudo dnf install nvidia-detect -y
+		# $sudo dnf remove elrepo-release -y
+		nvidia-detect -v
+		nvidia-detect
+		nvidia-detect -x
+		# $sudo dnf install $(nvidia-detect)
+	fi
 
 	rhelMajorVersion=$(source /etc/os-release;echo ${VERSION_ID/.*})
 	if [ $rhelMajorVersion -le 8 ];then
