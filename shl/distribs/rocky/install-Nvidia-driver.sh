@@ -28,6 +28,13 @@ if $isRedHatLike;then
 	$sudo sed -i.bak '/^proxy=/s/^/#/' $(readlink -e /etc/yum.conf)
 
 	dnf repolist | grep epel -w -q || $sudo dnf install epel-release -y
+
+	# nvidia-detect
+	dnf repolist | grep elrepo -w -q || $sudo dnf install elrepo-release -y
+	$sudo dnf install nvidia-detect -y
+	$sudo dnf remove elrepo-release -y
+	nvidia-detect
+
 	rhelMajorVersion=$(source /etc/os-release;echo ${VERSION_ID/.*})
 	if [ $rhelMajorVersion -le 8 ];then
 		dnf repolist | grep powertools -w -q || $sudo dnf config-manager --enable powertools
