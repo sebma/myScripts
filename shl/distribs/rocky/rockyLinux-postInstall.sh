@@ -60,6 +60,13 @@ dnf repolist | grep docker-ce -q || $sudo dnf config-manager --add-repo https://
 
 dnf repolist | grep cuda-rhel -q || $sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -i)/cuda-rhel$rhelMajorVersion.repo
 
+# See https://elrepo.org/wiki/doku.php?id=nvidia-detect
+dnf repolist | grep elrepo -w -q || $sudo dnf install elrepo-release -y
+$sudo dnf install nvidia-detect -y
+$sudo dnf remove elrepo-release -y
+nvidia-detect -v
+# $sudo dnf install $(nvidia-detect)
+
 dnf clean expire-cache
 if dnf module list nvidia-driver | grep $nvidiaDriverVersion -q;then
 	$sudo dnf clean expire-cache
