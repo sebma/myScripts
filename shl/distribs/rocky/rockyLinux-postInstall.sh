@@ -43,7 +43,11 @@ lspci -nnd ::0300
 [ -d /sys/firmware/efi ] && echo 'Session EFI' || echo 'Session non-EFI'
 mokutil --sb-state | grep SecureBoot
 
-dnf repolist | grep epel -w -q || $sudo dnf install epel-release -y
+if ! dnf repolist | grep epel -w -q;then
+	$sudo dnf install epel-release -y
+	$sudo dnf makecache
+fi
+
 # Pour gerer l'entropy
 # Avant l'install de "haveged"
 sysctl kernel.random.entropy_avail
@@ -55,14 +59,23 @@ sysctl kernel.random.entropy_avail
 cat /proc/sys/kernel/random/entropy_avail
 
 $sudo dnf install dnf-plugins-core -y
-dnf repolist | grep crb -w -q || $sudo dnf config-manager --set-enabled crb
-dnf repolist | grep docker-ce -q || $sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-
-dnf repolist | grep cuda-rhel -q || $sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -i)/cuda-rhel$rhelMajorVersion.repo
+if ! dnf repolist | grep crb -w -q;then
+	$sudo dnf config-manager --set-enabled crb
+	$sudo dnf makecache
+fi
+if ! dnf repolist | grep docker-ce -q;then
+	$sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+	$sudo dnf makecache
+fi
+if ! dnf repolist | grep cuda-rhel -q;then
+	$sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -i)/cuda-rhel$rhelMajorVersion.repo
+	$sudo dnf makecache
+fi
 
 # See https://elrepo.org/wiki/doku.php?id=nvidia-detect
 if ! dnf repolist | grep elrepo -w -q;then
 	$sudo dnf install elrepo-release -y
+	$sudo dnf makecache
 	$sudo dnf install nvidia-detect -y
 	# $sudo dnf remove elrepo-release -y
 	# See https://github.com/elrepo/packages/tree/master/nvidia-detect#readme
@@ -103,7 +116,12 @@ $sudo systemctl restart lightdm.service
 
 which nvidia-smi &>/dev/null && dnf module list nvidia-driver | grep -F '[e]'
 
-dnf repolist | grep puppet -q || $sudo dnf install https://yum.puppet.com/puppet8-release-el-$rhelMajorVersion.noarch.rpm -y
+# puppet-agent
+if ! dnf repolist | grep puppet -q;then
+	$sudo dnf install https://yum.puppet.com/puppet8-release-el-$rhelMajorVersion.noarch.rpm -y
+	$sudo dnf makecache
+fi
+
 rpm -q puppet-agent || $sudo dnf install puppet-agent -y
 #$sudo systemctl enable --now puppet.service # car va contacter https://puppet:8140/puppet-ca/v1 par default
 puppet=$(find /opt/puppetlabs/ -type l -name puppet -executable | grep bin/ -m1)
