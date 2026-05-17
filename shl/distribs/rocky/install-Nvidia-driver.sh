@@ -73,6 +73,7 @@ if $isRedHatLike;then
 	$sudo sed -i.bak 's/pkgs.dyn.su/pkgs.sysadmins.ws/' /etc/yum.repos.d/raven.repo # cf. https://git.sysadmins.ws/pkgs/raven/commit/3a0b578c3e#diff-25c0edd698ac12b47c5e2548b587db23904aac24
 
 	dnf clean expire-cache # See https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/rocky-linux.html
+	dnf makecache
 	if dnf module list nvidia-driver | grep $nvidiaDriverVersion -q;then
 		$sudo dnf clean expire-cache
 		$sudo dnf module reset nvidia-driver -y
