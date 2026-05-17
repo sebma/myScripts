@@ -71,6 +71,8 @@ dnf clean expire-cache
 if dnf module list nvidia-driver | grep $nvidiaDriverVersion -q;then
 	$sudo dnf clean expire-cache
 	$sudo dnf module enable nvidia-driver:$nvidiaDriverVersion -y
+	nvidiaDriverVersionNumber=$(tr -d '[a-zA-Z-_]' <<< $nvidiaDriverVersion)
+	echo "=> See https://download.nvidia.com/XFree86/Linux-x86_64/$nvidiaDriverVersionNumber.142/README/supportedchips.html"
 	$sudo dnf install nvidia-open kmod-nvidia-open-dkms nvidia-driver-cuda -y --allowerasing
 	$sudo dnf install docker-ce docker-compose-plugin -y
 	$sudo systemctl enable --now docker.service
