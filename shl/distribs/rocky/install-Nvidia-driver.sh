@@ -33,7 +33,8 @@ if $isRedHatLike;then
 	dnf repolist | grep elrepo -w -q || $sudo dnf install elrepo-release -y
 	$sudo dnf install nvidia-detect -y
 	$sudo dnf remove elrepo-release -y
-	nvidia-detect
+	nvidia-detect -v
+	# $sudo dnf install $(nvidia-detect)
 
 	rhelMajorVersion=$(source /etc/os-release;echo ${VERSION_ID/.*})
 	if [ $rhelMajorVersion -le 8 ];then
