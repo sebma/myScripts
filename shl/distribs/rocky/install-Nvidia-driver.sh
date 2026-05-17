@@ -27,11 +27,15 @@ if $isRedHatLike;then
 	# $sudo sed -i '/^exclude=/s/^/#/' $(readlink -e /etc/yum.conf)
 	$sudo sed -i.bak '/^proxy=/s/^/#/' $(readlink -e /etc/yum.conf)
 
-	dnf repolist | grep epel -w -q || $sudo dnf install epel-release -y
+	if ! dnf repolist | grep epel -w -q;then
+		$sudo dnf install epel-release -y
+		$sudo dnf makecache
+	fi
 
 	# See https://elrepo.org/wiki/doku.php?id=nvidia-detect
 	if ! dnf repolist | grep elrepo -w -q;then
 		$sudo dnf install elrepo-release -y
+		$sudo dnf makecache
 		$sudo dnf install nvidia-detect -y
 		# $sudo dnf remove elrepo-release -y
 		# See https://github.com/elrepo/packages/tree/master/nvidia-detect#readme
@@ -44,9 +48,15 @@ if $isRedHatLike;then
 
 	rhelMajorVersion=$(source /etc/os-release;echo ${VERSION_ID/.*})
 	if [ $rhelMajorVersion -le 8 ];then
-		dnf repolist | grep powertools -w -q || $sudo dnf config-manager --enable powertools
+		if ! dnf repolist | grep powertools -w -q;then
+			$sudo dnf config-manager --enable powertools
+			$sudo dnf makecache
+		fi
 	else
-		dnf repolist | grep crb -w -q || $sudo dnf config-manager --set-enabled crb
+		if ! dnf repolist | grep crb -w -q;then
+			$sudo dnf config-manager --set-enabled crb
+			$sudo dnf makecache
+		fi
 	fi
 	# cf. https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/rocky-linux.html#preparation
 	
@@ -54,7 +64,10 @@ if $isRedHatLike;then
 		# See https://docs.rockylinux.org/8/desktop/display/installing_nvidia_gpu_drivers/
 		$sudo rm /etc/yum.repos.d/cuda.repo -f
 		$sudo dnf remove *nvidia* cuda-drivers -y
-		dnf repolist | grep cuda-rhel -q || $sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -i)/cuda-rhel$rhelMajorVersion.repo
+		if dnf repolist | grep cuda-rhel -q;then
+			$sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -i)/cuda-rhel$rhelMajorVersion.repo
+			$sudo dnf makecache
+		fi
 	fi
 
 	$sudo sed -i.bak 's/pkgs.dyn.su/pkgs.sysadmins.ws/' /etc/yum.repos.d/raven.repo # cf. https://git.sysadmins.ws/pkgs/raven/commit/3a0b578c3e#diff-25c0edd698ac12b47c5e2548b587db23904aac24
@@ -85,7 +98,11 @@ if $isRedHatLike;then
 		which nvidia-smi >/dev/null && ! nvidia-smi >/dev/null && $sudo dnf reinstall kmod-nvidia-*-dkms -y
 
 		# PLUS SIMPLE :
-		dnf repolist | grep docker-ce -q || $sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo # https://docs.docker.com/engine/install/centos/#install-using-the-repository
+		if ! dnf repolist | grep docker-ce -q;then
+			$sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo # https://docs.docker.com/engine/install/centos/#install-using-the-repository
+			$sudo dnf makecache
+		fi
+
 		$sudo dnf install docker-ce docker-compose-plugin -y
 		$sudo systemctl enable --now docker.service
 		$sudo dnf install nvidia-container-toolkit -y
