@@ -29,7 +29,7 @@ if $isRedHatLike;then
 
 	dnf repolist | grep epel -w -q || $sudo dnf install epel-release -y
 
-	# nvidia-detect
+	# See https://elrepo.org/wiki/doku.php?id=nvidia-detect
 	dnf repolist | grep elrepo -w -q || $sudo dnf install elrepo-release -y
 	$sudo dnf install nvidia-detect -y
 	$sudo dnf remove elrepo-release -y
