@@ -1,6 +1,14 @@
+if ( $(alias history *>$null;$?) ) { del alias:history }
+function history() {
+	cat  $(Get-PSReadlineOption).HistorySavePath
+}
 if( $(alias curl *>$null;echo $?) ) { del alias:curl }
 if( $(alias ip *>$null;echo $?) ) { del alias:ip }
-if( $(alias rm *>$null;echo $?) ) { del alias:rm }
+if( $(alias rm *>$null;echo $?) ) {
+	if( $(gcm "rm.exe" 2>$null | % Name) )	{
+		del alias:rm
+	}
+}
 if( $(alias tee *>$null;echo $?) ) { del -Force alias:tee }
 if( $(alias wget *>$null;echo $?) ) { del alias:wget }
 
