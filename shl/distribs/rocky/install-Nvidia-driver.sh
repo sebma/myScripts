@@ -107,6 +107,7 @@ if $isRedHatLike;then
 		$sudo dnf install docker-ce docker-compose-plugin -y
 		$sudo systemctl enable --now docker.service
 		$sudo dnf install nvidia-container-toolkit -y
+		$sudo nvidia-ctk runtime configure --runtime=docker
 		$sudo systemctl restart docker.service
 
 		# NECESSAIRE ? :
