@@ -25,7 +25,7 @@ function videoSplit {
 	local ffmpeg="command  ffmpeg  -hide_banner"
 	local ffprobe="command  ffprobe  -hide_banner"
 
-	if $ffprobe "$fileName" 2>&1 | grep Video:.none -q;then
+	if $ffprobe "$fileName" 2>&1 | \grep Video:.none -q;then
 		mappingOptions+=" -map -0:v:1"
 	fi
 
