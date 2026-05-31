@@ -478,7 +478,7 @@ function getRestrictedFilenamesFORMAT() {
 #			fi
 #			$undebug
 
-			if [ $downloadRetCode = 0 ]; then
+			if $ffprobe -v error "$fileName"; then # If file is OK
 				ffprobeJSON_File_Info=$($ffprobe -v error -show_format -show_streams -print_format json "$fileName")
 				videoContainer=$(echo $ffprobeJSON_File_Info | $jq -r .format.format_name | cut -d, -f1)
 				videoContainersList=$(echo $ffprobeJSON_File_Info | $jq -r .format.format_name)
@@ -498,6 +498,9 @@ Channel URL : $channelURL" "$fileName"
 				[ $extension = m4a ] && \ls "${fileName/.*/}".*.$subTitleExtension >/dev/null 2>&1 && addSubtitles2media "$fileName" "${fileName/.*/}".*.$subTitleExtension
 				df -T . | awk '{print$2}' | egrep -q "fuseblk|vfat" || chmod -w "$fileName"
 				echo
+				if [ $downloadRetCode != 0 ]; then
+					echo "=> ERROR: $downloader returned $downloadRetCode." >&2
+				fi
 				videoLocalInfo "$fileName"
 				if $grep -i error $errorLogFile -q;then
 					echo "=> The were errors, you can see them in the <$errorLogFile>." >&2
@@ -505,9 +508,12 @@ Channel URL : $channelURL" "$fileName"
 					\rm -v $errorLogFile
 				fi
 			else
-				echo "=> ERROR: $downloader returned $downloadRetCode." >&2
-				$grepColor -iA1 'ERROR' $errorLogFile >&2
-				echo "=> \$? = $downloadRetCode" >&2
+				echo "=> ERROR: ffprobe returned $?." >&2
+				if $grep -i error $errorLogFile -q;then
+					echo "=> The were errors, you can see them in the <$errorLogFile>." >&2
+				else
+					\rm -v $errorLogFile
+				fi
 				echo >&2
 				exit $downloadRetCode
 			fi
