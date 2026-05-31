@@ -519,6 +519,7 @@ Channel URL : $channelURL" "$fileName"
 			fi
 		done
 	done
+	echo
 	printf "=> CWD = ";pwd
 	sync
 	set +x
