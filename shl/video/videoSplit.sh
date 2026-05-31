@@ -20,20 +20,27 @@ function videoSplit {
 	outputFile="$outputFilePath/$fileBaseName-CUT.$extension"
 	chmod -x "$fileName"
 
-	remuxOptions="-map 0 -c copy"
-	mp4Options="-movflags +frag_keyframe"
-	[ $extension = mp4 ] && remuxOptions="$remuxOptions $mp4Options"
-	ffmpeg="command  ffmpeg  -hide_banner"
+	local mappingOptions="-map 0"
+	local mp4Options="-movflags +frag_keyframe"
+	local ffmpeg="command  ffmpeg  -hide_banner"
+	local ffprobe="command  ffprobe  -hide_banner"
+
+	if $ffprobe "$fileName" 2>&1 | grep Video:.none -q;then
+		mappingOptions+=" -map -0:v:1"
+	fi
+
+	[ $extension = mp4 ] && mappingOptions="$mappingOptions $mp4Options"
+
 	if test $# -ge 3
 	then
 		end=$3
 #		duration=$(echo $(date +%s.%N -d $end) - $(date +%s.%N -d $begin) | bc -l)
-#		time $ffmpeg -ss $begin -t $duration -i "$fileName" $remuxOptions "$outputFile"
+#		time $ffmpeg -ss $begin -t $duration -i "$fileName" $mappingOptions "$outputFile"
 		set -x
-		time $ffmpeg -ss $begin -to $end -i "$fileName" $remuxOptions "$outputFile"
+		time $ffmpeg -ss $begin -to $end -i "$fileName" $mappingOptions -c copy "$outputFile"
 	else
 		set -x
-		time $ffmpeg -ss $begin -i "$fileName" $remuxOptions "$outputFile"
+		time $ffmpeg -ss $begin -i "$fileName" $mappingOptions -c copy "$outputFile"
 	fi
 	set +x
 	sync
