@@ -238,7 +238,6 @@ function getRestrictedFilenamesFORMAT() {
 
 	time "${downloadCMD[@]}" --ignore-config --rm-cache
 	echo
-	printf "=> CWD = ";pwd
 	for url
 	do
 		let i++
@@ -520,6 +519,7 @@ Channel URL : $channelURL" "$fileName"
 			fi
 		done
 	done
+	printf "=> CWD = ";pwd
 	sync
 	set +x
 	return $downloadRetCode
