@@ -218,6 +218,7 @@ function getRestrictedFilenamesFORMAT() {
 	local userAgent=null
 	local youtube_dl_FileNamePattern="%(title)s__%(format_id)s__%(id)s__%(extractor)s.%(ext)s"
 	local ytdlExtraOptions=()
+	local ytdlpTimeOutRetCode=124
 
 	echo "=> Started <$scriptBaseName> on $@ at : $startTime ..."
 	echo
@@ -478,7 +479,7 @@ function getRestrictedFilenamesFORMAT() {
 #			fi
 #			$undebug
 
-			if $ffprobe -v error "$fileName"; then # If file is OK
+			if [ $downloadRetCode == 0 ] || [ $downloadRetCode == $ytdlpTimeOutRetCode ] ;then # If file is OK
 				ffprobeJSON_File_Info=$($ffprobe -v error -show_format -show_streams -print_format json "$fileName")
 				videoContainer=$(echo $ffprobeJSON_File_Info | $jq -r .format.format_name | cut -d, -f1)
 				videoContainersList=$(echo $ffprobeJSON_File_Info | $jq -r .format.format_name)
@@ -508,7 +509,7 @@ Channel URL : $channelURL" "$fileName"
 					\rm -v $errorLogFile
 				fi
 			else
-				echo "=> ERROR: ffprobe returned $?." >&2
+				echo "=> ERROR: $downloader returned $downloadRetCode." >&2
 				if $grep -i error $errorLogFile -q;then
 					echo "=> The were errors, you can see them in the <$errorLogFile>." >&2
 				else
