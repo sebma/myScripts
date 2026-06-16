@@ -23,6 +23,7 @@ mkdir -p $logDIR
 echo "=> Test de jonction au domain $domain ..." | tee $logDIR/$HOSTNAME-join-$(date +%Y%m%d).log
 if ! time sudo adcli testjoin >/dev/null;then
 	echo "=> Jonction au domain $domain ..."
+	read -p "=> Veillez saisir votre identifiant T2 ..." t2USER
 	sudo realm join -v --user=$t2USER --computer-ou="$OU" --os-name=$NAME --os-version=$VERSION_ID $domain 2>&1 | tee -a $logDIR/$HOSTNAME-join-$(date +%Y%m%d).log
 	sudo pam-auth-update --enable mkhomedir 2>&1 | tee -a $logDIR/$HOSTNAME-join-$(date +%Y%m%d).log # Au cas ou le homedir n'est pas cree
 else
