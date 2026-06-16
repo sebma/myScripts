@@ -31,6 +31,7 @@ echo "=> Test de jonction au domain $domainLowercase ..." | tee $logDIR/$HOSTNAM
 if ! sudo adcli testjoin >/dev/null;then
 	echo "=> Jonction au domain $domainLowercase ..."
 	read -p "=> Veillez saisir votre identifiant T2: " t2USER
+	#domainLowercase=$(realm list -n | head -1 | tr [:upper:] [:lower:])
 	sudo realm join -v --user=$t2USER --computer-ou="$OU" --os-name=$NAME --os-version=$VERSION_ID $domainLowercase
 fi 2>&1 | tee -a $logDIR/$HOSTNAME-join-$(date +%Y%m%d).log
 
