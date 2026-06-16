@@ -24,7 +24,8 @@ echo "=> Test de jonction au domain $domain ..." | tee $logDIR/$HOSTNAME-join-$(
 if ! time sudo adcli testjoin >/dev/null;then
 	echo "=> Jonction au domain $domain ..."
 	read -p "=> Veillez saisir votre identifiant T2 ..." t2USER
-	sudo realm join -v --user=$t2USER --computer-ou="$OU" --os-name=$NAME --os-version=$VERSION_ID $domain 2>&1 | tee -a $logDIR/$HOSTNAME-join-$(date +%Y%m%d).log
+	#domainLowercase=$(realm list -n | head -1 | tr [:upper:] [:lower:])
+	sudo realm join -v --user=$t2USER --computer-ou="$OU" --os-name=$NAME --os-version=$VERSION_ID $domainLowercase 2>&1 | tee -a $logDIR/$HOSTNAME-join-$(date +%Y%m%d).log
 	sudo pam-auth-update --enable mkhomedir 2>&1 | tee -a $logDIR/$HOSTNAME-join-$(date +%Y%m%d).log # Au cas ou le homedir n'est pas cree
 else
 #	sudo grep "_homedir.*/home/%d/%u" /etc/sssd/sssd.conf -q || sudo sed -i-$(date +%Y%m%d-%H%M%S).conf "/_homedir/s|=.*|= /home/%d/%u|" /etc/sssd/sssd.conf
