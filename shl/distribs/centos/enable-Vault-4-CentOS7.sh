@@ -23,7 +23,7 @@ if $isRedHatLike;then
 		rpm -Uvh https://vault.centos.org/7.9.2009/updates/x86_64/Packages/centos-release-7-9.2009.2.el7.centos.x86_64.rpm
 		unset http_proxy https_proxy
 		for repo in C7.9.2009-base C7.9.2009-updates C7.9.2009-extras;do yum-config-manager --enable $repo >/dev/null;done
-		yum makecache
 		yum repolist
+		yum makecache
 	fi
 fi
