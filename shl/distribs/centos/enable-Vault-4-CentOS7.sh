@@ -19,10 +19,10 @@ test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 if $isRedHatLike;then
 	if [ $majorNumber == 7 ];then
 		# Disable CentOS7 repos and enable Vault repos
-		for repo in base updates extras epel;do yum-config-manager --disable $repo >/dev/null;done
-		rpm -Uvh https://vault.centos.org/7.9.2009/updates/x86_64/Packages/centos-release-7-9.2009.2.el7.centos.x86_64.rpm
+		for repo in base updates extras epel;do $sudo yum-config-manager --disable $repo >/dev/null;done
+		$sudo rpm -Uvh https://vault.centos.org/7.9.2009/updates/x86_64/Packages/centos-release-7-9.2009.2.el7.centos.x86_64.rpm
 		unset http_proxy https_proxy
-		for repo in C7.9.2009-base C7.9.2009-updates C7.9.2009-extras;do yum-config-manager --enable $repo >/dev/null;done
+		for repo in C7.9.2009-base C7.9.2009-updates C7.9.2009-extras;do $sudo yum-config-manager --enable $repo >/dev/null;done
 		yum repolist
 		yum makecache
 	fi
