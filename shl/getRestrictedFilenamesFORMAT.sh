@@ -515,7 +515,6 @@ Channel URL : $channelURL" "$fileName"
 					\rm -v $errorLogFile
 				fi
 				echo >&2
-				exit $downloadRetCode
 			fi
 		done
 	done
