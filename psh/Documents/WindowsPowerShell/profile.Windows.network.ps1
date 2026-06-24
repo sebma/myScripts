@@ -40,17 +40,17 @@ function iplink($iface) {
 }
 function ipaddr($iface) {
 	if( $iface ) {
-		Get-NetIPAddress | ? InterfaceAlias -Match "$iface" | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" } | select InterfaceAlias , IPAddress , PrefixLength
+		Get-NetIPAddress | ? InterfaceAlias -Match "$iface" | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" } | ? IPAddress -NotMatch '^169.254.' | select InterfaceAlias , IPAddress , PrefixLength
 	} else {
-		Get-NetIPAddress | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" } | select InterfaceAlias , IPAddress , PrefixLength
+		Get-NetIPAddress | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" } | ? IPAddress -NotMatch '^169.254.' | select InterfaceAlias , IPAddress , PrefixLength
 	}
 }
 
 function IPv4($iface) {
 	if( $iface ) {
-		Get-NetIPAddress -AddressFamily IPv4 | ? InterfaceAlias -Match "$iface" | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" } | select InterfaceAlias , IPv4Address , PrefixLength
+		Get-NetIPAddress -AddressFamily IPv4 | ? InterfaceAlias -Match "$iface" | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" } | ? IPAddress -NotMatch '^169.254.' | select InterfaceAlias , IPv4Address , PrefixLength
 	} else {
-		Get-NetIPAddress -AddressFamily IPv4 | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" } | select InterfaceAlias , IPv4Address , PrefixLength
+		Get-NetIPAddress -AddressFamily IPv4 | ? { $_.InterfaceAlias -NotMatch "Bluetooth" -and $_.InterfaceAlias -NotMatch "Local Area Connection*" } | ? IPAddress -NotMatch '^169.254.' | select InterfaceAlias , IPv4Address , PrefixLength
 	}
 }
 function IPv6($iface) {
