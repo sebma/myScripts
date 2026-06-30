@@ -15,7 +15,6 @@ function robocopyPS {
 	#$robocopyDryRUN = "/L"
 
 	gci $sourceDIR | foreach {
-		#$logFile = "$logDIR\$($_.BaseName).log" # Une log par rep copie : trop complique
 		$logFile = $logDIR + '\' + $sourceDIR.Split('\')[-1] + '.log'
 		Write-Host robocopy $_.FullName $destinationDIR $robocopyDryRUN @robocopyOptions /log+:$logFile
 		robocopy $_.FullName $destinationDIR $robocopyDryRUN @robocopyOptions /log+:$logFile
