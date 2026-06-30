@@ -13,6 +13,7 @@ $scriptPrefix = $scriptName.Split(".")[0]
 . $profileDIR/$scriptPrefix.common.ps1
 . $profileDIR/$scriptPrefix.$osFamily.ps1
 . $profileDIR/$scriptPrefix.$osFamily.network.ps1
+. $profileDIR/$scriptPrefix.$osFamily.choco.ps1
 . $profileDIR/aliases.$osFamily.ps1
 
 if( isInstalled("openssl") ) {
