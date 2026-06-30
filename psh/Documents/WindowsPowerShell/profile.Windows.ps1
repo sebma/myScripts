@@ -200,8 +200,6 @@ function main {
 
 main
 
-. $profileDIR/$scriptPrefix.$osFamily.network.ps1
-
 if( isInstalled("Get-ADUser") ) {
 	. $profileDIR/profile.Windows.AD.ps1
 }
