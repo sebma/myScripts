@@ -164,7 +164,7 @@ function getServiceTag {
 	}
 }
 
-function getModelName {
+function getModel {
 	(gwmi Win32_ComputerSystem).Model
 }
 
