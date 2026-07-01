@@ -8,14 +8,15 @@ function robocopyPS {
 
 	$sourceDIR = $args[0]
 	$destinationDIR = $args[1]
-	$destinationDIR = Join-Path $destinationDIR $sourceDIR.Split('\')[-1]
+	$sourceBaseName = $sourceDIR.Split('\')[-1]
+	$destinationDIR = Join-Path $destinationDIR $sourceBaseName
 	$logDIR = "C:\TEMP\Robocopy\Logs"
-#	$logFile = $logDIR + '\' + $sourceDIR.Split('\')[-1] + '.log'
+#	$logFile = $logDIR + '\' + $sourceBaseName + '.log'
 	$robocopyOptions = "/COPY:DATSO /MIR /r:0 /np /v /tee" -split '\s+'
 	#$robocopyDryRUN = "/L"
 
 	gci $sourceDIR | foreach {
-		$logFile = $logDIR + '\' + $sourceDIR.Split('\')[-1] + '.log'
+		$logFile = $logDIR + '\' + $sourceBaseName + '.log'
 		Write-Host robocopy $_.FullName $destinationDIR $robocopyDryRUN @robocopyOptions /log+:$logFile
 		robocopy $_.FullName $destinationDIR $robocopyDryRUN @robocopyOptions /log+:$logFile
 	}
