@@ -446,12 +446,12 @@ function getRestrictedFilenamesFORMAT() {
 			trap - INT
 			if [ $isLIVE == false ];then
 				$debug
-				time "${downloadCMD[@]}" --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+				time "${downloadCMD[@]}" --ignore-config --output "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 				downloadRetCode=$?
 				$undebug
 			else
 				$debug
-				time timeout -s SIGINT $timeout "${downloadCMD[@]}" --ignore-config -o "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
+				time timeout -s SIGINT $timeout "${downloadCMD[@]}" --ignore-config --output "$fileName" -f "$chosenFormatID" "${ytdlExtraOptions[@]}" "$url" $embedThumbnail 2>$errorLogFile
 				downloadRetCode=$?
 				$undebug
 			fi
