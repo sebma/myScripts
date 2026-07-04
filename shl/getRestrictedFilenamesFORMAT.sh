@@ -273,6 +273,7 @@ function getRestrictedFilenamesFORMAT() {
 		printf "=> Fetching the formatsIDs list for \"${url//\%/%%}\" with ${effects[bold]}${colors[blue]}$downloader$normal at %s ...\n" "$(LC_MESSAGES=en date)"
 #		$undebug
 
+		# filenamePattern which will extracted from ._filename JSON
 		jsonResults=$(time "${downloadCMD[@]}" --ignore-config --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
 		formatsIDs=( $(echo "$jsonResults" | $jq -r .format_id | awk '!seen[$0]++') ) # Remove duplicate lines i.e: https://stackoverflow.com/a/1444448/5649639
 		formatsNumber=${#formatsIDs[@]}
