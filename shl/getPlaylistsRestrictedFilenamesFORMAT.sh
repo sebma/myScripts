@@ -26,4 +26,20 @@ getPlaylistsRestrictedFilenamesFORMAT ()
 	trap - INT
 }
 
-getPlaylistsRestrictedFilenamesFORMAT "$@"
+function main() {
+	if locale | grep -i C.UTF-8 -q;then
+		declare -gx LANG=C.UTF-8
+	else
+		declare -gx LANG=C
+	fi
+
+	declare -gx scriptBaseName=${0/*\//}
+	declare -gx scriptExtension=${0/*./}
+	declare -gx funcName=${scriptBaseName/.$scriptExtension/}
+
+	echo time $funcName $@
+	return $?
+}
+
+main $@
+
