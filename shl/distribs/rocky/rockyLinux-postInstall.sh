@@ -49,6 +49,7 @@ if ! dnf repolist | grep epel -w -q;then
 fi
 
 # Pour gerer l'entropy
+# See https://wiki.archlinux.org/title/Haveged#List_available_entropy
 # Avant l'install de "haveged"
 sysctl kernel.random.entropy_avail
 cat /proc/sys/kernel/random/entropy_avail
