@@ -39,5 +39,5 @@ set-alias ipl iplink
 set-alias ipr iproute
 set-alias mac@ iplink
 set-alias mac iplink
-set-alias -Scope Global more less
 
+if( gcm "less.exe" 2>$null | % Name ) { set-alias -Scope Global more less }
