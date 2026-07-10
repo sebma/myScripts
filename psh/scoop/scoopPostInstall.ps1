@@ -10,8 +10,8 @@ if( $IsWindows ) {
 		}
 
 		# Buckets of softwares
-#		if( ! (sudo scoop bucket list | sls extras) ) { sudo scoop bucket add extras }
-#		'main' , 'extras' , 'nirsoft' , 'versions' | % { scoop bucket list | Out-String -Stream | sls ^$_ || scoop bucket add $_ }
+		'main' , 'extras' , 'nirsoft' , 'versions' | % { scoop bucket list | Out-String -Stream | sls ^$_ || scoop bucket add $_ }
+#		'main' , 'extras' , 'nirsoft' , 'versions' | % { git config --global --add safe.directory `"$env:ProgramFiles/scoop/buckets/$_`" }
 
 		sudo scoop install freetube kitty gow pshazz openssh openssl-lts-light psutils wget gsudo -g
   		sudo scoop reset openssl-lts-light
