@@ -9,7 +9,12 @@ if( $IsWindows ) {
 			sudo git config --global credential.helper manager-core # i.e https://github.com/ScoopInstaller/Main/blob/master/bucket/git.json
 		}
 
+		# Buckets of softwares
 		if( ! (sudo scoop bucket list | sls extras) ) { sudo scoop bucket add extras }
+#		scoop bucket add extras
+#		scoop bucket add nirsoft
+#		scoop bucket add versions
+
 		sudo scoop install freetube kitty gow pshazz openssh openssl-lts-light psutils wget gsudo -g
   		sudo scoop reset openssl-lts-light
 		sudo scoop shim rm putty plink pscp psftp peagent
