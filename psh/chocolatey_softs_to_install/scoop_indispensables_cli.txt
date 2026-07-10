@@ -1,7 +1,7 @@
 scoop bucket add extras
 scoop bucket add nirsoft
 scoop bucket add versions
-archiver aria2 busybox curl dos2unix fastfetch ffmpeg git gow iperf3 ipcalc jq mediainfo mpv openssl-lts-light psutils python38@3.8.9 ripgrep rga rclone unzip wget yq yt-dlp
+archiver aria2 busybox curl dos2unix fastfetch ffmpeg gawk git gow iperf3 ipcalc jq mediainfo mpv openssl-lts-light psutils python38@3.8.9 ripgrep rga rclone unzip wget yq yt-dlp
 # rustdesk
 # clamav
 # busybox contains time.exe and time.ps1
