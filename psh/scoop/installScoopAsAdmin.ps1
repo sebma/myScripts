@@ -13,3 +13,7 @@ if( $IsWindows ) {
 	}
 	InstallScoopAsAdmin
 }
+
+#irm get.scoop.sh -outfile 'scoop-Installer.ps1'
+#.\scoop-Installer.ps1 -RunAsAdmin -ScoopDir $env:ProgramFiles\scoop -ScoopGlobalDir $env:ProgramData\scoop
+#& $env:ProgramFiles\scoop\shims\scoop.ps1 shim add scoop $env:ProgramFiles\scoop\shims\scoop.ps1
