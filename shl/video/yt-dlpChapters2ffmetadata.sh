@@ -16,4 +16,4 @@ function yt-dlpChapters2ffmetadata {
 	done
 }
 
-yt-dlpChapters2ffmetadata.sh "$@"
+yt-dlpChapters2ffmetadata "$@"
