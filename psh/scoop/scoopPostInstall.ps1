@@ -7,6 +7,7 @@ if( $IsWindows ) {
 			$env:SCOOP = "$env:ProgramFiles\scoop"
 			[Environment]::SetEnvironmentVariable('SCOOP', $env:SCOOP)
 			& $env:SCOOP\shims\scoop.ps1 shim add scoop $env:SCOOP\shims\scoop.ps1
+			scoop shim list scoop
 		}
 		if( ! (isInstalled("git.exe")) ) {
 			sudo scoop install git -g
