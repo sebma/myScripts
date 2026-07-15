@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-function yt-dlpChapters2ffmetadata {
+function ytdlpChapters2ffmetadata {
 	for jsonFile
 	do
 		jq -r '
@@ -16,4 +16,4 @@ function yt-dlpChapters2ffmetadata {
 	done
 }
 
-yt-dlpChapters2ffmetadata "$@"
+ytdlpChapters2ffmetadata "$@"
