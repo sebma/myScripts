@@ -4,8 +4,8 @@ function isInstalled($cmd) { return gcm "$cmd" 2>$null | % Name }
 if( $IsWindows ) {
 	function scoopPostInstall {
 		if( ! (gcm "scoop.ps1" 2>$null | % Name) -and (ls "$env:ProgramFiles\scoop\shims\scoop.ps1") ) { 
-			$env:SCOOP = "$env:ProgramFiles\scoop"
-			[Environment]::SetEnvironmentVariable('SCOOP', $env:SCOOP)
+			# $env:SCOOP = "$env:ProgramFiles\scoop"
+			# [Environment]::SetEnvironmentVariable('SCOOP', $env:SCOOP)
 			& $env:SCOOP\shims\scoop.ps1 shim add scoop $env:SCOOP\shims\scoop.ps1
 			scoop shim list scoop
 		}
