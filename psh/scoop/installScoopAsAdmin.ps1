@@ -1,5 +1,5 @@
 # See https://github.com/ScoopInstaller/Install#advanced-installation
-function isInstalled($cmd) { return gcm "$cmd" 2>$null }
+function isInstalled($cmd) { return gcm "$cmd" 2>$null | % Name }
 
 if( $IsWindows ) {
 	function InstallScoopAsAdmin {
