@@ -17,8 +17,8 @@ if( $IsWindows ) {
 		}
 
 		# Buckets of softwares
-		'main' , 'extras' , 'nirsoft' , 'versions' | % { if( ! ( scoop bucket list | Out-String -Stream | sls ^$_ ) ) { scoop bucket add $_ } }
-		'main' , 'extras' , 'nirsoft' , 'versions' | % { if( ! ( git config --global safe.directory | Out-String -Stream | sls buckets.$_ ) ) { git config --global --add safe.directory `"$env:ProgramFiles/scoop/buckets/$_`" } }
+		'main' , 'extras' , 'nirsoft' , 'sysinternals' , 'versions' | % { if( ! ( scoop bucket list | Out-String -Stream | sls ^$_ ) ) { scoop bucket add $_ } }
+		'main' , 'extras' , 'nirsoft' , 'sysinternals' , 'versions' | % { if( ! ( git config --global safe.directory | sls buckets.$_ ) ) { git config --global --add safe.directory `"$env:ProgramFiles/scoop/buckets/$_`" } }
 
 		scoop install freetube kitty gow pshazz openssh openssl-lts-light psutils wget gsudo -g
   		scoop reset openssl-lts-light
