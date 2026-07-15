@@ -19,7 +19,7 @@ if( $IsWindows ) {
 		# Buckets of softwares
 		'main' , 'extras' , 'nirsoft' , 'sysinternals' , 'versions' | % { if( -not ( scoop bucket list | sls Name=$_ ) ) { scoop bucket add $_ } }
 
-		sudo scoop install freetube kitty gow pshazz openssh openssl-lts-light psutils wget gsudo -g
+		sudo scoop install psutils freetube kitty gow pshazz openssh openssl-lts-light psutils wget gsudo -g
   		sudo scoop reset openssl-lts-light
 		sudo scoop shim rm putty plink pscp psftp peagent
 		sudo -k
