@@ -12,7 +12,11 @@ function robocopyPS {
 	$destinationDIR = Join-Path $destinationDIR $sourceBaseName
 	$logDIR = "C:\TEMP\Robocopy\Logs"
 	$logFile = $logDIR + '\' + $sourceBaseName + '.log'
-	$robocopyOptions = "/COPY:DATSO /MIR /r:0 /np /v /tee" -split '\s+'
+	$nbThreads = $(Get-WmiObject Win32_Processor).NumberOfLogicalProcessors
+	$robocopyOptions = "/MT:$nbThreads /MIR /r:0 /np /v /tee"
+	if ( $full ) { $robocopyOptions += " /COPY:DATSO" }
+	else { $robocopyOptions += " /COPY:DAT" }
+	$robocopyOptions = $robocopyOptions -split '\s+'
 	#$robocopyDryRUN = "/L"
 
 	gci $sourceDIR | foreach {
