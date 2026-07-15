@@ -3,7 +3,7 @@ function isInstalled($cmd) { return gcm "$cmd" 2>$null | % Name }
 
 if( $IsWindows ) {
 	function scoopAdminModePostInstall {
-		if( ! (gcm "scoop.ps1" 2>$null | % Name) -and (ls "$env:ProgramFiles\scoop\shims\scoop.ps1") ) { 
+		if( (ls "$env:ProgramFiles\scoop\shims\scoop.ps1") -and -not (gcm "scoop.ps1" 2>$null | % Name) ) { 
 			# $env:SCOOP = "$env:ProgramFiles\scoop"
 			# [Environment]::SetEnvironmentVariable('SCOOP', $env:SCOOP)
 			& $env:SCOOP\shims\scoop.ps1 shim add scoop $env:SCOOP\shims\scoop.ps1
