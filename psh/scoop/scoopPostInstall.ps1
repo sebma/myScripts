@@ -2,6 +2,7 @@ function isInstalled($cmd) { return gcm "$cmd" 2>$null }
 
 if( $IsWindows ) {
 	function scoopPostInstall {
+		if( ! $(gcm "scoop" 2>$null | % Name) ) { & $env:SCOOP\shims\scoop.ps1 shim add scoop $env:SCOOP\shims\scoop.ps1 }
 		if( ! (isInstalled("git.exe")) ) {
 			sudo scoop install git -g
 		}
