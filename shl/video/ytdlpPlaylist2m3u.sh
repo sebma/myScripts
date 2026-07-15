@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 function ytdlpPlaylist2m3u {
-	locate playListURL="$1"
-	jq -r '"#EXTM3U", .entries[]? as $e | "#EXTINF:-1," + $e.title , $e.url' "$playListURL" 
+	local playListURL="$1"
+	local ytdlpnoconfig="yt-dlp --ignore-config"
+	$ytdlpnoconfig --ignore-errors --flat-playlist -J "$playListURL" | jq -r '"#EXTM3U", .entries[]? as $e | "#EXTINF:" + ($e.duration | tostring) + "," + $e.title , $e.url'
 }
 
 ytdlpPlaylist2m3u "$@"
