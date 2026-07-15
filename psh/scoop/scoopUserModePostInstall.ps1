@@ -10,7 +10,7 @@ if( $IsWindows ) {
 			scoop shim list scoop
 		}
 		if( ! (isInstalled("git.exe")) ) {
-			scoop install git -g
+			scoop install git
 		}
 		if( ( git config --global credential.helper ) -ne "manager-core" ) {
 			git config --global credential.helper manager-core # i.e https://github.com/ScoopInstaller/Main/blob/master/bucket/git.json
@@ -20,7 +20,7 @@ if( $IsWindows ) {
 		'main' , 'extras' , 'nirsoft' , 'sysinternals' , 'versions' | % { if( -not ( scoop bucket list | sls Name=$_ ) ) { scoop bucket add $_ } }
 		'main' , 'extras' , 'nirsoft' , 'sysinternals' , 'versions' | % { if( ! ( git config --global safe.directory | sls buckets.$_ ) ) { git config --global --add safe.directory `"$env:ProgramFiles/scoop/buckets/$_`" } }
 
-		scoop install freetube kitty gow pshazz openssh openssl-lts-light psutils wget gsudo -g
+		scoop install psutils freetube kitty gow pshazz openssh openssl-lts-light psutils wget gsudo
   		scoop reset openssl-lts-light
 		scoop shim rm putty plink pscp psftp peagent
 	}
