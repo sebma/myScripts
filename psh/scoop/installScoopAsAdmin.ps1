@@ -17,8 +17,8 @@ if( $IsWindows ) {
 
 # AS ADMIN :
 #irm get.scoop.sh -outfile 'scoop-Installer.ps1'
-$env:SCOOP = $env:ProgramFiles\scoop
-$env:SCOOP_GLOBAL = $env:ProgramData\scoop
+$env:SCOOP = "$env:ProgramFiles\scoop"
+$env:SCOOP_GLOBAL = "$env:ProgramData\scoop"
 [Environment]::SetEnvironmentVariable('SCOOP_GLOBAL', $env:SCOOP_GLOBAL, 'Machine')
 #.\scoop-Installer.ps1 -RunAsAdmin -ScoopDir $env:SCOOP -ScoopGlobalDir $env:SCOOP_GLOBAL
 #scoop bucket add extras
