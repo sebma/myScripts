@@ -1,3 +1,4 @@
+# See https://github.com/ScoopInstaller/Install#for-admin
 function isInstalled($cmd) { return gcm "$cmd" 2>$null }
 
 if( $IsWindows ) {
@@ -16,7 +17,11 @@ if( $IsWindows ) {
 
 # AS ADMIN :
 #irm get.scoop.sh -outfile 'scoop-Installer.ps1'
-#.\scoop-Installer.ps1 -RunAsAdmin -ScoopDir $env:ProgramFiles\scoop -ScoopGlobalDir $env:ProgramData\scoop
+$env:SCOOP = $env:ProgramFiles\scoop
+$env:SCOOP_GLOBAL = $env:ProgramData\scoop
+[Environment]::SetEnvironmentVariable('SCOOP_GLOBAL', $env:SCOOP_GLOBAL, 'Machine')
+#.\scoop-Installer.ps1 -RunAsAdmin -ScoopDir $env:SCOOP -ScoopGlobalDir $env:SCOOP_GLOBAL
 #scoop bucket add extras
 # AS USER :
-#& $env:ProgramFiles\scoop\shims\scoop.ps1 shim add scoop $env:ProgramFiles\scoop\shims\scoop.ps1
+$env:SCOOP = $env:ProgramFiles\scoop
+if( ! $(gcm "scoop" 2>$null | % Name) ) { & $env:SCOOP\shims\scoop.ps1 shim add scoop $env:SCOOP\shims\scoop.ps1 }
