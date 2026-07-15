@@ -1,1 +1,1 @@
-video/yt-dlpChapters2ffmetadata.sh
+video/ytdlpChapters2ffmetadata.sh
