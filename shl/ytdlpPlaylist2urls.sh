@@ -1,1 +1,1 @@
-video/ytdlpPlaylist2urls.sh
+yt-dlp/ytdlpPlaylist2urls.sh
