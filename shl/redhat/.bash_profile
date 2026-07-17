@@ -138,8 +138,6 @@ export XAUTHORITY=$HOME/.Xauthority
 export APPUppercase=$(echo $APP | tr [:lower:] [:upper:])
 export ENVIRON=v
 
-. ./.profile.me_casheurope
-
 export APP_USER=${APP}${ENVIRON}adm
 export mqmUser=${APP}vadm
 export LOGDIR=/applis/$APP$ENVIRON/app/log
