@@ -1,3 +1,4 @@
+# See https://learn.microsoft.com/en-gb/powershell/scripting/install/install-powershell-on-windows?view=powershell-7.6#install-powershell-using-winget
 winget search Microsoft.PowerShell --source winget
 winget show Microsoft.PowerShell --verbose | Select-String "Installer Type|Scope"
 if( $(winget show Microsoft.PowerShell --verbose | Select-String "Scope") ) {
@@ -9,4 +10,3 @@ if( $(winget show Microsoft.PowerShell --verbose | Select-String "Scope") ) {
 gcm pwsh | % Source
 pwsh -c "gcm pwsh | % Source"
 Get-AppxPackage -AllUsers Microsoft.PowerShell
-# winget install Microsoft.PowerShell --installer-type msi
