@@ -2,3 +2,4 @@
 winget source reset --force
 winget source update
 winget source list
+# to check : winget search Microsoft.PowerShell --source winget
