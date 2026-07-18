@@ -4,9 +4,8 @@ function ytdlpChapters2ffmetadata {
 	for jsonFile
 	do
 		jq -r '
-";FFMETADATA1",
-.chapters[]? as $c
-| "[CHAPTER]" ,
+";FFMETADATA1" ,
+.chapters[]? as $c | "[CHAPTER]" ,
 "TIMEBASE=1/1000" ,
 "START=" + ($c.start_time * 1000 | floor | tostring) ,
 "END="   + ($c.end_time   * 1000 | floor | tostring) ,
