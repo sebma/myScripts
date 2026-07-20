@@ -157,15 +157,15 @@ function getSerialNumber {
 	(gwmi win32_bios).SerialNumber
 }
 
+function getModel {
+	(gwmi Win32_ComputerSystem).Model
+}
+
 function getServiceTag {
 	$manufacturer = $(gwmi win32_bios).Manufacturer
 	if( $manufacturer -match "Dell" ) {
 		(gwmi win32_bios).SerialNumber
 	}
-}
-
-function getModel {
-	(gwmi Win32_ComputerSystem).Model
 }
 
 function osName {
