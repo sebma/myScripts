@@ -153,12 +153,17 @@ function changeLanguage2English {
 #	if( (Get-WinUserLanguageList).LanguageTag -ne "en-GB" ) { Set-WinUserLanguageList en-GB -Force }
 }
 
-function getSerialNumber {
-	(gwmi win32_bios).SerialNumber
+function getInstallDate {
+	(Get-CimInstance Win32_OperatingSystem).InstallDate
+	(gwmi Win32_OperatingSystem).InstallDate
+	(gwmi Win32_OperatingSystem).InstallDate | % { [Management.ManagementDateTimeConverter]::ToDateTime( $_ ) }
 }
 
 function getModel {
 	(gwmi Win32_ComputerSystem).Model
+}
+function getSerialNumber {
+	(gwmi win32_bios).SerialNumber
 }
 
 function getServiceTag {
@@ -170,12 +175,6 @@ function getServiceTag {
 
 function osName {
 	echo $(gwmi Win32_OperatingSystem).Caption
-}
-
-function getInstallDate {
-	(Get-CimInstance Win32_OperatingSystem).InstallDate
-	(gwmi Win32_OperatingSystem).InstallDate
-	(gwmi Win32_OperatingSystem).InstallDate | % { [Management.ManagementDateTimeConverter]::ToDateTime( $_ ) }
 }
 
 function np3 {
