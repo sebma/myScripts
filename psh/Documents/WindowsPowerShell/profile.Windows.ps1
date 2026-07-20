@@ -108,6 +108,19 @@ function findfiles {
 	dir -r -fo $dirName 2>$null | ? Name -match "$regexp" | % FullName
 }
 
+function findService {
+	$FUNCNAME = $MyInvocation.MyCommand.Name
+	$argc=$args.Count
+	$regexp = "."
+	if ( $argc -eq 1 ) {
+		$regexp = $args[0]
+	} else {
+		write-warning "Usage:$FUNCNAME [regexp=.]"
+		exit 1
+	}
+	Get-WmiObject win32_service | ? { $_.Description -Match "$regexp" -or $_.Name -Match "$regexp" -or $_.DisplayName -Match "$regexp" } | Format-Table Name , DisplayName , ServiceType , StartMode , State , ProcessId , PathName
+}
+
 function host1($name, $server) {
 	(nslookup $name $server 2>$null | sls -n Addresses: | sls Nom,Name,Address)[-2..-1] | Out-String -stream | % { $_.split(' ')[-1] }
 }
