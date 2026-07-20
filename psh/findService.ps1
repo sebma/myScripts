@@ -2,9 +2,7 @@ $scriptName = Split-Path -Leaf $PSCommandPath
 function findService {
 	$argc=$args.Count
 	$regexp = "."
-	if ( $argc -eq 0 ) {
-		$regexp = $defaultDomainController
-	} elseif ( $argc -eq 1 ) {
+	if ( $argc -eq 1 ) {
 		$regexp = $args[0]
 	} else {
 		write-warning "Usage:$scriptName [regexp=.]"
