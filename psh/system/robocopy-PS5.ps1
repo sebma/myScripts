@@ -12,7 +12,7 @@ function robocopyPS {
 	$sourceBaseName = $sourceDIR.Split('\')[-1]
 	$destinationDIR += $dirSep + $sourceBaseName
 	$logDIR = "C:\TEMP\Robocopy\Logs"
-	$logFile = $logDIR + '\' + $sourceBaseName + '.log'
+	$logFile = $logDIR + $dirSep + $sourceBaseName + '.log'
 	$nbThreads = $(Get-WmiObject Win32_Processor).NumberOfLogicalProcessors
 	$robocopyOptions = "/MT:$nbThreads /MIR /r:0 /np /v /tee"
 	$fullSynchro = $destinationDIR + $dirSep + $sourceBaseName + ".synchro"
