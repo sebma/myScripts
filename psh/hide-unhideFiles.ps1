@@ -1,7 +1,6 @@
 $scriptName = Split-Path -Leaf $PSCommandPath
 function hide-unhideFiles {
-        $argc=$args.Count
-        $regexp = "."
+        $argc = $args.Count
         if ( $argc -gt 0 ) {
                 for($i=0;$i -lt $argc;$i++) {
                         $file = $args[$i]
