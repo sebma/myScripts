@@ -19,7 +19,7 @@ function robocopyPS {
 
 	if ( Test-Path $fullSynchro ) {
 		# Hide $fullSynchro file
-		(Get-ItemProperty $fullSynchro).Attributes = (Get-ItemProperty $fullSynchro).Attributes -bor [io.fileattributes]::Hidden
+		$(Get-ItemProperty $fullSynchro).Attributes = $(Get-ItemProperty $fullSynchro).Attributes -bor [io.fileattributes]::Hidden
 		$robocopyOptions += " /COPY:DATSO"
 	}
 	else { $robocopyOptions += " /COPY:DAT" }
