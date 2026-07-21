@@ -1,1 +1,1 @@
-devcon find * | findstr /v /r "^ROOT"
+devcon find * | findstr /v /r "^ROOT"

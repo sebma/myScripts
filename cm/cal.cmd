@@ -1,1 +1,1 @@
-@start p:\bin\scal.exe &&exit
+@start p:\bin\scal.exe &&exit

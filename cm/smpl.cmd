@@ -1,1 +1,1 @@
-@start smplayer2 %*
+@start smplayer2 %*

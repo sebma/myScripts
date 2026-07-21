@@ -1,2 +1,2 @@
-@mkdir %1
-@chdir %1
+@mkdir %1
+@chdir %1

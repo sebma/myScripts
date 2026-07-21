@@ -1,2 +1,2 @@
-@echo off
-start/b "" notepad++ %*
+@echo off
+start/b "" notepad++ %*

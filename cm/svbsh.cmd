@@ -1,1 +1,1 @@
-@cscript -nologo \vbs\vbsh_simple.vbs
+@cscript -nologo \vbs\vbsh_simple.vbs

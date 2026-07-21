@@ -1,3 +1,3 @@
-::@echo off
-set NSISFile=%1
-%NSISFile% /S
+::@echo off
+set NSISFile=%1
+%NSISFile% /S

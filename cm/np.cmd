@@ -1,1 +1,1 @@
-@start/b notepad.exe %*
+@start/b notepad.exe %*

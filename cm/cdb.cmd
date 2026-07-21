@@ -1,1 +1,1 @@
-@pushd %userprofile%\bureau
+@pushd %userprofile%\bureau

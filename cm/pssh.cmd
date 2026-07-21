@@ -1,2 +1,2 @@
-@plink -agent -X -A %*
-exit/b
+@plink -agent -X -A %*
+exit/b

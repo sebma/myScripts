@@ -1,1 +1,1 @@
-@strings %1 | findstr -i "inno shield msi wise nullsoft ghost"
+@strings %1 | findstr -i "inno shield msi wise nullsoft ghost"

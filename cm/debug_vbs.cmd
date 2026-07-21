@@ -1,1 +1,1 @@
-@start /b wscript -x %1
+@start /b wscript -x %1

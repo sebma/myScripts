@@ -1,1 +1,1 @@
-wuauclt /detectnow /resetauthorization
+wuauclt /detectnow /resetauthorization

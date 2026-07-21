@@ -1,1 +1,1 @@
-@start Regshot-x86-ANSI.exe
+@start Regshot-x86-ANSI.exe

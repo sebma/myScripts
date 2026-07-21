@@ -1,1 +1,1 @@
-@whoami /groups
+@whoami /groups
