@@ -1,5 +1,6 @@
 $scriptName = Split-Path -Leaf $PSCommandPath
 function robocopyPS {
+	$dirSep = [io.path]::DirectorySeparatorChar
 	$argc=$args.Count
 	if ( $argc -lt 2 ) {
 		write-warning "Usage:$scriptName sourceDIR destinationDIR"
@@ -14,7 +15,8 @@ function robocopyPS {
 	$logFile = $logDIR + '\' + $sourceBaseName + '.log'
 	$nbThreads = $(Get-WmiObject Win32_Processor).NumberOfLogicalProcessors
 	$robocopyOptions = "/MT:$nbThreads /MIR /r:0 /np /v /tee"
-	if ( $full ) { $robocopyOptions += " /COPY:DATSO" }
+	$fullSynchro = $destinationDIR + $dirSep + $sourceBaseName + ".synchro"
+	if ( $(Test-Path $fullSynchro) ) { $robocopyOptions += " /COPY:DATSO" }
 	else { $robocopyOptions += " /COPY:DAT" }
 	$robocopyOptions = $robocopyOptions -split '\s+'
 	#$robocopyDryRUN = "/L"
@@ -23,6 +25,8 @@ function robocopyPS {
 		Write-Host robocopy $_.FullName $destinationDIR $robocopyDryRUN @robocopyOptions /log+:$logFile
 		robocopy $_.FullName $destinationDIR $robocopyDryRUN @robocopyOptions /log+:$logFile
 	}
+
+	Remove-Item $fullSynchro
 }
 
 robocopyPS @args
