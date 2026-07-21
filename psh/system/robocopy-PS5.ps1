@@ -21,8 +21,10 @@ function robocopyPS {
 		# Hide $fullSynchro file
 		$(Get-ItemProperty $fullSynchro).Attributes = $(Get-ItemProperty $fullSynchro).Attributes -bor [io.fileattributes]::Hidden
 		$robocopyOptions += " /COPY:DATSO"
+	} else {
+		$robocopyOptions += " /COPY:DAT"
 	}
-	else { $robocopyOptions += " /COPY:DAT" }
+
 	#$robocopyDryRUN = "/L"
 	$robocopyOptions = $robocopyOptions -split '\s+'
 
