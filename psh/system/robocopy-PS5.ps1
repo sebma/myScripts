@@ -16,6 +16,7 @@ function robocopyPS {
 	$nbThreads = $(Get-WmiObject Win32_Processor).NumberOfLogicalProcessors
 	$robocopyOptions = "/MT:$nbThreads /MIR /r:0 /np /v /tee"
 	$fullSynchro = $destinationDIR + $dirSep + $sourceBaseName + ".synchro"
+
 	if ( $(Test-Path $fullSynchro) ) { $robocopyOptions += " /COPY:DATSO" }
 	else { $robocopyOptions += " /COPY:DAT" }
 	$robocopyOptions = $robocopyOptions -split '\s+'
