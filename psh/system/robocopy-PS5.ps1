@@ -10,7 +10,7 @@ function robocopyPS {
 	$sourceDIR = $args[0]
 	$destinationDIR = $args[1]
 	$sourceBaseName = $sourceDIR.Split('\')[-1]
-	$destinationDIR = Join-Path $destinationDIR $sourceBaseName
+	$destinationDIR =+ $dirSep + $sourceBaseName
 	$logDIR = "C:\TEMP\Robocopy\Logs"
 	$logFile = $logDIR + '\' + $sourceBaseName + '.log'
 	$nbThreads = $(Get-WmiObject Win32_Processor).NumberOfLogicalProcessors
