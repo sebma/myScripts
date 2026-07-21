@@ -9,7 +9,7 @@ function robocopyPS {
 
 	$sourceDIR = $args[0]
 	$destinationDIR = $args[1]
-	$sourceBaseName = $sourceDIR.Split('\')[-1]
+	$sourceBaseName = $sourceDIR.Split($dirSep)[-1]
 	$destinationDIR += $dirSep + $sourceBaseName
 	$logDIR = "C:\TEMP\Robocopy\Logs"
 	$logFile = $logDIR + $dirSep + $sourceBaseName + '.log'
