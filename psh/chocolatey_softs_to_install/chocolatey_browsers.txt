@@ -1,1 +1,1 @@
-basilisk brave chromium firefox firefox-esr palemoon waterfox 
+basilisk brave chromium firefox firefox-esr palemoon waterfox 
