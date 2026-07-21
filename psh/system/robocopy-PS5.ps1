@@ -17,7 +17,11 @@ function robocopyPS {
 	$robocopyOptions = "/MT:$nbThreads /MIR /r:0 /np /v /tee"
 	$fullSynchro = $destinationDIR + $dirSep + $sourceBaseName + ".synchro"
 
-	if ( Test-Path $fullSynchro ) { $robocopyOptions += " /COPY:DATSO" }
+	if ( Test-Path $fullSynchro ) {
+		# Hide $fullSynchro file
+		(Get-ItemProperty $fullSynchro).Attributes = (Get-ItemProperty $fullSynchro).Attributes -bor [io.fileattributes]::Hidden
+		$robocopyOptions += " /COPY:DATSO"
+	}
 	else { $robocopyOptions += " /COPY:DAT" }
 	#$robocopyDryRUN = "/L"
 	$robocopyOptions = $robocopyOptions -split '\s+'
