@@ -15,9 +15,10 @@ function robocopyPS {
 	$logFile = $logDIR + $dirSep + $sourceBaseName + '.log'
 	$nbThreads = $(Get-WmiObject Win32_Processor).NumberOfLogicalProcessors
 	$robocopyOptions = "/MT:$nbThreads /MIR /r:0 /np /v /tee"
-	$fullSynchro = $destinationDIR + $dirSep + $sourceBaseName + ".synchro"
+	$fullSynchroFile = $destinationDIR + $dirSep + $sourceBaseName + ".synchro"
+	$fullSynchro = Test-Path $fullSynchroFile
 
-	if ( Test-Path $fullSynchro ) {
+	if ( $fullSynchro ) {
 		# Hide $fullSynchro file
 		$(Get-ItemProperty $fullSynchro).Attributes = $(Get-ItemProperty $fullSynchro).Attributes -bor [io.fileattributes]::Hidden
 		$robocopyOptions += " /COPY:DATSO"
@@ -33,7 +34,7 @@ function robocopyPS {
 		robocopy $_.FullName $destinationDIR $robocopyDryRUN @robocopyOptions /log+:$logFile
 	}
 
-	if ( Test-Path $fullSynchro ) { Remove-Item -Force $fullSynchro }
+	if ( $fullSynchro ) { Remove-Item -Force $fullSynchroFile }
 }
 
 robocopyPS @args
