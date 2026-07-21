@@ -19,8 +19,8 @@ function robocopyPS {
 
 	if ( Test-Path $fullSynchro ) { $robocopyOptions += " /COPY:DATSO" }
 	else { $robocopyOptions += " /COPY:DAT" }
-	$robocopyOptions = $robocopyOptions -split '\s+'
 	#$robocopyDryRUN = "/L"
+	$robocopyOptions = $robocopyOptions -split '\s+'
 
 	gci $sourceDIR | foreach {
 		Write-Host robocopy $_.FullName $destinationDIR $robocopyDryRUN @robocopyOptions /log+:$logFile
