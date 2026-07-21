@@ -27,7 +27,7 @@ function robocopyPS {
 		robocopy $_.FullName $destinationDIR $robocopyDryRUN @robocopyOptions /log+:$logFile
 	}
 
-	if ( Test-Path $fullSynchro ) Remove-Item -Force $fullSynchro
+	if ( Test-Path $fullSynchro ) { Remove-Item -Force $fullSynchro }
 }
 
 robocopyPS @args
