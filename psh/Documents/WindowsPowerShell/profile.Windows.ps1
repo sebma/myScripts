@@ -1,239 +1,239 @@
-"=> Sourcing $scriptPrefix.$osFamily.ps1 functions ..."
-if( $(Get-PSReadlineKeyHandler | ? Key -eq Ctrl+d | % Function) -ne "DeleteCharOrExit" ) {
-	Set-PSReadlineKeyHandler -Key ctrl+d -Function DeleteCharOrExit
-}
-
-#	set-alias -Scope Global  ex
-#	function ex{exit}
-
-$SuppressDriveInit = $true # cf. https://stackoverflow.com/a/1662159
-
-$PSDefaultParameterValues['Out-File:Encoding'] = 'utf8' # cf. https://stackoverflow.com/a/40098904
-
-function cd($dir) {
-	if( $(alias cd *>$null;echo $?) ) { del alias:cd }
-	if($dir -eq "-"){popd}
-	elseif( ! $dir.Length ) {pushd ~}
-	else {pushd $dir}
-}
-
-function setVariables {
-	$global:openssl = "${ENV:ProgramFiles(x86)}\LogMeIn\x64\openssl.exe" # Le "openssl" package dans LogMeIn ne sais pas decrypter
-	$global:USER = $ENV:USERNAME
-	$global:DOMAIN = $ENV:USERDOMAIN
-	$global:DNSDOMAIN = $ENV:USERDNSDOMAIN
-	$global:HOSTNAME = $ENV:COMPUTERNAME
-	$global:isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-	$global:KiTTY_LogDIR= "${ENV:ProgramData}/scoop/apps/kitty/current/log"
-	$global:RecentDIR = "$ENV:APPDATA/Microsoft/Windows/Recent"
-	$global:SendToDIR = "$ENV:APPDATA/Microsoft/Windows/SendTo"
-	$global:StartupDIR = "$ENV:APPDATA/Microsoft/Windows/Start Menu/Programs/Startup"
-	$global:AllUsersStartupDIR = "$ENV:ProgramData/Microsoft/Windows/Start Menu/Programs/Startup"
-	$global:QuickLaunchDIR = "$ENV:APPDATA/Microsoft/Internet Explorer/Quick Launch"
-	$global:TaskBarDIR = "$ENV:APPDATA/Microsoft/Internet Explorer/Quick Launch/User Pinned/TaskBar"
-	$ENV:DISPLAY = "localhost:0"
-	$ENV:IsWindows = $IsWindows
-}
-
-setVariables
-
-function sysinfo {
-	Get-ComputerInfo CsManufacturer , CsModel
-}
-
-if( isInstalled("rg.exe") ) {
-	function rgrep { rg -uu -g !.git/ @args }
-}
-
-if( isInstalled("ls.exe") ) {
-	$global:ls = "ls.exe"
-	#function ls { ls.exe -F @args }
-	function l1 { & $ls -1F @args }
-	function la { & $ls -aF @args }
-	function ll { & $ls -lF @args }
-	function lla { & $ls -laF @args }
-	function llah { & $ls -lahF @args }
-	function lld { & $ls -dlF @args }
-	function llh { & $ls -lhF @args }
-}
-
-if( isInstalled("rm.exe") ) {
-	function rm { rm.exe -vi @args }
-}
-
-#function source($script) {
-#	if ($script) {
-#		$tokens = $null
-#		$errors = $null
-#		$ast = [System.Management.Automation.Language.Parser]::ParseFile($script, [ref]$tokens, [ref]$errors)
-#		if ($errors) {
-#			Write-Error "Errors parsing script: $($errors -join ', ')"
-#			return
-#		}
-#		$functions = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
-#		foreach ($func in $functions) {
-#			$funcName = $func.Name
-#			$globalFuncBody = $func.Body.GetScriptBlock()
-#			Set-Item -Path "Function:\global:$funcName" -Value $globalFuncBody
-#		}
-#	}
-#
-#	$assignments = $ast.FindAll({ $args[0] -is [AssignmentStatementAst] }, $false)
-#	foreach ($assignment in $assignments) {
-#		# bring the assignment to this scope
-#		. ([scriptblock]::Create($assignment.ToString()))
-#		foreach ($target in $assignment.GetAssignmentTargets()) {
-#			# then get the value
-#			$varName = $target.VariablePath.ToString()
-#			$varValue = & ([scriptblock]::Create($target.ToString()))
-#			# and assign it to the caller's scope
-#			Set-Variable -Name $varName -Value $varValue -Scope Script
-#		}
-#	}
-#}
-
-function findfiles {
-	$argc=$args.Count
-	if ( $argc -eq 1 ) {
-		$dirName = "."
-		$regexp = $args[0]
-	} elseif ( $argc -eq 2 ) {
-		$dirName = $args[0]
-		$regexp = $args[1]
-	} else {
-		write-warning "Usage : [dirName] regexp"
-		return 1
-	}
-
-	dir -r -fo $dirName 2>$null | ? Name -match "$regexp" | % FullName
-}
-
-function findService {
-	$FUNCNAME = $MyInvocation.MyCommand.Name
-	$argc=$args.Count
-	$regexp = "."
-	if ( $argc -eq 1 ) {
-		$regexp = $args[0]
-	} else {
-		write-warning "Usage:$FUNCNAME [regexp=.]"
-		exit 1
-	}
-	Get-WmiObject win32_service | ? { $_.Description -Match "$regexp" -or $_.Name -Match "$regexp" -or $_.DisplayName -Match "$regexp" } | Format-Table Name , DisplayName , ServiceType , StartMode , State , ProcessId , PathName
-}
-
-function host1($name, $server) {
-	(nslookup $name $server 2>$null | sls -n Addresses: | sls Nom,Name,Address)[-2..-1] | Out-String -stream | % { $_.split(' ')[-1] }
-}
-
-function lastBoot {
-	Get-CimInstance -ClassName Win32_OperatingSystem | Select CSName , LastBootUpTime
-}
-function lastBoots($nbBoots) {
-	if ( $nbBoots ) {
-		Get-WinEvent -LogName System | ? Id -eq 6005 | select -f $nbBoots
-	} else {
-		Get-WinEvent -LogName System | ? Id -eq 6005
-	}
-}
-function lsserial {
-#	Get-CimInstance Win32_SerialPort | Select Name, Description, DeviceID
-#	""
-#	Get-WmiObject Win32_SerialPort | Select Name, Description, DeviceID
-#	""
-	$lptAndCom = '{4d36e978-e325-11ce-bfc1-08002be10318}'
-	gwmi Win32_PNPEntity | ? ClassGuid -eq $lptAndCom | select Name, Description
-	echo ""
-}
-function wgrep($regExp) {
-	if( $regExp.Length -eq 0 ) { $regExp="." }
-	Out-String -Stream | sls "$regExp"
-}
-
-if( ! (isInstalled("grep.exe")) ) {
-	function grep($pattern , $file) {
-		(cat $file) -match "$pattern"
-	}
-}
-
-function msinfo { 
-	$filename = "$ENV:COMPUTERNAME-$(get-date -f 'yyyyMMdd').nfo"
-	time Start-Process -wait  -FilePath "msinfo32.exe" -ArgumentList "-nfo", $filename
-}
-
-function changeLanguage2English {
-	[Threading.Thread]::CurrentThread.CurrentUICulture = 'en-UK'
-	if( (Get-WinSystemLocale).Name -ne "en-UK" ) { Set-WinSystemLocale en-UK }
-#	if( (Get-WinUserLanguageList).LanguageTag -ne "en-GB" ) { Set-WinUserLanguageList en-GB -Force }
-}
-
-function getInstallDate {
-	(Get-CimInstance Win32_OperatingSystem).InstallDate
-	(gwmi Win32_OperatingSystem).InstallDate
-	(gwmi Win32_OperatingSystem).InstallDate | % { [Management.ManagementDateTimeConverter]::ToDateTime( $_ ) }
-}
-
-function getModel {
-	(gwmi Win32_ComputerSystem).Model
-}
-function getSerialNumber {
-	(gwmi win32_bios).SerialNumber
-}
-
-function getServiceTag {
-	$manufacturer = $(gwmi win32_bios).Manufacturer
-	if( $manufacturer -match "Dell" ) {
-		(gwmi win32_bios).SerialNumber
-	}
-}
-
-function get-Service-Info {
-	$ErrorActionPreference = 'Stop'
-	$argc=$args.Count
-	if ( $argc -gt 0) {
-		for($i=0;$i -lt $argc;$i++) {
-			$serviceName = $args[$i]
-			echo "=> serviceName = <$serviceName> :`n"
-			try {
-				Get-Service $serviceName >$null 2>&1
-				Get-CimInstance win32_service | ? Name -eq $serviceName | Select Name , Caption , State , ServiceType , StartMode , ErrorControl , PathName , TagId , StartName , DelayedAutoStart
-			} catch {
-				echo "=> WARNING: The service <$serviceName> does not exist."
-				echo ""
-			}
-		}
-	}
-}
-
-function osName {
-	echo $(gwmi Win32_OperatingSystem).Caption
-}
-
-function np3 {
-	$argc=$args.Count
-	for($i=0;$i -lt $argc;$i++) {
-		if ( Test-Path $($args[$i]) ) {
-			notepad3 $($args[$i])
-		} else {
-			Write-Warning "$($args[$i]) does not exist."
-		}
-	}
-}
-
-function main {
-	$FUNCNAME = $MyInvocation.MyCommand.Name
-# 	"=> Running $FUNCNAME ..."
- 	$global:HISTFILE = $(Get-PSReadlineOption).HistorySavePath
- 	$today = $(Get-Date -f 'yyyyMMdd')
-
-#	changeLanguage2English
-}
-
-main
-
-if( isInstalled("Get-ADUser") ) {
-	. $profileDIR/profile.Windows.AD.ps1
-}
-
-if( isInstalled("choco") ) {
-	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
-}
+"=> Sourcing $scriptPrefix.$osFamily.ps1 functions ..."
+if( $(Get-PSReadlineKeyHandler | ? Key -eq Ctrl+d | % Function) -ne "DeleteCharOrExit" ) {
+	Set-PSReadlineKeyHandler -Key ctrl+d -Function DeleteCharOrExit
+}
+
+#	set-alias -Scope Global  ex
+#	function ex{exit}
+
+$SuppressDriveInit = $true # cf. https://stackoverflow.com/a/1662159
+
+$PSDefaultParameterValues['Out-File:Encoding'] = 'utf8' # cf. https://stackoverflow.com/a/40098904
+
+function cd($dir) {
+	if( $(alias cd *>$null;echo $?) ) { del alias:cd }
+	if($dir -eq "-"){popd}
+	elseif( ! $dir.Length ) {pushd ~}
+	else {pushd $dir}
+}
+
+function setVariables {
+	$global:openssl = "${ENV:ProgramFiles(x86)}\LogMeIn\x64\openssl.exe" # Le "openssl" package dans LogMeIn ne sais pas decrypter
+	$global:USER = $ENV:USERNAME
+	$global:DOMAIN = $ENV:USERDOMAIN
+	$global:DNSDOMAIN = $ENV:USERDNSDOMAIN
+	$global:HOSTNAME = $ENV:COMPUTERNAME
+	$global:isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+	$global:KiTTY_LogDIR= "${ENV:ProgramData}/scoop/apps/kitty/current/log"
+	$global:RecentDIR = "$ENV:APPDATA/Microsoft/Windows/Recent"
+	$global:SendToDIR = "$ENV:APPDATA/Microsoft/Windows/SendTo"
+	$global:StartupDIR = "$ENV:APPDATA/Microsoft/Windows/Start Menu/Programs/Startup"
+	$global:AllUsersStartupDIR = "$ENV:ProgramData/Microsoft/Windows/Start Menu/Programs/Startup"
+	$global:QuickLaunchDIR = "$ENV:APPDATA/Microsoft/Internet Explorer/Quick Launch"
+	$global:TaskBarDIR = "$ENV:APPDATA/Microsoft/Internet Explorer/Quick Launch/User Pinned/TaskBar"
+	$ENV:DISPLAY = "localhost:0"
+	$ENV:IsWindows = $IsWindows
+}
+
+setVariables
+
+function sysinfo {
+	Get-ComputerInfo CsManufacturer , CsModel
+}
+
+if( isInstalled("rg.exe") ) {
+	function rgrep { rg -uu -g !.git/ @args }
+}
+
+if( isInstalled("ls.exe") ) {
+	$global:ls = "ls.exe"
+	#function ls { ls.exe -F @args }
+	function l1 { & $ls -1F @args }
+	function la { & $ls -aF @args }
+	function ll { & $ls -lF @args }
+	function lla { & $ls -laF @args }
+	function llah { & $ls -lahF @args }
+	function lld { & $ls -dlF @args }
+	function llh { & $ls -lhF @args }
+}
+
+if( isInstalled("rm.exe") ) {
+	function rm { rm.exe -vi @args }
+}
+
+#function source($script) {
+#	if ($script) {
+#		$tokens = $null
+#		$errors = $null
+#		$ast = [System.Management.Automation.Language.Parser]::ParseFile($script, [ref]$tokens, [ref]$errors)
+#		if ($errors) {
+#			Write-Error "Errors parsing script: $($errors -join ', ')"
+#			return
+#		}
+#		$functions = $ast.FindAll({ $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true)
+#		foreach ($func in $functions) {
+#			$funcName = $func.Name
+#			$globalFuncBody = $func.Body.GetScriptBlock()
+#			Set-Item -Path "Function:\global:$funcName" -Value $globalFuncBody
+#		}
+#	}
+#
+#	$assignments = $ast.FindAll({ $args[0] -is [AssignmentStatementAst] }, $false)
+#	foreach ($assignment in $assignments) {
+#		# bring the assignment to this scope
+#		. ([scriptblock]::Create($assignment.ToString()))
+#		foreach ($target in $assignment.GetAssignmentTargets()) {
+#			# then get the value
+#			$varName = $target.VariablePath.ToString()
+#			$varValue = & ([scriptblock]::Create($target.ToString()))
+#			# and assign it to the caller's scope
+#			Set-Variable -Name $varName -Value $varValue -Scope Script
+#		}
+#	}
+#}
+
+function findfiles {
+	$argc=$args.Count
+	if ( $argc -eq 1 ) {
+		$dirName = "."
+		$regexp = $args[0]
+	} elseif ( $argc -eq 2 ) {
+		$dirName = $args[0]
+		$regexp = $args[1]
+	} else {
+		write-warning "Usage : [dirName] regexp"
+		return 1
+	}
+
+	dir -r -fo $dirName 2>$null | ? Name -match "$regexp" | % FullName
+}
+
+function findService {
+	$FUNCNAME = $MyInvocation.MyCommand.Name
+	$argc=$args.Count
+	$regexp = "."
+	if ( $argc -eq 1 ) {
+		$regexp = $args[0]
+	} else {
+		write-warning "Usage:$FUNCNAME [regexp=.]"
+		exit 1
+	}
+	Get-WmiObject win32_service | ? { $_.Description -Match "$regexp" -or $_.Name -Match "$regexp" -or $_.DisplayName -Match "$regexp" } | Format-Table Name , DisplayName , ServiceType , StartMode , State , ProcessId , PathName
+}
+
+function host1($name, $server) {
+	(nslookup $name $server 2>$null | sls -n Addresses: | sls Nom,Name,Address)[-2..-1] | Out-String -stream | % { $_.split(' ')[-1] }
+}
+
+function lastBoot {
+	Get-CimInstance -ClassName Win32_OperatingSystem | Select CSName , LastBootUpTime
+}
+function lastBoots($nbBoots) {
+	if ( $nbBoots ) {
+		Get-WinEvent -LogName System | ? Id -eq 6005 | select -f $nbBoots
+	} else {
+		Get-WinEvent -LogName System | ? Id -eq 6005
+	}
+}
+function lsserial {
+#	Get-CimInstance Win32_SerialPort | Select Name, Description, DeviceID
+#	""
+#	Get-WmiObject Win32_SerialPort | Select Name, Description, DeviceID
+#	""
+	$lptAndCom = '{4d36e978-e325-11ce-bfc1-08002be10318}'
+	gwmi Win32_PNPEntity | ? ClassGuid -eq $lptAndCom | select Name, Description
+	echo ""
+}
+function wgrep($regExp) {
+	if( $regExp.Length -eq 0 ) { $regExp="." }
+	Out-String -Stream | sls "$regExp"
+}
+
+if( ! (isInstalled("grep.exe")) ) {
+	function grep($pattern , $file) {
+		(cat $file) -match "$pattern"
+	}
+}
+
+function msinfo { 
+	$filename = "$ENV:COMPUTERNAME-$(get-date -f 'yyyyMMdd').nfo"
+	time Start-Process -wait  -FilePath "msinfo32.exe" -ArgumentList "-nfo", $filename
+}
+
+function changeLanguage2English {
+	[Threading.Thread]::CurrentThread.CurrentUICulture = 'en-UK'
+	if( (Get-WinSystemLocale).Name -ne "en-UK" ) { Set-WinSystemLocale en-UK }
+#	if( (Get-WinUserLanguageList).LanguageTag -ne "en-GB" ) { Set-WinUserLanguageList en-GB -Force }
+}
+
+function getInstallDate {
+	(Get-CimInstance Win32_OperatingSystem).InstallDate
+	(gwmi Win32_OperatingSystem).InstallDate
+	(gwmi Win32_OperatingSystem).InstallDate | % { [Management.ManagementDateTimeConverter]::ToDateTime( $_ ) }
+}
+
+function getModel {
+	(gwmi Win32_ComputerSystem).Model
+}
+function getSerialNumber {
+	(gwmi win32_bios).SerialNumber
+}
+
+function getServiceTag {
+	$manufacturer = $(gwmi win32_bios).Manufacturer
+	if( $manufacturer -match "Dell" ) {
+		(gwmi win32_bios).SerialNumber
+	}
+}
+
+function get-Service-Info {
+	$ErrorActionPreference = 'Stop'
+	$argc=$args.Count
+	if ( $argc -gt 0) {
+		for($i=0;$i -lt $argc;$i++) {
+			$serviceName = $args[$i]
+			echo "=> serviceName = <$serviceName> :`n"
+			try {
+				Get-Service $serviceName >$null 2>&1
+				Get-CimInstance win32_service | ? Name -eq $serviceName | Select Name , Caption , State , ServiceType , StartMode , ErrorControl , PathName , TagId , StartName , DelayedAutoStart
+			} catch {
+				echo "=> WARNING: The service <$serviceName> does not exist."
+				echo ""
+			}
+		}
+	}
+}
+
+function osName {
+	echo $(gwmi Win32_OperatingSystem).Caption
+}
+
+function np3 {
+	$argc=$args.Count
+	for($i=0;$i -lt $argc;$i++) {
+		if ( Test-Path $($args[$i]) ) {
+			notepad3 $($args[$i])
+		} else {
+			Write-Warning "$($args[$i]) does not exist."
+		}
+	}
+}
+
+function main {
+	$FUNCNAME = $MyInvocation.MyCommand.Name
+# 	"=> Running $FUNCNAME ..."
+ 	$global:HISTFILE = $(Get-PSReadlineOption).HistorySavePath
+ 	$today = $(Get-Date -f 'yyyyMMdd')
+
+#	changeLanguage2English
+}
+
+main
+
+if( isInstalled("Get-ADUser") ) {
+	. $profileDIR/profile.Windows.AD.ps1
+}
+
+if( isInstalled("choco") ) {
+	. $profileDIR/profile.choco.ps1 # Ne peut pas etre mis dans la fonction "main", sinon les definitions seront locales
+}
