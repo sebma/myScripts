@@ -43,3 +43,7 @@ egrep -h "deb\s+http://ppa.launchpad.net/" /etc/apt/sources.list.d/*-$(lsb_relea
 	sudo add-apt-repository ppa:$repo -r -y
 done
 
+grep -h URI.*https://ppa.launchpadcontent.net/ /etc/apt/sources.list.d/*-$(lsb_release -sc).sources | uniq | awk -F/ '{print$4"/"$5}'| while read repo;do
+	sudo ppa-purge ppa:$repo -y
+	sudo add-apt-repository ppa:$repo -r -y
+done
