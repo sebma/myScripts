@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
-elRelease=$(source /etc/os-release;echo $VERSION_ID)
+elRelease=$(source /etc/os-release;echo ${VERSION_ID/.*})
 
 wget "https://repo.zabbix.com/zabbix/7.0/rhel/$elRelease/x86_64/zabbix-release-latest-7.0.el$elRelease.noarch.rpm"
 unset http_proxy https_proxy
