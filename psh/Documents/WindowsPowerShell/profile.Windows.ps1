@@ -3,7 +3,6 @@ if( $(Get-PSReadlineKeyHandler | ? Key -eq Ctrl+d | % Function) -ne "DeleteCharO
 	Set-PSReadlineKeyHandler -Key ctrl+d -Function DeleteCharOrExit
 }
 
-#	set-alias -Scope Global  ex
 #	function ex{exit}
 
 $SuppressDriveInit = $true # cf. https://stackoverflow.com/a/1662159
