@@ -1,1 +1,1 @@
-@net stats srv | findstr "since depuis"
+@net stats srv | findstr "since depuis"

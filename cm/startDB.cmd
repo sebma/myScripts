@@ -1,2 +1,2 @@
-echo startup | sqlplus -s "/ as sysdba"
-@pause
+echo startup | sqlplus -s "/ as sysdba"
+@pause

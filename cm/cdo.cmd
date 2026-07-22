@@ -1,3 +1,3 @@
-set prevdir=%cd%
-popd
-pushd %prevdir%
+set prevdir=%cd%
+popd
+pushd %prevdir%

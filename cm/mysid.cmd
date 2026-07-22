@@ -1,2 +1,2 @@
-@whoami /user
-@whoami /user /sid
+@whoami /user
+@whoami /user /sid

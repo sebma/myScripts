@@ -1,1 +1,1 @@
-@start p:\winscp\winscp.exe %* && exit
+@start p:\winscp\winscp.exe %* && exit

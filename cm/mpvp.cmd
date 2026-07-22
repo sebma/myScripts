@@ -1,1 +1,1 @@
-@"%ProgramFiles%\SMPlayer\mpv\mpv.com" -playlist %*
+@"%ProgramFiles%\SMPlayer\mpv\mpv.com" -playlist %*

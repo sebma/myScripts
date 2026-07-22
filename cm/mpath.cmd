@@ -1,1 +1,1 @@
-@path | tr ";" "\n"
+@path | tr ";" "\n"

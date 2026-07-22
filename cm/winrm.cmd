@@ -1,1 +1,1 @@
-@cscript //nologo "%~dpn0.vbs" %*
+@cscript //nologo "%~dpn0.vbs" %*

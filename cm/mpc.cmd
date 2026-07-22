@@ -1,1 +1,1 @@
-@start mpc-hc %*
+@start mpc-hc %*

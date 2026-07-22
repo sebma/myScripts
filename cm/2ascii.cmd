@@ -1,1 +1,1 @@
-@iconv -f utf-16 -t ascii %1
+@iconv -f utf-16 -t ascii %1

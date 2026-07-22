@@ -1,1 +1,1 @@
-@net start albd || pause
+@net start albd || pause

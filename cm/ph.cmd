@@ -1,1 +1,1 @@
-@tasklist | findstr -i processhacker >nul: || start processhacker
+@tasklist | findstr -i processhacker >nul: || start processhacker

@@ -1,1 +1,1 @@
-@"%ProgramFiles%\SMPlayer\mpv\youtube-dl.exe" %*
+@"%ProgramFiles%\SMPlayer\mpv\youtube-dl.exe" %*

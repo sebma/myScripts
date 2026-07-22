@@ -1,1 +1,1 @@
-@start /b %windir%\PCHEALTH\HELPCTR\Binaries\msconfig.exe
+@start /b %windir%\PCHEALTH\HELPCTR\Binaries\msconfig.exe

@@ -1,1 +1,1 @@
-@sqlite3 -init p:\bin\.sqliterc %*
+@sqlite3 -init p:\bin\.sqliterc %*

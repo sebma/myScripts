@@ -1,1 +1,1 @@
-@readcd -clone f=%1
+@readcd -clone f=%1

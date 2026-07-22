@@ -1,1 +1,1 @@
-devcon find @pci\*
+devcon find @pci\*

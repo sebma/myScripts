@@ -1,1 +1,1 @@
-wmic softwarefeature get Caption,ProductName,Version | sort | uniq
+wmic softwarefeature get Caption,ProductName,Version | sort | uniq

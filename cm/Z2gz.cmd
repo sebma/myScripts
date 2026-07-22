@@ -1,1 +1,1 @@
-compress -d %1 && gzip -9 %1
+compress -d %1 && gzip -9 %1

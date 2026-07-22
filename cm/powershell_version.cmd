@@ -1,2 +1,2 @@
-@powershell "$PSVersionTable.CLRVersion"
-@powershell "[System.Environment]::Version"
+@powershell "$PSVersionTable.CLRVersion"
+@powershell "[System.Environment]::Version"
