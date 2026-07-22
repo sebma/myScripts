@@ -38,7 +38,8 @@ if ! which ppa-purge >/dev/null 2>&1;then
 	sudo apt install -V ppa-purge -y
 fi
 
-ls /etc/apt/sources.list.d/ | awk -F- "/$(lsb_release -sc).list$/"'{print$1"/"$3}' | while read repo;do
+egrep -h "deb\s+http://ppa.launchpad.net/" /etc/apt/sources.list.d/*-$(lsb_release -sc).list | awk -F/ '{print$4"/"$5}' | while read repo;do
 	sudo ppa-purge ppa:$repo -y
 	sudo add-apt-repository ppa:$repo -r -y
 done
+
