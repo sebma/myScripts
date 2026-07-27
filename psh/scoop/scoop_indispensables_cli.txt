@@ -1,6 +1,3 @@
-scoop bucket add extras
-scoop bucket add nirsoft
-scoop bucket add versions
 aria2 busybox curl dos2unix fastfetch fd ffmpeg gawk git gow iperf3 ipcalc jq mediainfo mpv openssl-lts-light psutils python ripgrep rga rclone unzip wget yq yt-dlp
 # rustdesk
 # clamav
