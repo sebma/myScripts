@@ -1,5 +1,6 @@
 $scriptName = Split-Path -Leaf $PSCommandPath
 function robocopyPS {
+	$stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 	$dirSep = [io.path]::DirectorySeparatorChar
 	$argc=$args.Count
 	if ( $argc -lt 2 ) {
@@ -35,6 +36,9 @@ function robocopyPS {
 	}
 
 	if ( $fullSynchro ) { Remove-Item -Force $fullSynchroFile }
+	$stopwatch.Stop()
+	$duration = $stopwatch.Elapsed
+	Write-Host "Execution time: $duration."
 }
 
 robocopyPS @args
