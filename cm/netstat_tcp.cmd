@@ -1,1 +1,1 @@
-netstat -nap tcp | findstr -i listen
+netstat -nap tcp -o | findstr -i listen
