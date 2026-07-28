@@ -75,6 +75,7 @@ dpkg-repack
 efibootmgr
 efivar
 elinks
+enscript
 eog
 epiphany-browser
 evince
