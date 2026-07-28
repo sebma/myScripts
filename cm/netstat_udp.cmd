@@ -1,1 +1,1 @@
-netstat -nap udp | findstr -i listen
+netstat -nap udp -o | findstr -i listen
