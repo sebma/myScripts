@@ -6,7 +6,9 @@ scriptBaseName=${0/*\//}
 grep ::proxy /etc/apt/apt.conf.d/*proxy
 
 # mkdir ~/ImageMagick-6/ && cp -piv /etc/ImageMagick-6/policy.xml ~/ImageMagick-6/policy.xml
-dpkg -l imagemagick-6-common && sudo apt purge imagemagick-6-common -Vy
+# dpkg -l imagemagick-6-common && sudo apt purge imagemagick-6-common -Vy
+
+dpkg -l open-vm-tools && sudo apt install open-vm-tools -Vy
 
 ################## DEPLACEMENT ES CONF DANS DES SOUS REPERTOIRES #####################
 sudo mkdir -p /etc/systemd/timesyncd.conf.d/
