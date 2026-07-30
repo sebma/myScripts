@@ -54,7 +54,7 @@ if $isRedHatLike;then
 		fi
 	else
 		if ! dnf repolist | grep crb -w -q;then
-			$sudo dnf config-manager --set-enabled crb
+			$sudo dnf config-manager --enabled crb
 			$sudo dnf makecache
 		fi
 	fi
