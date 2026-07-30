@@ -1,3 +1,4 @@
+# vim: ft=ruby noet:
 class customer::add_printer {
 	if $::osfamily == 'RedHat' {
 		package { 'cups':
