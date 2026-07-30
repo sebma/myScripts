@@ -71,7 +71,7 @@ function main {
 		echo "=> Downloading $package ..."
 		[ $package = chromium-browser-l10n ] && currentArch=all || currentArch=$arch
 #set -x
-		wget -U "Mozilla/5.0" -nv -P $tmpDir/ -nd -nH -A "${package}_*$LTSReleaseNumber*$currentArch.deb" -rl1 $baseUrl
+		wget -U "Mozilla/5.0" -nv -P $tmpDir/ -nd -nH -A "${package}_*$LTSReleaseNumber*$currentArch.deb" -r -l1 $baseUrl
 set +x
 		ls -v $tmpDir/$package* >/dev/null || exit
 		remoteVersion=$(ls -v $tmpDir/${package}_* | cut -d_ -f2 | tail -1)
