@@ -33,7 +33,7 @@ fi
 
 $sudo dnf install realmd krb5-workstation -y
 realm list
-#$sudo realm join -U T2-USER domain.LAN
+#$sudo realm join -U $T2-USER domain.LAN
 $sudo grep %admin_linux /etc/sudoers.d/t2admin -q || printf "%%admin_linux ALL=(ALL) ALL" | $sudo tee -a /etc/sudoers.d/t2admin
 
 $sudo mkdir -p /var/log/journal # Pour que la log de systemd-journald ne soit pas volatile
@@ -61,7 +61,7 @@ cat /proc/sys/kernel/random/entropy_avail
 
 $sudo dnf install dnf-plugins-core -y
 if ! dnf repolist | grep crb -w -q;then
-	$sudo dnf config-manager --set-enabled crb
+	$sudo dnf config-manager --enable crb
 	$sudo dnf makecache
 fi
 if ! dnf repolist | grep docker-ce -q;then
