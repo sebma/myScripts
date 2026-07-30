@@ -68,7 +68,7 @@ function main {
 	for package in $wgetThunderbirdPackageList
 	do
 		echo "=> Downloading $package ..."
-		wget -nv -P $tmpDir/ -nd -nH -A "${package}_*$LTSReleaseNumber*$arch.deb" -rl1 $baseUrl
+		wget -nv -P $tmpDir/ -nd -nH -A "${package}_*$LTSReleaseNumber*$arch.deb" -r -l1 $baseUrl
 		ls -v $tmpDir/$package* >/dev/null || exit
 		remoteVersion=$(ls -v $tmpDir/${package}_* | cut -d_ -f2 | tail -1)
 		localVersion=$(dpkg-query --showformat='${Version}' -W $package | cut -d: -f2-)
