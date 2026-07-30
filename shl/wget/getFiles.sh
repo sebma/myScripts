@@ -14,4 +14,4 @@ wget="command wget2"
 #time $wget --no-parent --continue --timestamping --server-response --random-wait --no-directories --directory-prefix=$baseUrl/ --user-agent=Mozilla --content-disposition --convert-links --page-requisites --recursive --level=1 --reject index.html --accept "$@"
 #time $wget --no-parent --continue --timestamping --random-wait --no-directories --directory-prefix=$baseUrl/ --user-agent=Mozilla --content-disposition --convert-links --page-requisites --recursive --level=1 --reject index.html --accept "$@"
 set -x
-time $wget --no-parent --continue --timestamping --random-wait --directory-prefix=$baseUrl/ --user-agent=Mozilla --content-disposition --convert-links --page-requisites --recursive --reject index.html --accept "$@"
+time $wget --no-parent --continue --timestamping --random-wait --directory-prefix="$baseUrl/" --user-agent="Mozilla" --content-disposition --convert-links --page-requisites --recursive --reject 'index.html' --accept "$@"
