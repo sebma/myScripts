@@ -19,5 +19,5 @@ if do-release-upgrade -c | grep New.release.*LTS.*available.;then
 	fi
 
 	do-release-upgrade
-	sudo apt autoremove -Vy
 fi
+sudo apt autoremove -Vy
