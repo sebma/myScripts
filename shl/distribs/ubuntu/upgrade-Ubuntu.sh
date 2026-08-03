@@ -13,7 +13,7 @@ if do-release-upgrade -c | grep New.release.*LTS.*available.;then
 		packagesList=$(apt list --upgradable 2>/dev/null | awk -F"/" "/$(lsb_release -sc)/"'{print$1}' | paste -sd " ")
 		packagesRegExp=${packagesList/ /|}
 		sudo aptitude install -V  $packagesList -y
-		if sudo apt install -V $packagesList -y;then
+		if ! sudo apt install -V $packagesList -y;then
 			sudo apt purge -V $(deborphan | egrep "$packagesRegExp")
 		fi
 	fi
