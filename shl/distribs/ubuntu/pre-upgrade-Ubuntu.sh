@@ -25,18 +25,24 @@ fi
 grep ::proxy /etc/apt/apt.conf.d/*proxy
 
 ################## DEPLACEMENT ES CONF DANS DES SOUS REPERTOIRES #####################
-$sudo mkdir -p /etc/systemd/timesyncd.conf.d/
+$sudo mkdir -pv /etc/systemd/timesyncd.conf.d/
 if egrep 'NTP=[0-9.]+' /etc/systemd/timesyncd.conf -q 2>/dev/null;then
 	$sudo mv -v /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.d/
 	$sudo apt -V install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" systemd-timesyncd
 	$sudo systemctl restart systemd-timesyncd.service
 fi
 
-$sudo mkdir -p /etc/snmp/snmpd.conf.d/
+$sudo mkdir -pv /etc/snmp/snmpd.conf.d/
 if $sudo grep -v 'sysContact.*me@example.org' /etc/snmp/snmpd.conf | grep sysContact -q 2>/dev/null;then
 	$sudo mv -v /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.d/
 	$sudo apt -V install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" snmpd
 	$sudo systemctl restart snmpd.service
+fi
+
+$sudo mkdir -pv /etc/default/grub.d/
+if egrep "^GRUB_GFX_MODE=|GRUB_TIMEOUT_STYLE=menu" /etc/default/grub -q;then
+	$sudo mv -v /etc/default/grub /etc/default/grub.d/
+	$sudo apt -V install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" grub-pc
 fi
 
 $sudo apt install -V open-vm-tools aptitude deborphan ripgrep htop dfc pv ncdu fd-find jq -y
@@ -54,9 +60,10 @@ if ! which ppa-purge >/dev/null 2>&1;then
 	$sudo apt install -V ppa-purge -y
 fi
 
-ls /etc/apt/sources.list.d/ | awk -F- "/$(lsb_release -sc).list$/"'{print$1"/"$3}' | while read repo;do
+ls /etc/apt/sources.list.d/ | awk -F- "/$(lsb_release -sc).list$/"'{print$0" "$1"/"$3}' | while read repoFile repo;do
 	$sudo ppa-purge ppa:$repo -y
 	pgrep dpkg >/dev/null || $sudo rm -vf /var/lib/dpkg/lock
 	pgrep apt  >/dev/null || $sudo rm -vf /var/lib/apt/lists/lock
 	$sudo add-apt-repository ppa:$repo -r -y
+	#$sudo sed -i 's/^deb/#deb/' /etc/apt/sources.list.d/$repoFile
 done
