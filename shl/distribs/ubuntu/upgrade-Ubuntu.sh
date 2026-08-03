@@ -16,11 +16,11 @@ fi
 
 if $isDebianLike;then
 	$sudo apt autoremove -V
-	if ! do-release-upgrade -c;then
+	if $isUbuntuLike && ! do-release-upgrade -c >/dev/null;then
 		$sudo apt install --reinstall -V ubuntu-keyring
 	fi
 
-	if do-release-upgrade -c | grep New.release.*LTS.*available.;then
+	if $isUbuntuLike && do-release-upgrade -c | grep New.release.*LTS.*available.;then
 		$sudo apt update && $sudo apt upgrade -Vy
 		if $sudo apt-get upgrade -V -s | grep 'and [^0][0-9]* not upgraded';then
 			packagesList=$(apt list --upgradable 2>/dev/null | awk -F"/" "/$(lsb_release -sc)/"'{print$1}' | paste -sd " ")
@@ -31,7 +31,7 @@ if $isDebianLike;then
 			fi
 		fi
 
-		do-release-upgrade
+		$isUbuntuLike && do-release-upgrade
 	fi
 	$sudo apt autoremove -V
 fi
