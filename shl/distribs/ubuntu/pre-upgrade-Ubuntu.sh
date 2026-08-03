@@ -24,8 +24,6 @@ fi
 
 grep ::proxy /etc/apt/apt.conf.d/*proxy
 
-dpkg -l open-vm-tools &>/dev/null && sudo apt install open-vm-tools -Vy
-
 ################## DEPLACEMENT ES CONF DANS DES SOUS REPERTOIRES #####################
 sudo mkdir -p /etc/systemd/timesyncd.conf.d/
 if egrep 'NTP=[0-9.]+' /etc/systemd/timesyncd.conf -q 2>/dev/null;then
@@ -41,7 +39,7 @@ if sudo grep -i '^agentAddress' /etc/snmp/snmpd.conf -q 2>/dev/null;then
 	sudo systemctl restart snmpd.service
 fi
 
-sudo apt install -V aptitude deborphan ripgrep htop dfc pv ncdu fd-find jq -y
+sudo apt install -V open-vm-tools aptitude deborphan ripgrep htop dfc pv ncdu fd-find jq -y
 [ $majorNumber -ge 22 ] && sudo apt install -V plocate -y
 
 [ $http_proxy  ] && sudo snap get system proxy.http  -l 2>/dev/null | grep proxy.http  -wq || time sudo snap set system proxy.http=$http_proxy
