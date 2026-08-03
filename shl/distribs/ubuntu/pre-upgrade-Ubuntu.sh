@@ -24,9 +24,6 @@ fi
 
 grep ::proxy /etc/apt/apt.conf.d/*proxy
 
-# mkdir ~/ImageMagick-6/ && cp -piv /etc/ImageMagick-6/policy.xml ~/ImageMagick-6/policy.xml
-# dpkg -l imagemagick-6-common &>/dev/null && sudo apt purge imagemagick-6-common -Vy && sudo apt autoremove -V
-
 dpkg -l open-vm-tools &>/dev/null && sudo apt install open-vm-tools -Vy
 
 ################## DEPLACEMENT ES CONF DANS DES SOUS REPERTOIRES #####################
