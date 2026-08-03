@@ -49,7 +49,7 @@ sudo apt install -V aptitude deborphan ripgrep htop dfc pv ncdu fd-find jq -y
 
 [ $http_proxy  ] && sudo snap get system proxy.http  -l 2>/dev/null | grep proxy.http  -wq || time sudo snap set system proxy.http=$http_proxy
 [ $https_proxy ] && sudo snap get system proxy.https -l 2>/dev/null | grep proxy.https -wq || time sudo snap set system proxy.https=$https_proxy
-sudo snap get system proxy
+sudo snap get system proxy -l
 snap debug connectivity
 
 sudo grep '^\s*Defaults:%sudo env_keep.*https_proxy' /etc/sudoers /etc/sudoers.d/* 2>/dev/null -q || echo 'Defaults:%sudo env_keep += "http_proxy https_proxy ftp_proxy all_proxy no_proxy HTTP_PROXY HTTPS_PROXY FTP_PROXY ALL_PROXY NO_PROXY"' | sudo tee -a /etc/sudoers.d/proxy_env
@@ -60,6 +60,7 @@ if ! which ppa-purge >/dev/null 2>&1;then
 fi
 
 ls /etc/apt/sources.list.d/ | awk -F- "/$(lsb_release -sc).list$/"'{print$1"/"$3}' | while read repo;do
+	unset http_proxy https_proxy
 	sudo ppa-purge ppa:$repo -y
 	sudo add-apt-repository ppa:$repo -r -y
 done
