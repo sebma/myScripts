@@ -3,6 +3,7 @@
 set -u
 scriptBaseName=${0/*\//}
 
+sudo apt autoremove -V
 if ! do-release-upgrade -c;then
 	sudo apt install --reinstall -V ubuntu-keyring
 fi
@@ -20,4 +21,4 @@ if do-release-upgrade -c | grep New.release.*LTS.*available.;then
 
 	do-release-upgrade
 fi
-sudo apt autoremove -Vy
+sudo apt autoremove -V
