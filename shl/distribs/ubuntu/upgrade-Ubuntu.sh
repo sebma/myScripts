@@ -21,12 +21,13 @@ if $isDebianLike;then
 	fi
 
 	if $isUbuntuLike && do-release-upgrade -c | grep New.release.*LTS.*available.;then
-		$sudo apt update && $sudo apt upgrade -Vy
+		$sudo apt update && $sudo apt upgrade -V -y
 		if $sudo apt-get upgrade -V -s | grep 'and [^0][0-9]* not upgraded';then
 			packagesList=$(apt list --upgradable 2>/dev/null | awk -F"/" "/$(lsb_release -sc)/"'{print$1}' | paste -sd " ")
 			packagesRegExp=${packagesList/ /|}
 			$sudo aptitude install -V $packagesList -y
 			if ! $sudo apt install -V $packagesList -y;then
+				dpkg -s deborphan &>/dev/null || $sudo apt install -V deborphan -y
 				$sudo apt purge -V $(deborphan | egrep "$packagesRegExp")
 			fi
 		fi
