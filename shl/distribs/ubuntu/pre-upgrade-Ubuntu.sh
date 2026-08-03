@@ -3,10 +3,10 @@
 set -u
 scriptBaseName=${0/*\//}
 
-distribID=$(source /etc/os-release;echo $ID)
 majorNumber=$(source /etc/os-release;echo $VERSION_ID | cut -d. -f1)
-test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
+test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
+distribID=$(source /etc/os-release;echo $ID)
 if   echo $distribID | egrep "centos|rhel|fedora" -q;then
 	isRedHatLike=true
 elif echo $distribID | egrep "debian|ubuntu" -q;then
