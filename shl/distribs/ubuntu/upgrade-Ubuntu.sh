@@ -3,7 +3,7 @@
 set -u
 scriptBaseName=${0/*\//}
 
-if ! do-release-upgrade;then
+if ! do-release-upgrade -c;then
 	sudo apt install --reinstall -V ubuntu-keyring
 fi
 
