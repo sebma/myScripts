@@ -33,7 +33,7 @@ if egrep 'NTP=[0-9.]+' /etc/systemd/timesyncd.conf -q 2>/dev/null;then
 fi
 
 $sudo mkdir -p /etc/snmp/snmpd.conf.d/
-if $sudo grep -i '^agentAddress' /etc/snmp/snmpd.conf -q 2>/dev/null;then
+if $sudo grep -v 'sysContact.*me@example.org' /etc/snmp/snmpd.conf | grep sysContact -q 2>/dev/null;then
 	$sudo mv -v /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.d/
 	$sudo apt -V install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" snmpd
 	$sudo systemctl restart snmpd.service
@@ -55,7 +55,8 @@ if ! which ppa-purge >/dev/null 2>&1;then
 fi
 
 ls /etc/apt/sources.list.d/ | awk -F- "/$(lsb_release -sc).list$/"'{print$1"/"$3}' | while read repo;do
-	unset http_proxy https_proxy
 	$sudo ppa-purge ppa:$repo -y
+	pgrep dpkg >/dev/null || $sudo rm -vf /var/lib/dpkg/lock
+	pgrep apt  >/dev/null || $sudo rm -vf /var/lib/apt/lists/lock
 	$sudo add-apt-repository ppa:$repo -r -y
 done
