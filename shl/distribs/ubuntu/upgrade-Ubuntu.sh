@@ -25,6 +25,7 @@ if $isDebianLike;then
 		if $sudo apt-get upgrade -V -s | grep 'and [^0][0-9]* not upgraded';then
 			packagesList=$(apt list --upgradable 2>/dev/null | awk -F"/" "/$(lsb_release -sc)/"'{print$1}' | paste -sd " ")
 			packagesRegExp=${packagesList/ /|}
+			dpkg -s aptitude &>/dev/null || $sudo apt install -V aptitude -y
 			$sudo aptitude install -V $packagesList -y
 			if ! $sudo apt install -V $packagesList -y;then
 				dpkg -s deborphan &>/dev/null || $sudo apt install -V deborphan -y
