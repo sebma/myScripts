@@ -3,15 +3,14 @@ set -o nounset
 declare {isDebian,isRedHat}Like=false
 
 distribID=$(source /etc/os-release;echo $ID)
+majorNumber=$(source /etc/os-release;echo $VERSION_ID | cut -d. -f1)
+test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
+
 if   echo $distribID | egrep "centos|rhel|fedora|photon" -q;then
-	sudo=""
 	isRedHatLike=true
 elif echo $distribID | egrep "debian|ubuntu" -q;then
-	sudo=$(type -P sudo)
 	isDebianLike=true
 fi
-
-test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
 if [ $# != 1 ];then
 	echo "=> Usage $scriptBaseName variablesDefinitionFile" >&2
