@@ -39,7 +39,7 @@ if $isDebianLike;then
 
 	read -p "Enter the new hostname you want :" newHostName
 	[ $newHostName ] && $sudo hostnamectl set-hostname $newHostName
-	###########################
+#############################################################################
 
 ################## DEPLACEMENT ES CONF DANS DES SOUS REPERTOIRES #####################
 	if egrep 'NTP=$ipAddressERE' /etc/systemd/timesyncd.conf -q 2>/dev/null;then
@@ -62,6 +62,7 @@ if $isDebianLike;then
 		$sudo mv -v /etc/default/grub /etc/default/grub.d/
 		$sudo apt -V install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" grub-pc
 	fi
+#############################################################################
 
 	$sudo apt install -V aptitude deborphan ripgrep htop dfc pv ncdu fd-find jq -y
 	$isVM && $sudo apt install -V open-vm-tools -y
