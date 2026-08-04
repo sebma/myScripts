@@ -25,6 +25,20 @@ fi
 grep ::proxy /etc/apt/apt.conf.d/*proxy
 
 if $isDebianLike;then
+################### DISABLE CLOUD-INIT SERVICE ############################
+	#$sudo systemctl disable --now cloud-init-local.service
+	#$sudo systemctl mask cloud-init-local.service
+	#$sudo touch /etc/cloud/cloud-init.disabled
+	if ! egrep "preserve_hostname:\s+true" /etc/cloud/cloud.cfg.d/*.cfg -q;then
+		$sudo tee /etc/cloud/cloud.cfg.d/99-preserve-hostname.cfg <<-EOF
+			preserve_hostname: true
+		EOF
+	fi
+
+	read -p "Enter the new hostname you want :" newHostName
+	[ $newHostName ] && $sudo hostnamectl set-hostname $newHostName
+	###########################
+
 ################## DEPLACEMENT ES CONF DANS DES SOUS REPERTOIRES #####################
 	$sudo mkdir -pv /etc/systemd/timesyncd.conf.d/
 	if egrep 'NTP=[0-9.]+' /etc/systemd/timesyncd.conf -q 2>/dev/null;then
