@@ -4,7 +4,7 @@ set -u
 scriptBaseName=${0/*\//}
 
 majorNumber=$(source /etc/os-release;echo $VERSION_ID | cut -d. -f1)
-isVM='egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name -q && echo true || echo false'
+isVM=$(egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name -q && echo true || echo false)
 
 test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 distribID=$(source /etc/os-release;echo $ID)
