@@ -86,4 +86,4 @@ if $isDebianLike;then
 	done
 fi
 
-$isVM && echo "=> WARNING : Do NOT FORGET to take a snapshot BEFORE your OS upgrade !"
+$isVM && echo && echo "=> WARNING : Do NOT FORGET to take a snapshot BEFORE your OS upgrade !"
