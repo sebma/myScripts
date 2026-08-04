@@ -40,22 +40,22 @@ if $isDebianLike;then
 	###########################
 
 ################## DEPLACEMENT ES CONF DANS DES SOUS REPERTOIRES #####################
-	$sudo mkdir -pv /etc/systemd/timesyncd.conf.d/
 	if egrep 'NTP=[0-9.]+' /etc/systemd/timesyncd.conf -q 2>/dev/null;then
+		$sudo mkdir -pv /etc/systemd/timesyncd.conf.d/
 		$sudo mv -v /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.d/
 		$sudo apt -V install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" systemd-timesyncd
 		$sudo systemctl restart systemd-timesyncd.service
 	fi
 
-	$sudo mkdir -pv /etc/snmp/snmpd.conf.d/
 	if $sudo grep -v 'sysContact.*me@example.org' /etc/snmp/snmpd.conf | grep sysContact -q 2>/dev/null;then
+		$sudo mkdir -pv /etc/snmp/snmpd.conf.d/
 		$sudo mv -v /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.d/
 		$sudo apt -V install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" snmpd
 		$sudo systemctl restart snmpd.service
 	fi
 
-	$sudo mkdir -pv /etc/default/grub.d/
 	if egrep "^(GRUB_GFX_MODE=|GRUB_TIMEOUT_STYLE=menu)" /etc/default/grub -q;then
+		$sudo mkdir -pv /etc/default/grub.d/
 		$sudo mv -v /etc/default/grub /etc/default/grub.d/
 		$sudo apt -V install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" grub-pc
 	fi
