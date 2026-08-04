@@ -53,6 +53,7 @@ if $isDebianLike;then
 		$sudo mkdir -pv /etc/snmp/snmpd.conf.d/
 		$sudo mv -v /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.d/
 		$sudo apt -V install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" snmpd
+		grep ^mibs /etc/snmp/snmp.conf -q && $sudo sed -i '/^mibs.*$/s/^/#/' /etc/snmp/snmp.conf
 		$sudo systemctl restart snmpd.service
 	fi
 
