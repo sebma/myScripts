@@ -3,6 +3,8 @@
 set -u
 scriptBaseName=${0/*\//}
 
+isVM=$(egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name -q && echo true || echo false)
+
 test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 distribID=$(source /etc/os-release;echo $ID)
 if   echo $distribID | egrep "centos|rhel|fedora" -q;then
@@ -33,5 +35,10 @@ if $isDebianLike;then
 	if ! dpkg -s plocate &>/dev/null;then
 		$sudo apt install plocate -V -y
 		$sudo systemctl restart plocate-updatedb.timer
+	fi
+
+	if journalctl -p err | grep 'SMBus Host Controller not enabled' -q && $isVM && lsmod | grep i2c_piix4 -q;then
+		echo "blacklist i2c_piix4" | $sudo tee /etc/modprobe.d/blacklist-i2c_piix4.conf >/dev/null
+		$sudo update-initramfs -u
 	fi
 fi
