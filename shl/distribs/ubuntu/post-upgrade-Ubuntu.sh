@@ -37,7 +37,7 @@ if $isDebianLike;then
 		$sudo systemctl restart plocate-updatedb.timer
 	fi
 
-	if journalctl -p err | grep 'SMBus Host Controller not enabled' -q && $isVM && lsmod | grep i2c_piix4 -q;then
+	if journalctl -p err | grep 'SMBus Host Controller not enabled' -q && $isVM && lsmod | grep i2c_piix4 -q && ! ls /sys/bus/i2c/devices/ -1 | grep . -q;then
 		echo "blacklist i2c_piix4" | $sudo tee /etc/modprobe.d/blacklist-i2c_piix4.conf >/dev/null
 		$sudo update-initramfs -u
 	fi
