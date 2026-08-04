@@ -42,6 +42,13 @@ if $isDebianLike;then
 #############################################################################
 
 ################## DEPLACEMENT ES CONF DANS DES SOUS REPERTOIRES #####################
+	if egrep "$ipAddressERE" /etc/rsyslog.conf -q;then
+		$sudo mkdir -pv /etc/rsyslog.d/
+		$sudo mv -v /etc/rsyslog.conf /etc/rsyslog.d/
+		$sudo apt -V install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" rsyslog
+		$sudo systemctl restart rsyslog.service
+	fi
+
 	if egrep 'NTP=$ipAddressERE' /etc/systemd/timesyncd.conf -q 2>/dev/null;then
 		$sudo mkdir -pv /etc/systemd/timesyncd.conf.d/
 		$sudo mv -v /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.d/
