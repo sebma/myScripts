@@ -28,5 +28,10 @@ if $isDebianLike;then
 			$sudo apt purge -V $(deborphan | egrep "$packagesRegExp")
 		fi
 	fi
+
 	$sudo apt autoremove -V
+	if ! dpkg -s plocate &>/dev/null;then
+		$sudo apt install plocate -V -y
+		$sudo systemctl restart plocate-updatedb.timer
+	fi
 fi
