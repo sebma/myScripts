@@ -5,6 +5,7 @@ scriptBaseName=${0/*\//}
 
 majorNumber=$(source /etc/os-release;echo $VERSION_ID | cut -d. -f1)
 isVM=$(egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name -q && echo true || echo false)
+ipAddressERE="([0-9]+\.){3}[0-9]+"
 
 test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 distribID=$(source /etc/os-release;echo $ID)
@@ -41,7 +42,7 @@ if $isDebianLike;then
 	###########################
 
 ################## DEPLACEMENT ES CONF DANS DES SOUS REPERTOIRES #####################
-	if egrep 'NTP=[0-9.]+' /etc/systemd/timesyncd.conf -q 2>/dev/null;then
+	if egrep 'NTP=$ipAddressERE' /etc/systemd/timesyncd.conf -q 2>/dev/null;then
 		$sudo mkdir -pv /etc/systemd/timesyncd.conf.d/
 		$sudo mv -v /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.d/
 		$sudo apt -V install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" systemd-timesyncd
