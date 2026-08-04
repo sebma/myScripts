@@ -55,7 +55,7 @@ if $isDebianLike;then
 	fi
 
 	$sudo mkdir -pv /etc/default/grub.d/
-	if egrep "^GRUB_GFX_MODE=|GRUB_TIMEOUT_STYLE=menu" /etc/default/grub -q;then
+	if egrep "^(GRUB_GFX_MODE=|GRUB_TIMEOUT_STYLE=menu)" /etc/default/grub -q;then
 		$sudo mv -v /etc/default/grub /etc/default/grub.d/
 		$sudo apt -V install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" grub-pc
 	fi
