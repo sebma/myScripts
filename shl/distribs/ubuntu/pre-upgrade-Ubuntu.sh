@@ -4,6 +4,7 @@ set -u
 scriptBaseName=${0/*\//}
 
 majorNumber=$(source /etc/os-release;echo $VERSION_ID | cut -d. -f1)
+isVM='egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name -q && echo true || echo false'
 
 test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 distribID=$(source /etc/os-release;echo $ID)
@@ -60,7 +61,8 @@ if $isDebianLike;then
 		$sudo apt -V install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" grub-pc
 	fi
 
-	$sudo apt install -V open-vm-tools aptitude deborphan ripgrep htop dfc pv ncdu fd-find jq -y
+	$sudo apt install -V aptitude deborphan ripgrep htop dfc pv ncdu fd-find jq -y
+	$isVM && $sudo apt install -V open-vm-tools -y
 	[ $majorNumber -ge 22 ] && $sudo apt install -V plocate -y
 
 	[ $http_proxy  ] && $sudo snap get system proxy.http  -l 2>/dev/null | grep proxy.http  -wq || time $sudo snap set system proxy.http=$http_proxy
@@ -83,3 +85,5 @@ if $isDebianLike;then
 		#$sudo sed -i 's/^deb/#deb/' /etc/apt/sources.list.d/$repoFile
 	done
 fi
+
+$isVM && echo "=> WARNING : Do NOT FORGET to take a snapshot BEFORE your OS upgrade !"
