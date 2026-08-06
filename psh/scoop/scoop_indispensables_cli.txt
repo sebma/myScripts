@@ -1,4 +1,4 @@
-aria2 busybox curl diffutils dos2unix fastfetch fd ffmpeg gawk git microsoft-coreutils-lean iperf3 ipcalc jq mediainfo mpv openssl-lts-light psutils python ripgrep rga rclone unzip wget yq yt-dlp
+aria2 busybox curl diffutils dos2unix fastfetch fd file ffmpeg gawk git microsoft-coreutils-lean iperf3 ipcalc jq mediainfo mpv openssl-lts-light psutils python ripgrep rga rclone unzip wget yq yt-dlp
 # rustdesk
 # clamav
 # busybox contains time.exe and time.ps1
