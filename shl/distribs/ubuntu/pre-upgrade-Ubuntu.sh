@@ -4,6 +4,7 @@ set -u
 scriptBaseName=${0/*\//}
 
 majorNumber=$(source /etc/os-release;echo $VERSION_ID | cut -d. -f1)
+isVM=false
 isVM=$(egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name -q && echo true || echo false)
 ipAddressERE="([0-9]+\.){3}[0-9]+"
 
