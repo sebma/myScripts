@@ -45,30 +45,34 @@ if $isDebianLike;then
 ################## DEPLACEMENT ES CONF DANS DES SOUS REPERTOIRES #####################
 	if egrep "$ipAddressERE" /etc/rsyslog.conf -q;then
 		$sudo mkdir -pv /etc/rsyslog.d/
-		$sudo mv -v /etc/rsyslog.conf /etc/rsyslog.d/
+		$sudo mv -v /etc/rsyslog.conf ~/rsyslog.conf
 		$sudo apt -V install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" rsyslog
+		sdiff -s /etc/rsyslog.conf ~/rsyslog.conf | $sudo tee /etc/rsyslog.d/rsyslog.conf
 		$sudo systemctl restart rsyslog.service
 	fi
 
 	if egrep 'NTP=$ipAddressERE' /etc/systemd/timesyncd.conf -q 2>/dev/null;then
 		$sudo mkdir -pv /etc/systemd/timesyncd.conf.d/
-		$sudo mv -v /etc/systemd/timesyncd.conf /etc/systemd/timesyncd.conf.d/
+		$sudo mv -v /etc/systemd/timesyncd.conf ~/timesyncd.conf
 		$sudo apt -V install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" systemd-timesyncd
+		sdiff -s /etc/systemd/timesyncd.conf ~/timesyncd.conf | $sudo tee /etc/systemd/timesyncd.conf.d/timesyncd.conf
 		$sudo systemctl restart systemd-timesyncd.service
 	fi
 
 	if $sudo grep -v 'sysContact.*me@example.org' /etc/snmp/snmpd.conf | grep sysContact -q 2>/dev/null;then
 		$sudo mkdir -pv /etc/snmp/snmpd.conf.d/
-		$sudo mv -v /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.d/
-		$sudo apt -V install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" snmpd
 		grep ^mibs /etc/snmp/snmp.conf -q && $sudo sed -i '/^mibs.*$/s/^/#/' /etc/snmp/snmp.conf
+		$sudo mv -v /etc/snmp/snmpd.conf ~/snmpd.conf
+		$sudo apt -V install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" snmpd
+		sdiff -s /etc/snmp/snmpd.conf ~/snmpd.conf | $sudo tee /etc/snmp/snmpd.conf.d/snmpd.conf
 		$sudo systemctl restart snmpd.service
 	fi
 
 	if egrep "^(GRUB_GFX_MODE=|GRUB_TIMEOUT_STYLE=menu)" /etc/default/grub -q;then
 		$sudo mkdir -pv /etc/default/grub.d/
-		$sudo mv -v /etc/default/grub /etc/default/grub.d/
+		$sudo mv -v /etc/default/grub ~/grub
 		$sudo apt -V install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" grub-pc
+		sdiff -s /etc/default/grub ~/grub | $sudo tee /etc/default/grub.d/grub
 	fi
 #############################################################################
 
