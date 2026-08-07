@@ -745,7 +745,7 @@ function videoLocalInfo {
 				$ffprobe "$urlOrFile" || $ffprobe $ffprobeOptions "$urlOrFile"
 			fi
 			echo
-		done 2>&1 | \egrep -vi "^ +(:\s+$|comment|description +: [^/]+$)" | uniq | egrep --color -iw "^$|description.*:/|PURL.*:/|stream|local|urlOrFile|kb/s|Input|Size:|Title\s*:|Duration:|Channel.*:|Stream|Chapter|Invalid|error|bad| no such file|^\[.* not"
+		done 2>&1 | \egrep -vi "^ +(:\s+$)" | uniq | egrep --color -iw "^$|description\s*:|PURL.*:/|stream|local|urlOrFile|kb/s|Input|Size:|title\s*:|comment\s*:|Duration:|Channel.*:|Stream|Chapter|Invalid|error|bad| no such file|^\[.* not"
 	}
 }
 
