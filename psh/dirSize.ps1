@@ -4,6 +4,7 @@ function size2iec {
 	$size = $args[0]
 	$size2IEC = ""
 	switch( $size ) {
+		{ $_ -ge 1pb -and $_ -le 1024pb } { $size2IEC = "{0:n2} TiB" -f ( $size / 1pb ); break }
 		{ $_ -ge 1tb -and $_ -le 1pb } { $size2IEC = "{0:n2} TiB" -f ( $size / 1tb ); break }
 		{ $_ -ge 1gb -and $_ -le 1tb } { $size2IEC = "{0:n2} GiB" -f ( $size / 1gb ); break }
 		{ $_ -ge 1mb -and $_ -le 1gb } { $size2IEC = "{0:n2} MiB" -f ( $size / 1mb ); break }
