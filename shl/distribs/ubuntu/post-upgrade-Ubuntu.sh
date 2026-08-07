@@ -2,7 +2,7 @@
 
 set -u
 scriptBaseName=${0/*\//}
-
+isVM=false
 isVM=$(egrep -i "vmware|virtal" /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name -q && echo true || echo false)
 
 test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
