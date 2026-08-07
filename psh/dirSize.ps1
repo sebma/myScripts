@@ -1,6 +1,9 @@
+#!/usr/bin/env pwsh
 # vim: ft=powershell noet:
+function dirSize2iec {
+	$FUNCNAME = $MyInvocation.MyCommand.Name
+	#Write-Host "=> Starting <$FUNCNAME> function ..."
 
-function size2iec {
 	$size = $args[0]
 	$size2IEC = ""
 	switch( $size ) {
@@ -12,31 +15,52 @@ function size2iec {
 		{ $_ -ge 0   -and $_ -le 1kb } { $size2IEC = "{0:n2} B  " -f   $size; break }
 	}
 
+	#Write-Host "=> Ending of <$FUNCNAME> function ..."
 	return $size2IEC
 }
+
 function dirSize {
+	$FUNCNAME = $MyInvocation.MyCommand.Name
+	#Write-Host "=> Starting <$FUNCNAME> function ..."
+
 	$dirName = $args[0]
- 	Write-Host -NoNewline "$dirName`t"
-	$size = ( dir "$dirName" -force -recurse | measure -property length -sum ).Sum
- 	$dirSize2iec = ( size2iec($size) )
-  
-  	return $size
+	$size = [uint64]( dir "$dirName" -force -recurse 2>$null | measure -property length -sum ).Sum
+
+	#Write-Host "=> Ending of <$FUNCNAME> function ..."
+	return [uint64]$size
 }
+
 function time {
 	$duration = ( "$args" | Measure-Command { Invoke-Expression $_ | Out-Default } ).toString("hh\:mm\:ss\.ff")
-	echo "`n"$duration"`n"
+	"`n$duration`n"
 }
+
 function main {
+	$FUNCNAME = $MyInvocation.MyCommand.Name
+	#Write-Host "=> Starting <$FUNCNAME> function ..."
+
 	$argc = $args.Count
+	#$total = 0
 	if ( $argc ) {
 		for($i=0;$i -lt $argc;$i++) {
 			$dir = $args[$i]
-			time { dirSize $dir }
+			#Write-Host "=> dir = $dir"
+			if ( ! ( Test-Path $dir ) ) { Write-Host "=> The $dir directory does not exits.";continue; }
+			$size = $( dirSize $dir )[-1]
+			$total += $size
+			#$size2iec = dirSize2iec($size)
+			#Write-Host "=> size2iec(size) = $size2iec."
 		}
 	} else {
 		$dir = "."
-		time { dirSize $dir }
+		$total = $( dirSize $dir )[-1]
 	}
+
+	Write-Host "=> total = <$total>."
+	$size2iec = dirSize2iec($total)
+	Write-Host "=> size2iec(total) = $size2iec."
+	Write-Host ""
+	#Write-Host "=> Ending of <$FUNCNAME> function ..."
 }
 
 main @args
