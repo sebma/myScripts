@@ -41,7 +41,7 @@ function videoInfo {
 				$ffprobe "$urlOrFile" || $ffprobe $ffprobeOptions "$urlOrFile"
 			fi
 			echo
-		done 2>&1 | \egrep -vi "^ +(:\s+$|comment|description +: [^/]+$)" | uniq | egrep --color -iw "^$|description\s*:/|PURL.*:/|stream|local|urlOrFile|kb/s|Input|Size:|title\s*:|comment\s*:|Duration:|Channel.*:|Stream|Chapters?|Invalid|error|bad| no such file|^\[.* not"
+		done 2>&1 | \egrep -vi "^ +(:\s+$)" | uniq | egrep --color -iw "^$|description\s*:|PURL.*:/|stream|local|urlOrFile|kb/s|Input|Size:|title\s*:|comment\s*:|Duration:|Channel.*:|Stream|Chapters?|Invalid|error|bad| no such file|^\[.* not"
 	}
 }
 
