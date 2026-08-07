@@ -1,0 +1,4 @@
+#7zip adobereader doublecmd firefox freetube --pre clamav infrarecorder libreoffice-fresh mediainfo microsoft-teams mpvnet.install notepad3 palemoon putty-cac processhacker rustdesk thunderbird ventoy vlc whatinstartup
+
+ 7zip adobereader doublecmd firefox freetube --pre clamav infrarecorder libreoffice-fresh mediainfo microsoft-teams mpvnet.install notepad3 palemoon putty-cac procexp rustdesk thunderbird ventoy vlc whatinstartup
+
