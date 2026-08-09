@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 $nbLines = 48
 if( $args.Count -eq 0 ) { $dirName = "." } else { $dirName = $args[0] }
 # " => $dirName = " + $dirName
