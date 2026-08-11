@@ -121,6 +121,20 @@ function findfiles {
 	dir -r -fo $dirName 2>$null | ? FullName -Match "$regexp" | % FullName
 }
 
+function ResetPrompt {
+	# Remove any custom prompt function
+	if (Test-Path Function:\prompt) {
+		Remove-Item Function:\prompt -Force
+	}
+
+	# Restore the default PowerShell prompt
+	function global:prompt {
+		"PS $($executionContext.SessionState.Path.CurrentLocation)$('>' * ($nestedPromptLevel + 1)) "
+	}
+
+	Write-Host "PowerShell prompt has been reset." -ForegroundColor Green
+}
+
 function main {
 	#% .
 	if( ! ( Test-Path variable:IsWindows ) ) { $global:IsWindows, $global:IsLinux, $global:IsMacOS, $global:osFamily = osFamily } else { $global:osFamily = osFamily }
