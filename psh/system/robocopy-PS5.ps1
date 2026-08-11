@@ -35,6 +35,7 @@ function robocopyPS {
 
 	$robocopyOptions = $robocopyOptions -split '\s+' # convertit les options de robocopy en array
 	gci -Force $sourceDIR | foreach {
+		Write-Host "=> Copying $_.FullName into $destinationDIR\$_ ..."
 		Write-Host robocopy $_.FullName $destinationDIR\$_ $robocopyDryRUN @robocopyOptions
 		Write-Host ""
 		robocopy $_.FullName $destinationDIR\$_ $robocopyDryRUN @robocopyOptions
