@@ -46,9 +46,9 @@ function main {
 			$argc = $dirs.Count
 			foreach ($dir in $dirs) {
 				if ( ! ( Test-Path $dir ) ) { Write-Host "=> The $dir directory does not exits.";continue; }
+				Write-Host "=> dir = < $dir >"
 				$size = $( dirSize $dir )[-1]
 				$total += $size
-				Write-Host "=> dir = < $dir >"
 				Write-Host "=> size = $size"
 				$size2iec = dirSize2iec($size)
 				Write-Host "=> dirSize2iec(size) = $size2iec."
