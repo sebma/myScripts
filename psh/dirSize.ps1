@@ -24,7 +24,7 @@ function dirSize {
 	#Write-Host "=> Starting <$FUNCNAME> function ..."
 
 	$dirName = $args[0]
-	$size = [uint64]( dir "$dirName" -force -recurse 2>$null | Measure-Object -Property length -sum ).Sum
+	$size = [uint64]( dir "$dirName" -force -recurse 2>$null | Measure-Object -Property Length -Sum ).Sum
 
 	#Write-Host "=> Ending of <$FUNCNAME> function ..."
 	return [uint64]$size
