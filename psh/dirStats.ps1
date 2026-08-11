@@ -55,7 +55,7 @@ function main {
 	#Write-Host "=> Starting <$FUNCNAME> function ..."
 
 	$argc = $args.Count
-	#$total = 0
+	$totalSize = 0L
 	if ( $argc ) {
 		foreach ($dirs in $args) {
 			$argc = $dirs.Count
@@ -63,12 +63,12 @@ function main {
 				if ( ! ( Test-Path $dir ) ) { Write-Host "=> The $dir directory does not exits.";continue; }
 				Write-Host "=> dir = < $dir >"
 				$size , $nbFiles , $nbDirs = $( dirStats $dir )
-				$total += $size
+				$totalSize += $size
 				$totalFiles += $nbFiles
 				$totalDirs += $nbDirs
-				Write-Host "=> size = $size"
 				Write-Host "=> nbFiles = $nbFiles"
 				Write-Host "=> nbDirs = $nbDirs"
+				Write-Host "=> size = $size"
 				$size2iec = dirSize2iec($size)
 				Write-Host "=> dirSize2iec(size) = $size2iec."
 				Write-Host ""
@@ -76,14 +76,16 @@ function main {
 		}
 	} else {
 		$dir = "."
-		$total = $( dirStats $dir )[-1]
+		$totalSize = $( dirStats $dir )[-1]
 		Write-Host "=> dir = < $dir >"
 	}
 
 	if ( $argc -eq 0 -or $argc -ge 2 ) {
-		Write-Host "=> total = $total"
-		$size2iec = dirSize2iec($total)
-		Write-Host "=> dirSize2iec(total) = $size2iec."
+		Write-Host "=> totalFiles = $totalFiles"
+		Write-Host "=> totalFiles = $totalDirs"
+		Write-Host "=> totalSize = $totalSize"
+		$size2iec = dirSize2iec($totalSize)
+		Write-Host "=> dirSize2iec(totalSize) = $size2iec."
 		Write-Host ""
 	}
 	#Write-Host "=> Ending of <$FUNCNAME> function ..."
