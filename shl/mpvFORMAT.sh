@@ -21,14 +21,14 @@ mpvFORMAT() {
 	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s | cut -d' ' -f1)
 	[ $osFamily = Linux ] && [ -c /dev/fb0 ] && tty | egrep -q "/dev/tty[0-9]+" && local mpvDefaultOptions="--vo=drm" && local mplayerDefaultOptions="--vo=fbdev2"
 	mpv="$mpv $mpvDefaultOptions"
-	local mpvConfigFile="$HOME/.config/mpv/mpv*.conf"
+	local mpvConfigFiles="$HOME/.config/mpv/mpv*.conf"
 	local format="$1"
 	shift
 
 	# Si on lance mpv via un ssh sur le PC b206, alors on ne forward pas l'affichage
 	test "$SSH_CONNECTION" && hostname | egrep -qi "b206$|eb1501p$" && export DISPLAY=:0
 
-	if grep -q "\[$format\]" $mpvConfigFile;then
+	if grep -q "\[$format\]" $mpvConfigFiles;then
 		set -x
 		LANG=en_US.utf8 nohup $mpv --profile="$format" "$@" &
 	else
