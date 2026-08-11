@@ -10,4 +10,4 @@ echo '=> Printing default routes via "netsh int ip sh route" ...'
 netsh int ipv4 show route | sls -n "224.0.0.0/4|/32|127.0.0.0/8"
 
 echo '=> Printing the route via "Get-NetRoute -AddressFamily IPv4" :'
-Get-NetRoute -AddressFamily IPv4 | select DestinationPrefix,NextHop,InterfaceAlias,ifIndex,InterfaceMetric,RouteMetric | Format-Table | Out-String -stream | sls -n "224.0.0.0/4|/32|127.0.0.0/8"
+Get-NetRoute -AddressFamily IPv4 | ? { $_.DestinationPrefix -notmatch '32' -and $_.DestinationPrefix -ne '224.0.0.0/4' } | select DestinationPrefix,NextHop,InterfaceAlias,ifIndex,InterfaceMetric,RouteMetric | Format-Table
