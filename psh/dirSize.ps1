@@ -59,10 +59,11 @@ function main {
 	} else {
 		$dir = "."
 		$total = $( dirSize $dir )[-1]
+		Write-Host "=> dir = < $dir >"
 	}
 
 	if ( $argc -eq 0 -or $argc -ge 2 ) {
-		Write-Host "=> total = $total."
+		Write-Host "=> total = $total"
 		$size2iec = dirSize2iec($total)
 		Write-Host "=> dirSize2iec(total) = $size2iec."
 		Write-Host ""
