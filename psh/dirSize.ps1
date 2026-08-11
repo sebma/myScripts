@@ -46,19 +46,23 @@ function main {
 			if ( ! ( Test-Path $dir ) ) { Write-Host "=> The $dir directory does not exits.";continue; }
 			$size = $( dirSize $dir )[-1]
 			$total += $size
-			Write-Host "=> dir = $dir"
+			Write-Host "=> dir = < $dir >"
+			Write-Host "=> size = $size"
 			$size2iec = dirSize2iec($size)
 			Write-Host "=> dirSize2iec(size) = $size2iec."
+			Write-Host ""
 		}
 	} else {
 		$dir = "."
 		$total = $( dirSize $dir )[-1]
 	}
 
-	Write-Host "=> total = <$total>."
-	$size2iec = dirSize2iec($total)
-	Write-Host "=> size2iec(total) = $size2iec."
-	Write-Host ""
+	if ( $argc -eq 0 -or $argc -ge 2 ) {
+		Write-Host "=> total = $total."
+		$size2iec = dirSize2iec($total)
+		Write-Host "=> dirSize2iec(total) = $size2iec."
+		Write-Host ""
+	}
 	#Write-Host "=> Ending of <$FUNCNAME> function ..."
 }
 
