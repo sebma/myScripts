@@ -11,10 +11,10 @@ $ENV:IsWindows = $IsWindows
 function isInstalled($cmd) { return gcm "$cmd" 2>$null | % Name }
 function dirname($path) { Split-Path -Parent -Path "$path" }
 
-#. $profileDIR/$scriptPrefix.common.ps1
-#. $profileDIR/$scriptPrefix.$osFamily.ps1
-#. $profileDIR/$scriptPrefix.$osFamily.network.ps1
-#. $profileDIR/aliases.$osFamily.ps1
+if( Test-Path $profileDIR/$scriptPrefix.common.ps1 ) { . $profileDIR/$scriptPrefix.common.ps1 }
+if( Test-Path $profileDIR/$scriptPrefix.$osFamily.ps1 ) { . $profileDIR/$scriptPrefix.$osFamily.ps1 }
+if( Test-Path $profileDIR/$scriptPrefix.$osFamily.network.ps1 ) { . $profileDIR/$scriptPrefix.$osFamily.network.ps1 }
+if( Test-Path $profileDIR/aliases.$osFamily.ps1 ) { . $profileDIR/aliases.$osFamily.ps1 }
 
 #if( isInstalled("openssl") ) {
 #	. $profileDIR/$scriptPrefix.openssl.ps1
@@ -28,3 +28,19 @@ if ( $(alias history *>$null;$?) ) { del alias:history }
 function history() {
 	cat  $(Get-PSReadlineOption).HistorySavePath
 }
+
+function prompt {
+	$myCWD = $PWD.path
+	$myCWD = $myCWD.Replace( $HOME, '~' )
+	$PSHVersion = ""+$PSVersionTable.PSVersion.Major + "." + $PSVersionTable.PSVersion.Minor
+	if( $isAdmin ) { Write-Host "$USER : " -NoNewline -ForegroundColor Red } else { Write-Host "$USER : " -NoNewline }
+	Write-Host "[ " -NoNewline
+	Write-Host "$HOSTNAME " -NoNewline -ForegroundColor Yellow
+	Write-Host "@ $DOMAIN " -NoNewline -ForegroundColor Red
+	#Write-Host "/ $osFamily $OSVersion " -NoNewline -ForegroundColor Green
+	Write-Host "] " -NoNewline
+	Write-Host "(PSv$PSHVersion) " -NoNewline
+	Write-Host "$myCWD" -ForegroundColor Green
+	if( $isAdmin ) { return "# " } else { return "$ " }
+}
+
