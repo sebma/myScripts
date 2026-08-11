@@ -64,7 +64,7 @@ function iproute($dest) {
 	if( $dest ) {
 		Find-NetRoute -RemoteIPAddress $dest | Select-Object DestinationPrefix , NextHop , InterfaceAlias , ifIndex , InterfaceMetric , RouteMetric -Last 1 | Format-Table
 	} else {
-		Get-NetRoute -AddressFamily IPv4 | select DestinationPrefix,NextHop,InterfaceAlias,ifIndex,InterfaceMetric,RouteMetric | ? { $_.DestinationPrefix -ne "224.0.0.0/4" -and $_.DestinationPrefix -notmatch "[0-9.]*/32" } | Format-Table
+		Get-NetRoute -AddressFamily IPv4 | ? { $_.DestinationPrefix -ne "224.0.0.0/4" -and $_.DestinationPrefix -notmatch "[0-9.]*/32" } | select DestinationPrefix,NextHop,InterfaceAlias,ifIndex,InterfaceMetric,RouteMetric | Format-Table
 	}
 }
 function host($url, $server, $type) {
