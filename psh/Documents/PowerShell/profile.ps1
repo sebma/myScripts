@@ -44,3 +44,16 @@ function prompt {
 	if( $isAdmin ) { return "# " } else { return "$ " }
 }
 
+function ResetPrompt {
+	# Remove any custom prompt function
+	if (Test-Path Function:\prompt) {
+		Remove-Item Function:\prompt -Force
+	}
+
+	# Restore the default PowerShell prompt
+	function global:prompt {
+		"PS $($executionContext.SessionState.Path.CurrentLocation)$('>' * ($nestedPromptLevel + 1)) "
+	}
+
+	Write-Host "PowerShell prompt has been reset." -ForegroundColor Green
+}
