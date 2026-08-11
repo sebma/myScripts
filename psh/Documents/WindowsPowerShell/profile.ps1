@@ -318,7 +318,7 @@ function mac@($iface) {
 	else { (Get-NetAdapter -Name $iface) | select InterfaceAlias, MacAddress }
 }
 
-function Prompt {
+function prompt {
 	$myCWD = $PWD.path
 	$myCWD = $myCWD.Replace( $HOME, '~' )
 	$PSHVersion = ""+$PSVersionTable.PSVersion.Major + "." + $PSVersionTable.PSVersion.Minor
