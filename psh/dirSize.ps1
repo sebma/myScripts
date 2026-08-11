@@ -42,8 +42,7 @@ function main {
 	$argc = $args.Count
 	#$total = 0
 	if ( $argc ) {
-		for($i=0;$i -lt $argc;$i++) {
-			$dir = $args[$i]
+		foreach ($dir in $args) {
 			if ( ! ( Test-Path $dir ) ) { Write-Host "=> The $dir directory does not exits.";continue; }
 			$size = $( dirSize $dir )[-1]
 			$total += $size
