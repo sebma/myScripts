@@ -44,12 +44,12 @@ function main {
 	if ( $argc ) {
 		for($i=0;$i -lt $argc;$i++) {
 			$dir = $args[$i]
-			#Write-Host "=> dir = $dir"
 			if ( ! ( Test-Path $dir ) ) { Write-Host "=> The $dir directory does not exits.";continue; }
 			$size = $( dirSize $dir )[-1]
 			$total += $size
-			#$size2iec = dirSize2iec($size)
-			#Write-Host "=> size2iec(size) = $size2iec."
+			Write-Host "=> dir = $dir"
+			$size2iec = dirSize2iec($size)
+			Write-Host "=> dirSize2iec(size) = $size2iec."
 		}
 	} else {
 		$dir = "."
