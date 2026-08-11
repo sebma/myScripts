@@ -21,11 +21,11 @@ function dns($iface) {
 }
 
 function ip($cmd,$iface) {
-	if( $cmd -eq 'a' ) {
+	if( 'address'.StartsWith( $cmd ) ) {
 		ipaddr($iface)
-	} elseif( $cmd -eq 'l' ) {
+	} elseif( 'link'.StartsWith( $cmd ) ) {
 		iplink($iface)
-	} elseif( $cmd -eq 'r' ) {
+	} elseif( 'route'.StartsWith( $cmd ) ) {
 		$dest=$iface
 		iproute($dest)
 	}
