@@ -43,6 +43,9 @@ function main {
 	#$total = 0
 	if ( $argc ) {
 		foreach ($dir in $args) {
+			$argc = $dir.Count
+			foreach ($d in $dir) {
+				$dir = $d
 			if ( ! ( Test-Path $dir ) ) { Write-Host "=> The $dir directory does not exits.";continue; }
 			$size = $( dirSize $dir )[-1]
 			$total += $size
@@ -51,6 +54,7 @@ function main {
 			$size2iec = dirSize2iec($size)
 			Write-Host "=> dirSize2iec(size) = $size2iec."
 			Write-Host ""
+			}
 		}
 	} else {
 		$dir = "."
