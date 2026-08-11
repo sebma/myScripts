@@ -755,36 +755,42 @@ function getRestrictedFilenamesBEST() {
 }
 function getRestrictedFilenamesFHD() {
 	local height=1080
+	local minimumHeight=720
 	local other_Formats=fhd/${height}p
 	local possibleFormats="best[vcodec^=avc1][height<=?$height]/bestvideo[vcodec^=avc1][height<=?$height]+bestaudio[ext=m4a]/$other_Formats"
 	getRestrictedFilenamesFORMAT -f "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
 function getRestrictedFilenamesHD() {
 	local height=720
+	local minimumHeight=576
 	local other_Formats=hd/high/${height}p
 	local possibleFormats="22/best[vcodec^=avc1][height<=?$height]/bestvideo[vcodec^=avc1][height<=?$height]+bestaudio[ext=m4a]/$other_Formats"
 	getRestrictedFilenamesFORMAT -f "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
 function getRestrictedFilenamesHQ() {
 	local height=576
+	local minimumHeight=480
 	local other_Formats=hq/fsd/std/sd/${height}p
 	local possibleFormats="best[vcodec^=avc1][height<=?$height]/bestvideo[vcodec^=avc1][height<=?$height]+bestaudio[ext=m4a]/$other_Formats"
 	getRestrictedFilenamesFORMAT -f "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
 function getRestrictedFilenamesFSD() {
 	local height=480
+	local minimumHeight=360
 	local other_Formats=fsd/std/${height}p
 	local possibleFormats="best[vcodec^=avc1][height<=?$height]/bestvideo[vcodec^=avc1][height<=?$height]+bestaudio[ext=m4a]/$other_Formats"
 	getRestrictedFilenamesFORMAT -f "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
 function getRestrictedFilenamesSD() {
 	local height=360
+	local minimumHeight=240
 	local other_Formats=low/sd/std/${height}p
-	local possibleFormats="18/best[vcodec^=avc1][height<=?$height]/bestvideo[vcodec^=avc1][height<=?$height]+bestaudio[ext=m4a]/$other_Formats"
+	local possibleFormats="18/best[vcodec^=avc1][height<=?$height][$minimumHeight>240]/bestvideo[vcodec^=avc1][height<=?$height][$minimumHeight>240]+bestaudio[ext=m4a]/$other_Formats"
 	getRestrictedFilenamesFORMAT -f "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
 }
 function getRestrictedFilenamesLD() {
 	local height=240
+	local minimumHeight=144
 	local other_Formats=ld/low/${height}p
 	local possibleFormats="best[vcodec^=avc1][height<=?$height]/bestvideo[vcodec^=avc1][height<=?$height]+bestaudio[ext=m4a]/$other_Formats"
 	getRestrictedFilenamesFORMAT -f "($possibleFormats/$bestFormats)" $@ # because of the "eval" statement in the "youtube_dl" bash variable
