@@ -23,8 +23,8 @@ test -z $https_proxy && echo "=> [$scriptBaseName] ERROR : https_proxy is not de
 test -z $no_proxy    && echo "=> [$scriptBaseName] ERROR : no_proxy is not defined." >&2 && exit 4
 
 if $isDebianLike;then
-	grep ^Acquire.*$http_proxy  /etc/apt/apt.conf.d/*proxy* -q 2>/dev/null || echo "Acquire::http::proxy  \"$http_proxy\";"  | $sudo tee /etc/apt/apt.conf.d/00aptproxy
-	grep ^Acquire.*$https_proxy /etc/apt/apt.conf.d/*proxy* -q 2>/dev/null || echo "Acquire::https::proxy \"$https_proxy\";" | $sudo tee -a /etc/apt/apt.conf.d/00aptproxy
+	apt-config dump | grep -i http::Proxy  -q || echo "Acquire::http::proxy  \"$http_proxy\";"  | $sudo tee /etc/apt/apt.conf.d/00aptproxy
+	apt-config dump | grep -i https::Proxy -q || echo "Acquire::https::proxy \"$https_proxy\";" | $sudo tee -a /etc/apt/apt.conf.d/00aptproxy
 elif $isRedHatLike;then
 	egrep "proxy\s*=\s*[0-9.]+" /etc/yum.conf || echo "proxy = $https_proxy" | $sudo tee -a /etc/yum.conf
 elif $isAlpineLike;then
