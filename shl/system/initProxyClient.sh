@@ -62,8 +62,8 @@ if which cpan &>/dev/null;then
 fi
 
 if which pip &>/dev/null;then
-	pip config get global.proxy | grep $http_proxy -q || pip config set global.proxy "$http_proxy"
-	$sudo pip config get global.proxy | grep $http_proxy -q || $sudo pip config set global.proxy "$http_proxy"
+	pip config --global get global.proxy &>/dev/null || $sudo pip config --global set global.proxy "$http_proxy"
+	# pip config get global.proxy &>/dev/null || pip config set global.proxy "$http_proxy"
 fi
 
 if which docker &>/dev/null;then
