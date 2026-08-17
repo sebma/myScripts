@@ -237,7 +237,6 @@ function getRestrictedFilenamesFORMAT() {
 	[ $verboseLevel = 1 ] && echo "=> tty is <$(tty)>"
 
 	time "${downloadCMD[@]}" --ignore-config --rm-cache
-	echo
 	for url
 	do
 		let i++
@@ -345,7 +344,7 @@ function getRestrictedFilenamesFORMAT() {
 				# Preparing the User Agent for ffprobe
 				userAgent=$(yt-dlp https://api.github.com/orgs/yt-dlp/repos --print "%(http_headers)#j" | jq '."User-Agent"' -r)
 				$undebug
-				echo "=> Fetching some information from remote stream with ffprobe ..."
+				echo "=> Fetching some information from the remote direct stream of $url with ffprobe ..."
 				if echo $chosenFormatID | \grep "[+]" -q;then
 					audioFormatID=$(echo $formatID | sed "s/.*+//")
 					# On utilise "$jsonResults" car on interroge TOUS les formats possibles contenus dans le tableau ".formats[]"
@@ -508,6 +507,7 @@ Channel URL : $channelURL" "$fileName"
 				else
 					\rm -v $errorLogFile
 				fi
+				echo
 			else
 				echo "=> ERROR: $downloader returned $downloadRetCode." >&2
 				if $grep -i error $errorLogFile -q;then
@@ -515,7 +515,7 @@ Channel URL : $channelURL" "$fileName"
 				else
 					\rm -v $errorLogFile
 				fi
-				echo >&2
+				echo
 			fi
 		done
 	done
