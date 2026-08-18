@@ -7,7 +7,7 @@ string2qrcode_with_qrencode () {
 		return -1
 	else
 		string="$1"
-		qrencode -l H -s $dotSize -m 0 -o- "$string" | feh -
+		qrencode -l H -s $dotSize -m 0 -o- "$string" | feh -F -
 	fi
 }
 
