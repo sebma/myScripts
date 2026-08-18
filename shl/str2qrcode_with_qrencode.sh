@@ -2,8 +2,8 @@
 
 string2qrcode_with_qrencode () {
 	local dotSize=8 string=""
-	local width=1600
-	local heigth=900
+	local width=$(xrandr | awk '-Fx| *' '/\+([^0]|$)/{printf$2;exit}')
+	local heigth=$(xrandr | awk '-Fx| *' '/\+([^0]|$)/{printf$3;exit}')
 	if [ $# != 1 ]; then
 		echo "=> Usage $FUNCNAME stringOrURL" >&2
 		return -1
