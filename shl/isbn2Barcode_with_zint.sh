@@ -5,7 +5,7 @@ ISBN2Barcode_with_zint ()
 	local string=""
 	if [ $# = 1 ]; then
 		string="$1"
-		zint -b ISBNX --scale 2 --direct -d "$string" | feh -F -
+		zint -b ISBNX --scale 2 --direct -d "$string" | feh -g +800+450  -
 	fi
 }
 
