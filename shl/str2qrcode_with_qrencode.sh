@@ -9,7 +9,7 @@ string2qrcode_with_qrencode () {
 		echo "=> Usage $FUNCNAME stringOrURL" >&2
 		return -1
 	else
-		read width heigth <<< $(xrandr | awk '-Fx| *' '/\+([^0]|$)/{print$2" "$3;exit}')
+		read width heigth <<< $(xrandr | awk '-Fx| *' '/\+([^0]|$)/{printf$2" "$3;exit}')
 		string="$1"
 		qrencode -l H -s $dotSize -m 0 -o- "$string" | feh -g +$((($width-$dotSize)/2))+$((($heigth-$dotSize)/2)) -
 	fi
