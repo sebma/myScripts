@@ -7,9 +7,9 @@ ISBN2Barcode_with_barcode ()
 		string="$1"
 		stringLength="${#string}"
 		if [ $stringLength = 10 ];then
-			barcode -e isbn -S -b "$string" | mogrify -format png -resize 200% - | feh -F -
+			barcode -e isbn -S -b "$string" | mogrify -format png -resize 200% - | feh -g +800+450  -
 		elif [ $stringLength = 13 ];then
-			barcode -e ean-13 -S -b "$string" | mogrify -format png -resize 200% - | feh -F -
+			barcode -e ean-13 -S -b "$string" | mogrify -format png -resize 200% - | feh -g +800+450  -
 		fi
 	fi
 }
