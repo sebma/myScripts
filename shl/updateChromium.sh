@@ -51,7 +51,7 @@ function initScript {
 	sudo_cmd=sudo
 	initColors
 	echo $normal
-	local platform=$(uname -i)
+	local platform=$(uname -m)
 	[ $platform = x86_64 ] && arch=amd64 || arch=i386
 	LTSReleaseNumber=14.04
 	LTSReleaseName=trusty
