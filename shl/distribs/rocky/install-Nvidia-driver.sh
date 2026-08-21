@@ -65,7 +65,7 @@ if $isRedHatLike;then
 		$sudo rm /etc/yum.repos.d/cuda.repo -f
 		$sudo dnf remove *nvidia* cuda-drivers -y
 		if dnf repolist | grep cuda-rhel -q;then
-			$sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -i)/cuda-rhel$rhelMajorVersion.repo
+			$sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -m)/cuda-rhel$rhelMajorVersion.repo
 			$sudo dnf makecache
 		fi
 	fi
