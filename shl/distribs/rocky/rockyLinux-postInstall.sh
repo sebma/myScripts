@@ -69,7 +69,7 @@ if ! dnf repolist | grep docker-ce -q;then
 	$sudo dnf makecache
 fi
 if ! dnf repolist | grep cuda-rhel -q;then
-	$sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -i)/cuda-rhel$rhelMajorVersion.repo
+	$sudo dnf config-manager --add-repo http://developer.download.nvidia.com/compute/cuda/repos/rhel$rhelMajorVersion/$(uname -m)/cuda-rhel$rhelMajorVersion.repo
 	$sudo dnf makecache
 fi
 
