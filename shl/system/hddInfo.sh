@@ -9,8 +9,14 @@ os=$(uname -s)
 
 if [ $# = 0 ] 
 then
-	[ $os = Linux  ] && diskName=sda
-	[ $os = Darwin ] && diskName=disk0
+	if [ $os = Linux  ];then
+		diskName=sda
+		diskList=$(ls /sys/class/block/ 2>/dev/null | sed "s|^|/dev/|" | egrep -v '/(loop|dm-|md|sr|z?ram|sd[a-z]+[0-9]+|nvme[0-9]n[0-9]p[0-9]|synoboot[0-9])')
+	fi
+	if [ $os = Darwin ];then
+		diskName=disk0
+		diskList=$(diskutil list physical | awk '/dev.disk/{print$1}')
+	fi
 else
 	[ "$1" = "-h" ] && {
 		echo "=> Usage: $scriptBaseName [disk device name]" >&2
@@ -22,7 +28,6 @@ diskDevice=/dev/$diskName
 
 smartctlMajorVersion=$(smartctl -j | jq -r .smartctl.version[0])
 smartctlMinorVersion=$(smartctl -j | jq -r .smartctl.version[1])
-smartctlMajorVersion=$(smartctl -V | awk '/release/{print$3}' | cut -d. -f1)
 smartctlVersion=$(smartctl -V | awk '/release/{print$3}')
 
 if perl -e "exit(!($smartctlVersion >= 5.41))" 
@@ -34,14 +39,17 @@ fi
 
 
 smartctlDiskInfo="$($sudo smartctl -i $diskDevice)"
+smartctlDiskInfoJSON="$($sudo smartctl -i $diskDevice -j)"
 which hdparm >/dev/null 2>&1 && hdparmDiskInfo="$($sudo hdparm -i $diskDevice)" && hdparmDiskMoreInfo="$($sudo hdparm -I $diskDevice)"
-diskModel="$(echo "$smartctlDiskInfo" |  awk '/Model:|Model Number:/{gsub("/","_");for(i=4;i<NF;++i)printf $i"_";print$i}')"
-test -z $diskModel && diskModel="$(echo "$smartctlDiskInfo" |  awk '/Model:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
-test -z $diskModel && which hdparm >/dev/null 2>&1 && diskModel="$(echo "$hdparmDiskInfo" | awk -F'[=,]' '/Model=/{print$2}')"
-test -z $diskModel && echo "=> ERROR : Could not infer diskModel." 2>/dev/null && exit 2
+#diskModel="$(echo "$smartctlDiskInfo" | awk '/Model( Number)?:/{gsub("/","_");for(i=4;i<NF;++i)printf $i"_";print$i}')"
+diskModel="$(echo "$smartctlDiskInfoJSON" | jq -r .model_name)"
+#test -z $diskModel && diskModel="$(echo "$smartctlDiskInfo" |  awk '/Model( Number)?:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
+#test -z $diskModel && which hdparm >/dev/null 2>&1 && diskModel="$(echo "$hdparmDiskInfo" | awk -F'[=,]' '/Model=/{print$2}')"
+#test -z $diskModel && echo "=> ERROR : Could not infer diskModel." 2>/dev/null && exit 2
 
-diskFamily="$(echo "$smartctlDiskInfo" |  awk '/Family:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
-test -z $diskFamily && diskFamily="$(echo "$smartctlDiskInfo" |  awk '/Model:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
+diskFamily="$(echo "$smartctlDiskInfo" | awk '/Family:/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
+#diskFamily="$(echo "$smartctlDiskInfoJSON" | jq -r .family)"
+test -z $diskFamily && diskFamily="$(echo "$smartctlDiskInfo" |  awk '/Model/{gsub("/","_");for(i=3;i<NF;++i)printf $i"_";print$i}')"
 diskFamily="$(echo $diskFamily | sed -E "s/[.]+$|\"//g")"
 
 osFamily=$(uname -s | cut -d' ' -f1)
