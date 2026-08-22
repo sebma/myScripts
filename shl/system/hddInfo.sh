@@ -26,19 +26,18 @@ fi
 
 for diskName in $diskList;do
 	diskDevice=/dev/$diskName
-	
+
 	smartctlMajorVersion=$(smartctl -j | jq -r .smartctl.version[0])
 	smartctlMinorVersion=$(smartctl -j | jq -r .smartctl.version[1])
 	smartctlVersion=$(smartctl -V | awk '/release/{print$3}')
-	
+
 	if perl -e "exit(!($smartctlVersion >= 5.41))" 
 	then
 		allInformation=-x
 	else
 		allInformation=-a
 	fi
-	
-	
+
 	smartctlDiskInfo="$($sudo smartctl -i $diskDevice)"
 	smartctlDiskInfoJSON="$($sudo smartctl -i $diskDevice -j)"
 	which hdparm >/dev/null 2>&1 && hdparmDiskInfo="$($sudo hdparm -i $diskDevice)" && hdparmDiskMoreInfo="$($sudo hdparm -I $diskDevice)"
