@@ -14,7 +14,7 @@ string2qrcode_with_qrencode () {
 		if [ $osFamily == Linux ];then
 			read width heigth <<< $(xrandr 2>/dev/null | awk -F'x| *' '/\+([^0]|$)/{printf$2" "$3;exit}')
 		elif [ $osFamily == Darwin ];then
-			:
+			read width heigth <<< $(xrandr 2>/dev/null | awk -F'[x+ ]' '/connected/{print$3" "$4;exit}')
 		fi
 		qrencode -l H -s $dotSize -m 0 -o- "$string" | feh -g +$((($width-$dotSize)/2))+$((($heigth-$dotSize)/2)) -
 	fi
