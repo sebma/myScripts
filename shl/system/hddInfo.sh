@@ -21,9 +21,10 @@ else
 	[ "$1" = "-h" ] && {
 		echo "=> Usage: $scriptBaseName [disk device name]" >&2
 		exit 1
-	} || diskName=${1/*\/}
+	} || diskList=${1/*\/}
 fi
 
+for diskName in $diskList;do
 diskDevice=/dev/$diskName
 
 smartctlMajorVersion=$(smartctl -j | jq -r .smartctl.version[0])
@@ -150,7 +151,7 @@ set -o nounset
 		sudo hddtemp $diskDevice 2>&1 | cut -d: -f3 | tr -s ' ' | grep --color=always .
 	fi
 } 2>&1 | tee $logFile
-
+done
 echo
 echo "=> logFile = $logFile"
 
