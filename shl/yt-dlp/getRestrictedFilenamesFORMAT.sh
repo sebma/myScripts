@@ -104,7 +104,7 @@ function parseArgs() {
 	declare -g ffmpegLogLevel=$ffmpegErrorLogLevel
 	declare -g initialSiteVideoFormat=null
 	declare -g playlistFileName=""
-	declare -g timeout=180m
+	declare -g timeout=150m
 	declare -g undebug="set +x" 
 	declare -g verboseLevel=0
 	declare -g ytdlInitialOptions=()
