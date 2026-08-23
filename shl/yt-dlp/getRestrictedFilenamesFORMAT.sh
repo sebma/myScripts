@@ -236,7 +236,8 @@ function getRestrictedFilenamesFORMAT() {
 	[ $verboseLevel = 1 ] && echo "=> TERM = <$TERM>"
 	[ $verboseLevel = 1 ] && echo "=> tty is <$(tty)>"
 
-	time "${downloadCMD[@]}" --ignore-config --rm-cache
+	# time "${downloadCMD[@]}" --ignore-config --rm-cache
+	rm -fr $HOME/.cache/yt-dlp/
 	for url
 	do
 		let i++
