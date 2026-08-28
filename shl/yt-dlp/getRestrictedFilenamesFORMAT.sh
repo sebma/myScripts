@@ -343,6 +343,7 @@ function getRestrictedFilenamesFORMAT() {
 				echo "=> Preparing the User Agent for ffprobe ..."
 				userAgent=$(time "${downloadCMD[@]}" https://api.github.com/orgs/yt-dlp/repos --print "%(http_headers)#j" | jq '."User-Agent"' -r)
 				$undebug
+				echo
 				echo "=> Fetching some information from the remote direct stream of $url with ffprobe ..."
 				if echo $chosenFormatID | \grep "[+]" -q;then
 					audioFormatID=$(echo $formatID | sed "s/.*+//")
@@ -351,7 +352,7 @@ function getRestrictedFilenamesFORMAT() {
 				else
 					streamDirectURL="$(echo "$jsonHeaders" | $jq -n -r "first(inputs | select(.format_id==\"$formatID\")).url")"
 				fi
-				ffprobeJSON_Stream_Info=$(time $ffprobe -hide_banner -user_agent "$userAgent" -v error -show_format -show_streams -print_format json "$streamDirectURL")
+				ffprobeJSON_Stream_Info=$($ffprobe -hide_banner -user_agent "$userAgent" -v error -show_format -show_streams -print_format json "$streamDirectURL")
 
 				if [ $? = 0 ];then
 					firstAudioStreamCodecName=$(echo "$ffprobeJSON_Stream_Info" | $jq -r '[ .streams[] | select(.codec_type=="audio") ][0].codec_name')
