@@ -341,7 +341,8 @@ function getRestrictedFilenamesFORMAT() {
 
 			if [ -z "$acodec" ] || [ $acodec = null ];then
 				echo "=> Preparing the User Agent for ffprobe ..."
-				userAgent=$(time "${downloadCMD[@]}" https://api.github.com/orgs/yt-dlp/repos --print "%(http_headers)#j" | jq '."User-Agent"' -r)
+				# userAgent=$(time "${downloadCMD[@]}" https://api.github.com/orgs/yt-dlp/repos --print "%(http_headers)#j" | jq '."User-Agent"' -r)
+				userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" # Pour gagner du temps sur macOS
 				$undebug
 				echo
 				echo "=> Fetching some information from the remote direct stream of $url with ffprobe ..."
