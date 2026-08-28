@@ -236,7 +236,7 @@ function getRestrictedFilenamesFORMAT() {
 	[ $verboseLevel = 1 ] && echo "=> TERM = <$TERM>"
 	[ $verboseLevel = 1 ] && echo "=> tty is <$(tty)>"
 
-	rm -fr $HOME/.cache/yt-dlp/
+	rm -fr $HOME/.cache/$downloader/
 	for url
 	do
 		let i++
@@ -271,7 +271,6 @@ function getRestrictedFilenamesFORMAT() {
 
 		printf "=> Fetching the formatsIDs list for \"${url//\%/%%}\" with ${effects[bold]}${colors[blue]}$downloader$normal at %s ...\n" "$(LC_MESSAGES=en date)"
 #		$undebug
-
 		# filenamePattern which will extracted from ._filename JSON
 		jsonResults=$(time "${downloadCMD[@]}" --ignore-config --restrict-filenames -f "$siteVideoFormat" -o "${youtube_dl_FileNamePattern}" -j "${ytdlExtraOptions[@]}" -- "$url" 2>$errorLogFile | $jq -r .)
 		formatsIDs=( $(echo "$jsonResults" | $jq -r .format_id | awk '!seen[$0]++') ) # Remove duplicate lines i.e: https://stackoverflow.com/a/1444448/5649639
@@ -341,8 +340,8 @@ function getRestrictedFilenamesFORMAT() {
 			test -n "$playlistFileName" && duration=$($grep '^[0-9]*' <<< $duration || echo -1) && printf "#EXTINF:$duration,$title\n$webpage_url\n" >> "$playlistFileName"
 
 			if [ -z "$acodec" ] || [ $acodec = null ];then
-				# Preparing the User Agent for ffprobe
-				userAgent=$(yt-dlp https://api.github.com/orgs/yt-dlp/repos --print "%(http_headers)#j" | jq '."User-Agent"' -r)
+				echo "=> Preparing the User Agent for ffprobe ..."
+				userAgent=$(time "${downloadCMD[@]}" https://api.github.com/orgs/yt-dlp/repos --print "%(http_headers)#j" | jq '."User-Agent"' -r)
 				$undebug
 				echo "=> Fetching some information from the remote direct stream of $url with ffprobe ..."
 				if echo $chosenFormatID | \grep "[+]" -q;then
