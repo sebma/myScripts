@@ -4,7 +4,7 @@ function getPlaylistsRestrictedFilenamesFORMAT () {
 	trap 'rc=130;set +x;echo "=> $FUNCNAME: CTRL+C Interruption trapped.">&2;return $rc' INT
 	local playList playListTitle="not_yet_known" listOfUrls="not_yet_known" fqdn="not_yet_known" service="not_yet_known"
 	local format=unset
-	test $# -gt 1 && format=$1 && shift
+	test $# -ge 2 && test $1 == "-f" && format=$2 && shift 2
 	for playList
 	do
 		echo "=> Treating playList : $playList ..." 1>&2
@@ -15,7 +15,7 @@ function getPlaylistsRestrictedFilenamesFORMAT () {
 			listOfUrls=$(\curl -Ls "$playList" | hxwls 2> /dev/null | awk -F '&' '/\<(watch|video)\>/{print$1}' | sort -u | paste -sd" ")
 			test $? != 0 && return
 		else
-			fqdn=$(echo "$playList" | sed "s|https\?://||" | cut -d/ -f1)
+			fqdn=$(echo "$playList" | cut -d/ -f3)
 			service=$(echo $fqdn | awk -F. '{print$(NF-1)}')
 			listOfUrls=$(time ytdlpGetVideoURLsFromPlayListURL.sh $playList)
 		fi
