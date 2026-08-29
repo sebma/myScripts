@@ -24,11 +24,10 @@ ytdlpUpdate ()
 	local package=yt-dlp
 	local yt_dlp="$(readlink -f $(type -P yt-dlp))"
 	if [ -n "$yt_dlp" ]; then
-		set -x
 		local ytdlpCurrentRelease=$($package --version)
 		echo "=> The current version of $package is <$ytdlpCurrentRelease>."
 		echo "=> Searching for the latest release on $ytdlpPyPI_URL ..." 1>&2
-		local ytdlpLatestRelease=$(\curl -qLs $ytdlpPyPI_URL/json | jq 'del(.info.description)' | jq -r .info.version)
+		local ytdlpLatestRelease=$(\curl -qLs $ytdlpGitHubAPIURL/releases/latest | jq 'del(.body)' | jq -r .tag_name)
 		if [ -z "$ytdlpLatestRelease" ]; then
 			set -o pipefail
 			echo "=> Couldn't find the latest release on $ytdlpPyPI_URL, checking the $ytdlpGitURL repository ..." 1>&2
@@ -37,7 +36,7 @@ ytdlpUpdate ()
 		else
 			if echo $ytdlpLatestRelease | cut -d. -f4 | grep . -q; then
 				ytdlpLatestRelease=$(printf "%04d.%02d.%02d.%d" $(echo $ytdlpLatestRelease | cut -d. -f1-4 | tr . " "))
-			else
+			elif echo $ytdlpLatestRelease | cut -d. -f2- | egrep '^[0-9]\.|\.[0-9]$' -q;then
 				ytdlpLatestRelease=$(printf "%04d.%02d.%02d" $(echo $ytdlpLatestRelease | cut -d. -f1-3 | tr . " "))
 			fi
 			echo "=> Found the <$ytdlpLatestRelease> version." 1>&2
