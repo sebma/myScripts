@@ -43,7 +43,7 @@ function main() {
 	declare -gx scriptExtension=${0/*./}
 	declare -gx funcName=${scriptBaseName/.$scriptExtension/}
 
-	echo time $funcName $@
+	time $funcName $@
 	return $?
 }
 
