@@ -72,7 +72,7 @@ function setOtherRequirements() {
 }
 
 function parseArgs() {
-	local osFamily=$(uname -s | cut -d' ' -f1)
+	declare -g osFamily=$(uname -s | cut -d' ' -f1)
 	local ffmpegErrorLogLevel=repeat+error
 	local ffmpegInfoLogLevel=repeat+info
 	local getopt=""
@@ -236,7 +236,8 @@ function getRestrictedFilenamesFORMAT() {
 	[ $verboseLevel = 1 ] && echo "=> TERM = <$TERM>"
 	[ $verboseLevel = 1 ] && echo "=> tty is <$(tty)>"
 
-	rm -fr $HOME/.cache/$downloader/
+	[ $osFamily == Darwin ] && rm -fr $HOME/.cache/$downloader/
+	[ $osFamily == Linux ]  && $downloader --rm-cache-dir
 	for url
 	do
 		let i++
@@ -341,8 +342,8 @@ function getRestrictedFilenamesFORMAT() {
 
 			if [ -z "$acodec" ] || [ $acodec = null ];then
 				echo "=> Preparing the User Agent for ffprobe ..."
-				# userAgent=$(time "${downloadCMD[@]}" https://api.github.com/orgs/yt-dlp/repos --print "%(http_headers)#j" | jq '."User-Agent"' -r)
-				userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" # Pour gagner du temps sur macOS
+				[ $osFamily == Linux ]  && userAgent=$(time "${downloadCMD[@]}" https://api.github.com/orgs/yt-dlp/repos --print "%(http_headers)#j" | jq '."User-Agent"' -r)
+				[ $osFamily == Darwin ] && userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" # Pour gagner du temps sur macOS
 				$undebug
 				echo
 				echo "=> Fetching some information from the remote direct stream of $url with ffprobe ..."
