@@ -10,6 +10,7 @@ ytdlpUpdate ()
 			local ytdlpGitURL=$1
 		else
 			local ytdlpGitURL=https://github.com/yt-dlp/yt-dlp
+			local ytdlpGitHubAPIURL=https://api.github.com/repos/yt-dlp/yt-dlp
 			local ytdlpPyPI_URL=https://pypi.org/pypi/yt-dlp
 		fi
 	fi
@@ -23,10 +24,11 @@ ytdlpUpdate ()
 	local package=yt-dlp
 	local yt_dlp="$(readlink -f $(type -P yt-dlp))"
 	if [ -n "$yt_dlp" ]; then
+		set -x
 		local ytdlpCurrentRelease=$($package --version)
 		echo "=> The current version of $package is <$ytdlpCurrentRelease>."
 		echo "=> Searching for the latest release on $ytdlpPyPI_URL ..." 1>&2
-		local ytdlpLatestRelease=$(\curl -qLs $ytdlpPyPI_URL/json | jq -r .info.version)
+		local ytdlpLatestRelease=$(\curl -qLs $ytdlpPyPI_URL/json | jq 'del(.info.description)' | jq -r .info.version)
 		if [ -z "$ytdlpLatestRelease" ]; then
 			set -o pipefail
 			echo "=> Couldn't find the latest release on $ytdlpPyPI_URL, checking the $ytdlpGitURL repository ..." 1>&2
