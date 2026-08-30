@@ -223,7 +223,7 @@ function getRestrictedFilenamesFORMAT() {
 	echo "=> Started <$scriptBaseName> on $@ at : $startTime ..."
 	echo
 
-	checkRequirements ffmpeg ffprobe jq yt-dlp
+	checkRequirements ffmpeg ffprobe jq
 	setOtherRequirements date grep stat
 
 	parseArgs "$@"
