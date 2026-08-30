@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
 estimatedDuration=140m
-set -x
-scriptDir=$(dirname $(readlink -f $0))
+scriptDir=$(dirname $(readlink -f $0)) || exit
 scriptDir=$(cd $scriptDir;pwd)
-set +x
 echo $PATH | grep /usr/local/bin -q || export PATH+=:/usr/local/bin
 echo $PATH | grep $scriptDir -q || export PATH+=:$scriptDir
 url=https://www.youtube.com/user/NewCreationChurch/live
