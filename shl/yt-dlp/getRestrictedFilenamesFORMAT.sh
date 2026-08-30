@@ -47,12 +47,17 @@ function checkRequirements() {
 	for tool;do
 		declare -g $tool="$(type -P $tool)"
 		if [ -z "${!tool}" ];then
-			echo "=> [$FUNCNAME] ERROR: $tool is required, you need to install it." >&2
+			echo "=> [$FUNCNAME] ERROR: <$tool> is required, you need to install it." >&2
 			exit 2
 		fi
 	done
 	ffmpeg+=" -hide_banner"
 	ffprobe+=" -hide_banner"
+
+	if which yt-dlp >/dev/null 2>&1;then
+		echo "=> [$FUNCNAME] ERROR: <yt-dlp> is required, you need to install it." >&2
+		exit 3
+	fi
 }
 
 function setOtherRequirements() {
