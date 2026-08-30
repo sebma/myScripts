@@ -21,6 +21,8 @@ if $isDebianLike;then
 		echo "= Usage: $scriptBaseName ppa:<user>/<ppa-name>|repo_url packageList"
 		exit 1
 	else
+		set -x
+		if ! [[ $1 =~ ^"deb " ]];then
 		ppa=${1}
 		ppaWithoutPrefix=${1/ppa:}
 		shift
@@ -37,5 +39,6 @@ if $isDebianLike;then
 			yes | $sudo add-apt-repository $ppa -r
 		fi
 		echo "=> Done."
+	fi
 	fi
 fi
