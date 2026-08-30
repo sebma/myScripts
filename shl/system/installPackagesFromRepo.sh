@@ -21,24 +21,42 @@ if $isDebianLike;then
 		echo "= Usage: $scriptBaseName ppa:<user>/<ppa-name>|repo_url packageList"
 		exit 1
 	else
-		set -x
+		repoLine=$1
 		if ! [[ $1 =~ ^"deb " ]];then
-		ppa=${1}
-		ppaWithoutPrefix=${1/ppa:}
-		shift
+			ppa=${1}
+			ppaWithoutPrefix=${1/ppa:}
+			shift
+			yes | $sudo add-apt-repository $ppa
+		else
+			echo $repoLine | $sudo tee /etc/apt/sources.list.d/$2.list
+			shift
+		fi
+
 		packageList=( $@ )
 		firstPackage="${packageList[0]}"
-		yes | $sudo add-apt-repository $ppa
-		apt-cache policy $firstPackage | grep $ppaWithoutPrefix -q || $sudo apt update
-		echo
-		if apt-cache policy $firstPackage | grep $ppaWithoutPrefix -q;then
-			$sudo apt install -V ${packageList[@]}
-		else
-			echo "=> No $firstPackage for $PRETTY_NAME, removing $ppa repository ..."
+
+		if ! [[ $repoLine =~ ^"deb " ]];then
+			apt-cache policy $firstPackage | grep $ppaWithoutPrefix -q || $sudo apt update
 			echo
-			yes | $sudo add-apt-repository $ppa -r
+			if apt-cache policy $firstPackage | grep $ppaWithoutPrefix -q;then
+				$sudo apt install -V ${packageList[@]}
+			else
+				echo "=> No $firstPackage for $PRETTY_NAME, removing $ppa repository ..."
+				echo
+				yes | $sudo add-apt-repository $ppa -r
+			fi
+		else
+			apt-cache policy $firstPackage | egrep https?:// -q || $sudo apt update
+			echo
+			if apt-cache policy $firstPackage | egrep https?:// -q;then
+				 $sudo apt install -V ${packageList[@]}
+			else
+				echo "=> No $firstPackage for $PRETTY_NAME, removing repository ..."
+				echo
+				$sudo rm /etc/apt/sources.list.d/$firstPackage.list
+				$sudo apt update
+			fi
 		fi
 		echo "=> Done."
-	fi
 	fi
 fi
