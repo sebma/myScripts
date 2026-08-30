@@ -54,7 +54,7 @@ function checkRequirements() {
 	ffmpeg+=" -hide_banner"
 	ffprobe+=" -hide_banner"
 
-	if which yt-dlp >/dev/null 2>&1;then
+	if ! which yt-dlp >/dev/null 2>&1;then
 		echo "=> [$FUNCNAME] ERROR: <yt-dlp> is required, you need to install it." >&2
 		exit 3
 	fi
