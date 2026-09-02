@@ -1,0 +1,1 @@
+yt-dlp/getRestrictedFilenamesFORMAT-OPTIONS.sh
