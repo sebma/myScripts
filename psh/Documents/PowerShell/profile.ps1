@@ -57,3 +57,7 @@ function ResetPrompt {
 
 	Write-Host "PowerShell prompt has been reset." -ForegroundColor Green
 }
+
+function wanIP {
+	Resolve-DnsName -name myip.opendns.com -server resolver1.opendns.com | % IPAddress
+}
