@@ -99,7 +99,7 @@ EOF
 		$sudo systemctl restart docker.service
 
 		# CONFIG DNS
-		if ! resolvectl dns | grep "$DNS_SERVER1" -q;then
+		if $isUbuntuLike && [ $majorNumber -ge 20 ] && ! resolvectl dns | grep "$DNS_SERVER1" -q;then
 			iface=$(\ls /sys/class/net/ | grep -vw lo)
 			resolvectl status $iface
 			$sudo resolvectl dns $iface $DNS_SERVER1 $FallBack_DNS_SERVER
