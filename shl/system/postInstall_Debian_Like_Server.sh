@@ -99,14 +99,16 @@ EOF
 		$sudo systemctl restart docker.service
 
 		# CONFIG DNS
-		if $isUbuntuLike && [ $majorNumber -ge 20 ] && ! resolvectl dns | grep "$DNS_SERVER1" -q;then
-			iface=$(\ls /sys/class/net/ | grep -vw lo)
-			resolvectl status $iface
-			$sudo resolvectl dns $iface $DNS_SERVER1 $FallBack_DNS_SERVER
-			$sudo resolvectl domain $iface $searchDOMAIN
-			resolvectl dns $iface
-			resolvectl status $iface
-			$sudo systemctl restart systemd-resolved.service
+		if $isUbuntuLike && [ $majorNumber -ge 20 ];then
+				if ! resolvectl dns | grep "$DNS_SERVER1" -q;then
+				iface=$(\ls /sys/class/net/ | grep -vw lo)
+				resolvectl status $iface
+				$sudo resolvectl dns $iface $DNS_SERVER1 $FallBack_DNS_SERVER
+				$sudo resolvectl domain $iface $searchDOMAIN
+				resolvectl dns $iface
+				resolvectl status $iface
+				$sudo systemctl restart systemd-resolved.service
+			fi
 		fi
 
 		# Install open-vm-tools
