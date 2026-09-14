@@ -30,6 +30,7 @@ function setVariables {
 	$global:AllUsersStartupDIR = "$ENV:ProgramData/Microsoft/Windows/Start Menu/Programs/Startup"
 	$global:QuickLaunchDIR = "$ENV:APPDATA/Microsoft/Internet Explorer/Quick Launch"
 	$global:TaskBarDIR = "$ENV:APPDATA/Microsoft/Internet Explorer/Quick Launch/User Pinned/TaskBar"
+	$global:HISTFILE = $(Get-PSReadlineOption).HistorySavePath
 	$ENV:DISPLAY = "localhost:0"
 	$ENV:IsWindows = $IsWindows
 }
