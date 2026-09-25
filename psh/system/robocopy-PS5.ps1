@@ -21,7 +21,7 @@ function robocopyPS {
 	#$robocopyOptions += " /tee" # pour tout voir a l_ecran
 	#$robocopyDryRUN = "/L"
 
-	$fullSynchroFile = $destinationDIR + $dirSep + $sourceBaseName + ".full"
+	$fullSynchroFile = $destinationDIR + $dirSep + $sourceBaseName + ".FULL"
 	$fullSynchro = Test-Path $fullSynchroFile
 	if ( $fullSynchro ) {
 		# Hide $fullSynchro file
