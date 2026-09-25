@@ -18,8 +18,6 @@ function robocopyPS {
 	$sourceBaseName = $sourceDIR.Split($dirSep)[-1]
 	$destinationDIR += $dirSep + $sourceBaseName
 	$logDIR = "C:\TEMP\Robocopy\Logs"
-	$logFile = $logDIR + $dirSep + $sourceBaseName + '.log'
-	$robocopyOptions += " /log+:$logFile"
 	#$robocopyOptions += " /tee" # pour tout voir a l_ecran
 	#$robocopyDryRUN = "/L"
 
@@ -29,9 +27,12 @@ function robocopyPS {
 		# Hide $fullSynchro file
 		$(Get-ItemProperty $fullSynchro).Attributes = $(Get-ItemProperty $fullSynchro).Attributes -bor [io.fileattributes]::Hidden
 		$robocopyOptions += " /COPY:DATSO"
+		$logFile = $logDIR + $dirSep + $sourceBaseName + '-FULL.log'
 	} else {
 		$robocopyOptions += " /COPY:DAT"
+		$logFile = $logDIR + $dirSep + $sourceBaseName + '-DIFF.log'
 	}
+	$robocopyOptions += " /log:$logFile"
 
 	$robocopyOptions = $robocopyOptions -split '\s+' # convertit les options de robocopy en array
 	gci -Force $sourceDIR | foreach {
