@@ -6,6 +6,8 @@ function lsgroup {
   			$group = $args[$i]
 			echo "=> Members of group $group :"
 			Get-ADGroupMember $group -server $DC | Select Name , SamAccountName  | sort
+			$nb = $(Get-ADGroupMember $group -server $DC).Count
+			[Console]::Error.WriteLine("Number of members : $nb`n")
 		}
 	}
 }
