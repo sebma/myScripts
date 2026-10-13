@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-find "$1" -type f -printf '%s %f\n' | awk '{
+time find "$1" -type f -printf '%s %f\n' | awk '{
 	e="NO_EXTENSION"
 	if ($2~/\./) {e=tolower($2); sub(/^.*\./,"",e)}
 	s[e]+=$1
