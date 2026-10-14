@@ -49,7 +49,7 @@ function lsgroup {
 		for($i=0;$i -lt $argc;$i++) {
 			$group = $args[$i]
 			echo "=> Members of group $group :"
-			(Get-ADGroupMember $group).SamAccountName | sort
+			Get-ADGroupMember $group | Select Name , SamAccountName | sort
 			$nb = $(Get-ADGroupMember $group).Count
 			[Console]::Error.WriteLine("Number of members : $nb`n")
 		}
