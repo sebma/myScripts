@@ -23,6 +23,10 @@ function robocopyPS {
 
 	$fullSynchroFile = $destinationDIR + $dirSep + $sourceBaseName + ".FULL"
 	$fullSynchro = Test-Path $fullSynchroFile
+
+	Write-Host "=> Testing if < $fullSynchroFile > exists..."
+	Write-Host "=> fullSynchro = $fullSynchro"
+
 	if ( $fullSynchro ) {
 		# Hide $fullSynchro file
 		$(Get-ItemProperty $fullSynchroFile).Attributes = $(Get-ItemProperty $fullSynchroFile).Attributes -bor [io.fileattributes]::Hidden
