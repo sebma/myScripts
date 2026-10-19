@@ -22,9 +22,9 @@ function robocopyPS {
 	#$robocopyDryRUN = "/L"
 
 	$fullSynchroFile = $destinationDIR + $dirSep + $sourceBaseName + ".FULL"
-	$fullSynchro = Test-Path $fullSynchroFile
 
 	Write-Host "=> Testing if < $fullSynchroFile > exists..."
+	$fullSynchro = Test-Path $fullSynchroFile
 	Write-Host "=> fullSynchro = $fullSynchro"
 
 	if ( $fullSynchro ) {
