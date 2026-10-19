@@ -36,7 +36,7 @@ function robocopyPS {
 		$robocopyOptions += " /COPY:DAT"
 		$logFile = $logDIR + $dirSep + $sourceBaseName + '-DIFF.log'
 	}
-	$robocopyOptions += " /log:$logFile"
+	$robocopyOptions += " /log+:$logFile"
 
 	$robocopyOptions = $robocopyOptions -split '\s+' # convertit les options de robocopy en array
 	gci -Force $sourceDIR | foreach {
