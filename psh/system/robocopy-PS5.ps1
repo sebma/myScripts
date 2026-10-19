@@ -25,7 +25,7 @@ function robocopyPS {
 	$fullSynchro = Test-Path $fullSynchroFile
 	if ( $fullSynchro ) {
 		# Hide $fullSynchro file
-		$(Get-ItemProperty $fullSynchro).Attributes = $(Get-ItemProperty $fullSynchro).Attributes -bor [io.fileattributes]::Hidden
+		$(Get-ItemProperty $fullSynchroFile).Attributes = $(Get-ItemProperty $fullSynchroFile).Attributes -bor [io.fileattributes]::Hidden
 		$robocopyOptions += " /COPY:DATSO"
 		$logFile = $logDIR + $dirSep + $sourceBaseName + '-FULL.log'
 	} else {
@@ -43,7 +43,7 @@ function robocopyPS {
 		robocopy $_.FullName $destinationDIR\$_ $robocopyDryRUN @robocopyOptions
 	}
 
-	if ( $fullSynchro ) { Remove-Item -Force $fullSynchro }
+	if ( $fullSynchro ) { Remove-Item -Force $fullSynchroFile }
 	$stopwatch.Stop()
 	$duration = $stopwatch.Elapsed
 	Write-Host ""
