@@ -13,6 +13,6 @@ certFileName && n { print > certFileName }
 ' | while read certFileName; do
 		commonName=$(openssl x509 -noout -subject -in $certFileName | grep -oP '(?<=CN=).*' | sed 's/\s/-/g')
 		sudo mv -v $certFileName $acCertsDIR/$commonName.crt
-		sudo update-ca-certificates
 	done
+	sudo update-ca-certificates
 fi
