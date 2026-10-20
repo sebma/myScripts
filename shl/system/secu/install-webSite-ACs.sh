@@ -11,8 +11,8 @@ if [ $retCode == 60 ];then
 certFileName && n { print > certFileName }
 /-----END CERTIFICATE-----/ { close(certFileName); if(n)print certFileName; certFileName=""; n++ }
 ' | while read certFileName; do
-	commonName=$(openssl x509 -noout -subject -in $certFileName | grep -oP '(?<=CN=).*' | sed 's/\s/-/g')
-	sudo mv -v $certFileName $acCertsDIR/$commonName.crt
-done
+		commonName=$(openssl x509 -noout -subject -in $certFileName | grep -oP '(?<=CN=).*' | sed 's/\s/-/g')
+		sudo mv -v $certFileName $acCertsDIR/$commonName.crt
+		sudo update-ca-certificates
+	done
 fi
-sudo update-ca-certificates
