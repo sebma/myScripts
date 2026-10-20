@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
-webSite=$1
-read ID_LIKE <<< $(awk -F '[= ]' '/ID_LIKE/{gsub(/"/, "", $2); print $2}' /etc/os-release)
+source <(grep ID_LIKE /etc/os-release)
+ID_LIKE=( $ID_LIKE )
 case $ID_LIKE in
 	debian) acCertsDIR=/usr/local/share/ca-certificates;updateCAsCMD=update-ca-certificates;;
 	rhel)   acCertsDIR=/etc/pki/ca-trust/source/anchors;updateCAsCMD=update-ca-trust;;
-	*)
+	*) ;;
 esac
 
+webSite=$1
 curl -sL $webSite >/dev/null
 retCode=$?
 if [ $retCode == 60 ];then
