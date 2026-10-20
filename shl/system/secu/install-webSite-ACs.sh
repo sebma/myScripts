@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 webSite=$1
-ID_LIKE=$(awk -F '[= ]' '/ID_LIKE/{gsub(/"/, "", $2); print $2}' /etc/os-release)
+read ID_LIKE <<< $(awk -F '[= ]' '/ID_LIKE/{gsub(/"/, "", $2); print $2}' /etc/os-release)
 case $ID_LIKE in
 	debian) acCertsDIR=/usr/local/share/ca-certificates;updateCAsCMD=update-ca-certificates;;
-	rhel) acCertsDIR=/etc/pki/ca-trust/source/anchors;updateCAsCMD=update-ca-trust;;
+	rhel)   acCertsDIR=/etc/pki/ca-trust/source/anchors;updateCAsCMD=update-ca-trust;;
 	*)
 esac
 
