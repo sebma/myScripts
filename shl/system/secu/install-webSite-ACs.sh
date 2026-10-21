@@ -17,7 +17,7 @@ case $distribFamily in
 esac
 
 webSite=$1
-curl -sL $webSite >/dev/null
+curl -I $webSite >/dev/null
 retCode=$?
 if [ $retCode == 60 ];then
 	fqdn=${webSite#http*://}
