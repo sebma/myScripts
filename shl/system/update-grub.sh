@@ -27,41 +27,41 @@ function distribName {
 	echo $osName | awk '{print tolower($0)}'
 }
 
-function distribType {
+function distribFamily {
 	local distribName=unknown
-	local distribType=unknown
+	local distribFamily=unknown
 	echo $OSTYPE | grep -q android && local osFamily=Android || local osFamily=$(uname -s | cut -d' ' -f1)
 
 	if [ $osFamily = Linux ]; then
 		if grep ID_LIKE /etc/os-release -q 2>/dev/null; then
-			distribType=$(source /etc/os-release && echo $ID_LIKE)
+			distribFamily=$(source /etc/os-release && echo $ID_LIKE)
 		elif [ ls /etc/*_version >/dev/null 2>&1 ]; then
-			distribType=$(echo /etc/*version | sed 's,/etc/\|_version,,g')
+			distribFamily=$(echo /etc/*version | sed 's,/etc/\|_version,,g')
 		else
 			distribName=$(distribName)
 			case $distribName in
-				sailfishos|rhel|fedora|centos|rocky|photon) distribType=redhat ;;
-				ubuntu) distribType=debian;;
-				*) distribType=$distribName ;;
+				sailfishos|rhel|fedora|centos|rocky|photon) distribFamily=redhat ;;
+				ubuntu) distribFamily=debian;;
+				*) distribFamily=$distribName ;;
 			esac
 		fi
 	elif [ $osFamily = Darwin ]; then
-		distribType=Darwin
+		distribFamily=Darwin
 	elif [ $osFamily = Android ]; then
-		distribType=Android
+		distribFamily=Android
 	elif [ $osFamily = VMkernel ]; then # ESXi
-		distribType=ESXi
+		distribFamily=ESXi
 	else
-		test -n $OSTYPE && distribType=$OSTYPE || distribType=$osFamily
+		test -n $OSTYPE && distribFamily=$OSTYPE || distribFamily=$osFamily
 	fi
 
-	echo $distribType
+	echo $distribFamily
 }
 
-distribType=$(distribType)
+distribFamily=$(distribFamily)
 test $(id -u) == 0 && sudo="" || sudo=$(type -P sudo)
 
-case $distribType in
+case $distribFamily in
 	rhel*|redhat)
 		if [ -d /sys/firmware/efi ];then
 			$sudo grub2-mkconfig -o "$(readlink -f /etc/grub2-efi.cfg)" || $sudo grub2-mkconfig -o "$(readlink -f /etc/grub2-efi.conf)"
@@ -70,5 +70,5 @@ case $distribType in
 		fi
 	;;
 	debian) $sudo update-grub;;
-	*) echo "=> $distribType not supported yet." >&2;exit 1;;
+	*) echo "=> $distribFamily not supported yet." >&2;exit 1;;
 esac
