@@ -23,7 +23,7 @@ if [ $retCode == 60 ];then
 	fqdn=${fqdn%%/*}
 	[[ $fqdn == *:* ]] && port=${fqdn#*:} || port=443
 	fqdn=${fqdn%:*}
-	openssl s_client -connect $fqdn:443 -showcerts < /dev/null 2>/dev/null | awk -v fqdn=$fqdn '
+	openssl s_client -connect $fqdn:$port -showcerts < /dev/null 2>/dev/null | awk -v fqdn=$fqdn '
 /-----BEGIN CERTIFICATE-----/ { certFileName=fqdn "-" n ".crt" }
 certFileName && n { print > certFileName }
 /-----END CERTIFICATE-----/ { close(certFileName); if(n)print certFileName; certFileName=""; n++ }
