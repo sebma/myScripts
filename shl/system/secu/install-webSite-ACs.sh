@@ -1,10 +1,18 @@
 #!/usr/bin/env bash
 
-source <(grep ID_LIKE /etc/os-release)
-ID_LIKE=( $ID_LIKE )
-case $ID_LIKE in
+source <(grep -w ID_LIKE /etc/os-release)
+if test -n $ID_LIKE;then
+	distribFamily=( $ID_LIKE )
+else
+	source <(grep -w ID /etc/os-release)
+	distribFamily=$ID
+fi
+
+case $distribFamily in
 	debian) acCertsDIR=/usr/local/share/ca-certificates;updateCAsCMD=update-ca-certificates;;
 	rhel)   acCertsDIR=/etc/pki/ca-trust/source/anchors;updateCAsCMD=update-ca-trust;;
+	alpine) ;;
+	arch) updateCAsCMD=update-ca-trust;;
 	*) ;;
 esac
 
