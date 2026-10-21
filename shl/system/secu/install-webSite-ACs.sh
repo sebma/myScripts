@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 source <(grep -w ID_LIKE /etc/os-release)
-if test -n $ID_LIKE;then
+if test -n "$ID_LIKE";then
 	distribFamily=( $ID_LIKE )
 else
 	source <(grep -w ID /etc/os-release)
