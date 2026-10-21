@@ -51,9 +51,9 @@ osCodeName() {
 			elif which lsb_release >/dev/null 2>&1;then
 				osCodeName=$(lsb_release -sc)
 			else
-				distribType=$(distribType.sh)
+				distribFamily=$(distribFamily.sh)
 				distribName=$(distribName.sh)
-				case $distribType in
+				case $distribFamily in
 					debian)
 						;;
 					redhat)
