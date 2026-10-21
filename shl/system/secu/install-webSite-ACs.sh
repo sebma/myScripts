@@ -21,8 +21,7 @@ retCode=$?
 if [ $retCode == 60 ];then
 	fqdn=${webSite#http*://}
 	fqdn=${fqdn%%/*}
-	port=${fqdn#*:}
-	test $port == $fqdn && port=443
+	[[ $fqdn == *:* ]] && port=${fqdn#*:} || port=443
 	fqdn=${fqdn%:*}
 	openssl s_client -connect $fqdn:443 -showcerts < /dev/null 2>/dev/null | awk -v fqdn=$fqdn '
 /-----BEGIN CERTIFICATE-----/ { certFileName=fqdn "-" n ".crt" }
