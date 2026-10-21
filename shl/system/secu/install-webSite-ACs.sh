@@ -16,19 +16,33 @@ case $distribFamily in
 esac
 
 webSite=$1
-curl -I $webSite >/dev/null
+curl -sI $webSite >/dev/null
 retCode=$?
+
+fqdn=${webSite#http*://}
+fqdn=${fqdn%%/*}
+[[ $fqdn =~ ":" ]] && port=${fqdn#*:} && fqdn=${fqdn%:*} || port=443
+
+type -P openssl >/dev/null && openssl s_client -connect $webSite:$port < /dev/null 2>/dev/null | grep s:.*CN.
+type -P gnutls-cli >/dev/null && gnutls-cli $webSite -p $port </dev/null | grep 'subject\s*.CN=[^,]*'
+type -P gnutls-cli >/dev/null && gnutls-cli --print-cert $webSite -p $port --save-cert $webSite-test.crt < /dev/null >/dev/null
+grep CERT $webSite-test.crt
+curl -sSw '%{certs}' -o /dev/null $webSite | egrep '(Subject|Issuer):'
+
 if [ $retCode == 60 ];then
-	fqdn=${webSite#http*://}
-	fqdn=${fqdn%%/*}
-	[[ $fqdn =~ ":" ]] && port=${fqdn#*:} && fqdn=${fqdn%:*} || port=443
-	openssl s_client -connect $fqdn:$port -showcerts < /dev/null 2>/dev/null | awk -v fqdn=$fqdn '
+#	openssl s_client -connect $fqdn:$port -showcerts < /dev/null 2>/dev/null \
+#	gnutls-cli --print-cert $webSite -p $port </dev/null \
+	curl -sSw '%{certs}' -o /dev/null $webSite \
+		| awk -v fqdn=$fqdn '
 /-----BEGIN CERTIFICATE-----/ { certFileName=fqdn "-" n ".crt" }
 certFileName && n { print > certFileName }
 /-----END CERTIFICATE-----/ { close(certFileName); if(n)print certFileName; certFileName=""; n++ }
 ' | while read certFileName; do
 		commonName=$(openssl x509 -noout -subject -in $certFileName | grep -oP '(?<=CN=).*' | sed 's/\s/-/g')
 		sudo mv -v $certFileName $acCertsDIR/$commonName.crt
+		# To test, type :
+		# sudo rm $acCertsDIR/$commonName.crt -vf && sudo update-ca-certificates -f
+		# and re-run this script.
 	done
 	sudo $updateCAsCMD
 fi
