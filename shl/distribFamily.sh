@@ -1,1 +1,0 @@
-distribs/distribType.sh
