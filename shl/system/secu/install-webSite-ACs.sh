@@ -10,8 +10,8 @@ fi
 
 case $distribFamily in
 	debian|alpine) acCertsDIR=/usr/local/share/ca-certificates;updateCAsCMD=update-ca-certificates;;
-	rhel)   acCertsDIR=/etc/pki/ca-trust/source/anchors;updateCAsCMD=update-ca-trust;;
-	arch) updateCAsCMD=update-ca-trust;;
+	rhel) acCertsDIR=/etc/pki/ca-trust/source/anchors;updateCAsCMD=update-ca-trust;;
+	arch) acCertsDIR=/etc/ca-certificates/trust-source/anchors/;updateCAsCMD=update-ca-trust;;
 	*) ;;
 esac
 
