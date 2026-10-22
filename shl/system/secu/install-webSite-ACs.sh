@@ -30,13 +30,13 @@ grep CERT $webSite-test.crt
 curl -sSw '%{certs}' -o /dev/null $webSite | egrep '(Subject|Issuer):'
 
 if [ $retCode == 60 ];then
-#	openssl s_client -connect $fqdn:$port -showcerts < /dev/null 2>/dev/null \
 #	gnutls-cli --print-cert $webSite -p $port </dev/null \
-	curl -sSw '%{certs}' -o /dev/null $webSite \
+#	curl -sSw '%{certs}' -o /dev/null $webSite \
+	openssl s_client -connect $fqdn:$port -showcerts < /dev/null 2>/dev/null \
 		| awk -v fqdn=$fqdn '
 n && /-----BEGIN CERTIFICATE-----/ { certFileName=fqdn "-" n ".crt" }
-certFileName && n { print > certFileName }
-/-----END CERTIFICATE-----/ {if(n) {close(certFileName);print certFileName} certFileName=""; n++ }
+n { print > certFileName }
+/-----END CERTIFICATE-----/ {if(n++) { close(certFileName);print certFileName;certFileName="" } }
 ' | while read certFileName; do
 		commonName=$(openssl x509 -noout -subject -in $certFileName | grep -oP '(?<=CN=).*' | sed 's/\s/-/g')
 		sudo mv -v $certFileName $acCertsDIR/$commonName.crt
