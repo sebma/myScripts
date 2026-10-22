@@ -35,7 +35,7 @@ if [ $retCode == 60 ];then
 	openssl s_client -connect $fqdn:$port -showcerts < /dev/null 2>/dev/null \
 		| awk -v fqdn=$fqdn '
 n && /-----BEGIN CERTIFICATE-----/ { certFileName=fqdn "-" n ".crt" }
-n { print > certFileName }
+n && certFileName { print > certFileName }
 /-----END CERTIFICATE-----/ {if(n++) { close(certFileName);print certFileName;certFileName="" } }
 ' | while read certFileName; do
 		commonName=$(openssl x509 -noout -subject -in $certFileName | grep -oP '(?<=CN=).*' | sed 's/\s/-/g')
