@@ -46,3 +46,4 @@ n { print > certFileName }
 	done
 	sudo $updateCAsCMD
 fi
+
