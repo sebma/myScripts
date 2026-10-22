@@ -24,7 +24,7 @@ fqdn=${fqdn%%/*}
 [[ $fqdn =~ ":" ]] && port=${fqdn#*:} && fqdn=${fqdn%:*} || port=443
 
 type -P openssl >/dev/null && openssl s_client -connect $webSite:$port < /dev/null 2>/dev/null | grep s:.*CN.
-type -P gnutls-cli >/dev/null && gnutls-cli $webSite -p $port </dev/null | grep 'subject\s*.CN=[^,]*'
+type -P gnutls-cli >/dev/null && gnutls-cli $webSite -p $port < /dev/null | grep 'subject\s*.CN=[^,]*'
 type -P gnutls-cli >/dev/null && gnutls-cli --print-cert $webSite -p $port --save-cert $webSite-test.crt < /dev/null >/dev/null
 grep CERT $webSite-test.crt
 curl -sSw '%{certs}' -o /dev/null $webSite | egrep '(Subject|Issuer):'
