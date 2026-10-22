@@ -188,6 +188,8 @@ if( $IsWindows ) {
 				#echo "=> $name :"
 				if ( $argc -eq 1 ) {
 					(Resolve-DnsName $fqdn).IP4Address
+					$Names = $(Resolve-DnsName $fqdn).Name
+					if( $Names[-1] -ne $fqdn) { $Names }
 				} elseif ( $argc -eq 2 ) {
 					(Resolve-DnsName -name $fqdn -server $server).IP4Address | sort
 				} elseif ( $argc -eq 3 ) {
