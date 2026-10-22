@@ -34,9 +34,9 @@ if [ $retCode == 60 ];then
 #	gnutls-cli --print-cert $webSite -p $port </dev/null \
 	curl -sSw '%{certs}' -o /dev/null $webSite \
 		| awk -v fqdn=$fqdn '
-/-----BEGIN CERTIFICATE-----/ { certFileName=fqdn "-" n ".crt" }
+n && /-----BEGIN CERTIFICATE-----/ { certFileName=fqdn "-" n ".crt" }
 certFileName && n { print > certFileName }
-/-----END CERTIFICATE-----/ { close(certFileName); if(n)print certFileName; certFileName=""; n++ }
+/-----END CERTIFICATE-----/ {if(n) {close(certFileName);print certFileName} certFileName=""; n++ }
 ' | while read certFileName; do
 		commonName=$(openssl x509 -noout -subject -in $certFileName | grep -oP '(?<=CN=).*' | sed 's/\s/-/g')
 		sudo mv -v $certFileName $acCertsDIR/$commonName.crt
