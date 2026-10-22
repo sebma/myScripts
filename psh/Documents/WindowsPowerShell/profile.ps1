@@ -176,9 +176,9 @@ if( $IsWindows ) {
 				$ip = $name -Replace('https?://|s?ftps?://','') -Replace('(/|:\d+).*$','')
 				#echo "=> $ip :"
 				if ( $argc -eq 1 ) {
-					(Resolve-DnsName -DnsOnly $ip).NameHost
+					(Resolve-DnsName -DnsOnly $ip).NameHost | sort
 				} elseif ( $argc -eq 2 ) {
-					(Resolve-DnsName -DnsOnly -name $ip -server $server).NameHost
+					(Resolve-DnsName -DnsOnly -name $ip -server $server).NameHost | sort
 				} else {
 					Write-Warning "=> Not supported for the moment."
 				}
@@ -189,14 +189,14 @@ if( $IsWindows ) {
 				if ( $argc -eq 1 ) {
 					(Resolve-DnsName $fqdn).IP4Address
 				} elseif ( $argc -eq 2 ) {
-					(Resolve-DnsName -name $fqdn -server $server).IP4Address
+					(Resolve-DnsName -name $fqdn -server $server).IP4Address | sort
 				} elseif ( $argc -eq 3 ) {
 					if ( $type -eq "-4" ) {
 						$type = "A"
-						(Resolve-DnsName -type $type -name $fqdn -server $server).IP4Address
+						(Resolve-DnsName -type $type -name $fqdn -server $server).IP4Address | sort
 					} elseif ( $type -eq "-6" ) {
 						$type = "AAAA"
-						(Resolve-DnsName -type $type -name $fqdn -server $server).IP6Address
+						(Resolve-DnsName -type $type -name $fqdn -server $server).IP6Address | sort
 					}
 				} else {
 					Write-Warning "=> Not supported for the moment."
