@@ -108,6 +108,7 @@ gnome-translate
 gnome-web-photo
 gns3
 gnuplot-qt
+gnutls-bin
 gpac
 gparted
 gpm
@@ -164,6 +165,7 @@ librecad
 libreoffice
 libreoffice-gtk
 libreoffice-kde
+libsecret-tools
 libsox-fmt-all
 libsword-utils
 libterm-readline-gnu-perl
