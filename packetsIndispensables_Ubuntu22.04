@@ -106,6 +106,7 @@ gmic
 gnome-session-flashback
 gnome-terminal
 gnuplot-qt
+gnutls-bin
 gpac
 gparted
 gpm
@@ -158,6 +159,7 @@ librecad
 libreoffice
 libreoffice-gtk
 libreoffice-kde
+libsecret-tools
 libsox-fmt-all
 libsword-utils
 libterm-readline-gnu-perl
