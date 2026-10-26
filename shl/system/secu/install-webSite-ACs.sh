@@ -18,6 +18,7 @@ esac
 webSite=$1
 curl -sI $webSite >/dev/null
 retCode=$?
+curl -I $webSite 2>&1 | egrep 'curl:|^HTTP'
 
 fqdn=${webSite#http*://}
 fqdn=${fqdn%%/*}
@@ -27,12 +28,12 @@ type -P openssl >/dev/null && openssl s_client -connect $webSite:$port < /dev/nu
 type -P gnutls-cli >/dev/null && gnutls-cli $webSite -p $port < /dev/null | grep 'subject\s*.CN=[^,]*'
 type -P gnutls-cli >/dev/null && gnutls-cli --print-cert $webSite -p $port --save-cert $webSite-test.crt < /dev/null >/dev/null
 grep CERT $webSite-test.crt
-curl -sSw '%{certs}' -o /dev/null $webSite | egrep '(Subject|Issuer):'
+curl -sSw %{certs} $webSite | egrep '(Subject|Issuer):'
 
 if [ $retCode == 60 ];then
 #	gnutls-cli --print-cert $webSite -p $port </dev/null \
-#	curl -sSw '%{certs}' -o /dev/null $webSite \
-	openssl s_client -connect $fqdn:$port -showcerts < /dev/null 2>/dev/null \
+#	openssl s_client -connect $fqdn:$port -showcerts < /dev/null 2>/dev/null \
+	curl -sSw %{certs} $webSite \
 		| awk -v fqdn=$fqdn '
 n && /-----BEGIN CERTIFICATE-----/ { certFileName=fqdn "-" n ".crt" }
 n && certFileName { print > certFileName }
