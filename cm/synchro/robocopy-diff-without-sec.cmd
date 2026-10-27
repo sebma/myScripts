@@ -12,7 +12,7 @@ set "logDIR=C:\TEMP\Robocopy\Logs"
 set "logDiffFile=%logDIR%\%sourceBaseName%-DIFF.log"
 set "logFile=%logDiffFile%
 
-set "robocopyOptions=%robocopyFullOptions% /log:%logFile%"
+set "robocopyOptions=%robocopyDiffOptions% /log:%logFile%"
 
 REM set robocopyDryRUN = "/L"
 
