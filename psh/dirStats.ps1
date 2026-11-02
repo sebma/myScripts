@@ -1,22 +1,22 @@
 #!/usr/bin/env pwsh
 # vim: ft=powershell noet:
-function dirSize2iec {
+function size2iec {
 	$FUNCNAME = $MyInvocation.MyCommand.Name
 	#Write-Host "=> Starting <$FUNCNAME> function ..."
 
 	$size = $args[0]
-	$size2IEC = ""
+	$iecSize = ""
 	switch( $size ) {
-		{ $_ -ge 1pb -and $_ -le 1024pb } { $size2IEC = "{0:n2} TiB" -f ( $size / 1pb ); break }
-		{ $_ -ge 1tb -and $_ -le 1pb } { $size2IEC = "{0:n2} TiB" -f ( $size / 1tb ); break }
-		{ $_ -ge 1gb -and $_ -le 1tb } { $size2IEC = "{0:n2} GiB" -f ( $size / 1gb ); break }
-		{ $_ -ge 1mb -and $_ -le 1gb } { $size2IEC = "{0:n2} MiB" -f ( $size / 1mb ); break }
-		{ $_ -ge 1kb -and $_ -le 1mb } { $size2IEC = "{0:n2} KiB" -f ( $size / 1kb ); break }
-		{ $_ -ge 0   -and $_ -le 1kb } { $size2IEC = "{0:n2} B  " -f   $size; break }
+		{ $_ -ge 1pb -and $_ -le 1024pb } { $iecSize = "{0:n2} TiB" -f ( $size / 1pb ); break }
+		{ $_ -ge 1tb -and $_ -le 1pb } { $iecSize = "{0:n2} TiB" -f ( $size / 1tb ); break }
+		{ $_ -ge 1gb -and $_ -le 1tb } { $iecSize = "{0:n2} GiB" -f ( $size / 1gb ); break }
+		{ $_ -ge 1mb -and $_ -le 1gb } { $iecSize = "{0:n2} MiB" -f ( $size / 1mb ); break }
+		{ $_ -ge 1kb -and $_ -le 1mb } { $iecSize = "{0:n2} KiB" -f ( $size / 1kb ); break }
+		{ $_ -ge 0   -and $_ -le 1kb } { $iecSize = "{0:n2} B  " -f   $size; break }
 	}
 
 	#Write-Host "=> Ending of <$FUNCNAME> function ..."
-	return $size2IEC
+	return $iecSize
 }
 
 function dirStats {
@@ -69,8 +69,8 @@ function main {
 				Write-Host "=> nbFiles = $nbFiles"
 				Write-Host "=> nbDirs = $nbDirs"
 				Write-Host "=> size = $size"
-				$size2iec = dirSize2iec($size)
-				Write-Host "=> dirSize2iec(size) = $size2iec."
+				$iecSize = size2iec($size)
+				Write-Host "=> size2iec(size) = $iecSize."
 				Write-Host ""
 			}
 		}
@@ -84,8 +84,8 @@ function main {
 		Write-Host "=> totalFiles = $totalFiles"
 		Write-Host "=> totalFiles = $totalDirs"
 		Write-Host "=> totalSize = $totalSize"
-		$size2iec = dirSize2iec($totalSize)
-		Write-Host "=> dirSize2iec(totalSize) = $size2iec."
+		$iecSize = size2iec($totalSize)
+		Write-Host "=> size2iec(totalSize) = $iecSize."
 		Write-Host ""
 	}
 	#Write-Host "=> Ending of <$FUNCNAME> function ..."
