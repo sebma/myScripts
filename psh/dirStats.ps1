@@ -62,7 +62,7 @@ function main {
 			foreach ($dir in $dirs) {
 				if ( ! ( Test-Path $dir ) ) { Write-Host "=> The $dir directory does not exits.";continue; }
 				Write-Host "=> dir = < $dir >"
-				$size , $nbFiles , $nbDirs = $( dirStats $dir )
+				$size , $nbFiles , $nbDirs = dirStats $dir
 				$totalSize += $size
 				$totalFiles += $nbFiles
 				$totalDirs += $nbDirs
