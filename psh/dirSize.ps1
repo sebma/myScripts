@@ -27,9 +27,8 @@ function dirSize {
 
 	$driveLetter = (Get-Item (Resolve-Path $dirName)).PSDrive.Name + ':'
 	$clusterSize = (Get-CimInstance Win32_Volume -Filter "DriveLetter='$driveLetter'").BlockSize
-	Write-Host "=> clusterSize = $clusterSize"
 	if ( ! $clusterSize ) { $clusterSize = 4096 }
-	Write-Host "=> clusterSize = $clusterSize"
+	#Write-Host "=> clusterSize = $clusterSize"
 
 	$size = [uint64]( dir "$dirName" -force -recurse -file 2>$null | Measure-Object -Property Length -Sum ).Sum
 	$sizeOnDisk = [uint64]( dir "$dirName" -force -recurse -file 2>$null | % { [math]::Ceiling($_.Length / $clusterSize) * $clusterSize } | Measure-Object -Sum ).Sum
