@@ -32,10 +32,10 @@ function dirSize {
 	if ( ! $clusterSize ) { $clusterSize = 4096 }
 	#Write-Host "=> clusterSize = $clusterSize"
 
-	dir $dirName -Force -Recurse -File 2>$null | ForEach-Object {
+	@(dir $dirName -Force -Recurse -File 2>$null).ForEach({
 		$size += $_.Length
 		$sizeOnDisk += [uint64]([math]::Ceiling($_.Length / $clusterSize) * $clusterSize)
-	}
+	})
 
 	#Write-Host "=> Ending of <$FUNCNAME> function ..."
 	return $size , $sizeOnDisk
