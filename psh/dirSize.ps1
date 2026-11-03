@@ -41,14 +41,25 @@ function dirSize {
 }
 
 function time {
-	$duration = ( "$args" | Measure-Command { Invoke-Expression $_ | Out-Default } ).toString("hh\:mm\:ss\.ff")
-	"`n$duration`n"
+    param(
+        [scriptblock]$ScriptBlock
+    )
+
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    $result = & $ScriptBlock
+    $sw.Stop()
+
+    [PSCustomObject]@{
+        Result   = $result
+        Duration = $sw.Elapsed
+    }
 }
 
 function main {
 	$FUNCNAME = $MyInvocation.MyCommand.Name
 	#Write-Host "=> Starting <$FUNCNAME> function ..."
 
+	$ligneFeed = "`n"
 	$argc = $args.Count
 	#$total = 0
 	if ( $argc ) {
@@ -57,21 +68,25 @@ function main {
 			foreach ($dir in $dirs) {
 				if ( ! ( Test-Path $dir ) ) { Write-Host "=> The $dir directory does not exits.";continue; }
 				Write-Host "=> dir = < $dir >"
-				$size , $sizeOnDisk = $( dirSize $dir )
+				$dirSizeResult = time { dirSize $dir }
+				$size , $sizeOnDisk = $dirSizeResult.Result
+				$duration = $dirSizeResult.Duration
 				$total += $size
 				$totalOnDisk += $sizeOnDisk
-				Write-Host "=> size = $size"
-				Write-Host "=> sizeOnDisk = $sizeOnDisk"
 				$iecSize = size2iec($size)
+
+				Write-Host "$ligneFeed=> size = $size"
 				Write-Host "=> size2iec(size) = $iecSize."
+
 				$iecSizeOnDisk = size2iec($sizeOnDisk)
+				Write-Host "$ligneFeed=> sizeOnDisk = $sizeOnDisk"
 				Write-Host "=> size2iec(sizeOnDisk) = $iecSizeOnDisk."
-				Write-Host ""
+				Write-Host "$ligneFeed=> duration = $($duration.ToString('hh\:mm\:ss\.ff'))`n"
 			}
 		}
 	} else {
 		$dir = "."
-		$total , $totalOnDisk = $( dirSize $dir )
+		$total , $totalOnDisk = dirSize $dir
 		Write-Host "=> dir = < $dir >"
 	}
 
