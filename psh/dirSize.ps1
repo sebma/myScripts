@@ -24,14 +24,18 @@ function dirSize {
 	#Write-Host "=> Starting <$FUNCNAME> function ..."
 
 	$dirName = $args[0]
+	$size = [uint64]0
+	$sizeOnDisk = [uint64]0
 
 	$driveLetter = (Get-Item (Resolve-Path $dirName)).PSDrive.Name + ':'
 	$clusterSize = (Get-CimInstance Win32_Volume -Filter "DriveLetter='$driveLetter'").BlockSize
 	if ( ! $clusterSize ) { $clusterSize = 4096 }
 	#Write-Host "=> clusterSize = $clusterSize"
 
-	$size = [uint64]( dir "$dirName" -force -recurse -file 2>$null | Measure-Object -Property Length -Sum ).Sum
-	$sizeOnDisk = [uint64]( dir "$dirName" -force -recurse -file 2>$null | % { [math]::Ceiling($_.Length / $clusterSize) * $clusterSize } | Measure-Object -Sum ).Sum
+	dir $dirName -Force -Recurse -File 2>$null | ForEach-Object {
+		$size += $_.Length
+		$sizeOnDisk += [uint64]([math]::Ceiling($_.Length / $clusterSize) * $clusterSize)
+	}
 
 	#Write-Host "=> Ending of <$FUNCNAME> function ..."
 	return $size , $sizeOnDisk
