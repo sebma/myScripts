@@ -24,10 +24,18 @@ function dirSize {
 	#Write-Host "=> Starting <$FUNCNAME> function ..."
 
 	$dirName = $args[0]
+
+	$driveLetter = (Get-Item (Resolve-Path $dirName)).PSDrive.Name + ':'
+	$clusterSize = (Get-CimInstance Win32_Volume -Filter "DriveLetter='$driveLetter'").BlockSize
+	Write-Host "=> clusterSize = $clusterSize"
+	if ( ! $clusterSize ) { $clusterSize = 4096 }
+	Write-Host "=> clusterSize = $clusterSize"
+
 	$size = [uint64]( dir "$dirName" -force -recurse -file 2>$null | Measure-Object -Property Length -Sum ).Sum
+	$sizeOnDisk = [uint64]( dir "$dirName" -force -recurse -file 2>$null | % { [math]::Ceiling($_.Length / $clusterSize) * $clusterSize } | Measure-Object -Sum ).Sum
 
 	#Write-Host "=> Ending of <$FUNCNAME> function ..."
-	return [uint64]$size
+	return $size , $sizeOnDisk
 }
 
 function time {
@@ -47,17 +55,21 @@ function main {
 			foreach ($dir in $dirs) {
 				if ( ! ( Test-Path $dir ) ) { Write-Host "=> The $dir directory does not exits.";continue; }
 				Write-Host "=> dir = < $dir >"
-				$size = $( dirSize $dir )[-1]
+				$size , $sizeOnDisk = $( dirSize $dir )
 				$total += $size
+				$totalOnDisk += $sizeOnDisk
 				Write-Host "=> size = $size"
+				Write-Host "=> sizeOnDisk = $sizeOnDisk"
 				$iecSize = size2iec($size)
 				Write-Host "=> size2iec(size) = $iecSize."
+				$iecSizeOnDisk = size2iec($sizeOnDisk)
+				Write-Host "=> size2iec(sizeOnDisk) = $iecSizeOnDisk."
 				Write-Host ""
 			}
 		}
 	} else {
 		$dir = "."
-		$total = $( dirSize $dir )[-1]
+		$total , $totalOnDisk = $( dirSize $dir )
 		Write-Host "=> dir = < $dir >"
 	}
 
@@ -65,6 +77,8 @@ function main {
 		Write-Host "=> total = $total"
 		$iecSize = size2iec($total)
 		Write-Host "=> size2iec(total) = $iecSize."
+		$iecSizeOnDisk = size2iec($sizeOnDisk)
+		Write-Host "=> size2iec(sizeOnDisk) = $iecSizeOnDisk."
 		Write-Host ""
 	}
 	#Write-Host "=> Ending of <$FUNCNAME> function ..."
