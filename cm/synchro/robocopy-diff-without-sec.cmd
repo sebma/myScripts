@@ -18,3 +18,6 @@ REM set robocopyDryRUN = "/L"
 
 echo on
 robocopy %sourceDIR% %destinationDIR% %robocopyDryRUN% %robocopyOptions%
+set "RC=%ERRORLEVEL%"
+
+exit /b %RC%
