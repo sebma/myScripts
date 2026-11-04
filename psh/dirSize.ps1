@@ -70,7 +70,7 @@ function main {
 				Write-Host "=> dir = < $dir >"
 				$dirSizeResult = time { dirSize $dir }
 				$size , $sizeOnDisk = $dirSizeResult.Result
-				$duration = $dirSizeResult.Duration
+				$totalDuration += $dirSizeResult.Duration
 				$total += $size
 				$totalOnDisk += $sizeOnDisk
 				$iecSize = size2iec($size)
@@ -81,7 +81,7 @@ function main {
 				$iecSizeOnDisk = size2iec($sizeOnDisk)
 				Write-Host "$ligneFeed=> sizeOnDisk = $sizeOnDisk"
 				Write-Host "=> size2iec(sizeOnDisk) = $iecSizeOnDisk."
-				Write-Host "$ligneFeed=> duration = $($duration.ToString('hh\:mm\:ss\.ff'))`n"
+				Write-Host "$ligneFeed=> totalDuration = $($totalDuration.ToString('hh\:mm\:ss\.ff'))`n"
 			}
 		}
 	} else {
