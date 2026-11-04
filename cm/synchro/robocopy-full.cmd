@@ -18,3 +18,8 @@ REM set robocopyDryRUN = "/L"
 
 echo on
 robocopy %sourceDIR% %destinationDIR% %robocopyDryRUN% %robocopyOptions%
+set "RC=%ERRORLEVEL%"
+
+if not errorlevel 8 attrib +r "%logFile%"
+
+exit /b %RC%
