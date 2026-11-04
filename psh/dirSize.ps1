@@ -62,15 +62,16 @@ function main {
 	$ligneFeed = "`n"
 	$argc = $args.Count
 	#$total = 0
-	if ( $argc ) {
-		foreach ($dirs in $args) {
+	if( $argc ) {
+		foreach($dirs in $args) {
 			$argc = $dirs.Count
-			foreach ($dir in $dirs) {
-				if ( ! ( Test-Path $dir ) ) { Write-Host "=> The $dir directory does not exits.";continue; }
+			foreach($dir in $dirs) {
+				if( ! ( Test-Path $dir ) ) { Write-Host "=> The $dir directory does not exits.";continue; }
 				Write-Host "=> dir = < $dir >"
 				$dirSizeResult = time { dirSize $dir }
 				$size , $sizeOnDisk = $dirSizeResult.Result
-				$totalDuration += $dirSizeResult.Duration
+				$duration = $dirSizeResult.Duration
+				$totalDuration += $duration
 				$total += $size
 				$totalOnDisk += $sizeOnDisk
 				$iecSize = size2iec($size)
@@ -81,22 +82,24 @@ function main {
 				$iecSizeOnDisk = size2iec($sizeOnDisk)
 				Write-Host "$ligneFeed=> sizeOnDisk = $sizeOnDisk"
 				Write-Host "=> size2iec(sizeOnDisk) = $iecSizeOnDisk."
-				Write-Host "$ligneFeed=> totalDuration = $($totalDuration.ToString('hh\:mm\:ss\.ff'))`n"
+				Write-Host "$ligneFeed=> duration = $($duration.ToString('hh\:mm\:ss\.ff'))`n"
 			}
 		}
 	} else {
 		$dir = "."
-		$total , $totalOnDisk = dirSize $dir
 		Write-Host "=> dir = < $dir >"
+		$dirSizeResult = time { dirSize $dir }
+		$total , $totalOnDisk = $dirSizeResult.Result
+		$totalDuration = $dirSizeResult.Duration
 	}
 
-	if ( $argc -eq 0 -or $argc -ge 2 ) {
+	if( $argc -eq 0 -or $argc -ge 2 ) {
 		Write-Host "=> total = $total"
 		$iecSize = size2iec($total)
 		Write-Host "=> size2iec(total) = $iecSize."
 		$iecSizeOnDisk = size2iec($sizeOnDisk)
 		Write-Host "=> size2iec(sizeOnDisk) = $iecSizeOnDisk."
-		Write-Host ""
+		Write-Host "$ligneFeed=> totalDuration = $($totalDuration.ToString('hh\:mm\:ss\.ff'))`n"
 	}
 	#Write-Host "=> Ending of <$FUNCNAME> function ..."
 }
