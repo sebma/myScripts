@@ -109,7 +109,7 @@ function main {
 		$totalDuration = $dirStatsResult.Duration
 	}
 
-	if( $argc -eq 0 -or $dirs.Count -gt 1 ) {
+	if( $argc -eq 0 -or $argc -ge 2 ) {
 		Write-Host "=> totalFiles = $totalFiles"
 		Write-Host "=> totalDirs = $totalDirs"
 		Write-Host "=> totalSize = $totalSize"
