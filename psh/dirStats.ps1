@@ -73,15 +73,16 @@ function main {
 	$ligneFeed = "`n"
 	$argc = $args.Count
 	$totalSize = 0L
-	if ( $argc ) {
-		foreach ($dirs in $args) {
+	if( $argc ) {
+		foreach( $dirs in $args ) {
 			$argc = $dirs.Count
-			foreach ($dir in $dirs) {
-				if ( ! ( Test-Path $dir ) ) { Write-Host "=> The $dir directory does not exits.";continue; }
+			foreach( $dir in $dirs ) {
+				if( ! ( Test-Path $dir ) ) { Write-Host "=> The $dir directory does not exits.";continue; }
 				Write-Host "=> dir = < $dir >"
 				$dirStatsResult = time { dirStats $dir }
 				$size , $sizeOnDisk , $nbFiles , $nbDirs = $dirStatsResult.Result
-				$totalDuration += $dirStatsResult.Duration
+				$duration = $dirStatsResult.Duration
+				$totalDuration += $duration
 				$totalSize += $size
 				$totalSizeOnDisk += $sizeOnDisk
 				$totalFiles += $nbFiles
@@ -97,24 +98,26 @@ function main {
 				Write-Host "$ligneFeed=> sizeOnDisk = $sizeOnDisk"
 				$iecSizeOnDisk = size2iec($sizeOnDisk)
 				Write-Host "=> size2iec(sizeOnDisk) = $iecSizeOnDisk."
-				Write-Host "$ligneFeed=> totalDuration = $($totalDuration.ToString('hh\:mm\:ss\.ff'))`n"
+				Write-Host "$ligneFeed=> duration = $($duration.ToString('hh\:mm\:ss\.ff'))`n"
 			}
 		}
 	} else {
 		$dir = "."
-		$totalSize = $( dirStats $dir )[-1]
 		Write-Host "=> dir = < $dir >"
+		$dirStatsResult = time { dirStats $dir }
+		$totalSize , $totalSizeOnDisk , $totalFiles , $totalDirs = $dirStatsResult.Result
+		$totalDuration = $dirStatsResult.Duration
 	}
 
-	if ( $argc -eq 0 -or $argc -ge 2 ) {
+	if( $argc -eq 0 -or $dirs.Count -gt 1 ) {
 		Write-Host "=> totalFiles = $totalFiles"
-		Write-Host "=> totalFiles = $totalDirs"
+		Write-Host "=> totalDirs = $totalDirs"
 		Write-Host "=> totalSize = $totalSize"
 		$iecSize = size2iec($totalSize)
 		Write-Host "=> size2iec(totalSize) = $iecSize."
 		$iecSizeOnDisk = size2iec($totalSizeOnDisk)
 		Write-Host "=> size2iec(totalSizeOnDisk) = $iecSizeOnDisk."
-		Write-Host ""
+		Write-Host "$ligneFeed=> totalDuration = $($totalDuration.ToString('hh\:mm\:ss\.ff'))`n"
 	}
 	#Write-Host "=> Ending of <$FUNCNAME> function ..."
 }
