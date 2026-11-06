@@ -1,6 +1,6 @@
 # See https://github.com/ScoopInstaller/Install#advanced-installation
 function isInstalled($cmd) { return gcm "$cmd" 2>$null | % Name }
-
+$sudo = "sudo.ps1"
 if( $IsWindows ) {
 	function scoopAdminModePostInstall {
 		if( (ls "$env:ProgramFiles\scoop\shims\scoop.ps1") -and -not (gcm "scoop.ps1" 2>$null | % Name) ) { 
@@ -9,20 +9,20 @@ if( $IsWindows ) {
 			scoop shim list scoop
 		}
 		if( ! (isInstalled("git.exe")) ) {
-			sudo scoop install -g git
+			$sudo scoop install -g git
 		}
 		if( ( git config --global credential.helper ) -ne "manager-core" ) {
-			sudo git config --global credential.helper manager-core # i.e https://github.com/ScoopInstaller/Main/blob/master/bucket/git.json
+			$sudo git config --global credential.helper manager-core # i.e https://github.com/ScoopInstaller/Main/blob/master/bucket/git.json
 		}
 
 		# Buckets of softwares
 		'main' , 'extras' , 'nirsoft' , 'sysinternals' , 'versions' | % { if( -not ( scoop bucket list | sls Name=$_ ) ) { scoop bucket add $_ } }
 
-		sudo scoop install -g psutils freetube kitty gow pshazz openssh openssl-lts-light psutils wget gsudo
-  		sudo scoop reset openssl-lts-light
-		sudo scoop shim rm putty plink pscp psftp peagent
-		sudo scoop shim add bash C:\ProgramData\scoop\apps\git\current\bin\bash.exe -g
-		sudo -k
+		$sudo scoop install -g psutils freetube kitty gow pshazz openssh openssl-lts-light psutils wget gsudo
+  		$sudo scoop reset openssl-lts-light
+		$sudo scoop shim rm putty plink pscp psftp peagent
+		$sudo scoop shim add bash C:\ProgramData\scoop\apps\git\current\bin\bash.exe -g
+		$sudo -k
 	}
 	scoopAdminModePostInstall
 }
