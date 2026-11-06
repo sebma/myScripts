@@ -21,6 +21,7 @@ if( $IsWindows ) {
 		sudo scoop install -g psutils freetube kitty gow pshazz openssh openssl-lts-light psutils wget gsudo
   		sudo scoop reset openssl-lts-light
 		sudo scoop shim rm putty plink pscp psftp peagent
+		sudo scoop shim add bash C:\ProgramData\scoop\apps\git\current\bin\bash.exe -g
 		sudo -k
 	}
 	scoopAdminModePostInstall
