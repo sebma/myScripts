@@ -23,6 +23,7 @@ if( $IsWindows ) {
 		scoop install psutils freetube kitty gow pshazz openssh openssl-lts-light psutils wget gsudo
   		scoop reset openssl-lts-light
 		scoop shim rm putty plink pscp psftp peagent
+		scoop shim add bash C:\ProgramData\scoop\apps\git\current\bin\bash.exe
 	}
 	scoopUserModePostInstall
 }
