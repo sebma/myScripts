@@ -35,6 +35,7 @@ mpvFORMAT() {
 		set -x
 		LANG=en_US.utf8 nohup $mpv --ytdl-format="$format" "$@" &
 	fi
+	tail -f nohup.out | egrep -v "AV: "
 }
 
 mpvLD() { mpvFORMAT ld "$@"; }
