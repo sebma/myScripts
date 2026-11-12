@@ -5,7 +5,7 @@ function lsgroup {
 		for($i=0;$i -lt $argc;$i++) {
   			$group = $args[$i]
 			echo "=> Members of group $group :"
-			Get-ADGroupMember $group -server $DC | Select Name , SamAccountName  | sort
+			Get-ADGroupMember $group -server $DC | Select Name , SamAccountName  | Sort-Object -Property SamAccountName
 			$nb = $(Get-ADGroupMember $group -server $DC).Count
 			[Console]::Error.WriteLine("Number of members : $nb`n")
 		}
