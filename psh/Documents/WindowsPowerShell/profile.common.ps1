@@ -1,5 +1,33 @@
 using namespace System.Management.Automation.Language
 "=> Sourcing $scriptPrefix.common.ps1 functions ..."
+function Add-Paths {
+	param(
+		[Parameter(ValueFromRemainingArguments = $true)]
+		[string[]]$Paths
+	)
+
+	$currentPath = [Environment]::GetEnvironmentVariable("PATH", "User")
+
+	foreach ($Path in $Paths) {
+		if (-not (Test-Path -Path $Path -PathType Container)) {
+			continue
+		}
+
+		$pathEntries = $currentPath -split ';'
+
+		if ($pathEntries -notcontains $Path) {
+			$currentPath = "$Path;$currentPath"
+		}
+	}
+
+	[Environment]::SetEnvironmentVariable(
+		"PATH",
+		$currentPath,
+		"User"
+	)
+
+	$env:PATH = $currentPath
+}
 function osFamily {
 	if( !(Test-Path variable:IsWindows) ) {
 		$platform = [System.Environment]::OSVersion.Platform
