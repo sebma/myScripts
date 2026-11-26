@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+installPackagesFromRepo.sh ppa:unit193/inxi inxi
